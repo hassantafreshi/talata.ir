@@ -212,8 +212,20 @@ export interface SettingsAdapter {
   uploadLogo(file: File): Promise<ShopProfile['logo']>;             // server validates raster type/size/dimensions
   getLayout(): Promise<{ settings: InvoiceLayoutSettings; version: number; can_customize: boolean }>;
   saveLayout(settings: InvoiceLayoutSettings, version: number): Promise<{ version: number } | { conflict: true } | { forbidden: true; message_fa: string }>;
-  entitlements(): Promise<{ capabilities: Record<string, boolean>; quotas: Record<string, { used: number; limit: number; period_label_fa?: string }>; plan_label_fa: string; trial_sms_left: number; sms_balance_segments: number }>;
+  entitlements(): Promise<{ capabilities: Record<string, boolean>; quotas: Record<string, { used: number; limit: number; period_label_fa?: string; resets_at_local?: LocalDateTime }>; plan: { id: PlanId; label_fa: string; period?: BillingPeriod; ends_at_local?: LocalDateTime; pending_change?: { to: PlanId; period: BillingPeriod; status: 'PENDING_ACTIVATION' } }; trial_sms_left: number; sms_balance_segments: number }>;
+  /** Prices and plan features are provider configuration (docs/design/contracts/plans-pricing.json), never constants in the UI. */
+  plans(): Promise<{ plans: PlanOffer[]; addons: AddonOffer[]; activation_note_fa: string }>;
+  requestPlanChange(input: { to: PlanId; period: BillingPeriod; idempotency_key: string }): Promise<{ request_id: string; status: 'PENDING_ACTIVATION'; amount_toman: DecimalString; payment_guide_fa: string } | { error: string; message_fa: string }>;
+  purchaseSmsPack(input: { addon_id: string; idempotency_key: string }): Promise<{ request_id: string; status: 'PENDING_ACTIVATION'; amount_toman: DecimalString; payment_guide_fa: string } | { error: string; message_fa: string }>;
 }
+
+export type PlanId = 'free' | 'basic' | 'professional';
+export type BillingPeriod = 'monthly' | 'yearly';
+export interface PlanOffer { id: PlanId; label_fa: string; price_toman: Record<BillingPeriod, DecimalString>; highlights_fa: string[]; not_included_fa: string[]; recommended?: boolean }
+export interface AddonOffer { id: string; label_fa: string; sms_count: number; price_toman: DecimalString; available_on: PlanId[] }
+
+/** Quota notices only reflect server entitlements; they never block invoice create/finalize/print or the verification QR. */
+export type QuotaTrigger = 'links_exhausted' | 'links_near_limit' | 'customers_not_in_plan' | 'sms_trial_exhausted' | 'sms_balance_low';
 
 /* ---------- Customers and installments (Professional) ---------- */
 

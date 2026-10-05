@@ -1,0 +1,72 @@
+{
+  "$comment": "Commercial terms stated by the owner on 2026-10-05, stored as CONFIGURATION to be seeded by the provider, never hard-coded in domain logic (no `if plan == ...`). Capabilities/quotas come from docs/prompts/PHASE_1_MASTER_PROMPT.md §11. ASSUMPTION FLAGGED: the owner wrote «ماهانه 790 تومان» for Basic; this file records 790,000 toman because it is consistent with the yearly 7.9 million; confirm. Display currency toman; stored IRR = toman × 10.",
+  "status": "owner-provided, pending confirmation of the Basic monthly figure",
+  "currency_display": "TOMAN",
+  "billing_periods": ["monthly", "yearly"],
+  "plans": [
+    {
+      "id": "free",
+      "label_fa": "رایگان",
+      "price_toman": {"monthly": "0", "yearly": "0"},
+      "highlights_fa": [
+        "ماشین‌حساب طلا، صدور و چاپ فاکتور بدون محدودیت",
+        "QR بررسی اصالت روی هر فاکتور",
+        "۱۰ لینک فاکتور در ماه · ۵ پیامک آزمایشی (یک‌بار)",
+        "قالب ثابت «ساده و خوانا» با نشان طلاتا"
+      ],
+      "not_included_fa": ["لوگوی فروشگاه و ویرایش ظاهر فاکتور", "دفتر مشتریان و اقساط"]
+    },
+    {
+      "id": "basic",
+      "label_fa": "پایه",
+      "price_toman": {"monthly": "790000", "yearly": "7900000"},
+      "yearly_equivalent_monthly_toman": "658333",
+      "yearly_saving_percent_vs_12_months": "16.7",
+      "highlights_fa": [
+        "همه امکانات رایگان",
+        "۱۰۰ لینک فاکتور در ماه · ارسال پیامک فاکتور با اعتبار",
+        "لوگوی فروشگاه، بدون نشان طلاتا، دو قالب و ویرایش ظاهر فاکتور",
+        "ویرایش متن پیامک"
+      ],
+      "not_included_fa": ["دفتر مشتریان، اقساط و یادآوری پیامکی"]
+    },
+    {
+      "id": "professional",
+      "label_fa": "حرفه‌ای",
+      "price_toman": {"monthly": "1900000", "yearly": "10900000"},
+      "yearly_equivalent_monthly_toman": "908333",
+      "yearly_saving_percent_vs_12_months": "52.2",
+      "highlights_fa": [
+        "همه امکانات پایه",
+        "۱٬۰۰۰ لینک فاکتور در ماه",
+        "دفتر مشتریان، قرارداد اقساط و ثبت پرداخت",
+        "یادآوری پیامکی اقساط"
+      ],
+      "not_included_fa": []
+    }
+  ],
+  "addons": [
+    {
+      "id": "sms_pack_500",
+      "label_fa": "بسته پیامک اضافه",
+      "sms_count": 500,
+      "price_toman": "750000",
+      "per_sms_toman": "1500",
+      "available_on": ["basic", "professional"],
+      "note_fa": "اعتبار پیامک جدا از سهمیه لینک است و با تغییر پلن از بین نمی‌رود."
+    }
+  ],
+  "activation": {
+    "mode": "manual_by_provider_until_gateway",
+    "note_fa": "تا اتصال درگاه آنلاین، پس از ثبت درخواست راهنمای پرداخت نمایش داده می‌شود و پشتیبانی طلاتا با ثبت در سوابق پلن را فعال/تمدید می‌کند. کاهش پلن در پایان دوره اعمال می‌شود و داده‌های ثبت‌شده حذف نمی‌شوند.",
+    "proration_policy": "TO_BE_DEFINED_BY_PROVIDER"
+  },
+  "quota_notice_triggers": [
+    {"id": "links_exhausted", "where": ["new_invoice"], "plans": ["free", "basic"], "message_key": "quota.links_exhausted", "never_blocks": ["invoice.create", "invoice.finalize", "invoice.print", "verification_qr"]},
+    {"id": "links_near_limit", "where": ["new_invoice"], "plans": ["free", "basic"], "threshold_remaining": 2, "message_key": "quota.links_near_limit"},
+    {"id": "customers_not_in_plan", "where": ["new_customer", "installments"], "plans": ["free", "basic"], "message_key": "quota.customers_professional_only", "fallback_fa": "نام و موبایل مشتری روی همین فاکتور قابل ثبت است."},
+    {"id": "sms_trial_exhausted", "where": ["review_issue_sms"], "plans": ["free"], "message_key": "quota.sms_trial_exhausted"},
+    {"id": "sms_balance_low", "where": ["review_issue_sms"], "plans": ["basic", "professional"], "message_key": "quota.sms_balance_low", "offer": "sms_pack_500"}
+  ],
+  "open_question_fa": "در قرارداد فعلی سقف تعداد فاکتور وجود ندارد (صدور و چاپ نامحدود در همه پلن‌ها). اگر مالک سقف تعداد فاکتور برای رایگان/پایه می‌خواهد، باید به‌صورت تنظیم جدید (invoice_count_limit_per_period) تعریف و در Master Prompt ثبت شود؛ جزء QuotaNotice بدون تغییر آن را نشان می‌دهد."
+}
