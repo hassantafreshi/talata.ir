@@ -1,6 +1,6 @@
 # Talata project instructions
 
-This repository currently contains planning documents. The owner requested prompts, not an application implementation in this documentation change.
+This repository currently contains planning documents. The owner requested prompts, not an application implementation in this documentation change. Start any build from `docs/IMPLEMENTATION_GUIDE.md` (doc map, modules, APIs, jobs, build order, open decisions).
 
 For future implementation requests, read:
 
@@ -10,7 +10,7 @@ For future implementation requests, read:
 4. `docs/research/UI_UX_TOOL_SHORTLIST.md` when choosing design tools.
 5. `docs/INVOICE_DELIVERY_AND_VERIFICATION.md` for invoice QR verification, responsive invoice views and customer-mobile SMS at issuance.
 6. `docs/INVOICE_CUSTOMIZATION.md` for mandatory business profile, contact fallback, two preset invoices and novice-friendly layout editing on Basic AND Professional.
-7. `docs/PLANS_AND_QUOTAS.md` (owner plan prices, quotas and SMS credit: Free 50 invoices and 50 new customers per month, current-month history only, 5 free SMS per year; prepaid per-segment SMS credit 850/500/350 toman), `docs/MAZNEH_AND_CALCULATOR.md` (quote board and golden calculator) and `docs/ROADMAP_V2_BUSINESS_TYPES.md` (v2: silver/coin/melted-gold business types, multi-type on Professional, product-photo attachments; Phase 1 prepares the infrastructure).
+7. `docs/PLANS_AND_QUOTAS.md` (owner plan prices, quotas and SMS credit: Free 50 invoices and 50 new customers per month, current-month history only, 5 free SMS per year; prepaid per-segment SMS credit 850/500/350 toman), `docs/MAZNEH_AND_CALCULATOR.md` (quote board and golden calculator) and `docs/PAYMENTS_AND_SMS_CREDIT.md` (online plan purchase and SMS top-up via a gateway adapter, bank-return result page, credit ledger) and `docs/ROADMAP_V2_BUSINESS_TYPES.md` (v2: silver/coin/melted-gold business types, multi-type on Professional, product-photo attachments; Phase 1 prepares the infrastructure).
 8. `docs/design/README.md` and `docs/design/UI_APPROVED_DECISIONS.md` for the Stage A proposal status, owner-stated UI requirements and which design decisions are actually approved (brand spelling: طلاتا / Talata).
 9. `docs/design/UI_BUILD_SPEC.md`, `docs/design/tokens/`, `docs/design/invoice-templates/` and `docs/design/contracts/` for the UI build contract, design tokens, invoice layout schema/presets and frontend adapter/calculation contracts (proposed; palette 1 and logo concept 1 are working defaults, not approvals).
 10. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
@@ -29,6 +29,7 @@ For future implementation requests, read:
 - Features and quotas enforced server-side; no business logic branching on plan names. Free: 50 issued invoices and 50 new customers per calendar month, current-month invoices only, no financial reports, 5 free SMS per year; Basic has configurable higher caps, Professional unlimited; customer directory in every plan, installments Professional only; prepaid toman SMS credit charged per segment (Free 850 / Basic 500 / Pro 350 toman, Free credit expires monthly). See `docs/PLANS_AND_QUOTAS.md`. Quota notices never block printing issued invoices, مظنه or the calculator.
 - Require shop name, business mobile and address before first invoice issuance; landline if available, with business mobile as fallback. Website/social accounts/licenses/logo are optional profile fields. Keep public business contact distinct from login and customer mobile.
 - Both Basic and Professional have invoice.customize: two presets, live print/mobile preview, simple header/footer and right/center/left controls for business blocks/logo, optional-field visibility and guarded appearance/column settings. Free uses a fixed layout. Protect required invoice data and upper-left QR; snapshot the layout/assets so later edits/downgrades never rewrite issued invoices.
+- Plan purchase and SMS credit go through a `PaymentGateway` adapter (PSP pending owner selection; MockGateway until then): server-side verify with the stored amount, idempotent fulfillment, result page from server state only, reconciliation. See `docs/PAYMENTS_AND_SMS_CREDIT.md`.
 - Provider integrations behind adapters. Demo data must be visibly labelled.
 - Two always-available entries: «مظنه» (18K buy/sell, 24K, USD, global ounce with real freshness) and «ماشین‌حساب طلایی» (standalone calculator, same GOLD_IR_V1 preview); see `docs/MAZNEH_AND_CALCULATOR.md`.
 - Gold feed refreshes centrally every 180 seconds. New-invoice entry shows the current 18K price prominently with شروع immediately below; Start captures the displayed accepted rate, and background updates never silently reprice the transaction.

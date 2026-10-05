@@ -80,7 +80,7 @@ Use interfaces/application services to cross boundaries. Modules must not reach 
 
 Customers can exist without invoices. Installment agreements can be standalone with a party and explicit principal, or linked to a finalized invoice. Pricing must run with manual input if MarketPrices is disabled/unavailable. If Invoices is disabled, calculator still works and no create-invoice action is shown. SMS disabling never prevents invoice finalization. No financial record creation depends on SMS provider success.
 
-Future extension modules: FinancialLedger, MetalLedger, Inventory, Assay, Silver, Payments, ModianConnector, Commerce and customer account portal. Define versioned events such as `InvoiceFinalized`, `InvoiceVoided`, `InstallmentPaymentRecorded`, `InvoiceShareCreated`, with event ID, schema version, tenant ID, actor, occurrence time and object ID. Persist an outbox entry in the same transaction as critical state changes; consumers are idempotent. Do not post real ledger entries in Phase 1.
+Billing (online plan purchase and SMS credit through a payment-gateway adapter) is a Phase 1 module per `../PAYMENTS_AND_SMS_CREDIT.md`. Future extension modules: FinancialLedger, MetalLedger, Inventory, Assay, Silver, ModianConnector, Commerce and customer account portal. Define versioned events such as `InvoiceFinalized`, `InvoiceVoided`, `InstallmentPaymentRecorded`, `InvoiceShareCreated`, with event ID, schema version, tenant ID, actor, occurrence time and object ID. Persist an outbox entry in the same transaction as critical state changes; consumers are idempotent. Do not post real ledger entries in Phase 1.
 
 ## 5. Tenancy and identity
 
@@ -137,6 +137,7 @@ These are required concepts, not a demand for identical class/table names. Suppl
 
 | Area | Minimum entities/concepts |
 | --- | --- |
+| Billing | BillingOrder, PaymentAttempt, gateway adapter configuration, receipt |
 | SaaS | Tenant, ShopProfile, User, Membership, Role/Permission, Plan, PlanFeature, PlanQuota, Subscription, TenantFeatureOverride, QuotaPeriod, QuotaUsage/Reservation |
 | Identity | OTP challenge, authentication session, PasskeyCredential, one-use WebAuthn ceremony challenge |
 | Pricing | Metal/Purity value objects, TaxRule version, TaxRuleAssignment, CalculationSnapshot, CalculationItemSnapshot, PriceSnapshot |
@@ -345,7 +346,7 @@ Quota assumptions for the initial seed: one subscription-month interval, display
 - Historical valid links remain readable after downgrade/period end unless revoked/expired; creation rights follow current entitlements. Downgrade preserves issued snapshots and financial records. Customer/installment records remain readable/exportable, and payment recording for existing debts remains available with appropriate permission; new agreements/customers and paid reminders are gated. Do not strand repayment workflows behind an upgrade.
 - Five free SMS per tenant per year (owner decision 2026-10-05; replaces the earlier lifetime allowance) are separate from plan definitions. An explicit trial grant enables only invoice SMS sharing even on Free until exhausted; free template remains fixed. Professional reminders require the appropriate feature and paid SMS balance. Trial credits are not refreshed by changing plans; they reset yearly.
 - Link quota, SMS message segments, paid SMS balance and operational OTP budget are different resources. Display them separately.
-- No payment gateway is assumed. Provider can activate/extend subscriptions manually with audit until billing integration is selected. Prices, checkout and renewal commercial terms remain configuration, not invented values.
+- Online payment (owner decision 2026-10-05): Basic/Professional purchase and SMS credit are paid through a bank payment gateway behind a `PaymentGateway` adapter, with server-side verify using the stored amount, idempotent fulfillment, a server-sourced result page (success/failed/pending) and reconciliation; see `../PAYMENTS_AND_SMS_CREDIT.md`. The concrete PSP is pending owner selection; build and test with `MockGateway`. Provider can still activate/extend subscriptions and adjust credit manually with audit. Prices, checkout and renewal commercial terms remain configuration, not invented values.
 
 ## 12. SMS and notifications
 
@@ -453,7 +454,7 @@ Drafts with repeatable GOLD/MISC rows, per-row product name/description, editabl
 
 ### M4 — Messaging and Professional workflows
 
-SMS adapter/outbox/reservations/status, final-text preview, five trial segments, provider health; Party records, standalone and invoice-linked installments, exact schedules, partial payments/reversal, overdue and idempotent consent-aware reminders.
+SMS adapter/outbox/reservations/status, final-text preview, five free SMS per year, prepaid toman credit lots/ledger, Billing with MockGateway (plan purchase, SMS top-up, result page, reconcile), provider health; Party records, standalone and invoice-linked installments, exact schedules, partial payments/reversal, overdue and idempotent consent-aware reminders.
 
 ### M5 — Selected UI, PWA and release verification
 
@@ -476,6 +477,7 @@ Tests must verify behavior and invariants, not merely mirror methods:
 - Business-profile issuance guard, optional landline/business-mobile fallback and private login/customer distinction; both presets and Basic/Professional editor rights vs Free fixed layout, direct-API permission/tenant checks, protected fields/QR, mobile controls, local undo/reset/conflicts and logo validation. Shop/layout/asset/plan changes preserve historical renders; new downgraded invoices follow Free rules.
 - Printed upper-left QR resolves the same issued snapshot; stable reprint, void/replacement/revocation, privacy, cross-tenant/invalid tokens and quota-independent verification checked. Actual PDF/paper scan and mobile responsive invoice evidence required; no draft/offline false validation.
 - Customer-mobile issue-and-SMS vs only-issue, Persian-number normalization, missing/invalid destination, insufficient link/SMS quota, post-issue share/send failure and unknown reconciliation; repeated taps/network retries yield one invoice and one initial send intent.
+- Billing per `../PAYMENTS_AND_SMS_CREDIT.md` §11: tampered amounts rejected, success/cancel/amount-mismatch/timeout/duplicate-callback scenarios, single fulfillment, result page from server state only, SMS credit per-segment pricing, FIFO expiry and Free month-end expiry.
 - Quota races, period boundaries, trial grants, revocation/regeneration, downgrade and preserved existing repayment/read behavior.
 - SMS Unicode/URL segment estimates, reservation failure/unknown reconciliation, idempotency/webhook duplicates, opted-out/paid/void reminders skipped.
 - Installment remainder/month-end/partial payments/reversals/concurrent allocation and invoice-void linkage handling.

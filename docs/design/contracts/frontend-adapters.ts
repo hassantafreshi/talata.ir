@@ -221,15 +221,38 @@ export interface SettingsAdapter {
   saveLayout(settings: InvoiceLayoutSettings, version: number): Promise<{ version: number } | { conflict: true } | { forbidden: true; message_fa: string }>;
   entitlements(): Promise<{ capabilities: Record<string, boolean>; quotas: Record<string, { used: number; limit: number; period_label_fa?: string; resets_at_local?: LocalDateTime }>; plan: { id: PlanId; label_fa: string; period?: BillingPeriod; ends_at_local?: LocalDateTime; pending_change?: { to: PlanId; period: BillingPeriod; status: 'PENDING_ACTIVATION' } }; trial_sms_left: number; sms_balance_segments: number }>;
   /** Prices and plan features are provider configuration (docs/design/contracts/plans-pricing.json), never constants in the UI. */
-  plans(): Promise<{ plans: PlanOffer[]; addons: AddonOffer[]; activation_note_fa: string }>;
-  requestPlanChange(input: { to: PlanId; period: BillingPeriod; idempotency_key: string }): Promise<{ request_id: string; status: 'PENDING_ACTIVATION'; amount_toman: DecimalString; payment_guide_fa: string } | { error: string; message_fa: string }>;
-  purchaseSmsPack(input: { addon_id: string; idempotency_key: string }): Promise<{ request_id: string; status: 'PENDING_ACTIVATION'; amount_toman: DecimalString; payment_guide_fa: string } | { error: string; message_fa: string }>;
+  plans(): Promise<{ plans: PlanOffer[]; activation_note_fa: string }>;
+  /** Purchases go through BillingAdapter (docs/PAYMENTS_AND_SMS_CREDIT.md). */
+}
+
+/* ---------- Billing: plan purchase and SMS top-up via bank gateway ---------- */
+
+export type BillingProduct = 'PLAN' | 'SMS_CREDIT';
+export type BillingOrderStatus = 'CREATED' | 'AWAITING_PAYMENT' | 'VERIFYING' | 'PENDING_VERIFICATION' | 'PAID' | 'FULFILLED' | 'FAILED' | 'EXPIRED';
+export interface BillingOffers { plans: PlanOffer[]; sms: SmsCredit; current_plan: { id: PlanId; period?: BillingPeriod; ends_at_local?: LocalDateTime }; gateway_mode: 'live' | 'mock' }
+export type ReturnTo = { route: 'review'; draft_id: string } | { route: 'issued'; invoice_id: string } | { route: 'settings' } | { route: 'customers' } | { route: 'plans' };
+export interface BillingOrderResult {
+  order_id: string; public_ref: string; product: BillingProduct; status: BillingOrderStatus;
+  amount_irr: DecimalString; created_at: IsoDateTime; paid_at?: IsoDateTime;
+  bank_ref_id?: string; failure?: { bank_code?: string; message_fa: string };
+  plan?: { id: PlanId; period: BillingPeriod; ends_at_local: LocalDateTime; carry_over_days?: number };
+  sms?: { added_irr: DecimalString; balance_irr: DecimalString; approx_segments: number; carries_over: boolean; expires_at?: IsoDateTime };
+  return_to?: ReturnTo; gateway_mode: 'live' | 'mock';
+}
+export interface BillingAdapter {
+  offers(): Promise<BillingOffers>;
+  /** Server prices the order from configuration; the client never sends an amount except a pack choice it validates. */
+  createOrder(input: { product: BillingProduct; plan?: { id: Exclude<PlanId, 'free'>; period: BillingPeriod }; pack_amount_toman?: DecimalString; return_to?: ReturnTo; idempotency_key: string }):
+    Promise<{ order_id: string; redirect: { url: string; method: 'GET' | 'POST'; fields?: Record<string, string> } } | { error: 'BELOW_MINIMUM' | 'NOT_ALLOWED' | 'RATE_LIMITED' | 'GATEWAY_DOWN'; message_fa: string }>;
+  /** Result page reads ONLY this; poll every 5 s while VERIFYING/PENDING_VERIFICATION, up to 2 min. */
+  getOrder(order_id: string): Promise<BillingOrderResult>;
+  history(page: number): Promise<{ items: BillingOrderResult[]; total: number }>;
+  receiptUrl(order_id: string): string;
 }
 
 export type PlanId = 'free' | 'basic' | 'professional';
 export type BillingPeriod = 'monthly' | 'yearly';
 export interface PlanOffer { id: PlanId; label_fa: string; price_toman: Record<BillingPeriod, DecimalString>; highlights_fa: string[]; not_included_fa: string[]; recommended?: boolean }
-export interface AddonOffer { id: string; label_fa: string; sms_count: number; price_toman: DecimalString; available_on: PlanId[] }
 
 /** Quota notices only reflect server entitlements; they never block invoice create/finalize/print or the verification QR. */
 export type QuotaTrigger = 'invoices_exhausted' | 'customers_exhausted' | 'links_exhausted' | 'near_limit' | 'history_restricted' | 'installments_professional_only' | 'sms_trial_exhausted' | 'sms_balance_low' | 'sms_balance_expiring';

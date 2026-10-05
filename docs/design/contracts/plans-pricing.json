@@ -89,9 +89,13 @@
     }
   ],
   "activation": {
-    "mode": "manual_by_provider_until_gateway",
-    "note_fa": "تا اتصال درگاه آنلاین، پس از ثبت درخواست راهنمای پرداخت نمایش داده می‌شود و پشتیبانی طلاتا با ثبت در سوابق پلن را فعال/تمدید می‌کند. کاهش پلن در پایان دوره اعمال می‌شود و داده‌های ثبت‌شده حذف نمی‌شوند.",
-    "proration_policy": "TO_BE_DEFINED_BY_PROVIDER"
+    "mode": "online_gateway_with_manual_provider_fallback",
+    "gateway": "PENDING_OWNER_SELECTION (MockGateway in development)",
+    "note_fa": "خرید و تمدید پلن و شارژ پیامک از درگاه بانک؛ فعال‌سازی فقط پس از تأیید سرور. فعال‌سازی/اصلاح دستی provider با ثبت در سوابق به‌عنوان پشتیبان. کاهش پلن در پایان دوره اعمال می‌شود و داده‌ها حذف نمی‌شوند.",
+    "proration_policy": "TO_BE_DEFINED_BY_PROVIDER",
+    "order_expiry_minutes": 20,
+    "refund_hours_display": 72,
+    "spec": "docs/PAYMENTS_AND_SMS_CREDIT.md"
   },
   "quota_notice_triggers": [
     {
@@ -249,7 +253,8 @@
       "مانده تومانی با تغییر پلن حفظ می‌شود و قیمت بخش پلن جدید اعمال می‌شود",
       "مانده رایگانِ منقضی‌نشده پس از ارتقا تابع قاعده انتقال پلن جدید است"
     ],
-    "example_fa": "پایه: پیامک سه‌بخشی = ۱٬۵۰۰ تومان؛ شارژ ۲۰۰ هزار تومان ≈ ۴۰۰ بخش"
+    "example_fa": "پایه: پیامک سه‌بخشی = ۱٬۵۰۰ تومان؛ شارژ ۲۰۰ هزار تومان ≈ ۴۰۰ بخش",
+    "on_plan_change": "KEEP_BALANCE_APPLY_NEW_SEGMENT_PRICE (assumption, confirm)"
   },
   "open_questions_fa": [
     "عدد ماهانه پایه (۷۹۰ هزار تومان؟)",

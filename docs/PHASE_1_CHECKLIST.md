@@ -21,6 +21,8 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [ ] Colors/logo/font/toolkit explicitly approved by owner (see `docs/design/STAGE_A_REVIEW_REQUEST.md`).
 - [x] Owner plan prices, quotas and SMS credit, مظنه/calculator contract and v2 business-type roadmap documented (2026-10-05); reflected in the draft boards.
 - [ ] Quotas enforced server-side (Free: 50 invoices and 50 new customers per month, current-month history, 5 free SMS per year; Basic configurable caps; Professional unlimited) with friendly notices.
+- [x] Build package documented: implementation guide, payments/SMS credit contract, SMS purchase and bank-return boards (2026-10-05).
+- [ ] Billing module with MockGateway: plan purchase, SMS top-up, server-sourced result page, reconcile, receipts; real PSP after owner selection.
 - [ ] Prepaid SMS credit: toman balance, per-segment pricing by plan, reserve/refund via outbox, Free monthly expiry with audit.
 - [ ] مظنه board and ماشین‌حساب طلایی on the shared 180-second quote cadence and GOLD_IR_V1 preview, no quota use.
 - [ ] v2-ready infrastructure: business-type registry, pricing-policy registry, per-category tax rules, typed item attributes, sale/purchase direction, item asset table; Phase 1 behaviour unchanged.
