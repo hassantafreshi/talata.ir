@@ -13,6 +13,9 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [x] Owner priority documented: low-bandwidth loading, production asset budgets and weak-network acceptance profiles.
 - [x] Owner-required 180-second gold refresh and large-price/Start invoice entry documented.
 - [x] Rapid UI execution prompt written with a wireframe/visual-identity approval stage before detailed implementation.
+- [x] Upper-left printed QR, secure mobile verification and responsive invoice contract documented.
+- [x] Customer mobile at issue, explicit issue-and-SMS/only-issue and independent delivery recovery documented.
+- [x] Required business profile, landline/mobile fallback, optional public fields and two-preset customization for Basic AND Professional documented; obsolete Professional-only rule removed.
 - [ ] Owner selects design skill and component toolkit.
 - [x] Overall wireframe/visual proposal shown (`docs/design/`, Stage A package, 2026-10-05).
 - [ ] Colors/logo/font/toolkit explicitly approved by owner (see `docs/design/STAGE_A_REVIEW_REQUEST.md`).
@@ -64,8 +67,18 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [ ] Conditional validation, incomplete rows, type switching, removal recovery and mixed totals verified against documented examples.
 - [ ] Finalization idempotency, numbering and quota races tested.
 - [ ] Issued values, shop details, template and branding are stable snapshots.
+- [ ] Business name/mobile/address required server-side before issue; optional landline fallback, optional website/social/licenses/logo and return-to-draft completion flow work on every plan.
+- [ ] Business contact is separate from login/customer identity; public-contact notice, valid URLs/phone parsing and logo-upload checks implemented.
+- [ ] Simple/Shop presets and Basic/Professional layout rights work; Free profile edit vs fixed layout, server permission checks and tenant isolation verified.
+- [ ] Per-block header/footer/alignment/order, optional visibility/logo sizing, permitted columns/readable appearance and print settings work with local preview, undo/cancel/reset/save/conflict recovery.
+- [ ] Mobile/keyboard editing works without dragging; protected QR/essential fields cannot hide/overlap, and long-address/logo/multi-page layouts remain readable.
+- [ ] Complete layout/schema/template/business-field/asset snapshot preserves old print/mobile views after edits/downgrade; stored custom settings retained while new Free invoices use fixed template.
 - [ ] Issued edits/deletes rejected; void/replacement and installment consequences defined.
 - [ ] Print A4, multi-page Persian and browser Save as PDF verified.
+- [ ] QR at physical upper-left survives print/PDF and reprint; actual paper/PDF scanning and four-module quiet zone checked.
+- [ ] Stable InvoiceVerification token/page serves issued snapshot and void/replacement/revocation states, independently of share quotas; drafts/offline/invalid tokens never falsely verify.
+- [ ] Merchant/customer invoice reflows at 360/390/768px without A4 shrinking or horizontal page scrolling; same-phone verification link works.
+- [ ] Public verification/share DTOs omit customer mobile/private data; token storage, tenant isolation, no-store/log redaction and revoked-token behavior checked.
 - [ ] High-entropy public links, revocation/expiry/regeneration implemented.
 - [ ] Public DTO hides private data; noindex/referrer/cache/log policies verified.
 - [ ] Link quota counting, period boundaries and downgrade behavior tested.
@@ -75,6 +88,9 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [ ] Trial grant and paid/OTP budgets separated; reservations concurrency-safe.
 - [ ] Provider adapter, final-text preview and segment policy validated.
 - [ ] Failure/unknown/retry reconciliation and webhook idempotency tested.
+- [ ] Issue review accepts normalized customer mobile; explicit issue-and-SMS vs only-issue works without customer login/OTP/Professional customer management.
+- [ ] Recipient/text/actual segment cost/link quota shown; insufficient budget, share/send failure and unknown outcomes preserve issued invoice and offer safe recovery.
+- [ ] Double tap, idempotent issue retry and outbox retry produce one invoice/initial-send intent; definite failed-send retry uses existing invoice.
 - [ ] Professional customer management works without invoices.
 - [ ] Standalone and invoice-linked installment agreements supported.
 - [ ] Exact schedules, month-end rules, partial payments and reversals tested.
