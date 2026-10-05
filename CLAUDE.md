@@ -9,6 +9,7 @@ For future implementation requests, read:
 3. `docs/PHASE_1_CHECKLIST.md`
 4. `docs/research/UI_UX_TOOL_SHORTLIST.md` when choosing design tools.
 5. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
+6. `docs/INVOICE_DELIVERY_AND_VERIFICATION.md` for invoice QR verification, responsive invoice views and customer-mobile SMS at issuance.
 
 ## Durable constraints
 
@@ -18,6 +19,8 @@ For future implementation requests, read:
 - Mobile number is the primary account identifier; first login/registration uses SMS OTP, without mandatory username/email/password. Afterwards users may opt into WebAuthn/Passkey login via fingerprint, face or device lock. Keep SMS recovery, verify assertions server-side, never collect biometrics, and preserve tenant authorization; login messages do not consume invoice-sharing trial credits.
 - Decimal money/weight/rates, explicit units, authoritative server calculations.
 - Snapshot finalized documents. Never silently recalculate historical invoices.
+- Issued sales invoices have a stable secure verification QR at the physical upper-left, preserved in print/PDF, plus a responsive mobile invoice view. A minimal verification token is separate from quota-controlled InvoiceShare; verify the issued record and current void/replacement status without exposing customer PII.
+- Review includes customer mobile and explicit صدور و ارسال پیامکی / فقط صدور actions. SMS shares the same issued invoice via outbox; failures/unknown sends do not roll back or duplicate issuance. Customer login/OTP or Professional customer management is not required.
 - Draft invoices support repeated GOLD/MISC rows and per-row product name/description. GOLD defaults to 18K/750 with editable purity and proportional pricing; MISC requires manual title and final row price and never inherits gold calculations/tax classification.
 - Features and quotas enforced server-side; no business logic branching on plan names.
 - Provider integrations behind adapters. Demo data must be visibly labelled.
