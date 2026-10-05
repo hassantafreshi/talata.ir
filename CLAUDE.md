@@ -15,6 +15,7 @@ For future implementation requests, read:
 - Persian-first, RTL, designed for very low digital literacy.
 - Decimal money/weight/rates, explicit units, authoritative server calculations.
 - Snapshot finalized documents. Never silently recalculate historical invoices.
+- Draft invoices support repeated GOLD/MISC rows and per-row product name/description. GOLD defaults to 18K/750 with editable purity and proportional pricing; MISC requires manual title and final row price and never inherits gold calculations/tax classification.
 - Features and quotas enforced server-side; no business logic branching on plan names.
 - Provider integrations behind adapters. Demo data must be visibly labelled.
 - No full accounting, inventory, silver, melted-gold, Modian integration, or commerce in Phase 1.

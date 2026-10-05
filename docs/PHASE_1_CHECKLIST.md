@@ -6,6 +6,7 @@ Status: documentation prepared; application work has not started. Check boxes re
 
 - [x] Phase 1 master implementation prompt written.
 - [x] Independent UX discovery prompt written.
+- [x] Owner clarification documented: repeatable GOLD/MISC rows, editable 18K-default purity, manual miscellaneous price and per-row product name/description.
 - [x] Primary-source UI/design-tool shortlist prepared.
 - [ ] Owner selects design skill and component toolkit.
 - [ ] Final UI prompt prepared after selection.
@@ -40,6 +41,11 @@ Status: documentation prepared; application work has not started. Check boxes re
 ## M3 — Invoices and public views
 
 - [ ] Draft items and optimistic save/version handling implemented.
+- [ ] Add/edit/remove draft rows work repeatedly without reload; GOLD, MISC and mixed/MISC-only invoices supported.
+- [ ] Every new row asks طلا/متفرقه; each GOLD row defaults to ۱۸ عیار (۷۵۰) and supports independent purity changes with proportional price recalculation.
+- [ ] MISC requires a manual title and exact final row price with an explicit currency; no gold weight/wage/profit/tax inference.
+- [ ] Per-row product names/descriptions and order survive draft, issue, print and public view.
+- [ ] Conditional validation, incomplete rows, type switching, removal recovery and mixed totals verified against documented examples.
 - [ ] Finalization idempotency, numbering and quota races tested.
 - [ ] Issued values, shop details, template and branding are stable snapshots.
 - [ ] Issued edits/deletes rejected; void/replacement and installment consequences defined.
@@ -66,6 +72,7 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [ ] Product-specific layout and tokens implemented from approved final UI prompt.
 - [ ] Merchant, provider and public environments use appropriate separate hierarchies.
 - [ ] Persian digits, numeric input, explicit units and mixed-direction text verified.
+- [ ] Novice add-row flow tested for different gold purities and manual miscellaneous entry on mobile/desktop.
 - [ ] RTL views at 360/390/768/1280, long names/values, keyboard and 200% zoom verified.
 - [ ] Novice usability sessions performed, or clearly marked pending with no invented findings.
 - [ ] Manifest, icons, app shell, direct routes and back/forward tested.

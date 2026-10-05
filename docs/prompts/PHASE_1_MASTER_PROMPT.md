@@ -19,7 +19,7 @@ Deliver in Phase 1:
 2. Mobile-number OTP login, tenant selection where applicable, owner/staff access and provider access.
 3. Central market feed for 18K gold, 24K gold and USD, with visible provenance, timestamps and freshness.
 4. Standalone gold calculator: editable effective 18K rate, weight, purity default 750, wage percentage, profit percentage, component-aware discount and tax rule.
-5. Multi-item draft invoices, authoritative finalization, printable layout, browser Save as PDF, public secure links, share actions and SMS delivery.
+5. Multi-item draft invoices with independently typed GOLD and MISC rows (including mixed invoices), authoritative finalization, printable layout, browser Save as PDF, public secure links, share actions and SMS delivery.
 6. Tenant shop profile, owner/staff permissions, branding and invoice customization controlled by features.
 7. Free/Basic/Professional feature and quota engine; five one-time trial SMS credits per tenant.
 8. Professional customer management and installments, manual payment recording, overdue status and reminders.
@@ -121,7 +121,7 @@ Money:
 - Rates are exact decimals; distinguish 2 percent from 0.02 fraction in API contracts.
 - Define bounds and overflow limits; reject negative weights, prices, rates, discounts or nonfinite/exponent input unless explicitly supported.
 
-Invoice item snapshots independently store: description, quantity if applicable, net weight, metal, purity, input unit, reference 18K quote, effective rate, metal value, wage type/rate/amount, profit policy/rate/amount, commission, discount scope and component allocations, taxable base, VAT rate/rule ID+version, VAT, final total, rounding policy and formula version.
+All invoice item snapshots independently store: stable row ID, display order, item_type (`GOLD` or `MISC`), item_name/title, optional description, input/display currency, posted IRR row total and the row calculation version. GOLD snapshots additionally store: quantity if applicable, net weight, metal, selected karat label and canonical purity, reference 18K quote, purity-adjusted effective rate, metal value, wage type/rate/amount, profit policy/rate/amount, commission, discount scope and component allocations, taxable base, VAT rate/rule ID+version, VAT and rounding policy. MISC snapshots store the manually entered row price and its unit; gold-only inputs/components are not applicable and remain null, not fabricated gold values.
 
 Do not store only weight, price and total. Keep raw inputs, calculated pre-discount components, applied discount allocation, post-discount components and rounded outputs. Capture customer display details (if supplied), shop name/contact/address/logo asset version, branding entitlement, invoice template version and seller at issue time. Later shop edits and plan downgrade cannot rewrite an issued document.
 
@@ -133,7 +133,7 @@ Implement a pure Pricing service with immutable inputs/outputs and no dependency
 
 Initial policy identifier: `GOLD_IR_V1`. Regulatory configuration is separate from the formula identifier. Wage model supports `PERCENT`, `PER_GRAM`, `FIXED`, `MIXED` as typed concepts; only `PERCENT` is enabled for Phase 1. Reject other modes with a clear capability validation, rather than partially calculating them. Commission is modeled and zero/hidden in Phase 1.
 
-For each item, before discounts:
+For each GOLD item, before discounts (MISC rows follow the separate manual-price contract below):
 
 ```text
 M = net_weight_g * reference_18k_price_irr_per_g * (purity_ppt / 750)
@@ -160,7 +160,7 @@ Expose a simple Phase 1 field `تخفیف اجرت و سود` with explicit scop
 
 ### Rounding and parity
 
-Use sufficient internal precision (minimum 18 fractional places or a justified stronger policy) for intermediates. Posted pre-discount M/W0/P0/C0 round HALF_UP to whole IRR. Tax uses the posted discounted taxable base and rounds HALF_UP once per line. Invoice totals are the sum of posted line components, not a second unrounded recomputation. Save `rounding_policy=IRR_LINE_HALF_UP_V1`. Clearly display any display-unit fraction; do not change legal/posting totals to obtain a prettier toman number.
+Use sufficient internal precision (minimum 18 fractional places or a justified stronger policy) for intermediates. Posted pre-discount M/W0/P0/C0 round HALF_UP to whole IRR. Gold tax uses the posted discounted taxable base and rounds HALF_UP once per GOLD line. Invoice payable total is the sum of posted GOLD line totals plus posted MISC manual line totals, not a second unrounded recomputation or another gold-tax calculation over the invoice total. Save `rounding_policy=IRR_LINE_HALF_UP_V1`. Clearly display any display-unit fraction; do not change legal/posting totals to obtain a prettier toman number.
 
 Use explicit decimal strings across JSON. Build shared fixtures that the browser and server both pass. In preview, show invalid/incomplete input state rather than a misleading zero total. Debounce network recalculation; immediate local preview is labeled until validated. Server always recomputes finalization and ignores client totals.
 
@@ -174,6 +174,38 @@ Required worked examples (IRR):
 | Currency | displayed 10,000,000 toman per gram | stored quote 100,000,000 IRR per gram |
 
 Also test zero wage, zero profit, full eligible discount, proportional allocation residuals, maximum precision weight, limits/overflow, no rule, changed tax rates, Persian/Arabic digit parsing and multiple lines. Assert T equals the sum of posted components and VAT never includes original gold in this profile.
+
+### Invoice row types and add-item contract — owner clarification
+
+The invoice editor must support repeated `افزودن ردیف` actions. Every new row asks `نوع کالا` with visible choices `طلا` / `متفرقه`. One invoice can contain several GOLD rows of different purities, several MISC rows, or any mixture; a MISC-only invoice is valid. Keep the standalone gold calculator focused on gold, while the invoice composer dispatches each row to its matching pricing contract.
+
+| Field/behavior | GOLD — طلا | MISC — متفرقه |
+| --- | --- | --- |
+| Name/title | editable product name; usable default such as `طلای ۱۸ عیار` | required manually entered title |
+| Description | optional editable product description | optional editable description |
+| Purity | ask visibly; default `۱۸ عیار (۷۵۰)`; editable per row | hidden/not applicable |
+| Weight | positive net gold weight in grams | hidden/not applicable |
+| Price | calculate from accepted 18K reference rate and selected purity | required manually entered final row price, with explicit تومان/ریال |
+| Wage/profit/gold VAT | existing GOLD_IR_V1 rules, per row | no automatic gold wage/profit/VAT additions |
+
+- Persist `purity_ppt` as the canonical calculation input; 18K is 750 and 24K is 1000. The UI provides an easy karat selector and an advanced precise purity input if needed; avoid asking a novice to understand a bare `750`. Other presets must use a documented mapping. Changing purity changes only that row's price: `effective_price_per_g = reference_18k_price_per_g * purity_ppt / 750`; then `metal_value = net_weight_g * effective_price_per_g`. For an exact selected karat K, the equivalent proportion is K/18; retain enough precision in the karat-to-purity conversion rather than rounding the preset to a different assay silently.
+- Recalculate that GOLD row's metal, wage, profit, eligible discount and tax, then invoice totals, when its weight/purity/accepted reference price changes. Do not change another row's selected purity or manual price. Display its adjusted per-gram rate alongside the selected purity. A changed row invalidates the reviewed fingerprint and requires review before issue.
+- For MISC, the Phase 1 manual input is the **final price for the entire row**, not a unit price multiplied by an implicit quantity. Label it `قیمت ردیف`; record `price_basis=ROW_TOTAL` and `formula_version=MANUAL_LINE_V1`. A quantity/unit-price workflow may be added only with an explicit separate contract. Validate required title, a positive exact price, currency and bounds; accept normalized Persian/Arabic/Latin digits. No catalog/inventory registration is required for either row type.
+- MISC manual pricing is a commercial entry rule, not an assertion of tax exemption. Do not inherit GOLD_TAX_PROFILE or set an exemption flag from the word `متفرقه`. Keep miscellaneous tax classification separate/unclassified unless an explicit applicable profile is configured, and do not infer or add tax on top of the entered final price. A future tax adapter must resolve that classification before a tax-system submission. Scope displayed GOLD tax subtotals to gold rows; do not describe them as known taxes for unclassified miscellaneous goods.
+- For a mixed invoice, `payable_total = sum(gold_row.final_total) + sum(misc_row.manual_total_irr)`. Gold weight, metal, wage/profit and gold tax breakdowns sum GOLD rows only. MISC prices have their own subtotal; do not count them as metal value or recalculate tax over the combined payable total. Do not apply gold-only discount to MISC rows.
+- Each row has a stable ID and position. Adding/editing/removing rows updates the preview without a full page reload and preserves other rows, current focus and unsaved input. An incomplete new row stays visibly incomplete; it is never silently ignored during finalization. At least one valid row is required. A documented technical maximum may protect against abuse, but do not invent a commercial one-row limit.
+- Switching a draft row's type changes conditional fields and validation. Do not destructively erase entered content without explanation; inactive type-specific fields must never leak into the submitted/calculated active row. Draft removal is recoverable before issue. Name/description appear in the review, issued snapshot, print and public invoice; preserve long Persian text and row order.
+- For finalized invoices, adding goods creates a guided linked replacement/revision rather than mutating the issued snapshot. Adding/removing rows in drafts remains unrestricted within the documented technical bounds. Keep this lifecycle rule consistent with the already agreed immutable-invoice policy.
+
+Required acceptance examples in IRR:
+
+| Case | Expected result |
+| --- | --- |
+| Two gold rows at different purities | With reference18=100,000,000, 1g at 750 is metal=100,000,000; 1g at 1000 is metal=133,333,333 after line rounding; zero wage/profit yields payable=233,333,333 |
+| Gold plus miscellaneous | Existing 2g/750 worked example total=215,620,000 plus a MISC row titled `جعبه هدیه`, manual price=2,000,000 gives payable=217,620,000; gold VAT remains 1,420,000 |
+| Miscellaneous only | One valid titled MISC row at 2,000,000 gives payable=2,000,000 without any gold inputs or a gold tax-rule lookup |
+| Row independence | Changing only the second GOLD row from 750 to 1000 updates that row and aggregate totals; other GOLD purity and MISC price remain unchanged |
+| Row validation and rendering | Blank MISC title/price, invalid GOLD weight/purity and incomplete added rows prevent issue with local errors; long item names/descriptions survive draft, snapshot, print and public view |
 
 ## 8. Market price module
 
@@ -195,8 +227,8 @@ PriceSnapshot stores provider quote, merchant-effective value, currency/unit, so
 
 Use lifecycle `DRAFT -> FINALIZED -> VOIDED` with an explicit linked replacement/revision workflow. Sharing and payment are orthogonal statuses/derived properties: a finalized invoice can be shared repeatedly and be unpaid/partially paid/paid. Avoid a single Draft->Shared->Paid enum that loses document status. Record share events without mutating legal document content.
 
-- Draft may contain multiple items, invoice-local customer details, notes and selected template. Save progress with a visible save state and optimistic locking/version field.
-- Finalization is one database transaction: validate tenant/permission/features, applicable rule, input version, reviewed fingerprint and effective rate; calculate authoritative outputs; allocate tenant invoice number; create immutable snapshot; persist audit/outbox; commit.
+- Draft may contain multiple independently typed GOLD/MISC items, invoice-local customer details, notes and selected template. Provide explicit add/edit/remove-row actions and a per-row name/description. Save progress with a visible save state and optimistic locking/version field.
+- Finalization is one database transaction: validate tenant/permission/features, every typed row, applicable GOLD rules (only for GOLD rows), input version, reviewed fingerprint and effective rates; compute authoritative GOLD outputs and validate exact MISC manual row totals; aggregate without applying gold rules to MISC; allocate tenant invoice number; create immutable snapshot; persist audit/outbox; commit.
 - Invoice number unique per tenant, allocated concurrency-safely. Finalization has a tenant-scoped idempotency key and request hash; retry same key/input returns the same result, key with different input is rejected. Double tap cannot issue two invoices.
 - Issued financial inputs and outputs cannot be edited or hard-deleted by normal endpoints. Void requires permission and reason; replacement creates a new linked invoice and snapshots its own rate/rules. Existing public views clearly show void/replaced state.
 - Payments and communications append independently to issued documents. Payment reversal is a recorded compensating action; no silent alteration of history.
@@ -330,7 +362,7 @@ Mock/live provider adapter path with explicit mode, freshness, overrides, effect
 
 ### M3 — Invoice vertical slice
 
-Drafts/items, review fingerprint, idempotent finalization/numbering, issued snapshots, history and void/replacement path, print layout, secure share token lifecycle and transactional link quota. Test rates/profile/plan changes do not rewrite issued content.
+Drafts with repeatable GOLD/MISC rows, per-row product name/description, editable gold purity and manual miscellaneous prices; mixed-type totals, review fingerprint, idempotent finalization/numbering, issued snapshots, history and void/replacement path, print layout, secure share token lifecycle and transactional link quota. Test rates/profile/plan changes do not rewrite issued content.
 
 ### M4 — Messaging and Professional workflows
 
@@ -347,6 +379,7 @@ Each milestone ends with changed files, checks actually run, evidence, known lim
 Tests must verify behavior and invariants, not merely mirror methods:
 
 - Exact calculation examples plus boundary/property tests, component discount reconciliation, line totals, purity and currency conversion; client/server fixtures identical.
+- Repeatable GOLD/MISC rows, MISC-only and mixed invoices, editable 18K-default per-row purity, independent recalculation, manual final-row prices, conditional validation, type switching, add/remove recovery, stable ordering and name/description snapshots in print/public views. Verify MISC rows never enter gold taxable bases or gold-weight totals.
 - Cross-tenant read/write/foreign-key attacks, public share lookup, staff permissions, provider boundary, queue/cache scopes.
 - OTP expiry/reuse/brute-force/rate limiting and secret redaction.
 - Price outage/stale/manual/quote-change acknowledgment; global quote unchanged by tenant edits.
