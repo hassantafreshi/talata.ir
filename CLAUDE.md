@@ -8,7 +8,8 @@ For future implementation requests, read:
 2. `docs/prompts/UI_UX_DISCOVERY_PROMPT.md`
 3. `docs/PHASE_1_CHECKLIST.md`
 4. `docs/research/UI_UX_TOOL_SHORTLIST.md` when choosing design tools.
-5. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
+5. `docs/design/README.md` and `docs/design/UI_APPROVED_DECISIONS.md` for the Stage A proposal status and which design decisions are actually approved (brand spelling: طلاتا / Talata).
+6. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
 
 ## Durable constraints
 

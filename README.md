@@ -12,6 +12,7 @@
 | [UI/UX tool shortlist](docs/research/UI_UX_TOOL_SHORTLIST.md) | گزینه‌های بررسی‌شده برای Claude، کتابخانه‌ها و لینک نمونه‌ها |
 | [Implementation checklist](docs/PHASE_1_CHECKLIST.md) | معیارهای پذیرش و پیگیری مراحل |
 | [Performance budget](docs/PERFORMANCE_BUDGET.md) | معیار حجم اولیه و آزمون سرعت روی اینترنت ضعیف |
+| [Stage A design package](docs/design/README.md) | اتود پیشنهادی مرحله A: وایرفریم، اتود موبایل/دسکتاپ، پالت، لوگو، فونت و toolkit؛ در انتظار تأیید مالک (`docs/design/STAGE_A_REVIEW_REQUEST.md`) |
 
 ## نحوه استفاده با Claude Code
 
@@ -25,7 +26,7 @@ Respect the pending UI selection. Do not install a UI library or design skill ye
 Record assumptions and progress in docs; implement in small verified milestones.
 ```
 
-تصمیم کتابخانه UI، ابزار طراحی و جهت بصری هنوز گرفته نشده است. پرامپ اجرای سریع UI آماده است: ابتدا اتود قابل مشاهده و تأیید رنگ، لوگو، فونت و ابزار، سپس جزئیات و پیاده‌سازی. این ریپو در این مرحله حاوی مستندات است؛ اپلیکیشن هنوز پیاده‌سازی نشده است.
+تصمیم کتابخانه UI، ابزار طراحی و جهت بصری هنوز گرفته نشده است. بسته اتود مرحله A (پیشنهادی) در `docs/design/` آماده و در انتظار تأیید مالک است؛ پس از تأیید، مرحله B طبق پرامپ اجرای سریع شروع می‌شود. این ریپو در این مرحله حاوی مستندات است؛ اپلیکیشن هنوز پیاده‌سازی نشده است.
 
 برای شروع مرحله طراحی با Claude Code:
 

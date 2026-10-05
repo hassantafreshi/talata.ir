@@ -1,0 +1,1100 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اتود UI طلاتا — مرحله A (پیشنهادی)</title>
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+html{background:#E9E6DF}
+body{margin:0;font-family:Vazirmatn,Tahoma,sans-serif;color:#1C1A17;padding:24px}
+.top{max-width:1280px;margin:0 auto 24px auto;background:#FFFFFF;border:1.5px solid #D9D4CA;border-radius:14px;padding:18px 22px;line-height:1.8}
+.top h1{margin:0 0 6px 0;font-size:22px}
+.top p{margin:0;font-size:14px;color:#5B564E}
+h2.grp{font-size:18px;margin:32px 0 12px 0}
+.row{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start}
+.board{margin:0;display:flex;flex-direction:column;gap:8px}
+figcaption{font-size:13px;font-weight:500;color:#5B564E}
+figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
+.frame{box-shadow:0 2px 10px rgba(0,0,0,.12);border-radius:4px;overflow:hidden;flex-shrink:0}
+.scalebox{position:relative;overflow:hidden}
+.scalebox .frame{position:absolute;top:0;right:0}
+#b-Print .frame{border:1px solid #D9D4CA}
+.noop{margin:0}
+#b-Flow a{color:#0F6E56}
+#b-Flow a:hover{color:#0B5A46}
+#b-Flow .step{flex:1;min-width:0;background:#FFFFFF;border:2px solid #1C1A17;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;min-height:300px;box-sizing:border-box}
+#b-Flow .step h2{margin:0;font-size:18px;font-weight:700;display:flex;gap:8px;align-items:center}
+#b-Flow .step h2 span{display:inline-flex;width:28px;height:28px;border-radius:50%;background:#1C1A17;color:#FFFFFF;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+#b-Flow .step ul{margin:0;padding-inline-start:18px;font-size:14px;line-height:1.7;color:#1C1A17}
+#b-Flow .wire{border:1.5px dashed #5B564E;border-radius:8px;padding:8px;font-size:12px;color:#5B564E;display:flex;flex-direction:column;gap:4px;margin-top:auto}
+#b-Flow .wire div{border:1px solid #D9D4CA;border-radius:4px;padding:2px 6px;background:#F7F5F0}
+#b-Flow .arrow{display:flex;align-items:center;justify-content:center;width:36px;flex-shrink:0;color:#1C1A17}
+#b-Flow .branch{background:#FBF0D9;border:1.5px solid #8A5A00;color:#1C1A17;border-radius:10px;padding:10px 14px;font-size:14px;line-height:1.6;flex:1}
+.noop{margin:0}
+#b-Login a{color:#0F6E56}
+#b-Login a:hover{color:#0B5A46}
+#b-Login .btn{display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:12px;font-weight:700;font-size:20px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%}
+#b-Login .btn-primary{background:#0F6E56;color:#FFFFFF}
+#b-Login .btn-primary:hover{color:#FFFFFF;background:#0B5A46}
+#b-Login .label{font-size:15px;font-weight:500}
+#b-Login .input{min-height:52px;border:1.5px solid #D9D4CA;border-radius:10px;background:#FFFFFF;padding:0 14px;font-size:22px;box-sizing:border-box;color:#1C1A17;font-family:inherit;width:100%;direction:ltr;text-align:right}
+#b-Login .code{width:48px;height:56px;border:1.5px solid #D9D4CA;border-radius:10px;background:#FFFFFF;font-size:26px;font-weight:700;text-align:center;box-sizing:border-box;font-family:inherit;color:#1C1A17}
+#b-Login .code.err{border-color:#B3261E}
+#b-Login .hint{font-size:13px;color:#5B564E;line-height:1.6}
+#b-Login .num{font-variant-numeric:tabular-nums}
+.noop{margin:0}
+#b-Passkey a{color:#0F6E56}
+#b-Passkey a:hover{color:#0B5A46}
+#b-Passkey .btn{display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:12px;font-weight:700;font-size:19px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%;text-align:center;padding:8px 16px}
+#b-Passkey .btn-primary{background:#0F6E56;color:#FFFFFF}
+#b-Passkey .btn-primary:hover{color:#FFFFFF;background:#0B5A46}
+#b-Passkey .btn-secondary{background:#FFFFFF;color:#1C1A17;border:1.5px solid #D9D4CA}
+#b-Passkey .btn-secondary:hover{color:#1C1A17}
+#b-Passkey .row{display:flex;gap:12px;align-items:flex-start}
+#b-Passkey .ic{flex-shrink:0;width:40px;height:40px;border-radius:10px;background:#E3F3EC;color:#0F6E56;display:inline-flex;align-items:center;justify-content:center}
+.noop{margin:0}
+#b-Main a{color:#0F6E56}
+#b-Main a:hover{color:#0B5A46}
+#b-Main .btn{display:flex;align-items:center;justify-content:center;min-height:60px;border-radius:12px;font-weight:700;font-size:22px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%}
+#b-Main .btn-primary{background:#0F6E56;color:#FFFFFF}
+#b-Main .btn-primary:hover{color:#FFFFFF;background:#0B5A46}
+#b-Main .btn-link{display:flex;align-items:center;justify-content:center;min-height:44px;font-size:15px;font-weight:500;text-decoration:underline;text-underline-offset:4px}
+#b-Main .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:500}
+#b-Main .num{font-variant-numeric:tabular-nums}
+#b-Main .tab{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-height:56px;justify-content:center;font-size:13px;font-weight:500;color:#5B564E;text-decoration:none}
+#b-Main .tab.on{color:#0F6E56}
+.noop{margin:0}
+#b-Items a{color:#0F6E56}
+#b-Items a:hover{color:#0B5A46}
+#b-Items .btn{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:12px;font-weight:700;font-size:18px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit}
+#b-Items .btn-primary{background:#0F6E56;color:#FFFFFF}
+#b-Items .btn-primary:hover{color:#FFFFFF;background:#0B5A46}
+#b-Items .btn-secondary{background:#FFFFFF;color:#0F6E56;border:1.5px solid #0F6E56}
+#b-Items .lbl{font-size:13px;font-weight:500;color:#5B564E}
+#b-Items .input{min-height:46px;border:1.5px solid #D9D4CA;border-radius:10px;background:#FFFFFF;padding:0 12px;font-size:18px;box-sizing:border-box;color:#1C1A17;font-family:inherit;width:100%}
+#b-Items .unitbox{display:flex;align-items:center;border:1.5px solid #D9D4CA;border-radius:10px;background:#FFFFFF;min-height:46px;box-sizing:border-box;overflow:hidden}
+#b-Items .unitbox input{border:0;min-height:44px;flex:1;min-width:0;padding:0 12px;font-size:18px;font-family:inherit;color:#1C1A17;background:transparent}
+#b-Items .unitbox span{padding:0 10px;font-size:13px;color:#5B564E;border-inline-start:1.5px solid #D9D4CA;min-height:44px;display:inline-flex;align-items:center;background:#F7F5F0}
+#b-Items .seg{display:flex;border:1.5px solid #D9D4CA;border-radius:10px;overflow:hidden;background:#FFFFFF}
+#b-Items .seg button{flex:1;min-height:40px;border:0;background:transparent;font-family:inherit;font-size:15px;font-weight:500;color:#5B564E;cursor:pointer}
+#b-Items .seg button.on{background:#1C1A17;color:#FFFFFF}
+#b-Items .num{font-variant-numeric:tabular-nums}
+#b-Items .badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
+.noop{margin:0}
+#b-Review a{color:#0F6E56}
+#b-Review a:hover{color:#0B5A46}
+#b-Review .btn{display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:12px;font-weight:700;font-size:19px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%}
+#b-Review .btn-primary{background:#0F6E56;color:#FFFFFF}
+#b-Review .btn-primary:hover{color:#FFFFFF;background:#0B5A46}
+#b-Review .btn-secondary{background:#FFFFFF;color:#1C1A17;border:1.5px solid #D9D4CA}
+#b-Review .btn-secondary:hover{color:#1C1A17}
+#b-Review .line{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:15px}
+#b-Review .line .k{color:#5B564E}
+#b-Review .num{font-variant-numeric:tabular-nums}
+#b-Review .badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
+.noop{margin:0}
+#b-RateB a{color:#243B6B}
+#b-RateB a:hover{color:#1A2C52}
+#b-RateB .btn{display:flex;align-items:center;justify-content:center;min-height:60px;border-radius:12px;font-weight:700;font-size:22px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%}
+#b-RateB .btn-primary{background:#243B6B;color:#FFFFFF}
+#b-RateB .btn-primary:hover{color:#FFFFFF;background:#1A2C52}
+#b-RateB .btn-link{display:flex;align-items:center;justify-content:center;min-height:44px;font-size:15px;font-weight:500;text-decoration:underline;text-underline-offset:4px}
+#b-RateB .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:500}
+#b-RateB .num{font-variant-numeric:tabular-nums}
+#b-RateB .tab{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-height:56px;justify-content:center;font-size:13px;font-weight:500;color:#5B564E;text-decoration:none}
+#b-RateB .tab.on{color:#243B6B}
+.noop{margin:0}
+#b-DesktopRate a{color:#0F6E56}
+#b-DesktopRate a:hover{color:#0B5A46}
+#b-DesktopRate .btn{display:flex;align-items:center;justify-content:center;min-height:64px;border-radius:12px;font-weight:700;font-size:24px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%}
+#b-DesktopRate .btn-primary{background:#0F6E56;color:#FFFFFF}
+#b-DesktopRate .btn-primary:hover{color:#FFFFFF;background:#0B5A46}
+#b-DesktopRate .nav a{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 14px;border-radius:10px;text-decoration:none;color:#1C1A17;font-size:16px;font-weight:500}
+#b-DesktopRate .nav a.on{background:#E3F3EC;color:#0F6E56}
+#b-DesktopRate .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:500}
+#b-DesktopRate .num{font-variant-numeric:tabular-nums}
+#b-DesktopRate .st{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-top:1px solid #D9D4CA;font-size:14px;line-height:1.6}
+#b-DesktopRate .st:first-child{border-top:0}
+.noop{margin:0}
+#b-DesktopItems a{color:#0F6E56}
+#b-DesktopItems a:hover{color:#0B5A46}
+#b-DesktopItems .btn{display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:12px;font-weight:700;font-size:19px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%}
+#b-DesktopItems .btn-primary{background:#0F6E56;color:#FFFFFF}
+#b-DesktopItems .btn-primary:hover{color:#FFFFFF;background:#0B5A46}
+#b-DesktopItems .btn-secondary{background:#FFFFFF;color:#0F6E56;border:1.5px solid #0F6E56}
+#b-DesktopItems .lbl{font-size:13px;font-weight:500;color:#5B564E}
+#b-DesktopItems .input{min-height:46px;border:1.5px solid #D9D4CA;border-radius:10px;background:#FFFFFF;padding:0 12px;font-size:17px;box-sizing:border-box;color:#1C1A17;font-family:inherit;width:100%}
+#b-DesktopItems .unitbox{display:flex;align-items:center;border:1.5px solid #D9D4CA;border-radius:10px;background:#FFFFFF;min-height:46px;box-sizing:border-box;overflow:hidden}
+#b-DesktopItems .unitbox input{border:0;min-height:44px;flex:1;min-width:0;padding:0 12px;font-size:17px;font-family:inherit;color:#1C1A17;background:transparent}
+#b-DesktopItems .unitbox span{padding:0 10px;font-size:13px;color:#5B564E;border-inline-start:1.5px solid #D9D4CA;min-height:44px;display:inline-flex;align-items:center;background:#F7F5F0}
+#b-DesktopItems .seg{display:flex;border:1.5px solid #D9D4CA;border-radius:10px;overflow:hidden;background:#FFFFFF;width:170px}
+#b-DesktopItems .seg button{flex:1;min-height:40px;border:0;background:transparent;font-family:inherit;font-size:15px;font-weight:500;color:#5B564E;cursor:pointer}
+#b-DesktopItems .seg button.on{background:#1C1A17;color:#FFFFFF}
+#b-DesktopItems .num{font-variant-numeric:tabular-nums}
+#b-DesktopItems .badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
+#b-DesktopItems .line{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:15px}
+#b-DesktopItems .line .k{color:#5B564E}
+#b-DesktopItems .f{display:flex;flex-direction:column;gap:4px}
+.noop{margin:0}
+#b-DesktopReview a{color:#0F6E56}
+#b-DesktopReview a:hover{color:#0B5A46}
+#b-DesktopReview .btn{display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:12px;font-weight:700;font-size:19px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%}
+#b-DesktopReview .btn-primary{background:#0F6E56;color:#FFFFFF}
+#b-DesktopReview .btn-primary:hover{color:#FFFFFF;background:#0B5A46}
+#b-DesktopReview .btn-secondary{background:#FFFFFF;color:#1C1A17;border:1.5px solid #D9D4CA}
+#b-DesktopReview .btn-secondary:hover{color:#1C1A17}
+#b-DesktopReview .num{font-variant-numeric:tabular-nums}
+#b-DesktopReview .badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
+#b-DesktopReview .line{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:15px}
+#b-DesktopReview .line .k{color:#5B564E}
+#b-DesktopReview table{border-collapse:collapse;width:100%;font-size:14px}
+#b-DesktopReview th, #b-DesktopReview td{padding:8px 10px;border-bottom:1px solid #D9D4CA;text-align:right;vertical-align:top}
+#b-DesktopReview th{font-weight:500;color:#5B564E;font-size:12px}
+#b-DesktopReview td.n, #b-DesktopReview th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+.noop{margin:0}
+#b-Palette a{color:#0F6E56}
+#b-Palette a:hover{color:#0B5A46}
+#b-Palette .sw{display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid #D9D4CA;font-size:14px}
+#b-Palette .sw:first-child{border-top:0}
+#b-Palette .chip{width:56px;height:40px;border-radius:8px;border:1px solid #D9D4CA;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+#b-Palette .hex{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:#5B564E;direction:ltr;width:76px;flex-shrink:0}
+#b-Palette .use{flex:1;min-width:0}
+#b-Palette .cr{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:#5B564E;direction:ltr;width:110px;flex-shrink:0;text-align:right}
+#b-Palette .num{font-variant-numeric:tabular-nums}
+#b-Palette h2{margin:0;font-size:18px;font-weight:700}
+.noop{margin:0}
+#b-Logo a{color:#0F6E56}
+#b-Logo a:hover{color:#0B5A46}
+#b-Logo h2{margin:0;font-size:18px;font-weight:700}
+#b-Logo .cap{font-size:12px;color:#5B564E}
+#b-Logo .cell{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border:1px dashed #D9D4CA;border-radius:10px;min-width:0}
+#b-Logo .mark{display:inline-flex;align-items:center;justify-content:center;border-radius:22%;flex-shrink:0}
+#b-Logo .wm{font-weight:700;line-height:1;letter-spacing:-0.5px}
+#b-Logo .lat{font-family:Vazirmatn,Tahoma,sans-serif;font-weight:500;letter-spacing:0.22em;direction:ltr;text-transform:uppercase}
+.noop{margin:0}
+#b-Type a{color:#0F6E56}
+#b-Type a:hover{color:#0B5A46}
+#b-Type h2{margin:0;font-size:18px;font-weight:700}
+#b-Type .num{font-variant-numeric:tabular-nums}
+#b-Type .row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid #D9D4CA;font-size:14px}
+#b-Type .row:first-child{border-top:0}
+#b-Type .k{color:#5B564E}
+#b-Type table{border-collapse:collapse;width:100%;font-size:13.5px}
+#b-Type th, #b-Type td{padding:6px 8px;border-bottom:1px solid #D9D4CA;text-align:right;vertical-align:top;line-height:1.6}
+#b-Type th{font-weight:500;color:#5B564E;font-size:12px}
+.noop{margin:0}
+#b-Print a{color:#1C1A17}
+#b-Print a:hover{color:#000000}
+#b-Print .num{font-variant-numeric:tabular-nums}
+#b-Print table{border-collapse:collapse;width:100%;font-size:12.5pt}
+#b-Print th, #b-Print td{padding:7pt 8pt;border:1px solid #1C1A17;text-align:right;vertical-align:top}
+#b-Print th{font-weight:700;background:#F0EDE6;font-size:11pt}
+#b-Print td.n, #b-Print th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+#b-Print .sum{display:flex;justify-content:space-between;font-size:12.5pt;padding:3pt 0}
+</style>
+</head>
+<body>
+<div class="top">
+<h1>اتود UI طلاتا — مرحله A (پیشنهادی، تأیید نشده)</h1>
+<p>نسخه آفلاین بوم اتود. همه قیمت‌ها و نرخ‌ها نمونه‌اند. لینک‌های داخل صفحه‌ها در این فایل غیرفعال‌اند؛ مسیر قابل کلیک در بوم طراحی است. برای تأیید یا اصلاح: <span dir="ltr">docs/design/STAGE_A_REVIEW_REQUEST.md</span></p>
+</div>
+<h2 class="grp">۱ — وایرفریم مسیر اصلی (همه قیمت‌ها نمونه‌اند)</h2><div class="row">
+<figure id="b-Flow" class="board"><figcaption>وایرفریم مسیر اصلی <span class="dim">1840×560</span></figcaption><div class="scalebox" style="width:1269px;height:386px"><div class="frame" style="width:1840px;transform:scale(0.69);transform-origin:top right"><div dir="rtl" style="width: 1840px; height: 560px; box-sizing: border-box; background: #F7F5F0; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px">
+  <div style="display: flex; align-items: stretch; gap: 0">
+    <section class="step">
+      <h2><span>۱</span>ورود با موبایل</h2>
+      <ul>
+        <li>شماره موبایل → «دریافت کد پیامکی»</li>
+        <li>کد ۶ رقمی، ارقام فارسی/انگلیسی، جای‌گذاری</li>
+        <li>ویرایش شماره، ارسال دوباره با شمارنده</li>
+        <li>خطای کنار فیلد، وضعیت تأخیر پیامک</li>
+      </ul>
+      <div class="wire"><div>شماره موبایل</div><div>[ کد ۶ رقمی ]</div><div style="background: #1C1A17; color: #FFFFFF">تأیید و ورود</div></div>
+    </section>
+    <div class="arrow"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div>
+    <section class="step">
+      <h2><span>۲</span>پیشنهاد اختیاری Passkey</h2>
+      <ul>
+        <li>فقط بعد از اولین ورود موفق</li>
+        <li>«فعال‌سازی با اثر انگشت یا قفل گوشی»</li>
+        <li>«فعلاً نه» بدون جریمه؛ پیامک می‌ماند</li>
+        <li>نسخه نمایشی: احراز هویت واقعی جعل نمی‌شود</li>
+      </ul>
+      <div class="wire"><div>توضیح کوتاه ۳ خطی</div><div style="background: #1C1A17; color: #FFFFFF">فعال‌سازی</div><div>فعلاً نه</div></div>
+    </section>
+    <div class="arrow"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div>
+    <section class="step" style="border-color: #0F6E56; border-width: 3px">
+      <h2><span style="background: #0F6E56">۳</span>نرخ بزرگ و شروع</h2>
+      <ul>
+        <li>نام فروشگاه + «فاکتور جدید»</li>
+        <li>«قیمت هر گرم طلای ۱۸ عیار» عدد بزرگ + تومان</li>
+        <li>دکمه بزرگ «شروع» بلافاصله زیر قیمت</li>
+        <li>زمان دریافت، وضعیت، «هر ۳ دقیقه»؛ ۲۴ عیار/دلار فرعی</li>
+      </ul>
+      <div class="wire"><div>قیمت هر گرم ۱۸ عیار</div><div style="font-size: 18px; font-weight: 700; color: #1C1A17">۱۰٬۰۰۰٬۰۰۰ تومان</div><div style="background: #0F6E56; color: #FFFFFF">شروع</div><div>۱۴:۲۱ · به‌روز · هر ۳ دقیقه</div></div>
+    </section>
+    <div class="arrow"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div>
+    <section class="step">
+      <h2><span>۴</span>اقلام طلا / متفرقه</h2>
+      <ul>
+        <li>هر ردیف: انتخاب «طلا | متفرقه»</li>
+        <li>طلا: نام، وزن خالص (گرم)، عیار پیش‌فرض ۱۸ (۷۵۰)، اجرت٪، سود٪، تخفیف</li>
+        <li>متفرقه: عنوان + قیمت ردیف دستی، بدون قواعد طلا</li>
+        <li>نرخ معامله ثابت؛ «استفاده از نرخ جدید» آگاهانه</li>
+      </ul>
+      <div class="wire"><div>ردیف ۱ · طلا · ۲ گرم · ۱۸ عیار</div><div>ردیف ۲ · متفرقه · جعبه هدیه</div><div>+ افزودن ردیف</div><div style="background: #1C1A17; color: #FFFFFF">جمع ← مرور فاکتور</div></div>
+    </section>
+    <div class="arrow"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div>
+    <section class="step">
+      <h2><span>۵</span>مرور</h2>
+      <ul>
+        <li>فهرست ردیف‌ها + «ویرایش ردیف‌ها»</li>
+        <li>اجزای طلا: ارزش طلا، اجرت، سود، مالیات فقط روی اجرت/سود</li>
+        <li>جمع متفرقه جدا؛ مبلغ قابل پرداخت = جمع ردیف‌ها</li>
+        <li>مشتری اختیاری؛ «صدور فاکتور» / «بازگشت»</li>
+      </ul>
+      <div class="wire"><div>ردیف‌ها</div><div>اجزا و جمع‌ها</div><div>مشتری (اختیاری)</div><div style="background: #1C1A17; color: #FFFFFF">صدور فاکتور</div></div>
+    </section>
+    <div class="arrow"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div>
+    <section class="step">
+      <h2><span>۶</span>فاکتور و چاپ/ارسال</h2>
+      <ul>
+        <li>فاکتور قطعی با شماره، نرخ snapshot، زمان</li>
+        <li>«چاپ»، «کپی لینک»، «ارسال پیامک» با سهمیه روشن</li>
+        <li>نمای مشتری سبک و قابل چاپ A4</li>
+        <li>نسخه نمایشی: صدور واقعی نیاز به سرور دارد</li>
+      </ul>
+      <div class="wire"><div>فاکتور ۱۴۰۵-۰۰۱۲ · قطعی</div><div>چاپ | لینک | پیامک</div><div>فاکتور جدید</div></div>
+    </section>
+  </div>
+
+  <div style="display: flex; gap: 16px">
+    <div class="branch"><strong>شاخه نرخ در دسترس نیست:</strong> صفحه نرخ از بین نمی‌رود؛ وضعیت «قدیمی / آفلاین» با زمان واقعی آخرین دریافت؛ گزینه «ثبت نرخ دستی» طبق سیاست و «فاکتور فقط متفرقه».</div>
+    <div class="branch"><strong>شاخه تغییر نرخ در لحظه شروع:</strong> عدد تازه با برچسب نمایش داده می‌شود و پذیرش می‌گیرد؛ هیچ نرخ دیده‌نشده‌ای جایگزین نمی‌شود.</div>
+    <div class="branch"><strong>شاخه قطع اینترنت در فرم:</strong> ردیف‌ها و فوکوس حفظ می‌شوند؛ پیش‌نمایش محلی ادامه دارد؛ صدور و ارسال تا اتصال سرور غیرفعال می‌مانند، نه جعلی.</div>
+  </div>
+</div></div></div></figure>
+</div>
+<h2 class="grp">۲ — اتود موبایل ۳۹۰px (پالت A روی مسیر کامل؛ پالت B فقط روی صفحه نرخ)</h2><div class="row">
+<figure id="b-Login" class="board"><figcaption>۱ ورود موبایل و کد پیامکی <span class="dim">390×844</span></figcaption><div class="frame" style="width:390px"><div dir="rtl" style="width: 390px; min-height: 844px; box-sizing: border-box; background: #F7F5F0; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.6; display: flex; flex-direction: column; padding: 40px 24px 32px 24px; gap: 24px">
+  <div style="display: flex; align-items: center; gap: 10px; color: #8A5A00">
+    <span style="display: inline-flex; width: 44px; height: 44px; border-radius: 12px; background: #1C1A17; color: #D4A017; align-items: center; justify-content: center">
+      <svg width="30" height="30" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v26"></path><path d="M8 13h24"></path><path d="M8 13l-5 11h10z"></path><path d="M32 13l-5 11h10z"></path><path d="M13 33h14"></path></svg>
+    </span>
+    <span style="font-size: 26px; font-weight: 700; color: #1C1A17">طلاتا</span>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <h1 style="margin: 0; font-size: 24px; font-weight: 700">ورود به طلاتا</h1>
+    <p style="margin: 0; color: #5B564E; font-size: 15px">کد تأیید به این شماره پیامک شد. کد را وارد کنید.</p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 6px">
+    <label class="label" for="mobile">شماره موبایل</label>
+    <div style="display: flex; align-items: center; gap: 8px">
+      <input id="mobile" class="input num" type="tel" inputmode="numeric" value="۰۹۱۲ ۳۴۵ ۶۷۸۹" readonly="readonly">
+      <a href="#" onclick="return false" style="flex-shrink: 0; min-height: 44px; display: inline-flex; align-items: center; font-size: 15px; font-weight: 500; text-decoration: underline; text-underline-offset: 4px">ویرایش</a>
+    </div>
+    <div class="hint">شماره را با ارقام فارسی یا انگلیسی وارد کنید؛ هر دو قبول است.</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <label class="label" for="c1">کد تأیید ۶ رقمی</label>
+    <div dir="ltr" style="display: flex; gap: 8px; justify-content: flex-end">
+      <input id="c1" class="code num" type="text" inputmode="numeric" maxlength="1" value="۴" aria-label="رقم اول">
+      <input class="code num" type="text" inputmode="numeric" maxlength="1" value="۸" aria-label="رقم دوم">
+      <input class="code num" type="text" inputmode="numeric" maxlength="1" value="۲" aria-label="رقم سوم">
+      <input class="code num" type="text" inputmode="numeric" maxlength="1" value="" aria-label="رقم چهارم">
+      <input class="code num" type="text" inputmode="numeric" maxlength="1" value="" aria-label="رقم پنجم">
+      <input class="code num" type="text" inputmode="numeric" maxlength="1" value="" aria-label="رقم ششم">
+    </div>
+    <div class="hint">اگر کد را از پیامک کپی کردید، همین‌جا جای‌گذاری کنید؛ همه رقم‌ها خودکار پر می‌شوند.</div>
+  </div>
+
+  <div style="background: #FBE9E7; color: #B3261E; border-radius: 10px; padding: 10px 14px; font-size: 14px; display: flex; gap: 8px; align-items: flex-start">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0; margin-top: 3px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg>
+    <span>نمونه حالت خطا: کد اشتباه است. دوباره نگاه کنید و وارد کنید. (۲ تلاش دیگر)</span>
+  </div>
+
+  <a href="#" onclick="return false" class="btn btn-primary">تأیید و ورود</a>
+
+  <div style="display: flex; align-items: center; justify-content: space-between; font-size: 15px">
+    <span style="color: #5B564E">ارسال دوباره تا <span class="num" style="font-weight: 500; color: #1C1A17">۰۱:۳۰</span></span>
+    <a href="#" onclick="return false" style="min-height: 44px; display: inline-flex; align-items: center; font-weight: 500; text-decoration: underline; text-underline-offset: 4px; color: #5B564E">ارسال دوباره کد</a>
+  </div>
+
+  <div style="margin-top: auto; background: #E6EEFF; color: #1D4ED8; border-radius: 10px; padding: 10px 14px; font-size: 14px; display: flex; gap: 8px; align-items: flex-start">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0; margin-top: 3px"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+    <span>پیامک معمولاً تا ۳۰ ثانیه می‌رسد. اگر نرسید، بعد از پایان زمان دوباره بفرستید. ثبت‌نام جدا لازم نیست.</span>
+  </div>
+</div></div></figure>
+<figure id="b-Passkey" class="board"><figcaption>۲ پیشنهاد اختیاری Passkey <span class="dim">390×844</span></figcaption><div class="frame" style="width:390px"><div dir="rtl" style="width: 390px; min-height: 844px; box-sizing: border-box; background: #F7F5F0; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.7; display: flex; flex-direction: column; padding: 40px 24px 32px 24px; gap: 24px">
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; padding-top: 24px">
+    <span style="display: inline-flex; width: 88px; height: 88px; border-radius: 24px; background: #E3F3EC; color: #0F6E56; align-items: center; justify-content: center">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11a5 5 0 0 1 10 0v2a5 5 0 0 1-1 3"></path><path d="M9.5 11a2.5 2.5 0 0 1 5 0v3a2.5 2.5 0 0 1-.5 1.5"></path><path d="M12 11v6"></path><path d="M5 9a7 7 0 0 1 14 0"></path><path d="M3 12a9 9 0 0 1 2-5.6"></path></svg>
+    </span>
+    <h1 style="margin: 0; font-size: 24px; font-weight: 700">دفعه بعد سریع‌تر وارد شوید؟</h1>
+    <p style="margin: 0; color: #5B564E; font-size: 15px">با اثر انگشت، چهره یا قفل همین گوشی، بدون منتظرماندن برای پیامک.</p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 14px; background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 16px; padding: 18px">
+    <div class="row">
+      <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg></span>
+      <div><strong>اختیاری است.</strong> هر وقت خواستید از تنظیمات فعال یا غیرفعال کنید.</div>
+    </div>
+    <div class="row">
+      <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg></span>
+      <div><strong>اثر انگشت یا چهره شما هیچ‌وقت به طلاتا فرستاده نمی‌شود.</strong> گوشی خودش شما را تأیید می‌کند.</div>
+    </div>
+    <div class="row">
+      <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg></span>
+      <div><strong>پیامک همیشه راه بازیابی می‌ماند.</strong> اگر گوشی عوض شد، با شماره موبایل وارد می‌شوید.</div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px; margin-top: auto">
+    <a href="#" onclick="return false" class="btn btn-primary">فعال‌سازی با اثر انگشت یا قفل گوشی</a>
+    <a href="#" onclick="return false" class="btn btn-secondary">فعلاً نه، ادامه با پیامک</a>
+    <div style="font-size: 13px; color: #5B564E; text-align: center">در این اتود، فعال‌سازی فقط نمایشی است و احراز هویت واقعی انجام نمی‌شود.</div>
+  </div>
+</div></div></figure>
+<figure id="b-Main" class="board"><figcaption>۳ نرخ بزرگ و شروع — پالت A <span class="dim">390×844</span></figcaption><div class="frame" style="width:390px"><div dir="rtl" style="width: 390px; min-height: 844px; box-sizing: border-box; background: #F7F5F0; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.6; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 8px 20px">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="font-size: 13px; color: #5B564E">فروشگاه فعال</div>
+      <div style="font-size: 18px; font-weight: 700">طلافروشی نمونه</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px; color: #8A5A00; font-weight: 700; font-size: 18px">
+      <svg width="28" height="28" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v26"></path><path d="M8 13h24"></path><path d="M8 13l-5 11h10z"></path><path d="M32 13l-5 11h10z"></path><path d="M13 33h14"></path></svg>
+      <span>طلاتا</span>
+    </div>
+  </header>
+
+  <main style="display: flex; flex-direction: column; gap: 16px; padding: 8px 20px 16px 20px; flex-grow: 1">
+    <h1 style="margin: 0; font-size: 22px; font-weight: 700">فاکتور جدید</h1>
+
+    <section aria-label="قیمت روز" style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+        <div style="font-size: 17px; font-weight: 500">قیمت هر گرم طلای ۱۸ عیار</div>
+        <span class="badge" style="background: #FBF0D9; color: #8A5A00">عدد نمونه</span>
+      </div>
+      <div style="display: flex; align-items: baseline; gap: 10px; border-inline-start: 4px solid #8A5A00; padding-inline-start: 12px">
+        <div class="num" style="font-size: 44px; font-weight: 700; line-height: 1.2; letter-spacing: -0.5px">۱۰٬۰۰۰٬۰۰۰</div>
+        <div style="font-size: 20px; font-weight: 500; color: #5B564E">تومان</div>
+      </div>
+      <a href="#" onclick="return false" class="btn btn-primary">شروع</a>
+      <div style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #5B564E">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <span>آخرین دریافت: <span class="num" style="color: #1C1A17; font-weight: 500">۱۴:۲۱</span></span>
+          <span class="badge" style="background: #E3F3EC; color: #0F6E56">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>
+            به‌روز
+          </span>
+        </div>
+        <div>به‌روزرسانی هر ۳ دقیقه · منبع: بازار (نمونه)</div>
+      </div>
+    </section>
+
+    <section aria-label="اطلاعات فرعی" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <div style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px">
+        <div style="font-size: 13px; color: #5B564E">طلای ۲۴ عیار</div>
+        <div class="num" style="font-size: 17px; font-weight: 500">۱۳٬۳۳۳٬۰۰۰ <span style="font-size: 12px; color: #5B564E">تومان</span></div>
+      </div>
+      <div style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px">
+        <div style="font-size: 13px; color: #5B564E">دلار</div>
+        <div class="num" style="font-size: 17px; font-weight: 500">۱۰۰٬۰۰۰ <span style="font-size: 12px; color: #5B564E">تومان</span></div>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-direction: column; gap: 4px; margin-top: auto">
+      <a href="#" onclick="return false" class="btn-link">نرخ در دسترس نیست؟ ثبت نرخ دستی</a>
+      <a href="#" onclick="return false" class="btn-link" style="color: #5B564E">فاکتور فقط متفرقه (بدون نرخ طلا)</a>
+    </div>
+  </main>
+
+  <nav aria-label="منوی اصلی" style="display: flex; border-top: 1.5px solid #D9D4CA; background: #FFFFFF; padding: 6px 8px 14px 8px">
+    <a href="#" onclick="return false" class="tab on">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+      فاکتور جدید
+    </a>
+    <a href="#" onclick="return false" class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l5 5v13H6z"></path><path d="M9 12h7M9 16h7"></path></svg>
+      فاکتورها
+    </a>
+    <a href="#" onclick="return false" class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>
+      مشتریان
+    </a>
+    <a href="#" onclick="return false" class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"></path></svg>
+      تنظیمات
+    </a>
+  </nav>
+</div></div></figure>
+<figure id="b-Items" class="board"><figcaption>۴ اقلام طلا / متفرقه <span class="dim">390×844</span></figcaption><div class="frame" style="width:390px"><div dir="rtl" style="width: 390px; min-height: 844px; box-sizing: border-box; background: #F7F5F0; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 10px; padding: 14px 16px 8px 16px">
+    <a href="#" onclick="return false" aria-label="بازگشت" style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 10px; color: #1C1A17">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+    </a>
+    <h1 style="margin: 0; font-size: 20px; font-weight: 700; flex-grow: 1">اقلام فاکتور</h1>
+    <span class="badge" style="background: #ECEAE6; color: #4A4A4A">پیش‌نویس ذخیره شد</span>
+  </header>
+
+  <div style="margin: 0 16px; background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; font-size: 14px">
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <span style="color: #5B564E">نرخ معامله (هر گرم ۱۸ عیار)</span>
+      <strong class="num" style="font-size: 16px">۱۰٬۰۰۰٬۰۰۰ <span style="font-weight: 400; font-size: 12px; color: #5B564E">تومان</span></strong>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px dashed #D9D4CA; padding-top: 6px">
+      <span style="color: #8A5A00">نرخ تازه بازار: <span class="num" style="font-weight: 500">۱۰٬۰۵۰٬۰۰۰</span> · ۱۴:۲۴</span>
+      <a href="#" onclick="return false" style="flex-shrink: 0; min-height: 36px; display: inline-flex; align-items: center; padding: 0 10px; border: 1.5px solid #0F6E56; border-radius: 8px; font-size: 13px; font-weight: 500; text-decoration: none">استفاده از نرخ جدید</a>
+    </div>
+  </div>
+
+  <main style="display: flex; flex-direction: column; gap: 12px; padding: 12px 16px 16px 16px; flex-grow: 1">
+    <section aria-label="ردیف ۱" style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px">
+        <div style="font-weight: 700">ردیف ۱</div>
+        <div class="seg" role="group" aria-label="نوع ردیف" style="width: 170px">
+          <button type="button" class="on">طلا</button>
+          <button type="button">متفرقه</button>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <label class="lbl" for="n1">نام کالا</label>
+        <input id="n1" class="input" type="text" value="النگو ۱۸ عیار">
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <label class="lbl" for="w1">وزن خالص طلا</label>
+          <div class="unitbox"><input id="w1" class="num" type="text" inputmode="decimal" value="۲"><span>گرم</span></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <label class="lbl" for="p1">عیار</label>
+          <select id="p1" class="input" style="font-size: 16px">
+            <option selected="selected">۱۸ عیار (۷۵۰)</option>
+            <option>۲۱ عیار (۸۷۵)</option>
+            <option>۲۴ عیار (۱۰۰۰)</option>
+            <option>عیار دقیق…</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: #5B564E">وزن سنگ و قسمت‌های غیرطلایی را وارد نکنید. نرخ این عیار: <span class="num">۱۰٬۰۰۰٬۰۰۰</span> تومان/گرم</div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <label class="lbl" for="wg1">اجرت</label>
+          <div class="unitbox"><input id="wg1" class="num" type="text" inputmode="decimal" value="۲"><span>٪</span></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <label class="lbl" for="pr1">سود</label>
+          <div class="unitbox"><input id="pr1" class="num" type="text" inputmode="decimal" value="۵"><span>٪</span></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <label class="lbl" for="d1">تخفیف اجرت و سود</label>
+          <div class="unitbox"><input id="d1" class="num" type="text" inputmode="decimal" value="۰"><span>تومان</span></div>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #D9D4CA; padding-top: 8px">
+        <span style="font-size: 14px; color: #5B564E">مبلغ این ردیف</span>
+        <strong class="num" style="font-size: 18px">۲۱٬۵۶۲٬۰۰۰ <span style="font-weight: 400; font-size: 12px; color: #5B564E">تومان</span></strong>
+      </div>
+    </section>
+
+    <section aria-label="ردیف ۲" style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px">
+        <div style="font-weight: 700">ردیف ۲</div>
+        <div class="seg" role="group" aria-label="نوع ردیف" style="width: 170px">
+          <button type="button">طلا</button>
+          <button type="button" class="on">متفرقه</button>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <label class="lbl" for="n2">عنوان (الزامی)</label>
+          <input id="n2" class="input" type="text" value="جعبه هدیه">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <label class="lbl" for="pm2">قیمت ردیف (الزامی)</label>
+          <div class="unitbox"><input id="pm2" class="num" type="text" inputmode="numeric" value="۲۰۰٬۰۰۰"><span>تومان</span></div>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: #5B564E">قیمت کل همین ردیف را بنویسید. برای متفرقه، وزن و عیار و محاسبه طلا به کار نمی‌رود.</div>
+    </section>
+
+    <a href="#" onclick="return false" class="btn btn-secondary" style="min-height: 48px; font-size: 16px">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" style="margin-inline-end: 6px"><path d="M12 5v14M5 12h14"></path></svg>
+      افزودن ردیف
+    </a>
+  </main>
+
+  <footer style="border-top: 1.5px solid #D9D4CA; background: #FFFFFF; padding: 12px 16px 18px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px">
+    <div style="display: flex; flex-direction: column">
+      <span style="font-size: 13px; color: #5B564E">جمع فاکتور (۲ ردیف)</span>
+      <strong class="num" style="font-size: 20px">۲۱٬۷۶۲٬۰۰۰ <span style="font-weight: 400; font-size: 13px; color: #5B564E">تومان</span></strong>
+    </div>
+    <a href="#" onclick="return false" class="btn btn-primary" style="min-width: 150px">مرور فاکتور</a>
+  </footer>
+</div></div></figure>
+<figure id="b-Review" class="board"><figcaption>۵ مرور و صدور <span class="dim">390×844</span></figcaption><div class="frame" style="width:390px"><div dir="rtl" style="width: 390px; min-height: 844px; box-sizing: border-box; background: #F7F5F0; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 10px; padding: 14px 16px 8px 16px">
+    <a href="#" onclick="return false" aria-label="بازگشت به ویرایش" style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 10px; color: #1C1A17">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+    </a>
+    <h1 style="margin: 0; font-size: 20px; font-weight: 700; flex-grow: 1">مرور فاکتور</h1>
+    <span class="badge" style="background: #FBF0D9; color: #8A5A00">حالت نمونه</span>
+  </header>
+
+  <main style="display: flex; flex-direction: column; gap: 12px; padding: 8px 16px 16px 16px; flex-grow: 1">
+    <section aria-label="ردیف‌ها" style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+        <div style="display: flex; flex-direction: column">
+          <strong>النگو ۱۸ عیار</strong>
+          <span style="font-size: 13px; color: #5B564E"><span class="num">۲</span> گرم · ۱۸ عیار (۷۵۰) · اجرت <span class="num">۲٪</span> · سود <span class="num">۵٪</span></span>
+        </div>
+        <strong class="num" style="white-space: nowrap">۲۱٬۵۶۲٬۰۰۰</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; border-top: 1px solid #D9D4CA; padding-top: 10px">
+        <div style="display: flex; flex-direction: column">
+          <strong>جعبه هدیه</strong>
+          <span style="font-size: 13px; color: #5B564E">متفرقه · قیمت دستی ردیف</span>
+        </div>
+        <strong class="num" style="white-space: nowrap">۲۰۰٬۰۰۰</strong>
+      </div>
+      <a href="#" onclick="return false" style="font-size: 14px; font-weight: 500; min-height: 40px; display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 4px">ویرایش ردیف‌ها</a>
+    </section>
+
+    <section aria-label="جمع‌بندی" style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+      <div style="font-size: 13px; color: #5B564E; font-weight: 500">اجزای طلا (فقط ردیف‌های طلا)</div>
+      <div class="line"><span class="k">ارزش طلا (<span class="num">۲</span> گرم)</span><span class="num">۲۰٬۰۰۰٬۰۰۰</span></div>
+      <div class="line"><span class="k">اجرت</span><span class="num">۴۰۰٬۰۰۰</span></div>
+      <div class="line"><span class="k">سود</span><span class="num">۱٬۰۲۰٬۰۰۰</span></div>
+      <div class="line"><span class="k">مالیات <span class="num">۱۰٪</span> روی اجرت و سود (قاعده نمونه)</span><span class="num">۱۴۲٬۰۰۰</span></div>
+      <div class="line" style="border-top: 1px dashed #D9D4CA; padding-top: 8px"><span class="k">جمع طلا</span><strong class="num">۲۱٬۵۶۲٬۰۰۰</strong></div>
+      <div class="line"><span class="k">جمع متفرقه</span><strong class="num">۲۰۰٬۰۰۰</strong></div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid #1C1A17; padding-top: 10px; margin-top: 4px">
+        <span style="font-weight: 700; font-size: 17px">مبلغ قابل پرداخت</span>
+        <span class="num" style="font-weight: 700; font-size: 24px">۲۱٬۷۶۲٬۰۰۰ <span style="font-size: 13px; font-weight: 400; color: #5B564E">تومان</span></span>
+      </div>
+      <div style="font-size: 12px; color: #5B564E">نرخ معامله: <span class="num">۱۰٬۰۰۰٬۰۰۰</span> تومان/گرم ۱۸ عیار · ۱۴:۲۱ (عدد نمونه)</div>
+    </section>
+
+    <a href="#" onclick="return false" style="display: flex; align-items: center; justify-content: space-between; background: #FFFFFF; border: 1.5px dashed #D9D4CA; border-radius: 12px; padding: 12px 14px; text-decoration: none; color: #1C1A17; min-height: 52px">
+      <span>مشتری (اختیاری)</span>
+      <span style="font-size: 14px; color: #0F6E56; font-weight: 500">افزودن نام و موبایل</span>
+    </a>
+
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px">
+      <div style="font-size: 13px; color: #5B564E; text-align: center">پس از صدور، نرخ و مبلغ‌ها ثابت می‌مانند و تغییر مالی فقط با فاکتور جایگزین انجام می‌شود.</div>
+      <a href="#" onclick="return false" class="btn btn-primary">صدور فاکتور</a>
+      <a href="#" onclick="return false" class="btn btn-secondary">بازگشت به ویرایش</a>
+    </div>
+  </main>
+</div></div></figure>
+<figure id="b-RateB" class="board"><figcaption>۳ همان صفحه — پالت B <span class="dim">390×844</span></figcaption><div class="frame" style="width:390px"><div dir="rtl" style="width: 390px; min-height: 844px; box-sizing: border-box; background: #F4F6FA; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.6; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 8px 20px">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="font-size: 13px; color: #5B564E">فروشگاه فعال</div>
+      <div style="font-size: 18px; font-weight: 700">طلافروشی نمونه</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px; color: #243B6B; font-weight: 700; font-size: 18px">
+      <span style="display: inline-flex; width: 32px; height: 32px; border-radius: 9px; background: #243B6B; color: #FFFFFF; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; line-height: 1">ط</span>
+      <span>طلاتا</span>
+    </div>
+  </header>
+
+  <main style="display: flex; flex-direction: column; gap: 16px; padding: 8px 20px 16px 20px; flex-grow: 1">
+    <h1 style="margin: 0; font-size: 22px; font-weight: 700">فاکتور جدید</h1>
+
+    <section aria-label="قیمت روز" style="background: #FFFFFF; border: 1.5px solid #D3D8E2; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+        <div style="font-size: 17px; font-weight: 500">قیمت هر گرم طلای ۱۸ عیار</div>
+        <span class="badge" style="background: #FBF0D9; color: #9A6700">عدد نمونه</span>
+      </div>
+      <div style="display: flex; align-items: baseline; gap: 10px; border-inline-start: 4px solid #9A6700; padding-inline-start: 12px">
+        <div class="num" style="font-size: 44px; font-weight: 700; line-height: 1.2; letter-spacing: -0.5px">۱۰٬۰۰۰٬۰۰۰</div>
+        <div style="font-size: 20px; font-weight: 500; color: #5B564E">تومان</div>
+      </div>
+      <a href="#" onclick="return false" class="btn btn-primary">شروع</a>
+      <div style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #5B564E">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <span>آخرین دریافت: <span class="num" style="color: #1C1A17; font-weight: 500">۱۴:۲۱</span></span>
+          <span class="badge" style="background: #E3F3EC; color: #1B7A3F">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>
+            به‌روز
+          </span>
+        </div>
+        <div>به‌روزرسانی هر ۳ دقیقه · منبع: بازار (نمونه)</div>
+      </div>
+    </section>
+
+    <section aria-label="اطلاعات فرعی" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+      <div style="background: #FFFFFF; border: 1.5px solid #D3D8E2; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px">
+        <div style="font-size: 13px; color: #5B564E">طلای ۲۴ عیار</div>
+        <div class="num" style="font-size: 17px; font-weight: 500">۱۳٬۳۳۳٬۰۰۰ <span style="font-size: 12px; color: #5B564E">تومان</span></div>
+      </div>
+      <div style="background: #FFFFFF; border: 1.5px solid #D3D8E2; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px">
+        <div style="font-size: 13px; color: #5B564E">دلار</div>
+        <div class="num" style="font-size: 17px; font-weight: 500">۱۰۰٬۰۰۰ <span style="font-size: 12px; color: #5B564E">تومان</span></div>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-direction: column; gap: 4px; margin-top: auto">
+      <a href="#" onclick="return false" class="btn-link">نرخ در دسترس نیست؟ ثبت نرخ دستی</a>
+      <a href="#" onclick="return false" class="btn-link" style="color: #5B564E">فاکتور فقط متفرقه (بدون نرخ طلا)</a>
+    </div>
+  </main>
+
+  <nav aria-label="منوی اصلی" style="display: flex; border-top: 1.5px solid #D3D8E2; background: #FFFFFF; padding: 6px 8px 14px 8px">
+    <a href="#" onclick="return false" class="tab on">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+      فاکتور جدید
+    </a>
+    <a href="#" onclick="return false" class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l5 5v13H6z"></path><path d="M9 12h7M9 16h7"></path></svg>
+      فاکتورها
+    </a>
+    <a href="#" onclick="return false" class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>
+      مشتریان
+    </a>
+    <a href="#" onclick="return false" class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"></path></svg>
+      تنظیمات
+    </a>
+  </nav>
+</div></div></figure>
+</div>
+<h2 class="grp">۳ — اتود دسکتاپ ۱۲۸۰px</h2><div class="row">
+<figure id="b-DesktopRate" class="board"><figcaption>دسکتاپ — نرخ و شروع + وضعیت‌های نرخ <span class="dim">1280×860</span></figcaption><div class="frame" style="width:1280px"><div dir="rtl" style="width: 1280px; min-height: 860px; box-sizing: border-box; background: #F7F5F0; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.6; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 14px 32px; background: #FFFFFF; border-bottom: 1.5px solid #D9D4CA">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <span style="display: inline-flex; width: 40px; height: 40px; border-radius: 10px; background: #1C1A17; color: #D4A017; align-items: center; justify-content: center">
+        <svg width="28" height="28" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v26"></path><path d="M8 13h24"></path><path d="M8 13l-5 11h10z"></path><path d="M32 13l-5 11h10z"></path><path d="M13 33h14"></path></svg>
+      </span>
+      <span style="font-size: 22px; font-weight: 700">طلاتا</span>
+      <span style="color: #D9D4CA">|</span>
+      <span style="font-size: 16px; color: #5B564E">طلافروشی نمونه</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px; font-size: 14px; color: #5B564E">
+      <span>پلن: حرفه‌ای (نمونه) · لینک‌های باقی‌مانده: <span class="num">۴۲</span></span>
+      <a href="#" onclick="return false" style="min-height: 44px; display: inline-flex; align-items: center; padding: 0 14px; border: 1.5px solid #D9D4CA; border-radius: 10px; text-decoration: none; color: #1C1A17">علی نمونه</a>
+    </div>
+  </header>
+
+  <div style="display: flex; flex-grow: 1">
+    <nav class="nav" aria-label="منوی اصلی" style="width: 240px; flex-shrink: 0; padding: 24px 16px; display: flex; flex-direction: column; gap: 4px; border-inline-end: 1.5px solid #D9D4CA">
+      <a href="#" onclick="return false" class="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>فاکتور جدید</a>
+      <a href="#" onclick="return false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l5 5v13H6z"></path><path d="M9 12h7M9 16h7"></path></svg>فاکتورها</a>
+      <a href="#" onclick="return false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>مشتریان و اقساط</a>
+      <a href="#" onclick="return false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path></svg>تنظیمات فروشگاه</a>
+      <div style="margin-top: auto; font-size: 13px; color: #5B564E; padding: 0 14px">کمک: <span class="num">۰۲۱-۰۰۰۰ (نمونه)</span></div>
+    </nav>
+
+    <main style="flex-grow: 1; padding: 32px 40px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-content: start">
+      <section aria-label="قیمت روز" style="grid-column: span 7; background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 18px; padding: 32px; display: flex; flex-direction: column; gap: 18px">
+        <h1 style="margin: 0; font-size: 24px; font-weight: 700">فاکتور جدید</h1>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+          <div style="font-size: 20px; font-weight: 500">قیمت هر گرم طلای ۱۸ عیار</div>
+          <span class="badge" style="background: #FBF0D9; color: #8A5A00">عدد نمونه — نرخ واقعی نیست</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 14px; border-inline-start: 5px solid #8A5A00; padding-inline-start: 16px">
+          <div class="num" style="font-size: 64px; font-weight: 700; line-height: 1.15; letter-spacing: -1px">۱۰٬۰۰۰٬۰۰۰</div>
+          <div style="font-size: 26px; font-weight: 500; color: #5B564E">تومان</div>
+        </div>
+        <a href="#" onclick="return false" class="btn btn-primary">شروع</a>
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 15px; color: #5B564E">
+          <span>آخرین دریافت: <span class="num" style="color: #1C1A17; font-weight: 500">۱۴:۲۱</span> · منبع: بازار (نمونه) · به‌روزرسانی هر ۳ دقیقه</span>
+          <span class="badge" style="background: #E3F3EC; color: #0F6E56">به‌روز</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; border-top: 1px solid #D9D4CA; padding-top: 16px">
+          <div style="display: flex; justify-content: space-between; font-size: 15px"><span style="color: #5B564E">طلای ۲۴ عیار</span><span class="num" style="font-weight: 500">۱۳٬۳۳۳٬۰۰۰ تومان</span></div>
+          <div style="display: flex; justify-content: space-between; font-size: 15px"><span style="color: #5B564E">دلار</span><span class="num" style="font-weight: 500">۱۰۰٬۰۰۰ تومان</span></div>
+        </div>
+        <div style="display: flex; gap: 20px; font-size: 15px">
+          <a href="#" onclick="return false" style="min-height: 44px; display: inline-flex; align-items: center; font-weight: 500; text-decoration: underline; text-underline-offset: 4px">نرخ در دسترس نیست؟ ثبت نرخ دستی</a>
+          <a href="#" onclick="return false" style="min-height: 44px; display: inline-flex; align-items: center; font-weight: 500; text-decoration: underline; text-underline-offset: 4px; color: #5B564E">فاکتور فقط متفرقه</a>
+        </div>
+      </section>
+
+      <aside aria-label="وضعیت‌های نرخ" style="grid-column: span 5; background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 4px">
+        <h2 style="margin: 0 0 8px 0; font-size: 17px; font-weight: 700">وضعیت‌های نرخ (برای تأیید نمایش)</h2>
+        <div class="st"><span class="badge" style="background: #E3F3EC; color: #0F6E56; flex-shrink: 0">به‌روز</span><span>دریافت در ۴ دقیقه اخیر. شروع با همین عدد انجام می‌شود.</span></div>
+        <div class="st"><span class="badge" style="background: #FBF0D9; color: #8A5A00; flex-shrink: 0">قدیمی</span><span>آخرین دریافت <span class="num">۱۳:۵۰</span>؛ دریافت تازه ناموفق. زمان واقعی می‌ماند و صفر نمایش داده نمی‌شود.</span></div>
+        <div class="st"><span class="badge" style="background: #E6EEFF; color: #1D4ED8; flex-shrink: 0">تغییر کرد</span><span>در لحظه شروع نرخ تازه رسید: «نرخ تازه <span class="num">۱۰٬۰۵۰٬۰۰۰</span> — ادامه با این عدد؟» قبل از ادامه پذیرش می‌گیرد.</span></div>
+        <div class="st"><span class="badge" style="background: #FBF0D9; color: #8A5A00; flex-shrink: 0">دستی</span><span>نرخ را خودتان وارد کرده‌اید. روی فاکتور «نرخ دستی» نوشته می‌شود.</span></div>
+        <div class="st"><span class="badge" style="background: #ECEAE6; color: #4A4A4A; flex-shrink: 0">آفلاین</span><span>اینترنت قطع است. آخرین نرخ دریافت‌شده <span class="num">۱۴:۲۱</span> با برچسب می‌ماند؛ صدور و ارسال تا اتصال غیرفعال است.</span></div>
+        <div class="st"><span class="badge" style="background: #FBE9E7; color: #B3261E; flex-shrink: 0">خطا</span><span>سرویس نرخ پاسخ نمی‌دهد. صفحه از بین نمی‌رود؛ نرخ دستی یا فاکتور فقط متفرقه در دسترس است.</span></div>
+      </aside>
+    </main>
+  </div>
+</div></div></figure>
+<figure id="b-DesktopItems" class="board"><figcaption>دسکتاپ — فرم چندردیفی <span class="dim">1280×860</span></figcaption><div class="frame" style="width:1280px"><div dir="rtl" style="width: 1280px; min-height: 860px; box-sizing: border-box; background: #F7F5F0; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 16px; padding: 14px 32px; background: #FFFFFF; border-bottom: 1.5px solid #D9D4CA">
+    <a href="#" onclick="return false" aria-label="بازگشت" style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 10px; color: #1C1A17; border: 1.5px solid #D9D4CA">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+    </a>
+    <h1 style="margin: 0; font-size: 22px; font-weight: 700">اقلام فاکتور</h1>
+    <span class="badge" style="background: #ECEAE6; color: #4A4A4A">پیش‌نویس ذخیره شد · ۱۴:۲۳</span>
+    <div style="margin-inline-start: auto; display: flex; align-items: center; gap: 12px; font-size: 14px">
+      <span style="color: #5B564E">نرخ معامله: <strong class="num" style="color: #1C1A17">۱۰٬۰۰۰٬۰۰۰</strong> تومان/گرم ۱۸ عیار</span>
+      <span style="color: #8A5A00">نرخ تازه بازار: <span class="num" style="font-weight: 500">۱۰٬۰۵۰٬۰۰۰</span></span>
+      <a href="#" onclick="return false" style="min-height: 40px; display: inline-flex; align-items: center; padding: 0 12px; border: 1.5px solid #0F6E56; border-radius: 8px; font-weight: 500; text-decoration: none">استفاده از نرخ جدید</a>
+    </div>
+  </header>
+
+  <div style="display: flex; gap: 24px; padding: 24px 32px; flex-grow: 1; align-items: flex-start">
+    <main style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+      <section aria-label="ردیف ۱" style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 14px">
+          <div style="font-weight: 700; font-size: 17px">ردیف ۱</div>
+          <div class="seg" role="group" aria-label="نوع ردیف"><button type="button" class="on">طلا</button><button type="button">متفرقه</button></div>
+          <a href="#" onclick="return false" style="margin-inline-start: auto; font-size: 14px; color: #B3261E; min-height: 40px; display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 4px">حذف ردیف (قابل برگشت)</a>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px">
+          <div class="f" style="grid-column: span 5"><label class="lbl" for="n1">نام کالا</label><input id="n1" class="input" type="text" value="النگو ۱۸ عیار"></div>
+          <div class="f" style="grid-column: span 3"><label class="lbl" for="w1">وزن خالص طلا</label><div class="unitbox"><input id="w1" class="num" type="text" inputmode="decimal" value="۲"><span>گرم</span></div></div>
+          <div class="f" style="grid-column: span 4"><label class="lbl" for="p1">عیار</label><select id="p1" class="input" style="font-size: 16px"><option selected="selected">۱۸ عیار (۷۵۰)</option><option>۲۱ عیار (۸۷۵)</option><option>۲۴ عیار (۱۰۰۰)</option><option>عیار دقیق…</option></select></div>
+          <div class="f" style="grid-column: span 3"><label class="lbl" for="wg1">اجرت</label><div class="unitbox"><input id="wg1" class="num" type="text" inputmode="decimal" value="۲"><span>٪</span></div></div>
+          <div class="f" style="grid-column: span 3"><label class="lbl" for="pr1">سود</label><div class="unitbox"><input id="pr1" class="num" type="text" inputmode="decimal" value="۵"><span>٪</span></div></div>
+          <div class="f" style="grid-column: span 3"><label class="lbl" for="d1">تخفیف اجرت و سود</label><div class="unitbox"><input id="d1" class="num" type="text" inputmode="decimal" value="۰"><span>تومان</span></div></div>
+          <div class="f" style="grid-column: span 3; justify-content: flex-end"><span class="lbl">مبلغ این ردیف</span><strong class="num" style="font-size: 20px; min-height: 46px; display: inline-flex; align-items: center">۲۱٬۵۶۲٬۰۰۰ <span style="font-weight: 400; font-size: 13px; color: #5B564E; margin-inline-start: 6px">تومان</span></strong></div>
+          <div class="f" style="grid-column: span 12"><label class="lbl" for="ds1">توضیح (اختیاری)</label><input id="ds1" class="input" type="text" value="" placeholder="مثلاً طرح، کد، سفارش مشتری"></div>
+        </div>
+        <div style="font-size: 13px; color: #5B564E">وزن سنگ و قسمت‌های غیرطلایی را وارد نکنید. نرخ این عیار: <span class="num">۱۰٬۰۰۰٬۰۰۰</span> تومان/گرم · ارزش طلا <span class="num">۲۰٬۰۰۰٬۰۰۰</span> · اجرت <span class="num">۴۰۰٬۰۰۰</span> · سود <span class="num">۱٬۰۲۰٬۰۰۰</span> · مالیات <span class="num">۱۴۲٬۰۰۰</span></div>
+      </section>
+
+      <section aria-label="ردیف ۲" style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 14px">
+          <div style="font-weight: 700; font-size: 17px">ردیف ۲</div>
+          <div class="seg" role="group" aria-label="نوع ردیف"><button type="button">طلا</button><button type="button" class="on">متفرقه</button></div>
+          <a href="#" onclick="return false" style="margin-inline-start: auto; font-size: 14px; color: #B3264E; min-height: 40px; display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 4px; color: #B3261E">حذف ردیف (قابل برگشت)</a>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px">
+          <div class="f" style="grid-column: span 5"><label class="lbl" for="n2">عنوان (الزامی)</label><input id="n2" class="input" type="text" value="جعبه هدیه"></div>
+          <div class="f" style="grid-column: span 4"><label class="lbl" for="pm2">قیمت ردیف (الزامی)</label><div class="unitbox"><input id="pm2" class="num" type="text" inputmode="numeric" value="۲۰۰٬۰۰۰"><span>تومان</span></div></div>
+          <div class="f" style="grid-column: span 3; justify-content: flex-end"><span class="lbl">مبلغ این ردیف</span><strong class="num" style="font-size: 20px; min-height: 46px; display: inline-flex; align-items: center">۲۰۰٬۰۰۰ <span style="font-weight: 400; font-size: 13px; color: #5B564E; margin-inline-start: 6px">تومان</span></strong></div>
+          <div class="f" style="grid-column: span 12"><label class="lbl" for="ds2">توضیح (اختیاری)</label><input id="ds2" class="input" type="text" value=""></div>
+        </div>
+        <div style="font-size: 13px; color: #5B564E">قیمت کل همین ردیف را بنویسید. برای متفرقه وزن، عیار و محاسبه طلا به کار نمی‌رود و مالیات طلا روی آن اعمال نمی‌شود.</div>
+      </section>
+
+      <a href="#" onclick="return false" class="btn btn-secondary" style="min-height: 52px; font-size: 17px">+ افزودن ردیف</a>
+    </main>
+
+    <aside aria-label="جمع فاکتور" style="width: 340px; flex-shrink: 0; background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+      <h2 style="margin: 0; font-size: 17px; font-weight: 700">جمع فاکتور (۲ ردیف)</h2>
+      <div class="line"><span class="k">ارزش طلا (<span class="num">۲</span> گرم)</span><span class="num">۲۰٬۰۰۰٬۰۰۰</span></div>
+      <div class="line"><span class="k">اجرت</span><span class="num">۴۰۰٬۰۰۰</span></div>
+      <div class="line"><span class="k">سود</span><span class="num">۱٬۰۲۰٬۰۰۰</span></div>
+      <div class="line"><span class="k">مالیات روی اجرت و سود</span><span class="num">۱۴۲٬۰۰۰</span></div>
+      <div class="line" style="border-top: 1px dashed #D9D4CA; padding-top: 8px"><span class="k">جمع طلا</span><strong class="num">۲۱٬۵۶۲٬۰۰۰</strong></div>
+      <div class="line"><span class="k">جمع متفرقه</span><strong class="num">۲۰۰٬۰۰۰</strong></div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid #1C1A17; padding-top: 10px">
+        <span style="font-weight: 700">قابل پرداخت</span>
+        <span class="num" style="font-weight: 700; font-size: 24px">۲۱٬۷۶۲٬۰۰۰ <span style="font-size: 13px; font-weight: 400; color: #5B564E">تومان</span></span>
+      </div>
+      <a href="#" onclick="return false" class="btn btn-primary" style="margin-top: 8px">مرور فاکتور</a>
+      <div style="font-size: 12px; color: #5B564E">اعداد نمونه؛ محاسبه نهایی توسط سرور انجام می‌شود.</div>
+    </aside>
+  </div>
+</div></div></figure>
+<figure id="b-DesktopReview" class="board"><figcaption>دسکتاپ — مرور فاکتور <span class="dim">1280×860</span></figcaption><div class="frame" style="width:1280px"><div dir="rtl" style="width: 1280px; min-height: 860px; box-sizing: border-box; background: #F7F5F0; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 16px; padding: 14px 32px; background: #FFFFFF; border-bottom: 1.5px solid #D9D4CA">
+    <a href="#" onclick="return false" aria-label="بازگشت به ویرایش" style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 10px; color: #1C1A17; border: 1.5px solid #D9D4CA">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+    </a>
+    <h1 style="margin: 0; font-size: 22px; font-weight: 700">مرور فاکتور</h1>
+    <span class="badge" style="background: #FBF0D9; color: #8A5A00">حالت نمونه — صدور واقعی به سرور نیاز دارد</span>
+  </header>
+
+  <div style="display: flex; gap: 24px; padding: 24px 32px; flex-grow: 1; align-items: flex-start">
+    <main style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+      <section aria-label="پیش‌نمایش فاکتور" style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 14px; padding: 28px; display: flex; flex-direction: column; gap: 16px">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <div style="font-size: 20px; font-weight: 700">طلافروشی نمونه</div>
+            <div style="font-size: 13px; color: #5B564E">تهران، خیابان نمونه، پلاک ۱ · <span class="num">۰۲۱-۰۰۰۰۰۰۰</span></div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 2px; text-align: left; font-size: 13px; color: #5B564E">
+            <div>پیش‌نویس (شماره پس از صدور)</div>
+            <div>تاریخ: <span class="num">۱۴۰۵/۰۷/۱۳</span> · ساعت <span class="num">۱۴:۲۵</span></div>
+            <div>مشتری: ثبت نشده (اختیاری)</div>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>#</th><th>شرح</th><th class="n">وزن (گرم)</th><th>عیار</th><th class="n">نرخ هر گرم</th><th class="n">اجرت</th><th class="n">سود</th><th class="n">مالیات</th><th class="n">مبلغ (تومان)</th></tr></thead>
+          <tbody>
+            <tr><td class="num">۱</td><td>النگو ۱۸ عیار</td><td class="n">۲</td><td>۱۸ (۷۵۰)</td><td class="n">۱۰٬۰۰۰٬۰۰۰</td><td class="n">۴۰۰٬۰۰۰</td><td class="n">۱٬۰۲۰٬۰۰۰</td><td class="n">۱۴۲٬۰۰۰</td><td class="n"><strong>۲۱٬۵۶۲٬۰۰۰</strong></td></tr>
+            <tr><td class="num">۲</td><td>جعبه هدیه <span style="color: #5B564E; font-size: 12px">(متفرقه، قیمت دستی)</span></td><td class="n">—</td><td>—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n"><strong>۲۰۰٬۰۰۰</strong></td></tr>
+          </tbody>
+        </table>
+        <div style="display: flex; justify-content: flex-start; gap: 24px; font-size: 13px; color: #5B564E">
+          <span>نرخ معامله: <span class="num">۱۰٬۰۰۰٬۰۰۰</span> تومان/گرم ۱۸ عیار در <span class="num">۱۴:۲۱</span> (عدد نمونه)</span>
+          <span>مالیات <span class="num">۱۰٪</span> فقط روی اجرت و سود ردیف‌های طلا (قاعده نمونه)</span>
+        </div>
+      </section>
+      <div style="display: flex; gap: 12px">
+        <a href="#" onclick="return false" class="btn btn-secondary" style="width: auto; padding: 0 24px">ویرایش ردیف‌ها</a>
+        <a href="#" onclick="return false" class="btn btn-secondary" style="width: auto; padding: 0 24px">افزودن مشتری (اختیاری)</a>
+      </div>
+    </main>
+
+    <aside aria-label="جمع و صدور" style="width: 360px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px">
+      <section style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+        <div class="line"><span class="k">ارزش طلا</span><span class="num">۲۰٬۰۰۰٬۰۰۰</span></div>
+        <div class="line"><span class="k">اجرت</span><span class="num">۴۰۰٬۰۰۰</span></div>
+        <div class="line"><span class="k">سود</span><span class="num">۱٬۰۲۰٬۰۰۰</span></div>
+        <div class="line"><span class="k">مالیات روی اجرت و سود</span><span class="num">۱۴۲٬۰۰۰</span></div>
+        <div class="line" style="border-top: 1px dashed #D9D4CA; padding-top: 8px"><span class="k">جمع طلا</span><strong class="num">۲۱٬۵۶۲٬۰۰۰</strong></div>
+        <div class="line"><span class="k">جمع متفرقه</span><strong class="num">۲۰۰٬۰۰۰</strong></div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid #1C1A17; padding-top: 10px">
+          <span style="font-weight: 700">مبلغ قابل پرداخت</span>
+          <span class="num" style="font-weight: 700; font-size: 26px">۲۱٬۷۶۲٬۰۰۰ <span style="font-size: 13px; font-weight: 400; color: #5B564E">تومان</span></span>
+        </div>
+      </section>
+      <a href="#" onclick="return false" class="btn btn-primary">صدور فاکتور</a>
+      <div style="font-size: 13px; color: #5B564E; line-height: 1.6">پس از صدور: شماره فاکتور، نرخ و مبلغ‌ها ثابت می‌مانند. سپس «چاپ»، «کپی لینک» و «ارسال پیامک» فعال می‌شوند. چاپ همیشه ممکن است؛ تمام‌شدن سهمیه لینک فقط ساخت لینک جدید را متوقف می‌کند.</div>
+    </aside>
+  </div>
+</div></div></figure>
+</div>
+<h2 class="grp">۴ — رنگ، لوگو، فونت و toolkit (پیشنهادی، در انتظار تأیید)</h2><div class="row">
+<figure id="b-Palette" class="board"><figcaption>پالت رنگ — دو نسخه <span class="dim">1280×760</span></figcaption><div class="frame" style="width:1280px"><div dir="rtl" style="width: 1280px; min-height: 760px; box-sizing: border-box; background: #F7F5F0; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; padding: 28px 32px; display: flex; flex-direction: column; gap: 16px">
+  <div style="display: flex; justify-content: space-between; align-items: baseline">
+    <h1 style="margin: 0; font-size: 22px; font-weight: 700">پالت رنگ — دو نسخه روی همان ساختار (پیشنهادی)</h1>
+    <div style="font-size: 13px; color: #5B564E">نسبت کنتراست WCAG محاسبه‌شده از کد رنگ؛ هدف متن ≥ ۴٫۵:۱. خوانایی عدد و دکمه بر تزئین مقدم است.</div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px">
+    <section style="background: #FFFFFF; border: 2px solid #0F6E56; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px">
+        <h2>A — کاغذ گرم، سبز اعتماد، طلایی تیره (پیشنهاد اول)</h2>
+        <span style="font-size: 12px; background: #E3F3EC; color: #0F6E56; padding: 3px 10px; border-radius: 999px">روی مسیر کامل موبایل و دسکتاپ</span>
+      </div>
+      <div class="sw"><span class="chip" style="background: #F7F5F0"></span><span class="hex">#F7F5F0</span><span class="use">پس‌زمینه صفحه (کاغذ گرم و کم‌خستگی)</span><span class="cr">متن 15.9:1</span></div>
+      <div class="sw"><span class="chip" style="background: #FFFFFF"></span><span class="hex">#FFFFFF</span><span class="use">کارت، فرم، فاکتور</span><span class="cr">متن 17.4:1</span></div>
+      <div class="sw"><span class="chip" style="background: #1C1A17; color: #FFFFFF">آ</span><span class="hex">#1C1A17</span><span class="use">متن اصلی، عدد قیمت، خط جمع نهایی</span><span class="cr">—</span></div>
+      <div class="sw"><span class="chip" style="background: #5B564E; color: #FFFFFF">آ</span><span class="hex">#5B564E</span><span class="use">متن فرعی، برچسب واحد، زمان دریافت</span><span class="cr">7.3:1 / 6.7:1</span></div>
+      <div class="sw"><span class="chip" style="background: #D9D4CA"></span><span class="hex">#D9D4CA</span><span class="use">خط، کادر فیلد، جداکننده</span><span class="cr">—</span></div>
+      <div class="sw"><span class="chip" style="background: #0F6E56; color: #FFFFFF">شروع</span><span class="hex">#0F6E56</span><span class="use">اقدام اصلی (شروع، صدور)، لینک، تب فعال؛ hover #0B5A46</span><span class="cr">سفید 6.2:1</span></div>
+      <div class="sw"><span class="chip" style="background: #8A5A00; color: #FFFFFF">۱۸</span><span class="hex">#8A5A00</span><span class="use">هویت طلا: نوار کنار قیمت، لوگو در متن، وضعیت «قدیمی/دستی» روی #FBF0D9</span><span class="cr">5.9:1 / 5.2:1</span></div>
+      <div class="sw"><span class="chip" style="background: #E3F3EC; color: #0F6E56">به‌روز</span><span class="hex">#E3F3EC</span><span class="use">وضعیت به‌روز / موفق (همیشه با متن و نشانه)</span><span class="cr">5.4:1</span></div>
+      <div class="sw"><span class="chip" style="background: #FBE9E7; color: #B3261E">خطا</span><span class="hex">#B3261E</span><span class="use">خطا، حذف؛ پس‌زمینه #FBE9E7</span><span class="cr">6.5:1 / 5.6:1</span></div>
+      <div class="sw"><span class="chip" style="background: #E6EEFF; color: #1D4ED8">تغییر</span><span class="hex">#1D4ED8</span><span class="use">اطلاع/تغییر نرخ، حلقه فوکوس؛ پس‌زمینه #E6EEFF</span><span class="cr">6.7:1 / 5.8:1</span></div>
+      <div class="sw"><span class="chip" style="background: #ECEAE6; color: #4A4A4A">آفلاین</span><span class="hex">#4A4A4A</span><span class="use">آفلاین / غیرفعال؛ پس‌زمینه #ECEAE6</span><span class="cr">7.4:1</span></div>
+      <div class="sw"><span class="chip" style="background: #1C1A17; color: #D4A017">●</span><span class="hex">#D4A017</span><span class="use">طلایی روشن فقط در لوگو روی زمینه تیره؛ هرگز برای متن روی سفید</span><span class="cr">7.3:1 روی تیره</span></div>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px">
+        <h2>B — زمینه سرد، سرمه‌ای، طلایی</h2>
+        <span style="font-size: 12px; background: #E6EEFF; color: #243B6B; padding: 3px 10px; border-radius: 999px">فقط روی صفحه نرخ/شروع نشان داده شده</span>
+      </div>
+      <div class="sw"><span class="chip" style="background: #F4F6FA"></span><span class="hex">#F4F6FA</span><span class="use">پس‌زمینه صفحه (خنثی سرد)</span><span class="cr">متن 16.1:1</span></div>
+      <div class="sw"><span class="chip" style="background: #FFFFFF"></span><span class="hex">#FFFFFF</span><span class="use">کارت، فرم، فاکتور</span><span class="cr">متن 17.4:1</span></div>
+      <div class="sw"><span class="chip" style="background: #1C1A17; color: #FFFFFF">آ</span><span class="hex">#1C1A17</span><span class="use">متن اصلی و عدد (مشترک با A)</span><span class="cr">—</span></div>
+      <div class="sw"><span class="chip" style="background: #5B564E; color: #FFFFFF">آ</span><span class="hex">#5B564E</span><span class="use">متن فرعی (مشترک با A)</span><span class="cr">6.7:1</span></div>
+      <div class="sw"><span class="chip" style="background: #D3D8E2"></span><span class="hex">#D3D8E2</span><span class="use">خط و کادر (سردتر)</span><span class="cr">—</span></div>
+      <div class="sw"><span class="chip" style="background: #243B6B; color: #FFFFFF">شروع</span><span class="hex">#243B6B</span><span class="use">اقدام اصلی، لینک، تب فعال؛ hover #1A2C52</span><span class="cr">سفید 11.0:1</span></div>
+      <div class="sw"><span class="chip" style="background: #9A6700; color: #FFFFFF">۱۸</span><span class="hex">#9A6700</span><span class="use">هویت طلا: نوار کنار قیمت، برچسب نمونه/دستی روی #FBF0D9</span><span class="cr">4.9:1</span></div>
+      <div class="sw"><span class="chip" style="background: #E3F3EC; color: #1B7A3F">به‌روز</span><span class="hex">#1B7A3F</span><span class="use">موفق / به‌روز (سبز جدا از اقدام اصلی)</span><span class="cr">5.4:1 / 4.7:1</span></div>
+      <div class="sw"><span class="chip" style="background: #FBE9E7; color: #B3261E">خطا</span><span class="hex">#B3261E</span><span class="use">خطا (مشترک با A)</span><span class="cr">6.5:1</span></div>
+      <div class="sw"><span class="chip" style="background: #E6EEFF; color: #1D4ED8">تغییر</span><span class="hex">#1D4ED8</span><span class="use">اطلاع / فوکوس (مشترک با A)</span><span class="cr">6.7:1</span></div>
+      <div class="sw"><span class="chip" style="background: #ECEAE6; color: #4A4A4A">آفلاین</span><span class="hex">#4A4A4A</span><span class="use">آفلاین / غیرفعال (مشترک با A)</span><span class="cr">7.4:1</span></div>
+      <div style="font-size: 13px; color: #5B564E; margin-top: 8px; line-height: 1.6">تفاوت B با A: اقدام اصلی سرمه‌ای است و سبز فقط برای «موفق/به‌روز» می‌ماند؛ تفکیک رنگی وضعیت از دکمه روشن‌تر است، اما زمینه سرد حس «برگه کاغذی» کمتری دارد. هر دو نسخه حالت روشن‌اند؛ حالت تیره در این مرحله پیشنهاد نمی‌شود.</div>
+    </section>
+  </div>
+
+  <div style="font-size: 13px; color: #5B564E; line-height: 1.7">قواعد مشترک: وضعیت‌ها همیشه با نوشته و نشانه همراه رنگ؛ سبز/قرمز به‌تنهایی معیار نیست. طلایی هیچ‌وقت رنگ متن روی سفید نمی‌شود. حلقه فوکوس ۳px آبی با فاصله ۲px از عنصر. این پالت پیشنهادی است و تا تأیید مالک در <span dir="ltr">docs/design/UI_APPROVED_DECISIONS.md</span> ثبت نمی‌شود.</div>
+</div></div></figure>
+<figure id="b-Logo" class="board"><figcaption>لوگو / wordmark پیشنهادی <span class="dim">1280×760</span></figcaption><div class="frame" style="width:1280px"><div dir="rtl" style="width: 1280px; min-height: 760px; box-sizing: border-box; background: #F7F5F0; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; padding: 28px 32px; display: flex; flex-direction: column; gap: 16px">
+  <div style="display: flex; justify-content: space-between; align-items: baseline">
+    <h1 style="margin: 0; font-size: 22px; font-weight: 700">لوگو / wordmark «طلاتا» — دو گزینه پیشنهادی (لوگوی موجودی در ریپو یافت نشد)</h1>
+    <div style="font-size: 13px; color: #5B564E">املای فارسی برند طبق اعلام مالک: «طلاتا» · لاتین: Talata · بدون الهام از برند فروشگاه قبلی</div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px">
+    <section style="background: #FFFFFF; border: 2px solid #0F6E56; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <h2>گزینه ۱ — نشان ترازو + wordmark</h2>
+        <span style="font-size: 12px; background: #E3F3EC; color: #0F6E56; padding: 3px 10px; border-radius: 999px">پیشنهاد اول</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 18px; padding: 18px; border: 1px solid #D9D4CA; border-radius: 12px">
+        <span class="mark" style="width: 96px; height: 96px; background: #1C1A17; color: #D4A017">
+          <svg width="68" height="68" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v26"></path><path d="M8 13h24"></path><path d="M8 13l-5 11h10z"></path><path d="M32 13l-5 11h10z"></path><path d="M13 33h14"></path></svg>
+        </span>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span class="wm" style="font-size: 56px">طلاتا</span>
+          <span class="lat" style="font-size: 14px; color: #8A5A00">Talata</span>
+        </div>
+      </div>
+      <div class="cap">ترازو = وزن‌کردن طلا، انصاف در حساب. دو کفه ساده با خط ضخیم؛ طلایی روشن فقط روی کاشی تیره. مناسب آیکون اپ/PWA و مهر چاپی.</div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+        <div class="cell">
+          <span class="mark" style="width: 64px; height: 64px; background: #1C1A17; color: #FFFFFF"><svg width="44" height="44" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v26"></path><path d="M8 13h24"></path><path d="M8 13l-5 11h10z"></path><path d="M32 13l-5 11h10z"></path><path d="M13 33h14"></path></svg></span>
+          <span class="cap">تک‌رنگ چاپ (مشکی)</span>
+        </div>
+        <div class="cell">
+          <span style="display: inline-flex; align-items: center; gap: 6px; color: #1C1A17"><svg width="28" height="28" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v26"></path><path d="M8 13h24"></path><path d="M8 13l-5 11h10z"></path><path d="M32 13l-5 11h10z"></path><path d="M13 33h14"></path></svg><span class="wm" style="font-size: 24px">طلاتا</span></span>
+          <span class="cap">خطی، سربرگ فاکتور</span>
+        </div>
+        <div class="cell">
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span class="mark" style="width: 24px; height: 24px; background: #1C1A17; color: #D4A017"><svg width="17" height="17" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v26"></path><path d="M8 13h24"></path><path d="M8 13l-5 11h10z"></path><path d="M32 13l-5 11h10z"></path><path d="M13 33h14"></path></svg></span><span class="wm" style="font-size: 16px">طلاتا</span></span>
+          <span class="cap">۲۴px — نوار بالا</span>
+        </div>
+        <div class="cell">
+          <span class="mark" style="width: 16px; height: 16px; background: #1C1A17; color: #D4A017; border-radius: 3px"><svg width="12" height="12" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v26"></path><path d="M8 13h24"></path><path d="M8 13l-5 11h10z"></path><path d="M32 13l-5 11h10z"></path><path d="M13 33h14"></path></svg></span>
+          <span class="cap">۱۶px — favicon</span>
+        </div>
+      </div>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <h2>گزینه ۲ — کاشی «ط» + wordmark</h2>
+        <span style="font-size: 12px; background: #ECEAE6; color: #4A4A4A; padding: 3px 10px; border-radius: 999px">گزینه دوم</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 18px; padding: 18px; border: 1px solid #D9D4CA; border-radius: 12px">
+        <span class="mark" style="width: 96px; height: 96px; background: #0F6E56; color: #FFFFFF; font-size: 64px; font-weight: 700; line-height: 1; padding-bottom: 6px">ط</span>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <span class="wm" style="font-size: 56px">طلاتا</span>
+          <span class="lat" style="font-size: 14px; color: #5B564E">Talata</span>
+        </div>
+      </div>
+      <div class="cap">حرف اول «طلا» روی کاشی رنگ اقدام اصلی (در پالت B سرمه‌ای). ساده‌ترین ساخت، خوانا در هر اندازه، اما کمتر اختصاصی و وابسته به فونت.</div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+        <div class="cell">
+          <span class="mark" style="width: 64px; height: 64px; background: #1C1A17; color: #FFFFFF; font-size: 42px; font-weight: 700; line-height: 1; padding-bottom: 4px">ط</span>
+          <span class="cap">تک‌رنگ چاپ (مشکی)</span>
+        </div>
+        <div class="cell">
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span class="mark" style="width: 28px; height: 28px; border: 2px solid #1C1A17; color: #1C1A17; font-size: 18px; font-weight: 700; line-height: 1; padding-bottom: 2px">ط</span><span class="wm" style="font-size: 24px">طلاتا</span></span>
+          <span class="cap">خطی، سربرگ فاکتور</span>
+        </div>
+        <div class="cell">
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span class="mark" style="width: 24px; height: 24px; background: #0F6E56; color: #FFFFFF; font-size: 15px; font-weight: 700; line-height: 1; padding-bottom: 2px">ط</span><span class="wm" style="font-size: 16px">طلاتا</span></span>
+          <span class="cap">۲۴px — نوار بالا</span>
+        </div>
+        <div class="cell">
+          <span class="mark" style="width: 16px; height: 16px; background: #0F6E56; color: #FFFFFF; font-size: 11px; font-weight: 700; line-height: 1; border-radius: 3px; padding-bottom: 1px">ط</span>
+          <span class="cap">۱۶px — favicon</span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div style="font-size: 13px; color: #5B564E; line-height: 1.7">هر دو گزینه «پیشنهادی» هستند و تا تأیید، لوگوی رسمی نیستند. فایل‌های SVG اولیه در <span dir="ltr">docs/design/proposed/</span> نگه داشته می‌شوند. پس از انتخاب: نسخه نهایی با فاصله امن، ابعاد آیکون PWA (۱۹۲/۵۱۲)، favicon و نسخه چاپ تک‌رنگ تولید می‌شود. در پلن رایگان، برند طلاتا در پایین فاکتور نمایش داده می‌شود؛ پلن‌های بالاتر لوگوی فروشگاه (تصویر بررسی‌شده) را می‌گذارند.</div>
+</div></div></figure>
+<figure id="b-Type" class="board"><figcaption>فونت فارسی و toolkit <span class="dim">1280×760</span></figcaption><div class="frame" style="width:1280px"><div dir="rtl" style="width: 1280px; min-height: 760px; box-sizing: border-box; background: #F7F5F0; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; padding: 28px 32px; display: flex; flex-direction: column; gap: 16px">
+  <h1 style="margin: 0; font-size: 22px; font-weight: 700">فونت فارسی و toolkit — پیشنهاد برای تأیید</h1>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px">
+    <section style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <h2>فونت: Vazirmatn (مجوز SIL OFL 1.1)</h2>
+        <span style="font-size: 12px; background: #E3F3EC; color: #0F6E56; padding: 3px 10px; border-radius: 999px">self-host، بدون CDN خارجی</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px; border: 1px dashed #D9D4CA; border-radius: 10px; padding: 12px 14px">
+        <div class="num" style="font-size: 44px; font-weight: 700; line-height: 1.2">۲۱٬۷۶۲٬۰۰۰ <span style="font-size: 18px; font-weight: 500; color: #5B564E">تومان</span></div>
+        <div style="font-size: 20px; font-weight: 500">قیمت هر گرم طلای ۱۸ عیار</div>
+        <div style="font-size: 16px">وزن خالص طلا را به گرم وارد کنید؛ وزن سنگ و قسمت‌های غیرطلایی را وارد نکنید.</div>
+        <div style="font-size: 14px; color: #5B564E">آخرین نرخ دریافت‌شده: <span class="num">۱۴:۲۱</span> · به‌روزرسانی هر ۳ دقیقه · <span dir="ltr" class="num">0123456789</span> · <span class="num">۰۱۲۳۴۵۶۷۸۹</span></div>
+      </div>
+      <table>
+        <thead><tr><th>مورد</th><th>پیشنهاد</th></tr></thead>
+        <tbody>
+          <tr><td>وزن‌ها</td><td>۴۰۰ متن، ۵۰۰ برچسب/دکمه فرعی، ۷۰۰ عدد قیمت و اقدام اصلی (فایل متغیر یک وزن‌مجموعه)</td></tr>
+          <tr><td>اندازه پایه</td><td><span class="num">۱۶px</span> متن، <span class="num">۱۴px</span> کمکی (حداقل)، <span class="num">۴۴–۶۴px</span> قیمت؛ ارقام هم‌عرض (tabular) برای ستون مبلغ</td></tr>
+          <tr><td>حجم اندازه‌گیری‌شده</td><td>زیرمجموعه عربی/فارسی متغیر <span class="num" dir="ltr">45.2 KiB</span> + لاتین پایه <span class="num" dir="ltr">33.7 KiB</span> = حدود <span class="num" dir="ltr">79 KiB</span> (فایل‌های عمومی Google Fonts v16، دانلود ۱۴۰۵/۰۷/۱۳). بودجه فونت ضروری: ≤ <span class="num" dir="ltr">80 KiB</span>.</td></tr>
+          <tr><td>برنامه self-host</td><td>ساخت زیرمجموعه خودمان از نسخه رسمی: فارسی/عربی + ارقام فارسی و لاتین + ASCII پایه، حذف لاتین گسترده؛ preload فقط فایل فارسی؛ <span dir="ltr">font-display: swap</span> با fallback «Tahoma/Segoe UI» و اندازه‌گیری دوباره قبل از ادعای بودجه.</td></tr>
+          <tr><td>جایگزین در صورت رد</td><td>Vazir (نسخه قدیمی‌تر همان خانواده) یا Sahel؛ هر دو OFL. فونت لاتین تزئینی جداگانه لازم نیست.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section style="background: #FFFFFF; border: 1.5px solid #D9D4CA; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <h2>Toolkit: مسیر A — PrimeVue Unstyled + طراحی اختصاصی</h2>
+        <span style="font-size: 12px; background: #FBF0D9; color: #8A5A00; padding: 3px 10px; border-radius: 999px">مشروط به سنجش حجم؛ هنوز نصب نشده</span>
+      </div>
+      <table>
+        <thead><tr><th>مورد</th><th>پیشنهاد</th></tr></thead>
+        <tbody>
+          <tr><td>Stack</td><td>Laravel + Inertia + Vue 3 + TypeScript + Vite؛ یک toolkit اصلی، بدون Next.js جدا</td></tr>
+          <tr><td>چرا PrimeVue Unstyled</td><td>رفتار آماده و دسترس‌پذیر برای Select، Dialog، Toast، DataTable و فرم‌ها با import تک‌کامپوننت؛ RTL مستند؛ ظاهر کاملاً از توکن‌های طلاتا می‌آید نه theme آماده</td></tr>
+          <tr><td>چه چیزهایی از آن نمی‌گیریم</td><td>Button، فیلد عددی با واحد، InvoiceRow، TotalSummary، نوار وضعیت نرخ: اختصاصی و سبک نوشته می‌شوند تا بسته ورود/نرخ کوچک بماند</td></tr>
+          <tr><td>بودجه حجم (قرارداد)</td><td>ورود و نرخ/شروع ≤ <span class="num" dir="ltr">150 KiB</span> JS gzip و ≤ <span class="num" dir="ltr">300 KiB</span> کل؛ فرم فاکتور ≤ <span class="num" dir="ltr">220/400 KiB</span>؛ فاکتور عمومی سرور-رندر ≤ <span class="num" dir="ltr">20 KiB</span> JS</td></tr>
+          <tr><td>شرط قفل‌شدن انتخاب</td><td>یک برش production (ورود + نرخ/شروع + فاکتور ترکیبی) ساخته و با پروفایل A/B اندازه‌گیری شود؛ رد بودجه = بازبینی با Reka UI (گزینه B) با همان معیار</td></tr>
+          <tr><td>ابزار طراحی</td><td>Impeccable فقط راهنمای نقد/ساده‌سازی در زمان توسعه؛ وابستگی مرورگر نمی‌شود. UI UX Pro Max حداکثر منبع کمکی</td></tr>
+          <tr><td>آیکون</td><td>SVG خطی انتخابی (مثل همین اتود)، inline یا sprite محلی؛ بدون بسته آیکون کامل</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size: 13px; color: #5B564E; line-height: 1.6">هیچ عدد سرعت یا حجم bundle برای کتابخانه‌ها در این مرحله اندازه‌گیری نشده است؛ فقط حجم فونت واقعاً سنجیده شده. نصب پس از تأیید مالک با نسخه و مجوز ثبت‌شده انجام می‌شود.</div>
+    </section>
+  </div>
+
+  <div style="font-size: 13px; color: #5B564E; line-height: 1.7">توکن‌های پایه پس از تأیید: فاصله <span class="num" dir="ltr">4/8/12/16/24/32</span>، گوشه <span class="num" dir="ltr">8/10/12/16</span>، خط <span class="num" dir="ltr">1.5px</span>، هدف لمس ≥ <span class="num" dir="ltr">44px</span> (اقدام اصلی <span class="num" dir="ltr">56–64px</span>)، حلقه فوکوس <span class="num" dir="ltr">3px</span> آبی. حالت روشن تنها حالت فاز ۱.</div>
+</div></div></figure>
+</div>
+<h2 class="grp">۵ — فاکتور چاپی A4 / نمای مشتری</h2><div class="row">
+<figure id="b-Print" class="board"><figcaption>۶ فاکتور چاپی / نمای مشتری <span class="dim">794×1123</span></figcaption><div class="frame" style="width:794px"><div dir="rtl" style="width: 794px; min-height: 1123px; box-sizing: border-box; background: #FFFFFF; color: #1C1A17; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 12.5pt; line-height: 1.6; padding: 48px 52px; display: flex; flex-direction: column; gap: 18px">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1C1A17; padding-bottom: 14px">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="font-size: 20pt; font-weight: 700">طلافروشی نمونه</div>
+      <div style="font-size: 11pt">تهران، خیابان نمونه، پلاک ۱ · تلفن <span class="num">۰۲۱-۰۰۰۰۰۰۰</span></div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px; text-align: left; font-size: 11pt">
+      <div style="font-size: 16pt; font-weight: 700">فاکتور فروش</div>
+      <div>شماره: <span class="num">۱۴۰۵-۰۰۱۲</span> (نمونه)</div>
+      <div>تاریخ: <span class="num">۱۴۰۵/۰۷/۱۳</span> · ساعت <span class="num">۱۴:۲۵</span></div>
+    </div>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; font-size: 11.5pt">
+    <div>خریدار: <strong>ثبت نشده</strong></div>
+    <div>فروشنده: علی نمونه</div>
+  </div>
+
+  <table>
+    <thead><tr><th>ردیف</th><th>شرح</th><th class="n">وزن (گرم)</th><th>عیار</th><th class="n">اجرت</th><th class="n">سود</th><th class="n">مالیات</th><th class="n">مبلغ (تومان)</th></tr></thead>
+    <tbody>
+      <tr><td class="num">۱</td><td>النگو ۱۸ عیار</td><td class="n">۲</td><td>۱۸ (۷۵۰)</td><td class="n">۴۰۰٬۰۰۰</td><td class="n">۱٬۰۲۰٬۰۰۰</td><td class="n">۱۴۲٬۰۰۰</td><td class="n"><strong>۲۱٬۵۶۲٬۰۰۰</strong></td></tr>
+      <tr><td class="num">۲</td><td>جعبه هدیه</td><td class="n">—</td><td>—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n"><strong>۲۰۰٬۰۰۰</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px">
+    <div style="font-size: 11pt; line-height: 1.7; max-width: 360px">
+      <div>نرخ مبنا: هر گرم طلای ۱۸ عیار <span class="num">۱۰٬۰۰۰٬۰۰۰</span> تومان، ثبت‌شده در <span class="num">۱۴:۲۱</span> (عدد نمونه).</div>
+      <div>مالیات <span class="num">۱۰٪</span> فقط روی اجرت و سود ردیف‌های طلا محاسبه شده است (قاعده نمونه، تأیید رسمی نشده).</div>
+      <div>قیمت ردیف متفرقه به‌صورت دستی ثبت شده است.</div>
+    </div>
+    <div style="width: 300px; display: flex; flex-direction: column">
+      <div class="sum"><span>ارزش طلا (<span class="num">۲</span> گرم)</span><span class="num">۲۰٬۰۰۰٬۰۰۰</span></div>
+      <div class="sum"><span>اجرت</span><span class="num">۴۰۰٬۰۰۰</span></div>
+      <div class="sum"><span>سود</span><span class="num">۱٬۰۲۰٬۰۰۰</span></div>
+      <div class="sum"><span>مالیات</span><span class="num">۱۴۲٬۰۰۰</span></div>
+      <div class="sum" style="border-top: 1px solid #1C1A17"><span>جمع طلا</span><strong class="num">۲۱٬۵۶۲٬۰۰۰</strong></div>
+      <div class="sum"><span>جمع متفرقه</span><strong class="num">۲۰۰٬۰۰۰</strong></div>
+      <div class="sum" style="border-top: 2px solid #1C1A17; margin-top: 4pt; padding-top: 6pt; font-size: 15pt; font-weight: 700"><span>مبلغ قابل پرداخت</span><span class="num">۲۱٬۷۶۲٬۰۰۰ تومان</span></div>
+    </div>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; margin-top: 24px; font-size: 11pt">
+    <div style="display: flex; flex-direction: column; gap: 40px"><span>مهر و امضای فروشنده</span><span style="border-top: 1px solid #1C1A17; width: 180px"></span></div>
+    <div style="display: flex; flex-direction: column; gap: 40px"><span>امضای خریدار</span><span style="border-top: 1px solid #1C1A17; width: 180px"></span></div>
+  </div>
+
+  <div style="margin-top: auto; border-top: 1px solid #D9D4CA; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 10pt; color: #5B564E">
+    <span style="display: inline-flex; align-items: center; gap: 6px">
+      <svg width="18" height="18" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v26"></path><path d="M8 13h24"></path><path d="M8 13l-5 11h10z"></path><path d="M32 13l-5 11h10z"></path><path d="M13 33h14"></path></svg>
+      صادرشده با طلاتا · talata.ir (در پلن رایگان نمایش داده می‌شود)
+    </span>
+    <span>این سند پس از صدور تغییر نمی‌کند؛ اصلاح مالی فقط با فاکتور جایگزین.</span>
+  </div>
+</div></div></figure>
+</div>
+</body>
+</html>

@@ -14,7 +14,8 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [x] Owner-required 180-second gold refresh and large-price/Start invoice entry documented.
 - [x] Rapid UI execution prompt written with a wireframe/visual-identity approval stage before detailed implementation.
 - [ ] Owner selects design skill and component toolkit.
-- [ ] Overall wireframe/visual proposal shown and colors/logo/font/toolkit explicitly approved by owner.
+- [x] Overall wireframe/visual proposal shown (`docs/design/`, Stage A package, 2026-10-05).
+- [ ] Colors/logo/font/toolkit explicitly approved by owner (see `docs/design/STAGE_A_REVIEW_REQUEST.md`).
 - [ ] Approved design decisions recorded and detailed UI contract finalized.
 - [ ] Owner requests implementation work.
 
