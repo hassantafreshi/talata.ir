@@ -1,0 +1,369 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://talata.ir/schemas/invoice-layout.v1.json",
+  "title": "Talata InvoiceLayout settings (schema_version 1)",
+  "description": "Allowlisted, versioned layout settings stored on InvoiceLayout and snapshotted at issuance. Everything not listed here is rejected server-side. Protected invariants (QR at physical upper-left, required blocks always visible, essential item/total data never hidden) are enforced by the renderer and by the conditional rules below. Status: proposed contract for Phase 1 implementation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "template_id",
+    "template_version",
+    "blocks",
+    "logo",
+    "items_table",
+    "summary",
+    "typography",
+    "print"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "template_id": {
+      "enum": [
+        "simple_readable",
+        "shop"
+      ],
+      "description": "simple_readable = «ساده و خوانا» (also the fixed Free layout); shop = «فروشگاهی»."
+    },
+    "template_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "blocks": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/$defs/block"
+      },
+      "description": "Business-information blocks. Order within an area follows array order. Required kinds shop_name, contact_primary and address must appear exactly once and be visible."
+    },
+    "logo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "visible",
+        "size"
+      ],
+      "properties": {
+        "visible": {
+          "type": "boolean",
+          "description": "Rendering also requires the invoice.shop_logo capability snapshot and an uploaded validated raster logo; otherwise the Talata mark is used on Free and nothing on Basic/Professional."
+        },
+        "size": {
+          "enum": [
+            "small",
+            "medium",
+            "large"
+          ]
+        }
+      }
+    },
+    "items_table": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "columns"
+      ],
+      "properties": {
+        "columns": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 3,
+          "items": {
+            "enum": [
+              "row_no",
+              "name",
+              "description",
+              "weight_g",
+              "purity",
+              "unit_rate",
+              "wage",
+              "profit",
+              "vat",
+              "amount"
+            ]
+          },
+          "description": "Column order. name and amount are mandatory; weight_g and purity are mandatory whenever the invoice contains a GOLD row (renderer re-adds them if omitted). description, unit_rate, wage, profit and vat are optional. Changing columns never changes any amount."
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "show_component_breakdown",
+        "public_note",
+        "signature_box"
+      ],
+      "properties": {
+        "show_component_breakdown": {
+          "type": "boolean",
+          "description": "Show metal/wage/profit/VAT lines for GOLD rows under the items. The payable total with its unit is always shown."
+        },
+        "public_note": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "visible",
+            "text"
+          ],
+          "properties": {
+            "visible": {
+              "type": "boolean"
+            },
+            "text": {
+              "type": "string",
+              "maxLength": 300,
+              "description": "Public end note printed on every invoice. Internal notes never flow here."
+            }
+          }
+        },
+        "signature_box": {
+          "type": "boolean",
+          "description": "Empty seller stamp/signature and buyer signature boxes. Implies no electronic or legal signature."
+        }
+      }
+    },
+    "typography": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text_size",
+        "density",
+        "accent",
+        "dividers"
+      ],
+      "properties": {
+        "text_size": {
+          "enum": [
+            "normal",
+            "large"
+          ]
+        },
+        "density": {
+          "enum": [
+            "comfortable",
+            "compact"
+          ]
+        },
+        "accent": {
+          "enum": [
+            "ink",
+            "gold_deep",
+            "emerald",
+            "burgundy"
+          ],
+          "description": "Accent for the header rule and table head only. ink=#15171A, gold_deep=#8A5A00, emerald=#0B3B2E, burgundy=#4A1326; all pass 4.5:1 on white and print black-and-white safely. Light gold is never allowed as text."
+        },
+        "section_spacing": {
+          "enum": [
+            "normal",
+            "tight"
+          ],
+          "default": "normal"
+        },
+        "dividers": {
+          "type": "boolean"
+        }
+      }
+    },
+    "print": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "paper",
+        "orientation",
+        "margins",
+        "repeat_header",
+        "repeat_footer"
+      ],
+      "properties": {
+        "paper": {
+          "const": "A4"
+        },
+        "orientation": {
+          "enum": [
+            "portrait",
+            "landscape"
+          ]
+        },
+        "margins": {
+          "enum": [
+            "normal",
+            "narrow"
+          ],
+          "description": "normal ≈ 12 mm, narrow ≈ 8 mm; both keep the QR quiet zone and never push the QR off the first-page header."
+        },
+        "repeat_header": {
+          "type": "boolean",
+          "description": "Compact header (shop name + invoice number) on pages after the first."
+        },
+        "repeat_footer": {
+          "type": "boolean"
+        }
+      }
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Optimistic concurrency version of the stored settings; server increments on save and rejects stale writes."
+    },
+    "$comment": {
+      "type": "string",
+      "maxLength": 600,
+      "description": "Free-text note for humans; ignored by the renderer."
+    }
+  },
+  "allOf": [
+    {
+      "description": "Required blocks are always visible.",
+      "properties": {
+        "blocks": {
+          "items": {
+            "if": {
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "shop_name",
+                    "contact_primary",
+                    "address"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "visible": {
+                  "const": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Required blocks present (shop_name, contact_primary, address).",
+      "properties": {
+        "blocks": {
+          "allOf": [
+            {
+              "contains": {
+                "properties": {
+                  "kind": {
+                    "const": "shop_name"
+                  }
+                }
+              }
+            },
+            {
+              "contains": {
+                "properties": {
+                  "kind": {
+                    "const": "contact_primary"
+                  }
+                }
+              }
+            },
+            {
+              "contains": {
+                "properties": {
+                  "kind": {
+                    "const": "address"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "name and amount columns are mandatory.",
+      "properties": {
+        "items_table": {
+          "properties": {
+            "columns": {
+              "allOf": [
+                {
+                  "contains": {
+                    "const": "name"
+                  }
+                },
+                {
+                  "contains": {
+                    "const": "amount"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "area",
+        "align",
+        "visible"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "shop_name",
+            "contact_primary",
+            "contact_mobile_extra",
+            "address",
+            "website",
+            "social",
+            "license_union",
+            "license_online"
+          ],
+          "description": "contact_primary renders the landline when a valid one exists, otherwise the business mobile (never hidden). contact_mobile_extra additionally shows the business mobile next to a landline. social requires ref = ShopProfile social entry id; one block per entry."
+        },
+        "ref": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Entry id for social blocks; omitted for all other kinds."
+        },
+        "area": {
+          "enum": [
+            "header",
+            "footer"
+          ]
+        },
+        "align": {
+          "enum": [
+            "right",
+            "center",
+            "left"
+          ],
+          "description": "Physical alignment inside the area. The physical upper-left of the header is reserved for the verification QR: a left-aligned header block renders beside/below the QR, never over it."
+        },
+        "visible": {
+          "type": "boolean"
+        }
+      },
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "social"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "ref"
+        ]
+      }
+    }
+  }
+}

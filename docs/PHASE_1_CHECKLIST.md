@@ -19,6 +19,7 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [ ] Owner selects design skill and component toolkit.
 - [x] Overall wireframe/visual proposal shown (`docs/design/`, Stage A package, 2026-10-05).
 - [ ] Colors/logo/font/toolkit explicitly approved by owner (see `docs/design/STAGE_A_REVIEW_REQUEST.md`).
+- [x] Design tokens, invoice layout schema v1 with Simple/Shop presets, sample snapshot, reference renders, adapter/calculation contracts and the UI build spec saved under `docs/design/` (proposed, 2026-10-05).
 - [ ] Approved design decisions recorded and detailed UI contract finalized.
 - [ ] Owner requests implementation work.
 

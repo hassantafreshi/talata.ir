@@ -1,0 +1,88 @@
+{
+  "$comment": "Sample issued-invoice snapshot used by the layout editor preview, reference renders and screenshots. All values are SAMPLE data (برچسب «نمونه» الزامی است). Money is IRR as decimal strings (10 IRR = 1 toman); display_currency decides the printed unit. Matches the worked example in docs/prompts/PHASE_1_MASTER_PROMPT.md §7 plus the MISC row example.",
+  "is_sample": true,
+  "snapshot_version": 1,
+  "invoice": {
+    "number": "1405-0012",
+    "status": "FINALIZED",
+    "issued_at_local": "1405/07/13 14:25",
+    "issued_at_utc": "2026-10-05T10:55:00Z",
+    "seller_user_display": "علی نمونه",
+    "display_currency": "TOMAN",
+    "rounding_policy": "IRR_LINE_HALF_UP_V1"
+  },
+  "shop": {
+    "name": "طلافروشی نمونه",
+    "address": "تهران، خیابان نمونه، پلاک ۱",
+    "landline": "021-0000000",
+    "business_mobile": "09120000000",
+    "website": "https://talata-sample.ir",
+    "socials": [{"id": "social_instagram_1", "network": "instagram", "handle": "@sample.gold"}],
+    "license_union": "1234",
+    "license_online": "5678",
+    "logo_asset_version": null,
+    "branding": {"hide_provider_brand": false, "shop_logo": false}
+  },
+  "customer": {
+    "name": "خانم رضایی",
+    "mobile": "09120000000",
+    "$comment": "Printed on merchant/customer copies; NEVER included in the public verification DTO."
+  },
+  "rate": {
+    "asset": "GOLD_18",
+    "reference_18k_price_irr_per_g": "100000000",
+    "quote_time_local": "14:21",
+    "source": "market_sample",
+    "freshness": "FRESH",
+    "override": false
+  },
+  "items": [
+    {
+      "row_id": "r1",
+      "order": 1,
+      "item_type": "GOLD",
+      "name": "النگو ۱۸ عیار",
+      "description": "طرح نمونه",
+      "net_weight_g": "2",
+      "karat_label": "۱۸ عیار (۷۵۰)",
+      "purity_ppt": "750",
+      "effective_rate_irr_per_g": "100000000",
+      "metal_value_irr": "200000000",
+      "wage": {"type": "PERCENT", "rate_percent": "2", "amount_irr": "4000000"},
+      "profit": {"rate_percent": "5", "amount_irr": "10200000"},
+      "commission_irr": "0",
+      "discount": {"scope": "TAXABLE_COMPONENTS", "requested_irr": "0", "allocation": {"wage": "0", "profit": "0", "commission": "0"}},
+      "taxable_base_irr": "14200000",
+      "vat": {"rule_id": "VAT_DEMO_GOLD_SERVICES", "rule_version": 1, "rate_percent": "10", "amount_irr": "1420000"},
+      "row_total_irr": "215620000",
+      "formula_version": "GOLD_IR_V1"
+    },
+    {
+      "row_id": "r2",
+      "order": 2,
+      "item_type": "MISC",
+      "name": "جعبه هدیه",
+      "description": "",
+      "manual_price_irr": "2000000",
+      "price_basis": "ROW_TOTAL",
+      "row_total_irr": "2000000",
+      "formula_version": "MANUAL_LINE_V1"
+    }
+  ],
+  "totals": {
+    "gold_metal_irr": "200000000",
+    "gold_wage_irr": "4000000",
+    "gold_profit_irr": "10200000",
+    "gold_vat_irr": "1420000",
+    "gold_rows_total_irr": "215620000",
+    "misc_rows_total_irr": "2000000",
+    "payable_total_irr": "217620000",
+    "payable_total_display": "۲۱٬۷۶۲٬۰۰۰ تومان"
+  },
+  "verification": {
+    "url": "https://talata.ir/v/SAMPLE-TOKEN-NOT-REAL",
+    "qr_svg": null,
+    "$comment": "Drafts carry no verification token or QR. The real QR is generated server-side (first-party), black on white, 4-module quiet zone, ~30×30 mm print area."
+  },
+  "layout_snapshot": {"template_id": "shop", "template_version": 1, "schema_version": 1}
+}

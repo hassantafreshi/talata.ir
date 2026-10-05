@@ -1,0 +1,58 @@
+{
+  "$comment": "Shared calculation fixtures for the browser preview and the server Pricing service (GOLD_IR_V1, MANUAL_LINE_V1, rounding IRR_LINE_HALF_UP_V1). All money values are IRR decimal strings. Both sides must pass every vector; the UI shows these as sample numbers only. Source: docs/prompts/PHASE_1_MASTER_PROMPT.md §7 worked examples, extended.",
+  "formula_version": "GOLD_IR_V1",
+  "rounding_policy": "IRR_LINE_HALF_UP_V1",
+  "vat_rule_sample": {"id": "VAT_DEMO_GOLD_SERVICES", "version": 1, "rate_percent": "10", "status": "demonstration, not certified"},
+  "vectors": [
+    {
+      "id": "base",
+      "input": {"net_weight_g": "2", "purity_ppt": "750", "price18_irr_per_g": "100000000", "wage_percent": "2", "profit_percent": "5", "discount": null, "vat_rate_percent": "10"},
+      "expected": {"M": "200000000", "W0": "4000000", "P0": "10200000", "C0": "0", "W": "4000000", "P": "10200000", "B": "14200000", "V": "1420000", "T": "215620000"}
+    },
+    {
+      "id": "wage_discount",
+      "input": {"net_weight_g": "2", "purity_ppt": "750", "price18_irr_per_g": "100000000", "wage_percent": "2", "profit_percent": "5", "discount": {"scope": "WAGE", "amount_irr": "1000000"}, "vat_rate_percent": "10"},
+      "expected": {"M": "200000000", "W0": "4000000", "P0": "10200000", "W": "3000000", "P": "10200000", "B": "13200000", "V": "1320000", "T": "214520000"}
+    },
+    {
+      "id": "taxable_components_discount_proportional",
+      "input": {"net_weight_g": "2", "purity_ppt": "750", "price18_irr_per_g": "100000000", "wage_percent": "2", "profit_percent": "5", "discount": {"scope": "TAXABLE_COMPONENTS", "amount_irr": "1000000"}, "vat_rate_percent": "10"},
+      "expected": {"allocation_wage": "281690", "allocation_profit": "718310", "W": "3718310", "P": "9481690", "B": "13200000", "V": "1320000", "T": "214520000"},
+      "$comment": "Allocation 1,000,000 × 4,000,000/14,200,000 = 281,690.14 → largest-remainder gives wage 281,690 and profit 718,310 (sum exact)."
+    },
+    {
+      "id": "purity_900_no_services",
+      "input": {"net_weight_g": "1", "purity_ppt": "900", "price18_irr_per_g": "100000000", "wage_percent": "0", "profit_percent": "0", "discount": null, "vat_rate_percent": "10"},
+      "expected": {"effective_rate_irr_per_g": "120000000", "M": "120000000", "B": "0", "V": "0", "T": "120000000"}
+    },
+    {
+      "id": "purity_1000_row_independence",
+      "input": {"net_weight_g": "2", "purity_ppt": "1000", "price18_irr_per_g": "100000000", "wage_percent": "2", "profit_percent": "5", "discount": null, "vat_rate_percent": "10"},
+      "expected": {"effective_rate_irr_per_g": "133333333.333333333333333333", "M": "266666667", "W0": "5333333", "P0": "13600000", "B": "18933333", "V": "1893333", "T": "288493333"},
+      "$comment": "Effective rate keeps ≥18 fractional digits internally; posted components round HALF_UP once. Changing this row's purity must not touch other rows."
+    },
+    {
+      "id": "currency_display",
+      "input": {"display_currency": "TOMAN", "displayed_price_per_g": "10000000"},
+      "expected": {"stored_price18_irr_per_g": "100000000"},
+      "$comment": "Exactly 10 IRR = 1 toman; unit label always visible."
+    },
+    {
+      "id": "mixed_invoice_gold_plus_misc",
+      "input": {"rows": [{"ref": "base"}, {"item_type": "MISC", "title": "جعبه هدیه", "manual_price_irr": "2000000"}]},
+      "expected": {"gold_rows_total": "215620000", "misc_rows_total": "2000000", "payable_total": "217620000", "gold_vat_total": "1420000"},
+      "$comment": "MISC never enters metal/wage/profit/VAT aggregates; payable = sum of posted row totals."
+    },
+    {
+      "id": "discount_exceeds_eligible",
+      "input": {"net_weight_g": "2", "purity_ppt": "750", "price18_irr_per_g": "100000000", "wage_percent": "2", "profit_percent": "5", "discount": {"scope": "TAXABLE_COMPONENTS", "amount_irr": "15000000"}, "vat_rate_percent": "10"},
+      "expected": {"error": "DISCOUNT_EXCEEDS_ELIGIBLE", "eligible_irr": "14200000"},
+      "$comment": "Never clamp silently; UI shows «برای ادامه، مبلغ تخفیف را کمتر از مجموع اجرت و سود وارد کنید.»"
+    },
+    {
+      "id": "persian_digit_parsing",
+      "input": {"raw_weight": "۲٫۵", "raw_price": "۱۰٬۰۰۰٬۰۰۰"},
+      "expected": {"net_weight_g": "2.5", "displayed_price_per_g": "10000000"}
+    }
+  ]
+}

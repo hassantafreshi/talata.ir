@@ -1,0 +1,78 @@
+/*
+  Talata design tokens — generated from talata-tokens.json (v1.0.0-proposed).
+  Status: PROPOSED. midnight_gold is the working default until the owner records a final selection.
+  Usage: import once in the app shell; components read only these custom properties.
+  Switch palette with <html data-palette="royal_emerald"> or "burgundy_gold".
+*/
+:root {
+  /* palette: midnight_gold (default) */
+  --t-chrome: #121417;
+  --t-chrome-2: #1C1F24;
+  --t-chrome-line: #2A2E35;
+  --t-gold-bright: #E0B44C;
+  --t-gold-action: #D4A53C;
+  --t-gold-action-hover: #C2962F;
+  --t-gold-deep: #8A5A00;
+  --t-gold-deep-hover: #6B4600;
+  --t-bg: #F4F1EA;
+  --t-surface: #FFFFFF;
+  --t-ink: #15171A;
+  --t-muted: #5A5E66;
+  --t-muted-on-chrome: #B8BCC4;
+  --t-text-on-chrome: #F4F1EA;
+  --t-text-on-gold: #15171A;
+  --t-line: #D9D3C7;
+
+  /* status (shared by all palettes; always paired with a label and icon) */
+  --t-success-fg: #1F7A4D; --t-success-bg: #E3F3EC;
+  --t-warning-fg: #8A5A00; --t-warning-bg: #FBF0D9;
+  --t-error-fg: #B3261E;   --t-error-bg: #FBE9E7;
+  --t-info-fg: #1D4ED8;    --t-info-bg: #E6EEFF;
+  --t-offline-fg: #4A4A4A; --t-offline-bg: #ECEAE6;
+
+  /* typography */
+  --t-font: Vazirmatn, Tahoma, "Segoe UI", sans-serif;
+  --t-fs-xs: 12px; --t-fs-sm: 13px; --t-fs-md: 14px; --t-fs-base: 16px; --t-fs-lg: 17px;
+  --t-fs-xl: 20px; --t-fs-h2: 22px; --t-fs-h1: 24px;
+  --t-fs-price-mobile: 39px; --t-fs-price-desktop: 68px;
+  --t-lh-tight: 1.2; --t-lh-normal: 1.5; --t-lh-relaxed: 1.6;
+
+  /* spacing, radius, borders, touch */
+  --t-sp-1: 4px; --t-sp-2: 8px; --t-sp-3: 12px; --t-sp-4: 16px; --t-sp-6: 24px; --t-sp-8: 32px;
+  --t-r-sm: 8px; --t-r-md: 10px; --t-r-lg: 12px; --t-r-xl: 14px; --t-r-card: 16px; --t-r-hero: 18px;
+  --t-border: 1.5px;
+  --t-touch-min: 44px; --t-touch-primary: 56px; --t-touch-hero: 62px;
+  --t-focus-ring: 3px solid #1D4ED8; --t-focus-offset: 2px;
+  --t-shadow-sticky: 0 6px 12px -8px rgba(0, 0, 0, .35);
+  --t-z-sticky: 2; --t-z-nav: 5; --t-z-dialog: 10; --t-z-toast: 20;
+}
+
+:root[data-palette="royal_emerald"] {
+  --t-chrome: #0B3B2E; --t-chrome-2: #124A3B; --t-chrome-line: #1A5A48;
+  --t-gold-bright: #E3C068;
+  --t-gold-action: #0F5C47; --t-gold-action-hover: #0B4A39;
+  --t-gold-deep: #866000; --t-gold-deep-hover: #6B4C00;
+  --t-bg: #F3F2EC; --t-surface: #FFFFFF;
+  --t-ink: #14201B; --t-muted: #52605A; --t-muted-on-chrome: #B5C9C0;
+  --t-text-on-chrome: #F3F2EC; --t-text-on-gold: #FFFFFF;
+  --t-line: #D3D9D4;
+}
+
+:root[data-palette="burgundy_gold"] {
+  --t-chrome: #4A1326; --t-chrome-2: #5C1A31; --t-chrome-line: #6B2340;
+  --t-gold-bright: #E6C26B;
+  --t-gold-action: #7A1F3A; --t-gold-action-hover: #63182F;
+  --t-gold-deep: #8A5A00; --t-gold-deep-hover: #6B4600;
+  --t-bg: #F7F3EF; --t-surface: #FFFFFF;
+  --t-ink: #1E1416; --t-muted: #5E5257; --t-muted-on-chrome: #D2BFC6;
+  --t-text-on-chrome: #F7F3EF; --t-text-on-gold: #FFFFFF;
+  --t-line: #DED4D0;
+}
+
+/* Base element rules the draft relies on (kept tiny; component styles live with components). */
+html { background: var(--t-bg); color: var(--t-ink); font-family: var(--t-font); font-size: var(--t-fs-base); line-height: var(--t-lh-relaxed); }
+.t-num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: var(--t-focus-ring); outline-offset: var(--t-focus-offset); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
+
+/* Print: palettes never apply to the invoice document; the invoice renderer uses its own black-on-white CSS (see docs/design/invoice-templates). */

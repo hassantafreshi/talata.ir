@@ -11,7 +11,8 @@ For future implementation requests, read:
 5. `docs/INVOICE_DELIVERY_AND_VERIFICATION.md` for invoice QR verification, responsive invoice views and customer-mobile SMS at issuance.
 6. `docs/INVOICE_CUSTOMIZATION.md` for mandatory business profile, contact fallback, two preset invoices and novice-friendly layout editing on Basic AND Professional.
 7. `docs/design/README.md` and `docs/design/UI_APPROVED_DECISIONS.md` for the Stage A proposal status, owner-stated UI requirements and which design decisions are actually approved (brand spelling: طلاتا / Talata).
-8. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
+8. `docs/design/UI_BUILD_SPEC.md`, `docs/design/tokens/`, `docs/design/invoice-templates/` and `docs/design/contracts/` for the UI build contract, design tokens, invoice layout schema/presets and frontend adapter/calculation contracts (proposed; palette 1 and logo concept 1 are working defaults, not approvals).
+9. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
 
 ## Durable constraints
 

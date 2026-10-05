@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>فاکتور نمونه — قالب فروشگاهی (رندر مرجع)</title>
+<!-- Reference render from the Stage A v2 draft (docs/design). SAMPLE DATA ONLY. No runtime dependency; fonts from ../../proposed/fonts/. -->
+<style>
+@font-face{font-family:"Vazirmatn";font-weight:100 900;font-display:swap;src:url(../../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+FB50-FDFF,U+FE70-FEFC,U+200C-200E}
+@font-face{font-family:"Vazirmatn";font-weight:100 900;font-display:swap;src:url(../../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF}
+html{background:#E6E2D8;margin:0}
+body{margin:0;display:flex;justify-content:center;padding:24px}
+.sample-banner{position:fixed;top:8px;left:8px;background:#FBF0D9;color:#8A5A00;font-family:Vazirmatn,Tahoma,sans-serif;font-size:12px;padding:4px 10px;border-radius:999px;z-index:9}
+
+body{margin:0}
+a{color:#15171A}a:hover{color:#000000}
+.num{font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-size:11.5pt}
+th,td{padding:6pt 7pt;border-bottom:1px solid #D9D3C7;text-align:right;vertical-align:top}
+th{font-weight:700;background:#121417;color:#F4F1EA;font-size:10.5pt}
+td.n,th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sum{display:flex;justify-content:space-between;font-size:12pt;padding:3pt 0}
+
+@media print{@page{size:A4 portrait;margin:0}html{background:#FFFFFF}body{padding:0;display:block}.sample-banner{display:none}thead{display:table-header-group}tr{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="sample-banner">نمونه — داده و QR واقعی نیستند</div>
+<div dir="rtl" style="width: 794px; min-height: 1123px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 12pt; line-height: 1.6; padding: 36px 44px; display: flex; flex-direction: column; gap: 14px">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; border-bottom: 3px solid #8A5A00; padding-bottom: 12px">
+    <div style="display: flex; gap: 14px; align-items: center">
+      <span style="width: 78px; height: 78px; border-radius: 12px; background: #ECEAE6; display: inline-flex; align-items: center; justify-content: center; font-size: 9pt; color: #5A5E66; flex-shrink: 0">لوگوی فروشگاه</span>
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <div style="font-size: 22pt; font-weight: 700; line-height: 1.2">طلافروشی نمونه</div>
+        <div style="font-size: 10.5pt; color: #5A5E66">تهران، خیابان نمونه، پلاک ۱</div>
+        <div style="font-size: 10.5pt; color: #5A5E66">تلفن <span class="num" dir="ltr">۰۲۱-۰۰۰۰۰۰۰</span> · موبایل <span class="num" dir="ltr">۰۹۱۲ ۰۰۰ ۰۰۰۰</span></div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; width: 120px">
+      <svg viewBox="0 0 29 29" width="112" height="112" shape-rendering="crispEdges" role="img" aria-label="QR بررسی اصالت (نمونه)"><rect width="29" height="29" fill="#FFFFFF"></rect><g fill="#000000"><path d="M2 2h7v7H2zM20 2h7v7h-7zM2 20h7v7H2z"></path><path d="M3 3h5v5H3zM21 3h5v5h-5zM3 21h5v5H3z" fill="#FFFFFF"></path><path d="M4 4h3v3H4zM22 4h3v3h-3zM4 22h3v3H4z"></path><path d="M11 2h1v1h-1zM13 2h2v1h-2zM16 3h1v2h-1zM11 4h2v1h-2zM14 5h3v1h-3zM11 7h1v2h-1zM13 8h2v1h-2zM16 7h1v1h-1zM2 11h2v1H2zM5 11h3v1H5zM10 11h2v1h-2zM13 10h1v2h-1zM15 11h3v1h-3zM19 11h2v1h-2zM22 10h1v2h-1zM24 11h3v1h-3zM3 13h1v2H3zM6 13h2v1H6zM9 14h3v1H9zM13 13h2v2h-2zM17 13h1v2h-1zM19 14h3v1h-3zM23 13h2v1h-2zM26 14h1v2h-1zM2 16h3v1H2zM7 16h1v2H7zM10 17h2v1h-2zM13 16h1v2h-1zM15 17h3v1h-3zM20 16h1v2h-1zM22 17h2v1h-2zM25 16h2v1h-2zM11 20h2v1h-2zM14 19h1v3h-1zM16 20h3v1h-3zM20 20h1v1h-1zM22 21h2v1h-2zM25 20h2v1h-2zM11 22h1v2h-1zM13 23h2v1h-2zM16 22h1v2h-1zM18 23h3v1h-3zM22 23h1v2h-1zM24 24h3v1h-3zM11 25h3v1h-3zM15 26h2v1h-2zM18 25h1v2h-1zM20 26h2v1h-2zM23 26h1v1h-1zM25 26h2v1h-2z"></path></g></svg>
+      <div style="font-size: 9.5pt; font-weight: 700; text-align: center">بررسی اصالت فاکتور</div>
+      <div style="font-size: 8.5pt; text-align: center; direction: ltr" class="num">talata.ir/v/•••• (نمونه)</div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; font-size: 11pt">
+    <div style="background: #F4F1EA; border-radius: 8px; padding: 8px 12px"><div style="font-size: 9.5pt; color: #5A5E66">فاکتور فروش</div><strong class="num" style="font-size: 14pt">۱۴۰۵-۰۰۱۲</strong> <span style="font-size: 9.5pt; color: #1F7A4D; font-weight: 700">قطعی</span></div>
+    <div style="background: #F4F1EA; border-radius: 8px; padding: 8px 12px"><div style="font-size: 9.5pt; color: #5A5E66">تاریخ و ساعت</div><strong class="num">۱۴۰۵/۰۷/۱۳ · ۱۴:۲۵</strong></div>
+    <div style="background: #F4F1EA; border-radius: 8px; padding: 8px 12px"><div style="font-size: 9.5pt; color: #5A5E66">خریدار</div><strong>خانم رضایی</strong> · <span class="num" dir="ltr">۰۹۱۲ ۰۰۰ ۰۰۰۰</span></div>
+  </div>
+
+  <table>
+    <thead><tr><th>#</th><th>شرح</th><th>توضیح</th><th class="n">وزن (گرم)</th><th>عیار</th><th class="n">مبلغ (تومان)</th></tr></thead>
+    <tbody>
+      <tr><td class="num">۱</td><td><strong>النگو ۱۸ عیار</strong></td><td style="color: #5A5E66">طرح نمونه · نرخ <span class="num">۱۰٬۰۰۰٬۰۰۰</span>/گرم · اجرت ۲٪ · سود ۵٪ · مالیات <span class="num">۱۴۲٬۰۰۰</span></td><td class="n">۲</td><td>۱۸ (۷۵۰)</td><td class="n"><strong>۲۱٬۵۶۲٬۰۰۰</strong></td></tr>
+      <tr><td class="num">۲</td><td><strong>جعبه هدیه</strong></td><td style="color: #5A5E66">متفرقه، قیمت دستی</td><td class="n">—</td><td>—</td><td class="n"><strong>۲۰۰٬۰۰۰</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px">
+    <div style="font-size: 10pt; line-height: 1.7; max-width: 340px; color: #5A5E66">
+      <div>نرخ مبنا: هر گرم طلای ۱۸ عیار <span class="num">۱۰٬۰۰۰٬۰۰۰</span> تومان در <span class="num">۱۴:۲۱</span> (عدد نمونه).</div>
+      <div>مالیات <span class="num">۱۰٪</span> فقط روی اجرت و سود ردیف‌های طلا (قاعده نمونه).</div>
+      <div style="margin-top: 8px; color: #15171A">از خرید شما سپاسگزاریم. تعویض فقط با همین فاکتور و تا ۷ روز (یادداشت عمومی نمونه).</div>
+    </div>
+    <div style="width: 310px; display: flex; flex-direction: column; background: #F4F1EA; border-radius: 10px; padding: 10px 14px">
+      <div class="sum"><span>ارزش طلا (<span class="num">۲</span> گرم)</span><span class="num">۲۰٬۰۰۰٬۰۰۰</span></div>
+      <div class="sum"><span>اجرت</span><span class="num">۴۰۰٬۰۰۰</span></div>
+      <div class="sum"><span>سود</span><span class="num">۱٬۰۲۰٬۰۰۰</span></div>
+      <div class="sum"><span>مالیات</span><span class="num">۱۴۲٬۰۰۰</span></div>
+      <div class="sum" style="border-top: 1px solid #D9D3C7"><span>جمع طلا</span><strong class="num">۲۱٬۵۶۲٬۰۰۰</strong></div>
+      <div class="sum"><span>جمع متفرقه</span><strong class="num">۲۰۰٬۰۰۰</strong></div>
+      <div class="sum" style="border-top: 2px solid #8A5A00; margin-top: 4pt; padding-top: 6pt; font-size: 14pt; font-weight: 700; white-space: nowrap; gap: 10px"><span>قابل پرداخت</span><span class="num">۲۱٬۷۶۲٬۰۰۰ <span style="font-size: 10pt; font-weight: 400">تومان</span></span></div>
+    </div>
+  </div>
+
+  <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 11pt">
+    <div style="display: flex; flex-direction: column; gap: 36px"><span>مهر و امضای فروشنده</span><span style="border-top: 1px solid #15171A; width: 180px"></span></div>
+    <div style="display: flex; flex-direction: column; gap: 36px"><span>امضای خریدار</span><span style="border-top: 1px solid #15171A; width: 180px"></span></div>
+  </div>
+
+  <div style="margin-top: auto; border-top: 1px solid #D9D3C7; padding-top: 8px; display: flex; flex-direction: column; gap: 2px; font-size: 9.5pt; color: #5A5E66; text-align: center">
+    <span>talata-sample.ir · اینستاگرام @sample.gold · مجوز اتحادیه <span class="num">۱۲۳۴</span> · مجوز کسب‌وکار اینترنتی <span class="num">۵۶۷۸</span></span>
+    <span>قالب «فروشگاهی» · لوگوی فروشگاه در پلن پایه/حرفه‌ای · این سند پس از صدور تغییر نمی‌کند.</span>
+  </div>
+</div>
+</body>
+</html>
