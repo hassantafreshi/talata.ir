@@ -1,5 +1,5 @@
 /*
-  Talata design tokens — generated from talata-tokens.json (v1.0.0-proposed).
+  Talata design tokens — generated from talata-tokens.json (v1.1.0-proposed).
   Status: PROPOSED. midnight_gold is the working default until the owner records a final selection.
   Usage: import once in the app shell; components read only these custom properties.
   Switch palette with <html data-palette="royal_emerald"> or "burgundy_gold".
@@ -39,7 +39,11 @@
 
   /* spacing, radius, borders, touch */
   --t-sp-1: 4px; --t-sp-2: 8px; --t-sp-3: 12px; --t-sp-4: 16px; --t-sp-6: 24px; --t-sp-8: 32px;
-  --t-r-sm: 8px; --t-r-md: 10px; --t-r-lg: 12px; --t-r-xl: 14px; --t-r-card: 16px; --t-r-hero: 18px;
+  --t-r-sm: 8px; --t-r-md: 10px; --t-r-lg: 12px; --t-r-xl: 14px; --t-r-card: 16px;
+  /* v3 surface language «برگه یکپارچه»: white page, borderless ivory bands, one shadowed hero, pill controls, filled inputs */
+  --t-page: #FFFFFF; --t-band: #F4F1EA; --t-band-emphasis: #FBF6E8; --t-control-track: #ECE8DF; --t-input-line: #C9C3B6; --t-hairline: #E6E1D6;
+  --t-r-band: 20px; --t-r-hero: 24px; --t-r-hero-desktop: 26px; --t-r-pill: 999px; --t-r-input: 12px 12px 0 0; --t-r-dialog: 18px;
+  --t-shadow-hero: 0 14px 28px -16px rgba(0, 0, 0, .55);
   --t-border: 1.5px;
   --t-touch-min: 44px; --t-touch-primary: 56px; --t-touch-hero: 62px;
   --t-focus-ring: 3px solid #1D4ED8; --t-focus-offset: 2px;
@@ -70,9 +74,17 @@
 }
 
 /* Base element rules the draft relies on (kept tiny; component styles live with components). */
-html { background: var(--t-bg); color: var(--t-ink); font-family: var(--t-font); font-size: var(--t-fs-base); line-height: var(--t-lh-relaxed); }
+html { background: var(--t-page); color: var(--t-ink); font-family: var(--t-font); font-size: var(--t-fs-base); line-height: var(--t-lh-relaxed); }
 .t-num { font-variant-numeric: tabular-nums; }
 :focus-visible { outline: var(--t-focus-ring); outline-offset: var(--t-focus-offset); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
 
 /* Print: palettes never apply to the invoice document; the invoice renderer uses its own black-on-white CSS (see docs/design/invoice-templates). */
+
+/* v3 primitives (reference; components may inline these) */
+.t-band { background: var(--t-band); border: 0; border-radius: var(--t-r-band); }
+.t-band--emphasis { background: var(--t-band-emphasis); box-shadow: inset 0 0 0 2px var(--t-gold-action); }
+.t-hero { background: var(--t-chrome); color: var(--t-text-on-chrome); border-radius: var(--t-r-hero); box-shadow: var(--t-shadow-hero); }
+.t-pill { border-radius: var(--t-r-pill); }
+.t-input { background: var(--t-surface); border: 0; border-bottom: 2px solid var(--t-input-line); border-radius: var(--t-r-input); }
+.t-seg { background: var(--t-control-track); border-radius: var(--t-r-pill); padding: 3px; gap: 2px; display: inline-flex; }
