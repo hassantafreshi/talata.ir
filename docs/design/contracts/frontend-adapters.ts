@@ -69,7 +69,14 @@ export interface QuoteSnapshot {
   tenant_override?: { value_irr: DecimalString; reason: string; actor: string; at: IsoDateTime };
 }
 
+export type BoardAsset = 'GOLD_18_BUY' | 'GOLD_18_SELL' | 'GOLD_24' | 'USD_IRR' | 'XAU_USD';
+export interface QuoteBoardRow { asset: BoardAsset; value: DecimalString | null; unit_fa: string; change_vs_previous_pct?: DecimalString; freshness: QuoteFreshness; fetched_at: IsoDateTime; source_label_fa: string }
+export interface QuoteBoardSnapshot { rows: QuoteBoardRow[]; fetched_at: IsoDateTime; freshness: QuoteFreshness; spread_18_irr?: DecimalString }
+
 export interface QuoteAdapter {
+  /** مظنه: every row of docs/MAZNEH_AND_CALCULATOR.md; a missing buy price is null, never derived. */
+  getBoard(): Promise<QuoteBoardSnapshot>;
+  subscribeBoard(cb: (b: QuoteBoardSnapshot) => void, opts: { interval_seconds: number; clock?: () => number }): () => void;
   /** Latest normalized server value; call on page entry, foreground and reconnect. */
   getLatest(assets?: Array<QuoteSnapshot['asset']>): Promise<QuoteSnapshot[]>;
   /**
@@ -225,7 +232,9 @@ export interface PlanOffer { id: PlanId; label_fa: string; price_toman: Record<B
 export interface AddonOffer { id: string; label_fa: string; sms_count: number; price_toman: DecimalString; available_on: PlanId[] }
 
 /** Quota notices only reflect server entitlements; they never block invoice create/finalize/print or the verification QR. */
-export type QuotaTrigger = 'links_exhausted' | 'links_near_limit' | 'customers_not_in_plan' | 'sms_trial_exhausted' | 'sms_balance_low';
+export type QuotaTrigger = 'invoices_exhausted' | 'customers_exhausted' | 'links_exhausted' | 'near_limit' | 'history_restricted' | 'installments_professional_only' | 'sms_trial_exhausted' | 'sms_balance_low' | 'sms_balance_expiring';
+/** Prepaid SMS credit (docs/PLANS_AND_QUOTAS.md §3): toman balance charged per segment at the current plan price. */
+export interface SmsCredit { balance_irr: DecimalString; per_segment_irr: DecimalString; approx_segments: number; min_purchase_irr: DecimalString; pack_amounts_irr: DecimalString[]; carries_over: boolean; expires_at?: IsoDateTime; free_yearly_remaining: number }
 
 /* ---------- Customers and installments (Professional) ---------- */
 

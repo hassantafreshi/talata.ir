@@ -5,7 +5,7 @@ Date: 2026-10-05.
 
 ## 1. Your role and mission
 
-Act as a senior Laravel engineer, product architect and test engineer. Build Talata.ir, a Persian-first, multi-tenant SaaS for Iranian jewelry merchants. The provider sells access to independent modules. Merchants have very low digital literacy but understand their trade. The product must help them calculate a gold sale, issue a stable invoice, print/share it and, on the Professional entitlement set, manage customers and installments with minimal confusion.
+Act as a senior Laravel engineer, product architect and test engineer. Build Talata.ir, a Persian-first, multi-tenant SaaS for Iranian jewelry merchants. The provider sells access to independent modules. Merchants have very low digital literacy but understand their trade. The product must help them calculate a gold sale, issue a stable invoice, print/share it manage customers and, on the Professional entitlement set, installments with minimal confusion.
 
 Read the entire specification and `docs/PERFORMANCE_BUDGET.md` before changing code. Fast usable loading on weak/unreliable internet in Iran is an owner-confirmed core acceptance requirement. Inspect repository files, instructions and existing dependencies. Preserve existing work. If starting from an empty repository, scaffold a maintainable modular monolith. First produce a concise plan, data model, module dependency map, risk/decision register and milestone checklist, then implement the authorized scope incrementally. Make routine reversible engineering decisions; ask only for missing choices that materially change business behavior. Do not stop after scaffolding or a decorative demo.
 
@@ -18,15 +18,15 @@ Deliver in Phase 1:
 1. Provider administration: tenants, memberships, plans, subscriptions, module entitlements, quota rules, tax configurations, integrations and operational health.
 2. Mobile number is the primary account identifier: SMS one-time-code first registration/login, plus optional Passkey/device-unlock login enabled after verified mobile sign-in, tenant selection where applicable, owner/staff access and provider access. Phase 1 does not require a username, email or password to sign in.
 3. Central market feed for 18K gold, 24K gold and USD, with an owner-required 180-second gold refresh cadence, visible provenance, timestamps and freshness; new-invoice entry prominently shows the current 18K quote with a `شروع` button immediately below it.
-4. Standalone gold calculator: editable effective 18K rate, weight, purity default 750, wage percentage, profit percentage, component-aware discount and tax rule.
+4. Standalone gold calculator, product name «ماشین‌حساب طلایی», plus the quote board «مظنه» (see `../MAZNEH_AND_CALCULATOR.md`): editable effective 18K rate, weight, purity default 750, wage percentage, profit percentage, component-aware discount and tax rule.
 5. Multi-item draft invoices with independently typed GOLD and MISC rows (including mixed invoices), authoritative finalization, printable layout, browser Save as PDF, public secure links, share actions and SMS delivery.
 6. Tenant shop profile, owner/staff permissions, branding and invoice customization controlled by features.
-7. Free/Basic/Professional feature and quota engine; five one-time trial SMS credits per tenant.
-8. Professional customer management and installments, manual payment recording, overdue status and reminders.
+7. Free/Basic/Professional feature and quota engine with the owner's quotas in `../PLANS_AND_QUOTAS.md`; five free SMS per tenant per year; prepaid toman SMS credit charged per segment.
+8. Customer directory in every plan (monthly new-customer caps on Free/Basic); Professional installments, manual payment recording, overdue status and reminders.
 9. Audit events, reliable queues, error handling, PWA app shell and controlled offline calculator behavior.
 10. Custom-domain-ready routing interfaces, but automatic DNS/TLS provisioning is deferred.
 
-Explicitly defer: full accounting, double-entry financial postings, metal ledger postings, inventory, barcode operations, assay/melted gold, silver calculations, customer OTP account portal, native apps, payment gateway, online shop, Modian submissions and automatic custom-domain provisioning. Create clear extension contracts and ADRs, not placeholder CRUD for every future module. Do not expose nonfunctional future menus.
+Explicitly defer: full accounting, double-entry financial postings, metal ledger postings, inventory, barcode operations, assay/melted gold, silver and coin calculations, product-photo attachments, customer OTP account portal, native apps, payment gateway, online shop, Modian submissions and automatic custom-domain provisioning. Silver, coin, melted gold, multi-business-type tenants and product photos are the v2 roadmap in `../ROADMAP_V2_BUSINESS_TYPES.md`: Phase 1 must prepare the infrastructure it lists (business-type registry, pricing-policy registry, per-category tax rules, typed item attributes, sale/purchase direction, item asset table) without implementing v2 behaviour. Create clear extension contracts and ADRs, not placeholder CRUD for every future module. Do not expose nonfunctional future menus.
 
 The printable sales invoice is not automatically a legally submitted tax-system invoice. No UI badge may imply tax submission or government approval.
 
@@ -269,6 +269,13 @@ Add `/app/invoices/new` as the primary new-sale entry (or an equivalent deep-lin
 5. After Start, periodic feed changes update the market indicator only. Existing line calculations remain on their accepted transaction rate until the merchant selects `استفاده از نرخ جدید`; issued snapshots remain immutable. Any accepted repricing updates affected gold rows and review fingerprint, never MISC prices.
 6. For an unavailable/stale feed, provide clearly labeled manual-rate recovery under the configured policy; MISC-only invoice creation must remain possible without a gold quote. Network failures do not erase rows or pretend a draft was issued. For standalone Calculator access with Invoices disabled, the same current-price/Start interaction launches only the calculator, preserving module independence.
 
+### Quote board (مظنه) and the Golden Calculator (ماشین‌حساب طلایی) — owner requirement
+
+Two always-available entries in the main navigation (mobile tabs «مظنه» and «ماشین‌حساب»; desktop menu items), contract in `../MAZNEH_AND_CALCULATOR.md`:
+
+- **مظنه** shows the latest normalized quotes in a plain, readable layout: 18K buy-from-customer, 18K sell-to-customer (the invoice reference, `GOLD_18_SELL`), 24K, USD/IRR and the global ounce in USD, each with real `fetched_at`, freshness and change versus the previous central fetch. Same 180-second central cadence, no browser-to-provider calls, no claim of tick-by-tick prices, offline/stale labels, no fabricated buy price when the provider lacks it.
+- **ماشین‌حساب طلایی** is the standalone calculator: rate prefilled from مظنه and editable, weight, purity, wage, profit, discount and the applicable tax rule, computed locally with the shared `GOLD_IR_V1` preview and fixtures; it never consumes quotas, never saves, and can hand its numbers to a new draft when Invoices is enabled.
+
 ## 9. Invoice lifecycle and finalization
 
 Read `../INVOICE_DELIVERY_AND_VERIFICATION.md` as the required contract for printed QR verification, responsive invoice views and SMS-at-issuance. These are Phase 1 requirements, not implemented capabilities.
@@ -315,29 +322,34 @@ Enforce `can(capability)` and `quota(resource)` on server; UI only reflects them
 | Capability/resource | Free | Basic | Professional |
 | --- | --- | --- | --- |
 | calculator.use | yes | yes | yes |
-| invoice.finalize / invoice.print | yes | yes | yes |
+| mazneh.view (quote board) | yes | yes | yes |
+| invoice.finalize — issued invoices per calendar month | 50 | configurable cap (owner figure pending; seed 500) | unlimited |
+| invoice.print (already issued) | yes, current-month invoices | yes | yes |
+| invoice history and financial reports | current calendar month only | all | all |
 | shop profile | required + optional fields | required + optional fields | required + optional fields |
 | invoice.hide_provider_brand | no | yes | yes |
 | invoice.shop_logo | no | yes | yes |
 | invoice.customize | no | yes | yes |
 | invoice_links limit per configured period | 10 | 100 | 1000 |
 | invoice.social_share | yes | yes | yes |
-| invoice.sms_share | trial allowance only | yes | yes |
+| invoice.sms_share | 5 free SMS per year, then prepaid credit (850 toman/segment, min 400,000 toman, expires at month end) | prepaid credit (500 toman/segment, min 100,000 toman, carries over) | prepaid credit (350 toman/segment, min 100,000 toman, carries over) |
 | sms.template_edit | no | yes | yes |
-| customers.manage | no | no | yes |
+| customers.manage — new customers per calendar month | 50 | configurable cap (owner figure pending; seed 500) | unlimited |
 | installments.manage | no | no | yes |
 | installments.sms_remind | no | no | yes |
 
 Quota assumptions for the initial seed: one subscription-month interval, displayed start/end in tenant local time; Free uses its own explicit monthly anchor. The owner has not specified a period, so make this configurable and record the assumption. All timestamps use half-open intervals and a frozen clock in tests.
 
 - Link quota counts first successful share creation for a distinct invoice in the period. Re-copy/share via social/reuse active link and token regeneration do not count again. Revocation does not refund historical usage. Document this counting rule; quota consumption is transactional and concurrency-safe.
-- Finalizing/printing a sales invoice does not consume link quota. Link quota exhaustion never prevents calculation or printing. No silent unlimited invoice creation throttling represented as a plan limit; abuse controls are separate.
+- Owner decisions 2026-10-05 (`../PLANS_AND_QUOTAS.md` is the single source): Free issues at most 50 invoices and registers at most 50 new customers per calendar month; Basic has higher configurable caps (figures pending); Professional is unlimited. Free sees only the current calendar month's invoices and no financial reports; data is retained, the verification QR and existing links keep working, and upgrading restores history. Printing an already issued invoice, the quote board (مظنه) and the calculator never depend on quotas. Link quota exhaustion never prevents calculation or printing. Abuse controls are separate from plan limits.
 - Historical valid links remain readable after downgrade/period end unless revoked/expired; creation rights follow current entitlements. Downgrade preserves issued snapshots and financial records. Customer/installment records remain readable/exportable, and payment recording for existing debts remains available with appropriate permission; new agreements/customers and paid reminders are gated. Do not strand repayment workflows behind an upgrade.
-- Five lifetime trial SMS credits per tenant are separate from plan definitions. An explicit trial grant enables only invoice SMS sharing even on Free until exhausted; free template remains fixed. Professional reminders require the appropriate feature and paid SMS balance. Trial credits are not refreshed by changing plans.
+- Five free SMS per tenant per year (owner decision 2026-10-05; replaces the earlier lifetime allowance) are separate from plan definitions. An explicit trial grant enables only invoice SMS sharing even on Free until exhausted; free template remains fixed. Professional reminders require the appropriate feature and paid SMS balance. Trial credits are not refreshed by changing plans; they reset yearly.
 - Link quota, SMS message segments, paid SMS balance and operational OTP budget are different resources. Display them separately.
 - No payment gateway is assumed. Provider can activate/extend subscriptions manually with audit until billing integration is selected. Prices, checkout and renewal commercial terms remain configuration, not invented values.
 
 ## 12. SMS and notifications
+
+Prepaid SMS credit (owner decision 2026-10-05, configuration in `../PLANS_AND_QUOTAS.md` §3): tenants buy a toman balance (packs 100k/200k/300k/500k/1M toman; minimum 100k on Basic/Professional, 400k on Free) and each sent segment is charged at the current plan's per-segment price (Free 850, Basic 500, Professional 350 toman; a three-segment message costs three times that). Basic/Professional balances carry over month to month; Free balance expires at the end of the calendar month with an audited expiry event. Reserve on send, refund on failure, hold while unknown; OTP never draws on it. Behaviour of a remaining balance on plan change is an assumption to confirm with the owner.
 
 Adapters: SMS provider send/status/webhook, template renderer, segment estimator and notification dispatcher. Use persisted message ID, tenant context and idempotency key.
 
@@ -355,9 +367,9 @@ Adapters: SMS provider send/status/webhook, template renderer, segment estimator
 
 ## 13. Customers and installments
 
-Professional customer records: name, normalized phone, optional notes and minimal necessary fields. Search by phone/name with tenant scoping. Offer duplicate suggestions, never auto-merge. Limit collection of national ID/address to a confirmed business need; those are not default required fields.
+Customer records in every plan, with monthly new-customer caps on Free and Basic (`../PLANS_AND_QUOTAS.md`): name, normalized phone, optional notes and minimal necessary fields. Search by phone/name with tenant scoping. Offer duplicate suggestions, never auto-merge. Limit collection of national ID/address to a confirmed business need; those are not default required fields.
 
-Invoice-local fields allow issuing without onboarding a customer. Professional users may save/link them to a Party explicitly. Customer history derives from scoped records and is understandable as `فاکتورها`, `پرداخت‌ها`, `اقساط`, not ledger jargon.
+Invoice-local fields allow issuing without onboarding a customer. Users may save/link them to a Party explicitly within their plan's monthly cap. Customer history derives from scoped records and is understandable as `فاکتورها`, `پرداخت‌ها`, `اقساط`, not ledger jargon.
 
 Installment MVP:
 

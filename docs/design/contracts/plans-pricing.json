@@ -1,59 +1,91 @@
 {
-  "$comment": "Commercial terms stated by the owner on 2026-10-05, stored as CONFIGURATION to be seeded by the provider, never hard-coded in domain logic (no `if plan == ...`). Capabilities/quotas come from docs/prompts/PHASE_1_MASTER_PROMPT.md §11. ASSUMPTION FLAGGED: the owner wrote «ماهانه 790 تومان» for Basic; this file records 790,000 toman because it is consistent with the yearly 7.9 million; confirm. Display currency toman; stored IRR = toman × 10.",
-  "status": "owner-provided, pending confirmation of the Basic monthly figure",
+  "$comment": "Commercial terms stated by the owner on 2026-10-05, stored as CONFIGURATION to be seeded by the provider, never hard-coded in domain logic (no `if plan == ...`). Capabilities/quotas come from docs/prompts/PHASE_1_MASTER_PROMPT.md §11. ASSUMPTION FLAGGED: the owner wrote «ماهانه 790 تومان» for Basic; this file records 790,000 toman because it is consistent with the yearly 7.9 million; confirm. Display currency toman; stored IRR = toman × 10. Updated 2026-10-05 with the owner's corrected Free quotas (50 invoices and 50 new customers per month, current-month history, 5 free SMS per year) and the prepaid per-segment SMS credit model (replaces the 500-SMS pack). See docs/PLANS_AND_QUOTAS.md.",
+  "status": "owner-provided; pending: Basic monthly figure, Basic invoice/customer caps, Free pack amounts above the minimum, balance behaviour on plan change",
   "currency_display": "TOMAN",
-  "billing_periods": ["monthly", "yearly"],
+  "billing_periods": [
+    "monthly",
+    "yearly"
+  ],
   "plans": [
     {
       "id": "free",
       "label_fa": "رایگان",
-      "price_toman": {"monthly": "0", "yearly": "0"},
+      "price_toman": {
+        "monthly": "0",
+        "yearly": "0"
+      },
       "highlights_fa": [
-        "ماشین‌حساب طلا، صدور و چاپ فاکتور بدون محدودیت",
-        "QR بررسی اصالت روی هر فاکتور",
-        "۱۰ لینک فاکتور در ماه · ۵ پیامک آزمایشی (یک‌بار)",
-        "قالب ثابت «ساده و خوانا» با نشان طلاتا"
+        "مظنه و ماشین‌حساب طلایی بدون محدودیت",
+        "۵۰ فاکتور در ماه · ۵۰ مشتری جدید در ماه",
+        "۵ پیامک در سال · ۱۰ لینک فاکتور در ماه",
+        "فقط فاکتورهای ماه جاری؛ بدون گزارش مالی",
+        "QR بررسی اصالت · قالب ثابت «ساده و خوانا» با نشان طلاتا"
       ],
-      "not_included_fa": ["لوگوی فروشگاه و ویرایش ظاهر فاکتور", "دفتر مشتریان و اقساط"]
+      "not_included_fa": [
+        "لوگوی فروشگاه و ویرایش ظاهر فاکتور",
+        "اقساط و یادآوری پیامکی",
+        "فاکتورهای ماه‌های قبل و گزارش مالی"
+      ],
+      "quotas": {
+        "invoices_per_month": 50,
+        "new_customers_per_month": 50,
+        "links_per_month": 10,
+        "free_sms_per_year": 5,
+        "history": "current_month",
+        "financial_reports": false
+      }
     },
     {
       "id": "basic",
       "label_fa": "پایه",
-      "price_toman": {"monthly": "790000", "yearly": "7900000"},
+      "price_toman": {
+        "monthly": "790000",
+        "yearly": "7900000"
+      },
       "yearly_equivalent_monthly_toman": "658333",
       "yearly_saving_percent_vs_12_months": "16.7",
       "highlights_fa": [
-        "همه امکانات رایگان",
-        "۱۰۰ لینک فاکتور در ماه · ارسال پیامک فاکتور با اعتبار",
+        "همه امکانات رایگان · همه ماه‌ها و گزارش مالی",
+        "سقف بالاتر فاکتور و مشتری جدید در ماه · ۱۰۰ لینک فاکتور در ماه",
         "لوگوی فروشگاه، بدون نشان طلاتا، دو قالب و ویرایش ظاهر فاکتور",
-        "ویرایش متن پیامک"
+        "ویرایش متن پیامک · ارسال پیامک فاکتور با شارژ"
       ],
-      "not_included_fa": ["دفتر مشتریان، اقساط و یادآوری پیامکی"]
+      "not_included_fa": [
+        "اقساط و یادآوری پیامکی"
+      ],
+      "quotas": {
+        "invoices_per_month": 500,
+        "new_customers_per_month": 500,
+        "links_per_month": 100,
+        "history": "all",
+        "financial_reports": true,
+        "$comment": "500/500 are proposed seeds; the owner said Basic also hits a cap but gave no figure"
+      }
     },
     {
       "id": "professional",
       "label_fa": "حرفه‌ای",
-      "price_toman": {"monthly": "1900000", "yearly": "10900000"},
+      "price_toman": {
+        "monthly": "1900000",
+        "yearly": "10900000"
+      },
       "yearly_equivalent_monthly_toman": "908333",
       "yearly_saving_percent_vs_12_months": "52.2",
       "highlights_fa": [
-        "همه امکانات پایه",
+        "همه امکانات پایه · فاکتور و مشتری نامحدود",
         "۱٬۰۰۰ لینک فاکتور در ماه",
-        "دفتر مشتریان، قرارداد اقساط و ثبت پرداخت",
-        "یادآوری پیامکی اقساط"
+        "قرارداد اقساط و ثبت پرداخت",
+        "یادآوری پیامکی اقساط",
+        "نسخه ۲: چند نوع کسب‌وکار و ضمیمه عکس محصول"
       ],
-      "not_included_fa": []
-    }
-  ],
-  "addons": [
-    {
-      "id": "sms_pack_500",
-      "label_fa": "بسته پیامک اضافه",
-      "sms_count": 500,
-      "price_toman": "750000",
-      "per_sms_toman": "1500",
-      "available_on": ["basic", "professional"],
-      "note_fa": "اعتبار پیامک جدا از سهمیه لینک است و با تغییر پلن از بین نمی‌رود."
+      "not_included_fa": [],
+      "quotas": {
+        "invoices_per_month": null,
+        "new_customers_per_month": null,
+        "links_per_month": 1000,
+        "history": "all",
+        "financial_reports": true
+      }
     }
   ],
   "activation": {
@@ -62,11 +94,167 @@
     "proration_policy": "TO_BE_DEFINED_BY_PROVIDER"
   },
   "quota_notice_triggers": [
-    {"id": "links_exhausted", "where": ["new_invoice"], "plans": ["free", "basic"], "message_key": "quota.links_exhausted", "never_blocks": ["invoice.create", "invoice.finalize", "invoice.print", "verification_qr"]},
-    {"id": "links_near_limit", "where": ["new_invoice"], "plans": ["free", "basic"], "threshold_remaining": 2, "message_key": "quota.links_near_limit"},
-    {"id": "customers_not_in_plan", "where": ["new_customer", "installments"], "plans": ["free", "basic"], "message_key": "quota.customers_professional_only", "fallback_fa": "نام و موبایل مشتری روی همین فاکتور قابل ثبت است."},
-    {"id": "sms_trial_exhausted", "where": ["review_issue_sms"], "plans": ["free"], "message_key": "quota.sms_trial_exhausted"},
-    {"id": "sms_balance_low", "where": ["review_issue_sms"], "plans": ["basic", "professional"], "message_key": "quota.sms_balance_low", "offer": "sms_pack_500"}
+    {
+      "id": "invoices_exhausted",
+      "where": [
+        "new_invoice",
+        "start"
+      ],
+      "plans": [
+        "free",
+        "basic"
+      ],
+      "message_key": "quota.invoices_exhausted",
+      "never_blocks": [
+        "invoice.print",
+        "mazneh.view",
+        "calculator.use",
+        "verification_qr"
+      ]
+    },
+    {
+      "id": "customers_exhausted",
+      "where": [
+        "new_customer"
+      ],
+      "plans": [
+        "free",
+        "basic"
+      ],
+      "message_key": "quota.customers_exhausted",
+      "fallback_fa": "نام و موبایل مشتری روی همین فاکتور قابل ثبت است."
+    },
+    {
+      "id": "links_exhausted",
+      "where": [
+        "share_link",
+        "review"
+      ],
+      "plans": [
+        "free",
+        "basic",
+        "professional"
+      ],
+      "message_key": "quota.links_exhausted",
+      "never_blocks": [
+        "invoice.finalize",
+        "invoice.print"
+      ]
+    },
+    {
+      "id": "near_limit",
+      "where": [
+        "new_invoice",
+        "new_customer",
+        "review"
+      ],
+      "plans": [
+        "free",
+        "basic"
+      ],
+      "threshold_remaining": 2,
+      "message_key": "quota.near_limit"
+    },
+    {
+      "id": "history_restricted",
+      "where": [
+        "invoice_list"
+      ],
+      "plans": [
+        "free"
+      ],
+      "message_key": "quota.history_restricted"
+    },
+    {
+      "id": "installments_professional_only",
+      "where": [
+        "installments"
+      ],
+      "plans": [
+        "free",
+        "basic"
+      ],
+      "message_key": "quota.installments_professional_only"
+    },
+    {
+      "id": "sms_trial_exhausted",
+      "where": [
+        "review_issue_sms"
+      ],
+      "plans": [
+        "free"
+      ],
+      "message_key": "quota.sms_trial_exhausted",
+      "offer": "sms_credit"
+    },
+    {
+      "id": "sms_balance_low",
+      "where": [
+        "review_issue_sms"
+      ],
+      "plans": [
+        "free",
+        "basic",
+        "professional"
+      ],
+      "message_key": "quota.sms_balance_low",
+      "offer": "sms_credit"
+    },
+    {
+      "id": "sms_balance_expiring",
+      "where": [
+        "plan_page"
+      ],
+      "plans": [
+        "free"
+      ],
+      "message_key": "quota.sms_balance_expiring"
+    }
   ],
-  "open_question_fa": "در قرارداد فعلی سقف تعداد فاکتور وجود ندارد (صدور و چاپ نامحدود در همه پلن‌ها). اگر مالک سقف تعداد فاکتور برای رایگان/پایه می‌خواهد، باید به‌صورت تنظیم جدید (invoice_count_limit_per_period) تعریف و در Master Prompt ثبت شود؛ جزء QuotaNotice بدون تغییر آن را نشان می‌دهد."
+  "sms_credit": {
+    "model": "prepaid_toman_balance_charged_per_segment",
+    "note_fa": "اعتبار تومانی؛ هزینه هر بخش پیامک از آن کم می‌شود (پیامک سه‌بخشی = ۳ بخش). ۵ پیامک رایگان سالانه اول مصرف می‌شود. ذخیره به ریال (×۱۰).",
+    "pack_amounts_toman": [
+      "100000",
+      "200000",
+      "300000",
+      "500000",
+      "1000000"
+    ],
+    "per_segment_toman": {
+      "free": "850",
+      "basic": "500",
+      "professional": "350"
+    },
+    "min_purchase_toman": {
+      "free": "400000",
+      "basic": "100000",
+      "professional": "100000"
+    },
+    "pack_amounts_free_toman": [
+      "400000",
+      "500000",
+      "1000000"
+    ],
+    "carry_over": {
+      "free": false,
+      "basic": true,
+      "professional": true
+    },
+    "free_expiry": "END_OF_CALENDAR_MONTH_WITH_AUDIT_EVENT",
+    "reserve_on_send_refund_on_failure": true,
+    "otp_uses_this_credit": false,
+    "assumptions_fa": [
+      "بسته‌های رایگان: همان مبالغ از ۴۰۰ هزار به بالا",
+      "مانده تومانی با تغییر پلن حفظ می‌شود و قیمت بخش پلن جدید اعمال می‌شود",
+      "مانده رایگانِ منقضی‌نشده پس از ارتقا تابع قاعده انتقال پلن جدید است"
+    ],
+    "example_fa": "پایه: پیامک سه‌بخشی = ۱٬۵۰۰ تومان؛ شارژ ۲۰۰ هزار تومان ≈ ۴۰۰ بخش"
+  },
+  "open_questions_fa": [
+    "عدد ماهانه پایه (۷۹۰ هزار تومان؟)",
+    "سقف فاکتور و مشتری جدید پایه",
+    "بسته‌های شارژ رایگان بالاتر از حداقل ۴۰۰ هزار",
+    "رفتار مانده شارژ هنگام تغییر پلن"
+  ]
 }

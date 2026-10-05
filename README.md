@@ -12,6 +12,9 @@
 | [UI/UX tool shortlist](docs/research/UI_UX_TOOL_SHORTLIST.md) | گزینه‌های بررسی‌شده برای Claude، کتابخانه‌ها و لینک نمونه‌ها |
 | [Implementation checklist](docs/PHASE_1_CHECKLIST.md) | معیارهای پذیرش و پیگیری مراحل |
 | [Performance budget](docs/PERFORMANCE_BUDGET.md) | معیار حجم اولیه و آزمون سرعت روی اینترنت ضعیف |
+| [Plans and quotas](docs/PLANS_AND_QUOTAS.md) | قیمت پلن‌ها، سهمیه‌ها و شارژ پیامک به تصمیم مالک (رایگان: ۵۰ فاکتور و ۵۰ مشتری جدید در ماه، فقط ماه جاری، ۵ پیامک در سال؛ شارژ پیامک تومانی) |
+| [Mazneh and calculator](docs/MAZNEH_AND_CALCULATOR.md) | قرارداد «مظنه» (خرید/فروش ۱۸، ۲۴ عیار، دلار، انس) و «ماشین‌حساب طلایی» |
+| [V2 roadmap](docs/ROADMAP_V2_BUSINESS_TYPES.md) | نسخه ۲: نقره‌فروشی، سکه‌فروشی، طلای آب‌شده، چند نوع کسب‌وکار (حرفه‌ای)، ضمیمه عکس محصول؛ زیرساخت فاز ۱ |
 | [UI build spec](docs/design/UI_BUILD_SPEC.md) | قرارداد کامل ساخت UI مرحله B به‌همراه توکن‌ها، قالب‌های فاکتور (schema + دو preset) و قراردادهای adapter |
 | [Stage A design package](docs/design/README.md) | اتود پیشنهادی مرحله A: وایرفریم، اتود موبایل/دسکتاپ، پالت، لوگو، فونت و toolkit؛ در انتظار تأیید مالک (`docs/design/STAGE_A_REVIEW_REQUEST.md`) |
 
