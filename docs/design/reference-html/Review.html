@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>مرور فاکتور، مشتری و صدور</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: Review · 390x844.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.btn{display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:999px;font-weight:700;font-size:18px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%;text-align:center;padding:6px 12px}
+.btn-gold{background:#D4A53C;color:#15171A}
+.btn-gold:hover{color:#15171A;background:#C2962F}
+.btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #15171A;font-weight:500}
+.btn-line:hover{color:#15171A}
+.line{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:14px}
+.line .k{color:#5A5E66}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
+.lbl{font-size:13px;font-weight:500;color:#5A5E66}
+.input{min-height:46px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:17px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 390px; min-height: 844px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="background: #121417; color: #F4F1EA; display: flex; align-items: center; gap: 10px; padding: 12px 16px">
+    <a href="Items.html" aria-label="بازگشت به ویرایش" style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 10px; color: #F4F1EA">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+    </a>
+    <h1 style="margin: 0; font-size: 19px; font-weight: 700; flex-grow: 1">مرور و صدور</h1>
+    <span class="badge" style="background: #2A2E35; color: #E0B44C">حالت نمونه</span>
+  </header>
+
+  <main style="display: flex; flex-direction: column; gap: 10px; padding: 12px 16px 16px 16px; flex-grow: 1">
+    <section aria-label="ردیف‌ها و جمع" style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+      <div class="line"><span><strong>النگو ۱۸ عیار</strong> <span style="color: #5A5E66; font-size: 12px">۲ گرم · ۷۵۰ · اجرت ۲٪ · سود ۵٪</span></span><strong class="num">۲۱٬۵۶۲٬۰۰۰</strong></div>
+      <div class="line"><span><strong>جعبه هدیه</strong> <span style="color: #5A5E66; font-size: 12px">متفرقه · قیمت دستی</span></span><strong class="num">۲۰۰٬۰۰۰</strong></div>
+      <div style="border-top: 1px dashed #D9D3C7; padding-top: 6px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 12px; font-size: 12.5px; color: #5A5E66"><span>ارزش طلا <span class="num" style="color: #15171A">۲۰٬۰۰۰٬۰۰۰</span></span><span>اجرت <span class="num" style="color: #15171A">۴۰۰٬۰۰۰</span></span><span>سود <span class="num" style="color: #15171A">۱٬۰۲۰٬۰۰۰</span></span><span>مالیات ۱۰٪ روی اجرت و سود <span class="num" style="color: #15171A">۱۴۲٬۰۰۰</span></span></div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid #15171A; padding-top: 8px">
+        <span style="font-weight: 700">مبلغ قابل پرداخت</span>
+        <span class="num" style="font-weight: 700; font-size: 22px">۲۱٬۷۶۲٬۰۰۰ <span style="font-size: 12px; font-weight: 400; color: #5A5E66">تومان</span></span>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; color: #5A5E66">
+        <span>نرخ معامله <span class="num">۱۰٬۰۰۰٬۰۰۰</span> · ۱۴:۲۱ (نمونه)</span>
+        <a href="Items.html" style="font-weight: 500; text-decoration: underline; text-underline-offset: 3px; min-height: 32px; display: inline-flex; align-items: center">ویرایش ردیف‌ها</a>
+      </div>
+    </section>
+
+    <section aria-label="مشتری" style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px">
+      <div style="font-weight: 700; font-size: 15px">خریدار</div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <label class="lbl" for="cn">نام خریدار</label>
+          <input id="cn" class="input" type="text" value="خانم رضایی">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <label class="lbl" for="cm">شماره موبایل مشتری</label>
+          <input id="cm" class="input num" type="tel" inputmode="tel" value="۰۹۱۲ ۰۰۰ ۰۰۰۰" style="direction: ltr; text-align: right">
+        </div>
+      </div>
+      <div style="font-size: 12px; color: #5A5E66; line-height: 1.6">نام و شماره روی فاکتور چاپ می‌شود. شماره برای «صدور و ارسال پیامکی» لازم است و برای «فقط صدور» اختیاری. در صفحه بررسی QR منتشر نمی‌شود.</div>
+      <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 36px"><input type="checkbox" style="width: 20px; height: 20px"> ذخیره در دفتر مشتریان (همه پلن‌ها؛ در سقف ماهانه)</label>
+    </section>
+
+    <section aria-label="پیش‌نمایش پیامک" style="background: #FFFFFF; border: 1.5px dashed #D9D3C7; border-radius: 20px; padding: 10px 14px; display: flex; flex-direction: column; gap: 4px; font-size: 13px">
+      <div style="display: flex; justify-content: space-between"><span style="font-weight: 500">پیامک به <span class="num" dir="ltr">۰۹۱۲ ۰۰۰ ۰۰۰۰</span></span><span style="color: #5A5E66">۱ بخش · از ۵ پیامک رایگان امسال: ۱ مانده</span></div>
+      <div style="display: flex; justify-content: space-between; font-size: 12.5px"><span style="color: #5A5E66">بعد از آن از اعتبار: <span class="num">۴۲٬۰۰۰</span> تومان ≈ <span class="num">۸۴</span> بخش</span><a href="SmsBuy.html" style="font-weight: 500">خرید پیامک بیشتر</a></div>
+      <div style="color: #5A5E66; line-height: 1.6">«طلافروشی نمونه: فاکتور شما صادر شد. مشاهده: talata.ir/i/•••• (نمونه)»</div>
+      <div style="color: #5A5E66">لینک اشتراک: ۲ از ۱۰۰ باقی‌مانده · پس از صدور صف می‌شود؛ قبل از صدور چیزی ارسال نمی‌شود.</div>
+    </section>
+
+    <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px">
+      <div style="font-size: 12px; color: #5A5E66; text-align: center">پس از صدور، نرخ و مبلغ‌ها ثابت می‌مانند. اصلاح مالی فقط با فاکتور جایگزین.</div>
+      <a href="Issued.html" class="btn btn-gold">صدور و ارسال پیامکی</a>
+      <a href="Issued.html" class="btn btn-line">فقط صدور (بدون پیامک)</a>
+    </div>
+  </main>
+</div>
+</body>
+</html>

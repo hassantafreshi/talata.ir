@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>حالت‌های نرخ در موبایل — تغییر، دستی، آفلاین، خطا</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: RateStates · 390x1240.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.btn{display:flex;align-items:center;justify-content:center;min-height:50px;border-radius:999px;font-weight:700;font-size:16px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%;text-align:center;padding:0 10px}
+.btn-gold{background:#D4A53C;color:#15171A}
+.btn-dark{background:#121417;color:#F4F1EA}
+.btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+.btn-off{background:#ECEAE6;color:#4A4A4A;font-weight:500}
+.sheet{background:#F4F1EA;border:0;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.lbl{font-size:12px;color:#1D4ED8;background:#E6EEFF;padding:3px 10px;border-radius:999px;align-self:flex-start}
+.unitbox{display:flex;align-items:center;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;min-height:52px;box-sizing:border-box;overflow:hidden}
+.unitbox input{border:0;min-height:50px;flex:1;min-width:0;padding:0 12px;font-size:22px;font-weight:700;font-family:inherit;color:#15171A;background:transparent}
+.unitbox span{padding:0 10px;font-size:13px;color:#5A5E66;border-inline-start:1.5px solid #D9D3C7;min-height:50px;display:inline-flex;align-items:center;background:#ECE8DF}
+.input{min-height:46px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:15px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+.hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+.cmp{display:flex;justify-content:space-between;align-items:center;border:1.5px solid #D9D3C7;border-radius:12px;padding:10px 12px}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 390px; min-height: 1240px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column; gap: 12px; padding: 16px">
+  <div class="hint">چهار حالت نرخ در موبایل (نمونه). همان قواعد صفحه نرخ/شروع: هیچ نرخ دیده‌نشده‌ای جایگزین نمی‌شود؛ زمان دریافت واقعی می‌ماند؛ صفحه هیچ‌وقت خالی یا خراب نمی‌شود.</div>
+
+  <span class="lbl">۱ · در لحظه «شروع» نرخ تازه رسید — پذیرش آگاهانه</span>
+  <section class="sheet" style="box-shadow: inset 0 0 0 2px #1D4ED8" aria-label="نرخ تغییر کرد">
+    <strong style="font-size: 17px">نرخ تازه رسید؛ با کدام عدد ادامه دهیم؟</strong>
+    <div class="cmp"><span style="color: #5A5E66">عددی که دیدید · <span class="num">۱۴:۲۱</span></span><span class="num" style="font-weight: 500; text-decoration: line-through; color: #5A5E66">۱۰٬۰۰۰٬۰۰۰</span></div>
+    <div class="cmp" style="box-shadow: inset 0 0 0 2px #1D4ED8; background: #E6EEFF"><span style="color: #1D4ED8">نرخ تازه · <span class="num">۱۴:۲۴</span></span><strong class="num" style="font-size: 20px">۱۰٬۰۵۰٬۰۰۰ <span style="font-size: 12px; font-weight: 400">تومان</span></strong></div>
+    <a href="Items.html" class="btn btn-gold">ادامه با نرخ تازه (<span class="num">۱۰٬۰۵۰٬۰۰۰</span>)</a>
+    <a href="Main.html" class="btn btn-line">برگشت و دوباره نگاه کنم</a>
+    <div class="hint">نرخ پذیرفته‌شده برای این معامله ثابت می‌ماند تا خودتان «استفاده از نرخ جدید» را بزنید.</div>
+  </section>
+
+  <span class="lbl">۲ · «ثبت نرخ دستی» — وقتی نرخ در دسترس نیست یا توافق دیگری دارید</span>
+  <section class="sheet" style="box-shadow: inset 0 0 0 2px #8A5A00" aria-label="نرخ دستی">
+    <strong style="font-size: 17px">ثبت نرخ دستی برای این فاکتور</strong>
+    <div style="display: flex; flex-direction: column; gap: 4px"><label for="mr" style="font-size: 13px; font-weight: 500">قیمت هر گرم طلای ۱۸ عیار</label><div class="unitbox"><input id="mr" class="num" type="text" inputmode="numeric" value="۱۰٬۰۰۰٬۰۰۰"><span>تومان</span></div></div>
+    <div style="display: flex; flex-direction: column; gap: 4px"><label for="mw" style="font-size: 13px; font-weight: 500">دلیل</label><select id="mw" class="input"><option>نرخ بازار در دسترس نیست</option><option>توافق با مشتری</option><option>نرخ همکار</option></select></div>
+    <div style="background: #FBF0D9; color: #8A5A00; border-radius: 10px; padding: 8px 12px; font-size: 13px; line-height: 1.6">روی فاکتور و صفحه بررسی، «نرخ دستی» نوشته می‌شود. آخرین نرخ بازار (<span class="num">۱۳:۵۰</span>): <span class="num">۹٬۹۸۰٬۰۰۰</span> تومان برای مقایسه.</div>
+    <a href="Items.html" class="btn btn-dark">ثبت و شروع با این نرخ</a>
+    <a href="Main.html" class="btn btn-line">انصراف</a>
+  </section>
+
+  <span class="lbl">۳ · آفلاین — ماشین‌حساب با آخرین نرخ برچسب‌دار؛ صدور غیرفعال</span>
+  <section class="sheet" aria-label="آفلاین">
+    <div style="display: flex; align-items: center; justify-content: space-between"><strong>قیمت هر گرم طلای ۱۸ عیار</strong><span class="badge" style="background: #ECEAE6; color: #4A4A4A">آفلاین</span></div>
+    <div class="num" style="font-size: 30px; font-weight: 700; color: #4A4A4A">۱۰٬۰۰۰٬۰۰۰ <span style="font-size: 13px; font-weight: 400">تومان</span></div>
+    <div class="hint">آفلاین؛ آخرین نرخ دریافت‌شده <span class="num">۱۴:۲۱</span>. می‌توانید محاسبه و پیش‌نویس را ادامه دهید؛ صدور، لینک و پیامک پس از اتصال.</div>
+    <a href="Items.html" class="btn btn-line">ادامه محاسبه با همین نرخ</a>
+    <a href="Main.html" class="btn btn-off" aria-disabled="true">شروع فاکتور (پس از اتصال)</a>
+  </section>
+
+  <span class="lbl">۴ · خطای سرویس نرخ — صفحه از بین نمی‌رود</span>
+  <section class="sheet" style="box-shadow: inset 0 0 0 2px #B3261E" aria-label="خطا">
+    <div style="display: flex; align-items: center; justify-content: space-between"><strong>سرویس نرخ پاسخ نمی‌دهد</strong><span class="badge" style="background: #FBE9E7; color: #B3261E">خطا</span></div>
+    <div class="hint">آخرین نرخ معتبر <span class="num">۱۳:۵۰</span>: <span class="num">۹٬۹۸۰٬۰۰۰</span> تومان (قدیمی). تا ۳ دقیقه دیگر دوباره تلاش می‌کنیم.</div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px"><a href="RateStates.html" class="btn btn-dark">ثبت نرخ دستی</a><a href="Items.html" class="btn btn-line">فقط متفرقه</a></div>
+    <a href="Main.html" style="font-size: 14px; font-weight: 500; text-align: center; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; text-decoration: underline; text-underline-offset: 4px">تلاش دوباره الان</a>
+  </section>
+</div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>ماشین‌حساب طلایی — دسکتاپ</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: DesktopCalculator · 1280x860.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:500;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;border-radius:999px;font-weight:700;font-size:17px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 22px;gap:8px;width:100%}
+.btn-gold{background:#D4A53C;color:#15171A}
+.btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+.nav a{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:15px;font-weight:500}
+.nav a.on{background:#2A2E35;color:#E0B44C}
+.band{background:#F4F1EA;border:0;border-radius:20px;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.lbl{font-size:13px;font-weight:500;color:#5A5E66}
+.unitbox{display:flex;align-items:center;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;min-height:48px;box-sizing:border-box;overflow:hidden}
+.unitbox input{border:0;min-height:46px;flex:1;min-width:0;padding:0 12px;font-size:19px;font-family:inherit;color:#15171A;background:transparent}
+.unitbox span{padding:0 10px;font-size:13px;color:#5A5E66;min-height:46px;display:inline-flex;align-items:center;background:#ECE8DF}
+.input{min-height:48px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:16px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+.line{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:15px}
+.line .k{color:#B8BCC4}
+.f{display:flex;flex-direction:column;gap:4px}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 1280px; min-height: 860px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 12px 32px; background: #121417; color: #F4F1EA">
+    <div style="display: flex; align-items: center; gap: 12px"><svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke="#E0B44C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg><span style="font-size: 21px; font-weight: 700; color: #E0B44C">طلاتا</span><span style="color: #2A2E35">|</span><span style="font-size: 15px; color: #B8BCC4">طلافروشی نمونه</span></div>
+    <nav class="nav" aria-label="منوی اصلی" style="display: flex; gap: 4px"><a href="DesktopRate.html">فاکتور جدید</a><a href="DesktopInvoiceList.html">فاکتورها</a><a href="DesktopMazneh.html">مظنه</a><a href="DesktopCalculator.html" class="on">ماشین‌حساب</a><a href="DesktopCustomers.html">مشتریان و اقساط</a><a href="DesktopSettings.html">تنظیمات</a></nav>
+  </header>
+
+  <main style="flex-grow: 1; padding: 28px 40px; display: grid; grid-template-columns: 7fr 5fr; gap: 24px; align-content: start">
+    <div style="display: flex; flex-direction: column; gap: 14px">
+      <div><h1 style="margin: 0; font-size: 24px; font-weight: 700">ماشین‌حساب طلایی</h1><div style="font-size: 13.5px; color: #5A5E66">محاسبه فوری و محلی با همان فرمول فاکتور؛ چیزی ذخیره نمی‌شود و در سهمیه فاکتور حساب نمی‌شود. در همه پلن‌ها.</div></div>
+      <section class="band" aria-label="نرخ">
+        <div style="display: flex; justify-content: space-between; align-items: center"><span class="lbl">قیمت هر گرم طلای ۱۸ عیار</span><span class="badge" style="background: #FFFFFF; color: #8A5A00">از مظنه · فروش · <span class="num">۱۴:۲۱</span></span></div>
+        <div class="unitbox" style="max-width: 360px"><input class="num" type="text" inputmode="numeric" value="۱۰٬۰۰۰٬۰۰۰" aria-label="قیمت هر گرم"><span>تومان</span></div>
+      </section>
+      <section class="band" aria-label="ورودی‌ها">
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+          <div class="f"><label class="lbl" for="w">وزن خالص طلا</label><div class="unitbox"><input id="w" class="num" type="text" inputmode="decimal" value="۲"><span>گرم</span></div></div>
+          <div class="f"><label class="lbl" for="p">عیار</label><select id="p" class="input"><option selected="selected">۱۸ عیار (۷۵۰)</option><option>۲۱ عیار (۸۷۵)</option><option>۲۴ عیار (۱۰۰۰)</option><option>عیار دقیق…</option></select></div>
+          <div class="f"><label class="lbl" for="wg">اجرت</label><div class="unitbox"><input id="wg" class="num" type="text" inputmode="decimal" value="۲"><span>٪</span></div></div>
+          <div class="f"><label class="lbl" for="pr">سود</label><div class="unitbox"><input id="pr" class="num" type="text" inputmode="decimal" value="۵"><span>٪</span></div></div>
+          <div class="f" style="grid-column: span 2"><label class="lbl" for="d">تخفیف اجرت و سود</label><div class="unitbox" style="max-width: 300px"><input id="d" class="num" type="text" inputmode="numeric" value="۰"><span>تومان</span></div></div>
+        </div>
+        <div style="font-size: 13px; color: #5A5E66">وزن سنگ و قسمت‌های غیرطلایی را وارد نکنید. مالیات <span class="num">۱۰٪</span> فقط روی اجرت و سود (قاعده نمونه). تخفیف بیش از جمع اجرت و سود پذیرفته نمی‌شود.</div>
+        <div style="display: flex; gap: 10px"><a href="DesktopCalculator.html" class="btn btn-line" style="width: auto">پاک‌کردن</a><a href="DesktopMazneh.html" class="btn btn-line" style="width: auto">مظنه</a></div>
+      </section>
+    </div>
+
+    <aside style="display: flex; flex-direction: column; gap: 12px">
+      <section aria-label="نتیجه" style="background: #121417; color: #F4F1EA; border-radius: 26px; padding: 24px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 14px 28px -16px rgba(0,0,0,.55)">
+        <span style="font-size: 15px; color: #B8BCC4">مبلغ این قطعه</span>
+        <span class="num" style="font-size: 42px; font-weight: 700; color: #E0B44C; line-height: 1.15">۲۱٬۵۶۲٬۰۰۰ <span style="font-size: 15px; font-weight: 400; color: #B8BCC4">تومان</span></span>
+        <div class="line"><span class="k">ارزش طلا (<span class="num">۲</span> گرم × <span class="num">۱۰٬۰۰۰٬۰۰۰</span>)</span><span class="num">۲۰٬۰۰۰٬۰۰۰</span></div>
+        <div class="line"><span class="k">اجرت <span class="num">۲٪</span></span><span class="num">۴۰۰٬۰۰۰</span></div>
+        <div class="line"><span class="k">سود <span class="num">۵٪</span> (روی طلا + اجرت)</span><span class="num">۱٬۰۲۰٬۰۰۰</span></div>
+        <div class="line"><span class="k">مالیات <span class="num">۱۰٪</span> روی اجرت و سود</span><span class="num">۱۴۲٬۰۰۰</span></div>
+        <div style="font-size: 12.5px; color: #B8BCC4; border-top: 1px solid #2A2E35; padding-top: 8px">پیش‌نمایش محلی (GOLD_IR_V1، گردکردن ریالی هر ردیف). صدور فاکتور نیاز به سرور دارد.</div>
+      </section>
+      <a href="DesktopItems.html" class="btn btn-gold">ساخت فاکتور با همین اعداد</a>
+      <div style="font-size: 13px; color: #5A5E66; line-height: 1.7">در قطع اینترنت با آخرین نرخ برچسب‌دار یا نرخ دستی کار می‌کند. با انتخاب عیار دیگر، فقط نرخ همین محاسبه تغییر می‌کند.</div>
+    </aside>
+  </main>
+</div>
+</body>
+</html>

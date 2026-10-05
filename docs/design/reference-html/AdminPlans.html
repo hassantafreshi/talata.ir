@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>مدیریت سرویس — پلن‌ها و قیمت‌ها (دسکتاپ)</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: AdminPlans · 1280x1100.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.ok{background:#E3F3EC;color:#1F7A4D}.warn{background:#FBF0D9;color:#8A5A00}.err{background:#FBE9E7;color:#B3261E}.info{background:#E6EEFF;color:#1D4ED8}.off{background:#ECEAE6;color:#4A4A4A}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:6px;white-space:nowrap}
+.btn-gold{background:#D4A53C;color:#15171A}
+.btn-dark{background:#121417;color:#F4F1EA}
+.btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+.btn-danger{background:#FFFFFF;color:#B3261E;border:1.5px solid #B3261E;font-weight:500}
+.side a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:14.5px}
+.side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
+.side .cnt{font-size:11.5px;background:#2A2E35;color:#E0B44C;border-radius:999px;padding:1px 8px}
+.side a.on .cnt{background:#121417}
+.tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.tile .v{font-size:26px;font-weight:700;line-height:1.2}
+.tile .l{font-size:12.5px;color:#5A5E66}
+.card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card.em{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+.white{background:#FFFFFF;border-radius:14px;padding:4px 12px}
+.input{min-height:40px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f label{font-size:12.5px;font-weight:500}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:8px 8px;border-bottom:1px solid #E6E1D6;text-align:right;vertical-align:middle}
+th{font-weight:500;color:#5A5E66;font-size:12px}
+td.n,th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.sel td{background:#FBF6E8}
+h2{margin:0;font-size:15px;font-weight:700}
+.hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+.seg{display:inline-flex;border-radius:999px;background:#ECE8DF;padding:3px;gap:2px}
+.seg a{min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;color:#5A5E66;text-decoration:none}
+.seg a.on{background:#121417;color:#E0B44C}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid #E6E1D6}
+.row:first-child{border-top:0}
+.tabs{display:flex;gap:4px;border-bottom:1px solid #E6E1D6}
+.tabs a{padding:8px 14px;font-size:14px;color:#5A5E66;text-decoration:none;border-bottom:3px solid transparent;font-weight:500}
+.tabs a.on{color:#15171A;border-bottom-color:#D4A53C;font-weight:700}
+.chk{width:18px;height:18px}
+[dir="ltr"].num,.num[dir="ltr"]{white-space:nowrap;display:inline-block}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 1280px; min-height: 1100px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 15px; line-height: 1.5; display: flex">
+  <aside class="side" aria-label="منوی مدیریت سرویس" style="width: 232px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 4px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا</div>
+    <div style="padding: 0 8px 12px 8px; font-size: 12px; color: #B8BCC4">مدیریت سرویس · نسخه ۱</div>
+    <a href="Provider.html">داشبورد</a><a href="AdminTenants.html">فروشگاه‌ها<span class="cnt num">۱۲۸</span></a><a href="AdminPlans.html" class="on">پلن‌ها و قیمت‌ها</a><a href="AdminPayments.html">پرداخت‌ها<span class="cnt num">۲</span></a><a href="AdminSms.html">پیامک<span class="cnt num">۱</span></a><a href="AdminQuotes.html">نرخ و مظنه</a><a href="AdminTax.html">قواعد مالیات</a><a href="AdminIntegrations.html">اتصال‌ها</a><a href="AdminStaff.html">کارکنان و دسترسی</a><a href="AdminAudit.html">سوابق (audit)</a><a href="AdminSystem.html">سلامت سیستم</a>
+    <div style="margin-top: auto; font-size: 11.5px; color: #B8BCC4; padding: 10px 8px 0 8px; line-height: 1.6">مریم کاظمی · نقش: مالک سرویس<br>ورود با موبایل + Passkey · <a href="#" style="color: #E0B44C">خروج</a></div>
+  </aside>
+  <main style="flex: 1; min-width: 0; padding: 20px 26px 24px 26px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div><h1 style="margin: 0; font-size: 21px; font-weight: 700">پلن‌ها و قیمت‌ها</h1><div class="hint">پیکربندی تجاری؛ کد هیچ عددی را ثابت ندارد. تغییرات به‌صورت نسخه جدید با تاریخ اجرا منتشر می‌شوند و روی سفارش‌های باز و فاکتورهای صادرشده اثر ندارند.</div></div><div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"><a href="#" class="btn btn-line">پیش‌نمایش صفحه پلن کاربر</a><a href="#" class="btn btn-gold">انتشار نسخه ۴</a><span class="badge info">داده نمونه</span></div></div>
+    <div class="hint">نسخه فعال: <strong>۳</strong> از <span class="num">۱۴۰۵/۰۷/۰۵</span> · پیش‌نویس: <strong>۴</strong> (تغییر: سقف پایه) · اجرا از: <input class="input num" value="۱۴۰۵/۰۸/۰۱" style="max-width: 130px; display: inline-block; min-height: 32px"></div>
+    <div style="display: grid; grid-template-columns: 1.45fr 1fr; gap: 12px; align-items: start"><section class="card"><h2>قیمت پلن‌ها (تومان، بدون مالیات)</h2><table><thead><tr><th>پلن</th><th>ماهانه</th><th>سالانه</th><th>با ۱۰٪ مالیات</th></tr></thead><tbody><tr><td>رایگان</td><td>۰</td><td>۰</td><td>۰</td></tr><tr><td>پایه</td><td><input class="input num" value="۷۹۰٬۰۰۰" style="min-width: 120px"></td><td><input class="input num" value="۷٬۹۰۰٬۰۰۰" style="min-width: 120px"></td><td><span class="num">۸۶۹٬۰۰۰<br>۸٬۶۹۰٬۰۰۰</span></td></tr><tr><td>حرفه‌ای</td><td><input class="input num" value="۱٬۹۰۰٬۰۰۰" style="min-width: 120px"></td><td><input class="input num" value="۱۰٬۹۰۰٬۰۰۰" style="min-width: 120px"></td><td><span class="num">۲٬۰۹۰٬۰۰۰<br>۱۱٬۹۹۰٬۰۰۰</span></td></tr></tbody></table><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>ماهانه پایه (۷۹۰ هزار) در انتظار تأیید مالک</span><h2>سقف‌ها و قابلیت‌ها</h2><table><thead><tr><th>قابلیت / سهمیه</th><th>رایگان</th><th>پایه</th><th>حرفه‌ای</th></tr></thead><tbody><tr><td>مظنه، ماشین‌حساب طلایی</td><td>✓</td><td>✓</td><td>✓</td></tr><tr><td>فاکتور در ماه</td><td><input class="input num" value="۵۰" style="max-width: 90px"></td><td><input class="input num" value="۵۰۰" style="max-width: 90px"></td><td>نامحدود</td></tr><tr><td>مشتری جدید در ماه</td><td><input class="input num" value="۵۰" style="max-width: 90px"></td><td><input class="input num" value="۵۰۰" style="max-width: 90px"></td><td>نامحدود</td></tr><tr><td>لینک اشتراک در ماه</td><td><input class="input num" value="۱۰" style="max-width: 90px"></td><td><input class="input num" value="۱۰۰" style="max-width: 90px"></td><td><input class="input num" value="۱٬۰۰۰" style="max-width: 90px"></td></tr><tr><td>پیامک رایگان در سال</td><td><input class="input num" value="۵" style="max-width: 90px"></td><td>—</td><td>—</td></tr><tr><td>تاریخچه فاکتورها و گزارش مالی</td><td>فقط ماه جاری</td><td>همه</td><td>همه</td></tr><tr><td>لوگو، دو قالب، ویرایش ظاهر</td><td>—</td><td>✓</td><td>✓</td></tr><tr><td>اقساط و یادآوری</td><td>—</td><td>—</td><td>✓</td></tr></tbody></table><div class="hint">قابلیت‌ها با کلید (مثل <span dir="ltr">invoice.customize</span>) به سرور می‌روند؛ منطق دامنه هرگز نام پلن را بررسی نمی‌کند.</div></section><div style="display: flex; flex-direction: column; gap: 12px"><section class="card"><h2>مالیات بر ارزش افزوده خرید</h2><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start"><div class="f"><label>نرخ (٪)</label><input class="input num" type="text" value="۱۰"></div><div class="f"><label>گرد کردن</label><select class="input"><option selected="selected">ریال، نیم به بالا</option></select></div></div><label style="display: flex; gap: 8px; align-items: center; font-size: 13.5px"><input type="checkbox" class="chk" checked="checked"> قیمت‌ها بدون مالیات اعلام می‌شوند</label><div class="hint">نرخ در هر سفارش snapshot می‌شود.</div></section><section class="card"><h2>شارژ پیامک</h2><table><thead><tr><th>پلن</th><th>هر بخش (تومان)</th><th>حداقل خرید</th><th>انتقال مانده</th></tr></thead><tbody><tr><td>رایگان</td><td><input class="input num" value="۸۵۰"></td><td><input class="input num" value="۴۰۰٬۰۰۰"></td><td><select class="input" aria-label="انتقال مانده"><option>منقضی</option></select></td></tr><tr><td>پایه</td><td><input class="input num" value="۵۰۰"></td><td><input class="input num" value="۱۰۰٬۰۰۰"></td><td><select class="input" aria-label="انتقال مانده"><option>منتقل</option></select></td></tr><tr><td>حرفه‌ای</td><td><input class="input num" value="۳۵۰"></td><td><input class="input num" value="۱۰۰٬۰۰۰"></td><td><select class="input" aria-label="انتقال مانده"><option>منتقل</option></select></td></tr></tbody></table><div class="f"><label>بسته‌های مجاز (تومان، با ویرگول)</label><input class="input num" type="text" value="۱۰۰٬۰۰۰، ۲۰۰٬۰۰۰، ۳۰۰٬۰۰۰، ۵۰۰٬۰۰۰، ۱٬۰۰۰٬۰۰۰"></div><div class="f"><label>هنگام تغییر پلن</label><select class="input"><option selected="selected">مانده حفظ، قیمت بخش پلن جدید (فرض در انتظار تأیید)</option></select></div></section><section class="card"><h2>سیاست باقی‌مانده هنگام ارتقا</h2><div class="f"><label>proration</label><select class="input"><option selected="selected">روزهای باقی‌مانده به انتهای دوره جدید اضافه شود (پیش‌فرض پیاده‌سازی)</option><option>بدون احتساب</option></select></div><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>در انتظار تصمیم مالک</span></section></div></div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>فهرست فاکتورها — دسکتاپ</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: DesktopInvoiceList · 1280x860.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:999px;font-weight:700;font-size:15px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 16px;gap:8px}
+.btn-gold{background:#D4A53C;color:#15171A}
+.btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+.nav a{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:15px;font-weight:500}
+.nav a.on{background:#2A2E35;color:#E0B44C}
+.chip{display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border-radius:999px;font-size:13.5px;font-weight:500;background:#FFFFFF;border:1px solid #D9D3C7;color:#15171A;text-decoration:none;white-space:nowrap}
+.chip.on{background:#121417;color:#E0B44C;border-color:#121417}
+.input{min-height:44px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:15px;box-sizing:border-box;color:#15171A;font-family:inherit}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:11px 12px;border-bottom:1px solid #D9D3C7;text-align:right;vertical-align:middle}
+th{font-weight:500;color:#5A5E66;font-size:12.5px;background:#F4F1EA}
+td.n,th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+.act{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 10px;border-radius:999px;border:1px solid #D9D3C7;background:#FFFFFF;font-size:12.5px;font-weight:500;color:#15171A;text-decoration:none;white-space:nowrap}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 1280px; min-height: 860px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 12px 32px; background: #121417; color: #F4F1EA">
+    <div style="display: flex; align-items: center; gap: 12px"><svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke="#E0B44C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg><span style="font-size: 21px; font-weight: 700; color: #E0B44C">طلاتا</span><span style="color: #2A2E35">|</span><span style="font-size: 15px; color: #B8BCC4">طلافروشی نمونه</span></div>
+    <nav class="nav" aria-label="منوی اصلی" style="display: flex; gap: 4px"><a href="DesktopRate.html">فاکتور جدید</a><a href="DesktopInvoiceList.html" class="on">فاکتورها</a><a href="DesktopMazneh.html">مظنه</a><a href="DesktopCalculator.html">ماشین‌حساب</a><a href="DesktopCustomers.html">مشتریان و اقساط</a><a href="DesktopSettings.html">تنظیمات</a></nav>
+  </header>
+
+  <main style="flex-grow: 1; padding: 20px 32px 24px 32px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px">
+      <div><h1 style="margin: 0; font-size: 21px; font-weight: 700">فاکتورها</h1><div style="font-size: 12.5px; color: #5A5E66">این ماه <span class="num">۴۲</span> فاکتور · لینک اشتراک <span class="num">۲</span> از ۱۰۰ مانده · فاکتور <span class="num">۴۲</span> از ۵۰۰ (پلن پایه)</div></div>
+      <a href="DesktopRate.html" class="btn btn-gold">+ فاکتور جدید</a>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+      <input type="search" class="input" placeholder="شماره فاکتور، نام یا موبایل خریدار، مبلغ" aria-label="جست‌وجو" style="width: 360px">
+      <input type="text" class="input num" value="۱۴۰۵/۰۷/۰۱ تا ۱۴۰۵/۰۷/۳۰" aria-label="بازه تاریخ" style="width: 220px">
+      <a href="DesktopInvoiceList.html" class="chip on">همه</a><a href="DesktopInvoiceList.html" class="chip">پیش‌نویس (۲)</a><a href="DesktopInvoiceList.html" class="chip">قطعی</a><a href="DesktopInvoiceList.html" class="chip">باطل‌شده</a><a href="DesktopInvoiceList.html" class="chip">اقساطی</a><a href="DesktopInvoiceList.html" class="chip">پیامک ناموفق</a>
+    </div>
+
+    <div style="background: #FFFFFF; border: 0; border-radius: 20px; overflow: hidden; box-shadow: 0 0 0 1px #E6E1D6">
+      <table>
+        <thead><tr><th>شماره</th><th>تاریخ</th><th>خریدار</th><th>اقلام</th><th class="n">مبلغ (تومان)</th><th>وضعیت</th><th>پیامک</th><th>اقدام</th></tr></thead>
+        <tbody>
+          <tr style="background: #FBF9F4"><td><span class="badge" style="background: #ECEAE6; color: #4A4A4A">پیش‌نویس</span></td><td class="num">۱۴۰۵/۰۷/۱۳ · ۱۴:۰۵</td><td>خانم رضایی</td><td>۲ ردیف</td><td class="n">۲۱٬۷۶۲٬۰۰۰ <span style="font-size: 11px; color: #5A5E66">محلی</span></td><td>—</td><td>—</td><td><a href="DesktopItems.html" class="act" style="background: #121417; color: #E0B44C; box-shadow: inset 0 0 0 2px #121417">ادامه</a> <a href="DesktopInvoiceList.html" class="act">حذف</a></td></tr>
+          <tr><td class="num"><strong>۱۴۰۵-۰۰۱۲</strong></td><td class="num">۱۴۰۵/۰۷/۱۳</td><td>خانم رضایی · <span class="num" dir="ltr">۰۹۱۲…۰۰۰۰</span></td><td>النگو ۱۸ عیار، جعبه هدیه</td><td class="n"><strong>۲۱٬۷۶۲٬۰۰۰</strong></td><td><span class="badge" style="background: #E3F3EC; color: #1F7A4D">قطعی</span></td><td><span class="badge" style="background: #E3F3EC; color: #1F7A4D">تحویل شد</span></td><td><a href="DesktopInvoiceDetail.html" class="act">جزئیات</a> <a href="Print.html" class="act">چاپ</a> <a href="DesktopInvoiceList.html" class="act">لینک</a></td></tr>
+          <tr><td class="num"><strong>۱۴۰۵-۰۰۱۱</strong></td><td class="num">۱۴۰۵/۰۷/۱۱</td><td>آقای محمدی</td><td>انگشتر ۱۸ عیار</td><td class="n"><strong>۸٬۴۵۰٬۰۰۰</strong></td><td><span class="badge" style="background: #E3F3EC; color: #1F7A4D">قطعی</span></td><td><span class="badge" style="background: #FBE9E7; color: #B3261E">ناموفق</span> <a href="DesktopInvoiceList.html" style="font-size: 12.5px; font-weight: 500">ارسال دوباره</a></td><td><a href="DesktopInvoiceDetail.html" class="act">جزئیات</a> <a href="Print.html" class="act">چاپ</a> <a href="DesktopInvoiceList.html" class="act">لینک</a></td></tr>
+          <tr><td class="num"><strong>۱۴۰۵-۰۰۱۰</strong></td><td class="num">۱۴۰۵/۰۷/۰۲</td><td>بدون خریدار</td><td>زنجیر ۱۸ عیار</td><td class="n"><strong>۳٬۲۰۰٬۰۰۰</strong></td><td><span class="badge" style="background: #E3F3EC; color: #1F7A4D">قطعی · جایگزین ۰۰۰۹</span></td><td>—</td><td><a href="DesktopInvoiceDetail.html" class="act">جزئیات</a> <a href="Print.html" class="act">چاپ</a></td></tr>
+          <tr><td class="num" style="color: #5A5E66">۱۴۰۵-۰۰۰۹</td><td class="num">۱۴۰۵/۰۷/۰۲</td><td>بدون خریدار</td><td>زنجیر ۱۸ عیار</td><td class="n" style="color: #5A5E66; text-decoration: line-through">۳٬۲۰۰٬۰۰۰</td><td><span class="badge" style="background: #FBE9E7; color: #B3261E">باطل‌شده</span></td><td>—</td><td><a href="DesktopInvoiceDetail.html" class="act">جزئیات</a></td></tr>
+          <tr><td class="num"><strong>۱۴۰۵-۰۰۰۸</strong></td><td class="num">۱۴۰۵/۰۵/۲۰</td><td>خانم کریمی‌نژاد</td><td>گردنبند ۱۸ عیار</td><td class="n"><strong>۱۰٬۰۰۰٬۰۰۰</strong></td><td><span class="badge" style="background: #FBF0D9; color: #8A5A00">قطعی · اقساطی</span></td><td><span class="badge" style="background: #E3F3EC; color: #1F7A4D">تحویل شد</span></td><td><a href="DesktopInvoiceDetail.html" class="act">جزئیات</a> <a href="DesktopCustomers.html" class="act">اقساط</a></td></tr>
+        </tbody>
+      </table>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; font-size: 13px; color: #5A5E66; background: #F4F1EA">
+        <span>نمایش ۱ تا ۲۵ از ۴۲ · ۲۵ در هر صفحه</span>
+        <div style="display: flex; gap: 6px"><a href="DesktopInvoiceList.html" class="act">قبلی</a><a href="DesktopInvoiceList.html" class="act" style="background: #121417; color: #E0B44C; box-shadow: inset 0 0 0 2px #121417">۱</a><a href="DesktopInvoiceList.html" class="act">۲</a><a href="DesktopInvoiceList.html" class="act">بعدی</a></div>
+      </div>
+    </div>
+    <div style="font-size: 12.5px; color: #5A5E66">پلن رایگان: فقط فاکتورهای ماه جاری و بدون گزارش مالی؛ داده‌ها حفظ می‌شوند و با ارتقا نمایش داده می‌شوند. حالت خالی: «هنوز فاکتوری ندارید» با دکمه فاکتور جدید · حالت آفلاین: فهرست کش‌شده با برچسب «آخرین به‌روزرسانی» · داده نمونه.</div>
+  </main>
+</div>
+</body>
+</html>

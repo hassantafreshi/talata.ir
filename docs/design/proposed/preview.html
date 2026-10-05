@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>اتود UI طلاتا — مرحله A نسخه ۴ (پیشنهادی)</title>
+<title>اتود UI طلاتا — مرحله A نسخه ۵ (پیشنهادی)</title>
 <style>
 @font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
 @font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -694,27 +694,6 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
 #b-DesktopQuotaLimit .meter{height:8px;border-radius:999px;background:#ECEAE6;overflow:hidden}
 #b-DesktopQuotaLimit .meter span{display:block;height:100%;background:#8A5A00}
 .noop{margin:0}
-#b-Provider a{color:#8A5A00}
-#b-Provider a:hover{color:#6B4600}
-#b-Provider .num{font-variant-numeric:tabular-nums}
-#b-Provider .badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
-#b-Provider .btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;border-radius:999px;font-weight:700;font-size:14px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:8px}
-#b-Provider .btn-gold{background:#D4A53C;color:#15171A}
-#b-Provider .btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
-#b-Provider .side a{display:flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:15px}
-#b-Provider .side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
-#b-Provider .tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
-#b-Provider .tile .v{font-size:26px;font-weight:700;line-height:1.2}
-#b-Provider .tile .l{font-size:13px;color:#5A5E66}
-#b-Provider .card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
-#b-Provider .input{min-height:42px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
-#b-Provider table{border-collapse:collapse;width:100%;font-size:13.5px}
-#b-Provider th, #b-Provider td{padding:9px 10px;border-bottom:1px solid #D9D3C7;text-align:right;vertical-align:middle}
-#b-Provider th{font-weight:500;color:#5A5E66;font-size:12px}
-#b-Provider td.n, #b-Provider th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
-#b-Provider h2{margin:0;font-size:15px;font-weight:700}
-#b-Provider .hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
-.noop{margin:0}
 #b-Mazneh a{color:#8A5A00}
 #b-Mazneh a:hover{color:#6B4600}
 #b-Mazneh .num{font-variant-numeric:tabular-nums}
@@ -963,11 +942,551 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
 #b-DesktopPayReturnSms .side a{display:flex;align-items:center;justify-content:space-between;min-height:46px;padding:0 14px;border-radius:999px;text-decoration:none;color:#15171A;font-size:15px}
 #b-DesktopPayReturnSms .side a.on{background:#F4F1EA;box-shadow:inset 0 0 0 2px #D4A53C;font-weight:700}
 #b-DesktopPayReturnSms .btn{width:auto;padding:0 20px;min-height:46px;font-size:15px}
+.noop{margin:0}
+#b-Provider a{color:#8A5A00}
+#b-Provider a:hover{color:#6B4600}
+#b-Provider .num{font-variant-numeric:tabular-nums}
+#b-Provider .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+#b-Provider .ok{background:#E3F3EC;color:#1F7A4D}
+#b-Provider .warn{background:#FBF0D9;color:#8A5A00}
+#b-Provider .err{background:#FBE9E7;color:#B3261E}
+#b-Provider .info{background:#E6EEFF;color:#1D4ED8}
+#b-Provider .off{background:#ECEAE6;color:#4A4A4A}
+#b-Provider .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:6px;white-space:nowrap}
+#b-Provider .btn-gold{background:#D4A53C;color:#15171A}
+#b-Provider .btn-dark{background:#121417;color:#F4F1EA}
+#b-Provider .btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+#b-Provider .btn-danger{background:#FFFFFF;color:#B3261E;border:1.5px solid #B3261E;font-weight:500}
+#b-Provider .side a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:14.5px}
+#b-Provider .side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
+#b-Provider .side .cnt{font-size:11.5px;background:#2A2E35;color:#E0B44C;border-radius:999px;padding:1px 8px}
+#b-Provider .side a.on .cnt{background:#121417}
+#b-Provider .tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+#b-Provider .tile .v{font-size:26px;font-weight:700;line-height:1.2}
+#b-Provider .tile .l{font-size:12.5px;color:#5A5E66}
+#b-Provider .card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#b-Provider .card.em{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+#b-Provider .white{background:#FFFFFF;border-radius:14px;padding:4px 12px}
+#b-Provider .input{min-height:40px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+#b-Provider .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#b-Provider .f label{font-size:12.5px;font-weight:500}
+#b-Provider table{border-collapse:collapse;width:100%;font-size:13px}
+#b-Provider th, #b-Provider td{padding:8px 8px;border-bottom:1px solid #E6E1D6;text-align:right;vertical-align:middle}
+#b-Provider th{font-weight:500;color:#5A5E66;font-size:12px}
+#b-Provider td.n, #b-Provider th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+#b-Provider tr.sel td{background:#FBF6E8}
+#b-Provider h2{margin:0;font-size:15px;font-weight:700}
+#b-Provider .hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+#b-Provider .seg{display:inline-flex;border-radius:999px;background:#ECE8DF;padding:3px;gap:2px}
+#b-Provider .seg a{min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;color:#5A5E66;text-decoration:none}
+#b-Provider .seg a.on{background:#121417;color:#E0B44C}
+#b-Provider .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid #E6E1D6}
+#b-Provider .row:first-child{border-top:0}
+#b-Provider .tabs{display:flex;gap:4px;border-bottom:1px solid #E6E1D6}
+#b-Provider .tabs a{padding:8px 14px;font-size:14px;color:#5A5E66;text-decoration:none;border-bottom:3px solid transparent;font-weight:500}
+#b-Provider .tabs a.on{color:#15171A;border-bottom-color:#D4A53C;font-weight:700}
+#b-Provider .chk{width:18px;height:18px}
+#b-Provider [dir="ltr"].num, #b-Provider .num[dir="ltr"]{white-space:nowrap;display:inline-block}
+.noop{margin:0}
+#b-AdminTenants a{color:#8A5A00}
+#b-AdminTenants a:hover{color:#6B4600}
+#b-AdminTenants .num{font-variant-numeric:tabular-nums}
+#b-AdminTenants .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+#b-AdminTenants .ok{background:#E3F3EC;color:#1F7A4D}
+#b-AdminTenants .warn{background:#FBF0D9;color:#8A5A00}
+#b-AdminTenants .err{background:#FBE9E7;color:#B3261E}
+#b-AdminTenants .info{background:#E6EEFF;color:#1D4ED8}
+#b-AdminTenants .off{background:#ECEAE6;color:#4A4A4A}
+#b-AdminTenants .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:6px;white-space:nowrap}
+#b-AdminTenants .btn-gold{background:#D4A53C;color:#15171A}
+#b-AdminTenants .btn-dark{background:#121417;color:#F4F1EA}
+#b-AdminTenants .btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+#b-AdminTenants .btn-danger{background:#FFFFFF;color:#B3261E;border:1.5px solid #B3261E;font-weight:500}
+#b-AdminTenants .side a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:14.5px}
+#b-AdminTenants .side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
+#b-AdminTenants .side .cnt{font-size:11.5px;background:#2A2E35;color:#E0B44C;border-radius:999px;padding:1px 8px}
+#b-AdminTenants .side a.on .cnt{background:#121417}
+#b-AdminTenants .tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+#b-AdminTenants .tile .v{font-size:26px;font-weight:700;line-height:1.2}
+#b-AdminTenants .tile .l{font-size:12.5px;color:#5A5E66}
+#b-AdminTenants .card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#b-AdminTenants .card.em{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+#b-AdminTenants .white{background:#FFFFFF;border-radius:14px;padding:4px 12px}
+#b-AdminTenants .input{min-height:40px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+#b-AdminTenants .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#b-AdminTenants .f label{font-size:12.5px;font-weight:500}
+#b-AdminTenants table{border-collapse:collapse;width:100%;font-size:13px}
+#b-AdminTenants th, #b-AdminTenants td{padding:8px 8px;border-bottom:1px solid #E6E1D6;text-align:right;vertical-align:middle}
+#b-AdminTenants th{font-weight:500;color:#5A5E66;font-size:12px}
+#b-AdminTenants td.n, #b-AdminTenants th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+#b-AdminTenants tr.sel td{background:#FBF6E8}
+#b-AdminTenants h2{margin:0;font-size:15px;font-weight:700}
+#b-AdminTenants .hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+#b-AdminTenants .seg{display:inline-flex;border-radius:999px;background:#ECE8DF;padding:3px;gap:2px}
+#b-AdminTenants .seg a{min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;color:#5A5E66;text-decoration:none}
+#b-AdminTenants .seg a.on{background:#121417;color:#E0B44C}
+#b-AdminTenants .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid #E6E1D6}
+#b-AdminTenants .row:first-child{border-top:0}
+#b-AdminTenants .tabs{display:flex;gap:4px;border-bottom:1px solid #E6E1D6}
+#b-AdminTenants .tabs a{padding:8px 14px;font-size:14px;color:#5A5E66;text-decoration:none;border-bottom:3px solid transparent;font-weight:500}
+#b-AdminTenants .tabs a.on{color:#15171A;border-bottom-color:#D4A53C;font-weight:700}
+#b-AdminTenants .chk{width:18px;height:18px}
+#b-AdminTenants [dir="ltr"].num, #b-AdminTenants .num[dir="ltr"]{white-space:nowrap;display:inline-block}
+.noop{margin:0}
+#b-AdminTenantDetail a{color:#8A5A00}
+#b-AdminTenantDetail a:hover{color:#6B4600}
+#b-AdminTenantDetail .num{font-variant-numeric:tabular-nums}
+#b-AdminTenantDetail .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+#b-AdminTenantDetail .ok{background:#E3F3EC;color:#1F7A4D}
+#b-AdminTenantDetail .warn{background:#FBF0D9;color:#8A5A00}
+#b-AdminTenantDetail .err{background:#FBE9E7;color:#B3261E}
+#b-AdminTenantDetail .info{background:#E6EEFF;color:#1D4ED8}
+#b-AdminTenantDetail .off{background:#ECEAE6;color:#4A4A4A}
+#b-AdminTenantDetail .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:6px;white-space:nowrap}
+#b-AdminTenantDetail .btn-gold{background:#D4A53C;color:#15171A}
+#b-AdminTenantDetail .btn-dark{background:#121417;color:#F4F1EA}
+#b-AdminTenantDetail .btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+#b-AdminTenantDetail .btn-danger{background:#FFFFFF;color:#B3261E;border:1.5px solid #B3261E;font-weight:500}
+#b-AdminTenantDetail .side a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:14.5px}
+#b-AdminTenantDetail .side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
+#b-AdminTenantDetail .side .cnt{font-size:11.5px;background:#2A2E35;color:#E0B44C;border-radius:999px;padding:1px 8px}
+#b-AdminTenantDetail .side a.on .cnt{background:#121417}
+#b-AdminTenantDetail .tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+#b-AdminTenantDetail .tile .v{font-size:26px;font-weight:700;line-height:1.2}
+#b-AdminTenantDetail .tile .l{font-size:12.5px;color:#5A5E66}
+#b-AdminTenantDetail .card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#b-AdminTenantDetail .card.em{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+#b-AdminTenantDetail .white{background:#FFFFFF;border-radius:14px;padding:4px 12px}
+#b-AdminTenantDetail .input{min-height:40px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+#b-AdminTenantDetail .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#b-AdminTenantDetail .f label{font-size:12.5px;font-weight:500}
+#b-AdminTenantDetail table{border-collapse:collapse;width:100%;font-size:13px}
+#b-AdminTenantDetail th, #b-AdminTenantDetail td{padding:8px 8px;border-bottom:1px solid #E6E1D6;text-align:right;vertical-align:middle}
+#b-AdminTenantDetail th{font-weight:500;color:#5A5E66;font-size:12px}
+#b-AdminTenantDetail td.n, #b-AdminTenantDetail th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+#b-AdminTenantDetail tr.sel td{background:#FBF6E8}
+#b-AdminTenantDetail h2{margin:0;font-size:15px;font-weight:700}
+#b-AdminTenantDetail .hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+#b-AdminTenantDetail .seg{display:inline-flex;border-radius:999px;background:#ECE8DF;padding:3px;gap:2px}
+#b-AdminTenantDetail .seg a{min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;color:#5A5E66;text-decoration:none}
+#b-AdminTenantDetail .seg a.on{background:#121417;color:#E0B44C}
+#b-AdminTenantDetail .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid #E6E1D6}
+#b-AdminTenantDetail .row:first-child{border-top:0}
+#b-AdminTenantDetail .tabs{display:flex;gap:4px;border-bottom:1px solid #E6E1D6}
+#b-AdminTenantDetail .tabs a{padding:8px 14px;font-size:14px;color:#5A5E66;text-decoration:none;border-bottom:3px solid transparent;font-weight:500}
+#b-AdminTenantDetail .tabs a.on{color:#15171A;border-bottom-color:#D4A53C;font-weight:700}
+#b-AdminTenantDetail .chk{width:18px;height:18px}
+#b-AdminTenantDetail [dir="ltr"].num, #b-AdminTenantDetail .num[dir="ltr"]{white-space:nowrap;display:inline-block}
+.noop{margin:0}
+#b-AdminPlans a{color:#8A5A00}
+#b-AdminPlans a:hover{color:#6B4600}
+#b-AdminPlans .num{font-variant-numeric:tabular-nums}
+#b-AdminPlans .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+#b-AdminPlans .ok{background:#E3F3EC;color:#1F7A4D}
+#b-AdminPlans .warn{background:#FBF0D9;color:#8A5A00}
+#b-AdminPlans .err{background:#FBE9E7;color:#B3261E}
+#b-AdminPlans .info{background:#E6EEFF;color:#1D4ED8}
+#b-AdminPlans .off{background:#ECEAE6;color:#4A4A4A}
+#b-AdminPlans .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:6px;white-space:nowrap}
+#b-AdminPlans .btn-gold{background:#D4A53C;color:#15171A}
+#b-AdminPlans .btn-dark{background:#121417;color:#F4F1EA}
+#b-AdminPlans .btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+#b-AdminPlans .btn-danger{background:#FFFFFF;color:#B3261E;border:1.5px solid #B3261E;font-weight:500}
+#b-AdminPlans .side a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:14.5px}
+#b-AdminPlans .side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
+#b-AdminPlans .side .cnt{font-size:11.5px;background:#2A2E35;color:#E0B44C;border-radius:999px;padding:1px 8px}
+#b-AdminPlans .side a.on .cnt{background:#121417}
+#b-AdminPlans .tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+#b-AdminPlans .tile .v{font-size:26px;font-weight:700;line-height:1.2}
+#b-AdminPlans .tile .l{font-size:12.5px;color:#5A5E66}
+#b-AdminPlans .card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#b-AdminPlans .card.em{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+#b-AdminPlans .white{background:#FFFFFF;border-radius:14px;padding:4px 12px}
+#b-AdminPlans .input{min-height:40px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+#b-AdminPlans .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#b-AdminPlans .f label{font-size:12.5px;font-weight:500}
+#b-AdminPlans table{border-collapse:collapse;width:100%;font-size:13px}
+#b-AdminPlans th, #b-AdminPlans td{padding:8px 8px;border-bottom:1px solid #E6E1D6;text-align:right;vertical-align:middle}
+#b-AdminPlans th{font-weight:500;color:#5A5E66;font-size:12px}
+#b-AdminPlans td.n, #b-AdminPlans th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+#b-AdminPlans tr.sel td{background:#FBF6E8}
+#b-AdminPlans h2{margin:0;font-size:15px;font-weight:700}
+#b-AdminPlans .hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+#b-AdminPlans .seg{display:inline-flex;border-radius:999px;background:#ECE8DF;padding:3px;gap:2px}
+#b-AdminPlans .seg a{min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;color:#5A5E66;text-decoration:none}
+#b-AdminPlans .seg a.on{background:#121417;color:#E0B44C}
+#b-AdminPlans .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid #E6E1D6}
+#b-AdminPlans .row:first-child{border-top:0}
+#b-AdminPlans .tabs{display:flex;gap:4px;border-bottom:1px solid #E6E1D6}
+#b-AdminPlans .tabs a{padding:8px 14px;font-size:14px;color:#5A5E66;text-decoration:none;border-bottom:3px solid transparent;font-weight:500}
+#b-AdminPlans .tabs a.on{color:#15171A;border-bottom-color:#D4A53C;font-weight:700}
+#b-AdminPlans .chk{width:18px;height:18px}
+#b-AdminPlans [dir="ltr"].num, #b-AdminPlans .num[dir="ltr"]{white-space:nowrap;display:inline-block}
+.noop{margin:0}
+#b-AdminPayments a{color:#8A5A00}
+#b-AdminPayments a:hover{color:#6B4600}
+#b-AdminPayments .num{font-variant-numeric:tabular-nums}
+#b-AdminPayments .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+#b-AdminPayments .ok{background:#E3F3EC;color:#1F7A4D}
+#b-AdminPayments .warn{background:#FBF0D9;color:#8A5A00}
+#b-AdminPayments .err{background:#FBE9E7;color:#B3261E}
+#b-AdminPayments .info{background:#E6EEFF;color:#1D4ED8}
+#b-AdminPayments .off{background:#ECEAE6;color:#4A4A4A}
+#b-AdminPayments .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:6px;white-space:nowrap}
+#b-AdminPayments .btn-gold{background:#D4A53C;color:#15171A}
+#b-AdminPayments .btn-dark{background:#121417;color:#F4F1EA}
+#b-AdminPayments .btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+#b-AdminPayments .btn-danger{background:#FFFFFF;color:#B3261E;border:1.5px solid #B3261E;font-weight:500}
+#b-AdminPayments .side a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:14.5px}
+#b-AdminPayments .side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
+#b-AdminPayments .side .cnt{font-size:11.5px;background:#2A2E35;color:#E0B44C;border-radius:999px;padding:1px 8px}
+#b-AdminPayments .side a.on .cnt{background:#121417}
+#b-AdminPayments .tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+#b-AdminPayments .tile .v{font-size:26px;font-weight:700;line-height:1.2}
+#b-AdminPayments .tile .l{font-size:12.5px;color:#5A5E66}
+#b-AdminPayments .card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#b-AdminPayments .card.em{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+#b-AdminPayments .white{background:#FFFFFF;border-radius:14px;padding:4px 12px}
+#b-AdminPayments .input{min-height:40px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+#b-AdminPayments .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#b-AdminPayments .f label{font-size:12.5px;font-weight:500}
+#b-AdminPayments table{border-collapse:collapse;width:100%;font-size:13px}
+#b-AdminPayments th, #b-AdminPayments td{padding:8px 8px;border-bottom:1px solid #E6E1D6;text-align:right;vertical-align:middle}
+#b-AdminPayments th{font-weight:500;color:#5A5E66;font-size:12px}
+#b-AdminPayments td.n, #b-AdminPayments th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+#b-AdminPayments tr.sel td{background:#FBF6E8}
+#b-AdminPayments h2{margin:0;font-size:15px;font-weight:700}
+#b-AdminPayments .hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+#b-AdminPayments .seg{display:inline-flex;border-radius:999px;background:#ECE8DF;padding:3px;gap:2px}
+#b-AdminPayments .seg a{min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;color:#5A5E66;text-decoration:none}
+#b-AdminPayments .seg a.on{background:#121417;color:#E0B44C}
+#b-AdminPayments .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid #E6E1D6}
+#b-AdminPayments .row:first-child{border-top:0}
+#b-AdminPayments .tabs{display:flex;gap:4px;border-bottom:1px solid #E6E1D6}
+#b-AdminPayments .tabs a{padding:8px 14px;font-size:14px;color:#5A5E66;text-decoration:none;border-bottom:3px solid transparent;font-weight:500}
+#b-AdminPayments .tabs a.on{color:#15171A;border-bottom-color:#D4A53C;font-weight:700}
+#b-AdminPayments .chk{width:18px;height:18px}
+#b-AdminPayments [dir="ltr"].num, #b-AdminPayments .num[dir="ltr"]{white-space:nowrap;display:inline-block}
+.noop{margin:0}
+#b-AdminSms a{color:#8A5A00}
+#b-AdminSms a:hover{color:#6B4600}
+#b-AdminSms .num{font-variant-numeric:tabular-nums}
+#b-AdminSms .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+#b-AdminSms .ok{background:#E3F3EC;color:#1F7A4D}
+#b-AdminSms .warn{background:#FBF0D9;color:#8A5A00}
+#b-AdminSms .err{background:#FBE9E7;color:#B3261E}
+#b-AdminSms .info{background:#E6EEFF;color:#1D4ED8}
+#b-AdminSms .off{background:#ECEAE6;color:#4A4A4A}
+#b-AdminSms .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:6px;white-space:nowrap}
+#b-AdminSms .btn-gold{background:#D4A53C;color:#15171A}
+#b-AdminSms .btn-dark{background:#121417;color:#F4F1EA}
+#b-AdminSms .btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+#b-AdminSms .btn-danger{background:#FFFFFF;color:#B3261E;border:1.5px solid #B3261E;font-weight:500}
+#b-AdminSms .side a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:14.5px}
+#b-AdminSms .side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
+#b-AdminSms .side .cnt{font-size:11.5px;background:#2A2E35;color:#E0B44C;border-radius:999px;padding:1px 8px}
+#b-AdminSms .side a.on .cnt{background:#121417}
+#b-AdminSms .tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+#b-AdminSms .tile .v{font-size:26px;font-weight:700;line-height:1.2}
+#b-AdminSms .tile .l{font-size:12.5px;color:#5A5E66}
+#b-AdminSms .card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#b-AdminSms .card.em{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+#b-AdminSms .white{background:#FFFFFF;border-radius:14px;padding:4px 12px}
+#b-AdminSms .input{min-height:40px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+#b-AdminSms .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#b-AdminSms .f label{font-size:12.5px;font-weight:500}
+#b-AdminSms table{border-collapse:collapse;width:100%;font-size:13px}
+#b-AdminSms th, #b-AdminSms td{padding:8px 8px;border-bottom:1px solid #E6E1D6;text-align:right;vertical-align:middle}
+#b-AdminSms th{font-weight:500;color:#5A5E66;font-size:12px}
+#b-AdminSms td.n, #b-AdminSms th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+#b-AdminSms tr.sel td{background:#FBF6E8}
+#b-AdminSms h2{margin:0;font-size:15px;font-weight:700}
+#b-AdminSms .hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+#b-AdminSms .seg{display:inline-flex;border-radius:999px;background:#ECE8DF;padding:3px;gap:2px}
+#b-AdminSms .seg a{min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;color:#5A5E66;text-decoration:none}
+#b-AdminSms .seg a.on{background:#121417;color:#E0B44C}
+#b-AdminSms .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid #E6E1D6}
+#b-AdminSms .row:first-child{border-top:0}
+#b-AdminSms .tabs{display:flex;gap:4px;border-bottom:1px solid #E6E1D6}
+#b-AdminSms .tabs a{padding:8px 14px;font-size:14px;color:#5A5E66;text-decoration:none;border-bottom:3px solid transparent;font-weight:500}
+#b-AdminSms .tabs a.on{color:#15171A;border-bottom-color:#D4A53C;font-weight:700}
+#b-AdminSms .chk{width:18px;height:18px}
+#b-AdminSms [dir="ltr"].num, #b-AdminSms .num[dir="ltr"]{white-space:nowrap;display:inline-block}
+.noop{margin:0}
+#b-AdminQuotes a{color:#8A5A00}
+#b-AdminQuotes a:hover{color:#6B4600}
+#b-AdminQuotes .num{font-variant-numeric:tabular-nums}
+#b-AdminQuotes .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+#b-AdminQuotes .ok{background:#E3F3EC;color:#1F7A4D}
+#b-AdminQuotes .warn{background:#FBF0D9;color:#8A5A00}
+#b-AdminQuotes .err{background:#FBE9E7;color:#B3261E}
+#b-AdminQuotes .info{background:#E6EEFF;color:#1D4ED8}
+#b-AdminQuotes .off{background:#ECEAE6;color:#4A4A4A}
+#b-AdminQuotes .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:6px;white-space:nowrap}
+#b-AdminQuotes .btn-gold{background:#D4A53C;color:#15171A}
+#b-AdminQuotes .btn-dark{background:#121417;color:#F4F1EA}
+#b-AdminQuotes .btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+#b-AdminQuotes .btn-danger{background:#FFFFFF;color:#B3261E;border:1.5px solid #B3261E;font-weight:500}
+#b-AdminQuotes .side a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:14.5px}
+#b-AdminQuotes .side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
+#b-AdminQuotes .side .cnt{font-size:11.5px;background:#2A2E35;color:#E0B44C;border-radius:999px;padding:1px 8px}
+#b-AdminQuotes .side a.on .cnt{background:#121417}
+#b-AdminQuotes .tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+#b-AdminQuotes .tile .v{font-size:26px;font-weight:700;line-height:1.2}
+#b-AdminQuotes .tile .l{font-size:12.5px;color:#5A5E66}
+#b-AdminQuotes .card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#b-AdminQuotes .card.em{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+#b-AdminQuotes .white{background:#FFFFFF;border-radius:14px;padding:4px 12px}
+#b-AdminQuotes .input{min-height:40px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+#b-AdminQuotes .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#b-AdminQuotes .f label{font-size:12.5px;font-weight:500}
+#b-AdminQuotes table{border-collapse:collapse;width:100%;font-size:13px}
+#b-AdminQuotes th, #b-AdminQuotes td{padding:8px 8px;border-bottom:1px solid #E6E1D6;text-align:right;vertical-align:middle}
+#b-AdminQuotes th{font-weight:500;color:#5A5E66;font-size:12px}
+#b-AdminQuotes td.n, #b-AdminQuotes th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+#b-AdminQuotes tr.sel td{background:#FBF6E8}
+#b-AdminQuotes h2{margin:0;font-size:15px;font-weight:700}
+#b-AdminQuotes .hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+#b-AdminQuotes .seg{display:inline-flex;border-radius:999px;background:#ECE8DF;padding:3px;gap:2px}
+#b-AdminQuotes .seg a{min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;color:#5A5E66;text-decoration:none}
+#b-AdminQuotes .seg a.on{background:#121417;color:#E0B44C}
+#b-AdminQuotes .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid #E6E1D6}
+#b-AdminQuotes .row:first-child{border-top:0}
+#b-AdminQuotes .tabs{display:flex;gap:4px;border-bottom:1px solid #E6E1D6}
+#b-AdminQuotes .tabs a{padding:8px 14px;font-size:14px;color:#5A5E66;text-decoration:none;border-bottom:3px solid transparent;font-weight:500}
+#b-AdminQuotes .tabs a.on{color:#15171A;border-bottom-color:#D4A53C;font-weight:700}
+#b-AdminQuotes .chk{width:18px;height:18px}
+#b-AdminQuotes [dir="ltr"].num, #b-AdminQuotes .num[dir="ltr"]{white-space:nowrap;display:inline-block}
+.noop{margin:0}
+#b-AdminTax a{color:#8A5A00}
+#b-AdminTax a:hover{color:#6B4600}
+#b-AdminTax .num{font-variant-numeric:tabular-nums}
+#b-AdminTax .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+#b-AdminTax .ok{background:#E3F3EC;color:#1F7A4D}
+#b-AdminTax .warn{background:#FBF0D9;color:#8A5A00}
+#b-AdminTax .err{background:#FBE9E7;color:#B3261E}
+#b-AdminTax .info{background:#E6EEFF;color:#1D4ED8}
+#b-AdminTax .off{background:#ECEAE6;color:#4A4A4A}
+#b-AdminTax .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:6px;white-space:nowrap}
+#b-AdminTax .btn-gold{background:#D4A53C;color:#15171A}
+#b-AdminTax .btn-dark{background:#121417;color:#F4F1EA}
+#b-AdminTax .btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+#b-AdminTax .btn-danger{background:#FFFFFF;color:#B3261E;border:1.5px solid #B3261E;font-weight:500}
+#b-AdminTax .side a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:14.5px}
+#b-AdminTax .side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
+#b-AdminTax .side .cnt{font-size:11.5px;background:#2A2E35;color:#E0B44C;border-radius:999px;padding:1px 8px}
+#b-AdminTax .side a.on .cnt{background:#121417}
+#b-AdminTax .tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+#b-AdminTax .tile .v{font-size:26px;font-weight:700;line-height:1.2}
+#b-AdminTax .tile .l{font-size:12.5px;color:#5A5E66}
+#b-AdminTax .card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#b-AdminTax .card.em{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+#b-AdminTax .white{background:#FFFFFF;border-radius:14px;padding:4px 12px}
+#b-AdminTax .input{min-height:40px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+#b-AdminTax .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#b-AdminTax .f label{font-size:12.5px;font-weight:500}
+#b-AdminTax table{border-collapse:collapse;width:100%;font-size:13px}
+#b-AdminTax th, #b-AdminTax td{padding:8px 8px;border-bottom:1px solid #E6E1D6;text-align:right;vertical-align:middle}
+#b-AdminTax th{font-weight:500;color:#5A5E66;font-size:12px}
+#b-AdminTax td.n, #b-AdminTax th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+#b-AdminTax tr.sel td{background:#FBF6E8}
+#b-AdminTax h2{margin:0;font-size:15px;font-weight:700}
+#b-AdminTax .hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+#b-AdminTax .seg{display:inline-flex;border-radius:999px;background:#ECE8DF;padding:3px;gap:2px}
+#b-AdminTax .seg a{min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;color:#5A5E66;text-decoration:none}
+#b-AdminTax .seg a.on{background:#121417;color:#E0B44C}
+#b-AdminTax .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid #E6E1D6}
+#b-AdminTax .row:first-child{border-top:0}
+#b-AdminTax .tabs{display:flex;gap:4px;border-bottom:1px solid #E6E1D6}
+#b-AdminTax .tabs a{padding:8px 14px;font-size:14px;color:#5A5E66;text-decoration:none;border-bottom:3px solid transparent;font-weight:500}
+#b-AdminTax .tabs a.on{color:#15171A;border-bottom-color:#D4A53C;font-weight:700}
+#b-AdminTax .chk{width:18px;height:18px}
+#b-AdminTax [dir="ltr"].num, #b-AdminTax .num[dir="ltr"]{white-space:nowrap;display:inline-block}
+.noop{margin:0}
+#b-AdminIntegrations a{color:#8A5A00}
+#b-AdminIntegrations a:hover{color:#6B4600}
+#b-AdminIntegrations .num{font-variant-numeric:tabular-nums}
+#b-AdminIntegrations .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+#b-AdminIntegrations .ok{background:#E3F3EC;color:#1F7A4D}
+#b-AdminIntegrations .warn{background:#FBF0D9;color:#8A5A00}
+#b-AdminIntegrations .err{background:#FBE9E7;color:#B3261E}
+#b-AdminIntegrations .info{background:#E6EEFF;color:#1D4ED8}
+#b-AdminIntegrations .off{background:#ECEAE6;color:#4A4A4A}
+#b-AdminIntegrations .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:6px;white-space:nowrap}
+#b-AdminIntegrations .btn-gold{background:#D4A53C;color:#15171A}
+#b-AdminIntegrations .btn-dark{background:#121417;color:#F4F1EA}
+#b-AdminIntegrations .btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+#b-AdminIntegrations .btn-danger{background:#FFFFFF;color:#B3261E;border:1.5px solid #B3261E;font-weight:500}
+#b-AdminIntegrations .side a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:14.5px}
+#b-AdminIntegrations .side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
+#b-AdminIntegrations .side .cnt{font-size:11.5px;background:#2A2E35;color:#E0B44C;border-radius:999px;padding:1px 8px}
+#b-AdminIntegrations .side a.on .cnt{background:#121417}
+#b-AdminIntegrations .tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+#b-AdminIntegrations .tile .v{font-size:26px;font-weight:700;line-height:1.2}
+#b-AdminIntegrations .tile .l{font-size:12.5px;color:#5A5E66}
+#b-AdminIntegrations .card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#b-AdminIntegrations .card.em{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+#b-AdminIntegrations .white{background:#FFFFFF;border-radius:14px;padding:4px 12px}
+#b-AdminIntegrations .input{min-height:40px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+#b-AdminIntegrations .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#b-AdminIntegrations .f label{font-size:12.5px;font-weight:500}
+#b-AdminIntegrations table{border-collapse:collapse;width:100%;font-size:13px}
+#b-AdminIntegrations th, #b-AdminIntegrations td{padding:8px 8px;border-bottom:1px solid #E6E1D6;text-align:right;vertical-align:middle}
+#b-AdminIntegrations th{font-weight:500;color:#5A5E66;font-size:12px}
+#b-AdminIntegrations td.n, #b-AdminIntegrations th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+#b-AdminIntegrations tr.sel td{background:#FBF6E8}
+#b-AdminIntegrations h2{margin:0;font-size:15px;font-weight:700}
+#b-AdminIntegrations .hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+#b-AdminIntegrations .seg{display:inline-flex;border-radius:999px;background:#ECE8DF;padding:3px;gap:2px}
+#b-AdminIntegrations .seg a{min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;color:#5A5E66;text-decoration:none}
+#b-AdminIntegrations .seg a.on{background:#121417;color:#E0B44C}
+#b-AdminIntegrations .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid #E6E1D6}
+#b-AdminIntegrations .row:first-child{border-top:0}
+#b-AdminIntegrations .tabs{display:flex;gap:4px;border-bottom:1px solid #E6E1D6}
+#b-AdminIntegrations .tabs a{padding:8px 14px;font-size:14px;color:#5A5E66;text-decoration:none;border-bottom:3px solid transparent;font-weight:500}
+#b-AdminIntegrations .tabs a.on{color:#15171A;border-bottom-color:#D4A53C;font-weight:700}
+#b-AdminIntegrations .chk{width:18px;height:18px}
+#b-AdminIntegrations [dir="ltr"].num, #b-AdminIntegrations .num[dir="ltr"]{white-space:nowrap;display:inline-block}
+.noop{margin:0}
+#b-AdminStaff a{color:#8A5A00}
+#b-AdminStaff a:hover{color:#6B4600}
+#b-AdminStaff .num{font-variant-numeric:tabular-nums}
+#b-AdminStaff .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+#b-AdminStaff .ok{background:#E3F3EC;color:#1F7A4D}
+#b-AdminStaff .warn{background:#FBF0D9;color:#8A5A00}
+#b-AdminStaff .err{background:#FBE9E7;color:#B3261E}
+#b-AdminStaff .info{background:#E6EEFF;color:#1D4ED8}
+#b-AdminStaff .off{background:#ECEAE6;color:#4A4A4A}
+#b-AdminStaff .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:6px;white-space:nowrap}
+#b-AdminStaff .btn-gold{background:#D4A53C;color:#15171A}
+#b-AdminStaff .btn-dark{background:#121417;color:#F4F1EA}
+#b-AdminStaff .btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+#b-AdminStaff .btn-danger{background:#FFFFFF;color:#B3261E;border:1.5px solid #B3261E;font-weight:500}
+#b-AdminStaff .side a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:14.5px}
+#b-AdminStaff .side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
+#b-AdminStaff .side .cnt{font-size:11.5px;background:#2A2E35;color:#E0B44C;border-radius:999px;padding:1px 8px}
+#b-AdminStaff .side a.on .cnt{background:#121417}
+#b-AdminStaff .tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+#b-AdminStaff .tile .v{font-size:26px;font-weight:700;line-height:1.2}
+#b-AdminStaff .tile .l{font-size:12.5px;color:#5A5E66}
+#b-AdminStaff .card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#b-AdminStaff .card.em{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+#b-AdminStaff .white{background:#FFFFFF;border-radius:14px;padding:4px 12px}
+#b-AdminStaff .input{min-height:40px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+#b-AdminStaff .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#b-AdminStaff .f label{font-size:12.5px;font-weight:500}
+#b-AdminStaff table{border-collapse:collapse;width:100%;font-size:13px}
+#b-AdminStaff th, #b-AdminStaff td{padding:8px 8px;border-bottom:1px solid #E6E1D6;text-align:right;vertical-align:middle}
+#b-AdminStaff th{font-weight:500;color:#5A5E66;font-size:12px}
+#b-AdminStaff td.n, #b-AdminStaff th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+#b-AdminStaff tr.sel td{background:#FBF6E8}
+#b-AdminStaff h2{margin:0;font-size:15px;font-weight:700}
+#b-AdminStaff .hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+#b-AdminStaff .seg{display:inline-flex;border-radius:999px;background:#ECE8DF;padding:3px;gap:2px}
+#b-AdminStaff .seg a{min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;color:#5A5E66;text-decoration:none}
+#b-AdminStaff .seg a.on{background:#121417;color:#E0B44C}
+#b-AdminStaff .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid #E6E1D6}
+#b-AdminStaff .row:first-child{border-top:0}
+#b-AdminStaff .tabs{display:flex;gap:4px;border-bottom:1px solid #E6E1D6}
+#b-AdminStaff .tabs a{padding:8px 14px;font-size:14px;color:#5A5E66;text-decoration:none;border-bottom:3px solid transparent;font-weight:500}
+#b-AdminStaff .tabs a.on{color:#15171A;border-bottom-color:#D4A53C;font-weight:700}
+#b-AdminStaff .chk{width:18px;height:18px}
+#b-AdminStaff [dir="ltr"].num, #b-AdminStaff .num[dir="ltr"]{white-space:nowrap;display:inline-block}
+.noop{margin:0}
+#b-AdminAudit a{color:#8A5A00}
+#b-AdminAudit a:hover{color:#6B4600}
+#b-AdminAudit .num{font-variant-numeric:tabular-nums}
+#b-AdminAudit .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+#b-AdminAudit .ok{background:#E3F3EC;color:#1F7A4D}
+#b-AdminAudit .warn{background:#FBF0D9;color:#8A5A00}
+#b-AdminAudit .err{background:#FBE9E7;color:#B3261E}
+#b-AdminAudit .info{background:#E6EEFF;color:#1D4ED8}
+#b-AdminAudit .off{background:#ECEAE6;color:#4A4A4A}
+#b-AdminAudit .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:6px;white-space:nowrap}
+#b-AdminAudit .btn-gold{background:#D4A53C;color:#15171A}
+#b-AdminAudit .btn-dark{background:#121417;color:#F4F1EA}
+#b-AdminAudit .btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+#b-AdminAudit .btn-danger{background:#FFFFFF;color:#B3261E;border:1.5px solid #B3261E;font-weight:500}
+#b-AdminAudit .side a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:14.5px}
+#b-AdminAudit .side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
+#b-AdminAudit .side .cnt{font-size:11.5px;background:#2A2E35;color:#E0B44C;border-radius:999px;padding:1px 8px}
+#b-AdminAudit .side a.on .cnt{background:#121417}
+#b-AdminAudit .tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+#b-AdminAudit .tile .v{font-size:26px;font-weight:700;line-height:1.2}
+#b-AdminAudit .tile .l{font-size:12.5px;color:#5A5E66}
+#b-AdminAudit .card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#b-AdminAudit .card.em{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+#b-AdminAudit .white{background:#FFFFFF;border-radius:14px;padding:4px 12px}
+#b-AdminAudit .input{min-height:40px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+#b-AdminAudit .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#b-AdminAudit .f label{font-size:12.5px;font-weight:500}
+#b-AdminAudit table{border-collapse:collapse;width:100%;font-size:13px}
+#b-AdminAudit th, #b-AdminAudit td{padding:8px 8px;border-bottom:1px solid #E6E1D6;text-align:right;vertical-align:middle}
+#b-AdminAudit th{font-weight:500;color:#5A5E66;font-size:12px}
+#b-AdminAudit td.n, #b-AdminAudit th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+#b-AdminAudit tr.sel td{background:#FBF6E8}
+#b-AdminAudit h2{margin:0;font-size:15px;font-weight:700}
+#b-AdminAudit .hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+#b-AdminAudit .seg{display:inline-flex;border-radius:999px;background:#ECE8DF;padding:3px;gap:2px}
+#b-AdminAudit .seg a{min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;color:#5A5E66;text-decoration:none}
+#b-AdminAudit .seg a.on{background:#121417;color:#E0B44C}
+#b-AdminAudit .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid #E6E1D6}
+#b-AdminAudit .row:first-child{border-top:0}
+#b-AdminAudit .tabs{display:flex;gap:4px;border-bottom:1px solid #E6E1D6}
+#b-AdminAudit .tabs a{padding:8px 14px;font-size:14px;color:#5A5E66;text-decoration:none;border-bottom:3px solid transparent;font-weight:500}
+#b-AdminAudit .tabs a.on{color:#15171A;border-bottom-color:#D4A53C;font-weight:700}
+#b-AdminAudit .chk{width:18px;height:18px}
+#b-AdminAudit [dir="ltr"].num, #b-AdminAudit .num[dir="ltr"]{white-space:nowrap;display:inline-block}
+.noop{margin:0}
+#b-AdminSystem a{color:#8A5A00}
+#b-AdminSystem a:hover{color:#6B4600}
+#b-AdminSystem .num{font-variant-numeric:tabular-nums}
+#b-AdminSystem .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+#b-AdminSystem .ok{background:#E3F3EC;color:#1F7A4D}
+#b-AdminSystem .warn{background:#FBF0D9;color:#8A5A00}
+#b-AdminSystem .err{background:#FBE9E7;color:#B3261E}
+#b-AdminSystem .info{background:#E6EEFF;color:#1D4ED8}
+#b-AdminSystem .off{background:#ECEAE6;color:#4A4A4A}
+#b-AdminSystem .btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:999px;font-weight:700;font-size:13.5px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 14px;gap:6px;white-space:nowrap}
+#b-AdminSystem .btn-gold{background:#D4A53C;color:#15171A}
+#b-AdminSystem .btn-dark{background:#121417;color:#F4F1EA}
+#b-AdminSystem .btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+#b-AdminSystem .btn-danger{background:#FFFFFF;color:#B3261E;border:1.5px solid #B3261E;font-weight:500}
+#b-AdminSystem .side a{display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:14.5px}
+#b-AdminSystem .side a.on{background:#2A2E35;color:#E0B44C;font-weight:700}
+#b-AdminSystem .side .cnt{font-size:11.5px;background:#2A2E35;color:#E0B44C;border-radius:999px;padding:1px 8px}
+#b-AdminSystem .side a.on .cnt{background:#121417}
+#b-AdminSystem .tile{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+#b-AdminSystem .tile .v{font-size:26px;font-weight:700;line-height:1.2}
+#b-AdminSystem .tile .l{font-size:12.5px;color:#5A5E66}
+#b-AdminSystem .card{background:#F4F1EA;border:0;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+#b-AdminSystem .card.em{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+#b-AdminSystem .white{background:#FFFFFF;border-radius:14px;padding:4px 12px}
+#b-AdminSystem .input{min-height:40px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:14px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+#b-AdminSystem .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#b-AdminSystem .f label{font-size:12.5px;font-weight:500}
+#b-AdminSystem table{border-collapse:collapse;width:100%;font-size:13px}
+#b-AdminSystem th, #b-AdminSystem td{padding:8px 8px;border-bottom:1px solid #E6E1D6;text-align:right;vertical-align:middle}
+#b-AdminSystem th{font-weight:500;color:#5A5E66;font-size:12px}
+#b-AdminSystem td.n, #b-AdminSystem th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+#b-AdminSystem tr.sel td{background:#FBF6E8}
+#b-AdminSystem h2{margin:0;font-size:15px;font-weight:700}
+#b-AdminSystem .hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+#b-AdminSystem .seg{display:inline-flex;border-radius:999px;background:#ECE8DF;padding:3px;gap:2px}
+#b-AdminSystem .seg a{min-height:34px;display:inline-flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:500;color:#5A5E66;text-decoration:none}
+#b-AdminSystem .seg a.on{background:#121417;color:#E0B44C}
+#b-AdminSystem .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid #E6E1D6}
+#b-AdminSystem .row:first-child{border-top:0}
+#b-AdminSystem .tabs{display:flex;gap:4px;border-bottom:1px solid #E6E1D6}
+#b-AdminSystem .tabs a{padding:8px 14px;font-size:14px;color:#5A5E66;text-decoration:none;border-bottom:3px solid transparent;font-weight:500}
+#b-AdminSystem .tabs a.on{color:#15171A;border-bottom-color:#D4A53C;font-weight:700}
+#b-AdminSystem .chk{width:18px;height:18px}
+#b-AdminSystem [dir="ltr"].num, #b-AdminSystem .num[dir="ltr"]{white-space:nowrap;display:inline-block}
 </style>
 </head>
 <body>
 <div class="top">
-<h1>اتود UI طلاتا — مرحله A، نسخه ۴ (پیشنهادی، تأیید نشده)</h1>
+<h1>اتود UI طلاتا — مرحله A، نسخه ۵ (پیشنهادی، تأیید نشده)</h1>
 <p>نسخه آفلاین بوم اتود. همه قیمت‌ها و نرخ‌ها نمونه‌اند. لینک‌های داخل صفحه‌ها در این فایل غیرفعال‌اند؛ مسیر قابل کلیک در بوم طراحی است. برای تأیید یا اصلاح: <span dir="ltr">docs/design/STAGE_A_REVIEW_REQUEST.md</span></p>
 </div>
 <h2 class="grp">۱ — وایرفریم مسیر اصلی (همه قیمت‌ها نمونه‌اند)</h2><div class="row">
@@ -1372,14 +1891,14 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
         </div>
       </div>
       <div style="font-size: 12px; color: #5A5E66; line-height: 1.6">نام و شماره روی فاکتور چاپ می‌شود. شماره برای «صدور و ارسال پیامکی» لازم است و برای «فقط صدور» اختیاری. در صفحه بررسی QR منتشر نمی‌شود.</div>
-      <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 36px"><input type="checkbox" style="width: 20px; height: 20px"> ذخیره در دفتر مشتریان (پلن حرفه‌ای)</label>
+      <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 36px"><input type="checkbox" style="width: 20px; height: 20px"> ذخیره در دفتر مشتریان (همه پلن‌ها؛ در سقف ماهانه)</label>
     </section>
 
     <section aria-label="پیش‌نمایش پیامک" style="background: #FFFFFF; border: 1.5px dashed #D9D3C7; border-radius: 20px; padding: 10px 14px; display: flex; flex-direction: column; gap: 4px; font-size: 13px">
       <div style="display: flex; justify-content: space-between"><span style="font-weight: 500">پیامک به <span class="num" dir="ltr">۰۹۱۲ ۰۰۰ ۰۰۰۰</span></span><span style="color: #5A5E66">۱ بخش · از ۵ پیامک رایگان امسال: ۱ مانده</span></div>
       <div style="display: flex; justify-content: space-between; font-size: 12.5px"><span style="color: #5A5E66">بعد از آن از اعتبار: <span class="num">۴۲٬۰۰۰</span> تومان ≈ <span class="num">۸۴</span> بخش</span><a href="#" onclick="return false" style="font-weight: 500">خرید پیامک بیشتر</a></div>
       <div style="color: #5A5E66; line-height: 1.6">«طلافروشی نمونه: فاکتور شما صادر شد. مشاهده: talata.ir/i/•••• (نمونه)»</div>
-      <div style="color: #5A5E66">لینک اشتراک: ۴۱ از ۵۰ باقی‌مانده · پس از صدور صف می‌شود؛ قبل از صدور چیزی ارسال نمی‌شود.</div>
+      <div style="color: #5A5E66">لینک اشتراک: ۲ از ۱۰۰ باقی‌مانده · پس از صدور صف می‌شود؛ قبل از صدور چیزی ارسال نمی‌شود.</div>
     </section>
 
     <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px">
@@ -1411,7 +1930,7 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
     <section aria-label="وضعیت‌ها" style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 4px 14px; display: flex; flex-direction: column">
       <div class="st"><span>فاکتور</span><span class="badge" style="background: #E3F3EC; color: #1F7A4D">قطعی</span></div>
       <div class="st"><span>پیامک به <span class="num" dir="ltr">۰۹۱۲ ۰۰۰ ۰۰۰۰</span></span><span class="badge" style="background: #E6EEFF; color: #1D4ED8">در صف ارسال</span></div>
-      <div class="st"><span>لینک اشتراک</span><span style="font-size: 13px; color: #5A5E66">ساخته شد · ۴۰ از ۵۰ باقی‌مانده</span></div>
+      <div class="st"><span>لینک اشتراک</span><span style="font-size: 13px; color: #5A5E66">ساخته شد · ۱ از ۱۰۰ باقی‌مانده</span></div>
       <div style="font-size: 12px; color: #5A5E66; padding: 6px 0 10px 0; line-height: 1.6">وضعیت پیامک جدا از فاکتور است. اگر ارسال ناموفق شد، فاکتور صادرشده می‌ماند و «ارسال دوباره» فعال می‌شود. مانده اعتبار پیامک ≈ <span class="num">۸۳</span> بخش · <a href="#" onclick="return false">خرید پیامک</a>؛ فاکتور تکراری ساخته نمی‌شود.</div>
     </section>
 
@@ -1738,7 +2257,7 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
     <h2>پلن و اعتبار</h2>
     <a href="#" onclick="return false" class="item">
       <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v12H3zM3 11h18"></path></svg></span>
-      <span class="t"><strong>پلن و اعتبار · پایه (نمونه) تا ۱۴۰۵/۰۸/۰۱ · تغییر پلن</strong><span class="s">لینک فاکتور: <span class="num">۴۰</span> از ۵۰ · پیامک آزمایشی: <span class="num">۴</span> از ۵ · اعتبار پیامک: <span class="num">۴۲٬۰۰۰</span> تومان ≈ <span class="num">۸۴</span> بخش</span></span>
+      <span class="t"><strong>پلن و اعتبار · پایه (نمونه) تا ۱۴۰۵/۰۸/۰۱ · تغییر پلن</strong><span class="s">لینک فاکتور: <span class="num">۹۹</span> از ۱۰۰ · پیامک رایگان امسال: <span class="num">۱</span> مانده از ۵ · اعتبار پیامک: <span class="num">۴۲٬۰۰۰</span> تومان ≈ <span class="num">۸۴</span> بخش</span></span>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A5E66" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
     </a>
     <a href="#" onclick="return false" class="item">
@@ -1875,7 +2394,7 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
       <div style="display: flex; justify-content: space-between; align-items: center"><strong>پلن فعلی: پایه (ماهانه)</strong><span style="font-size: 13px; color: #5A5E66">تا <span class="num">۱۴۰۵/۰۸/۰۱</span></span></div>
       <div style="display: flex; justify-content: space-between; font-size: 13px"><span>لینک فاکتور این ماه</span><span class="num"><strong>۹۸</strong> از ۱۰۰</span></div>
       <div class="meter"><span style="width: 98%"></span></div>
-      <div style="display: flex; justify-content: space-between; font-size: 13px; color: #5A5E66"><span>اعتبار پیامک: <span class="num" style="color: #15171A">۴۲٬۰۰۰</span> تومان ≈ ۸۴ بخش</span><span>پیامک آزمایشی: <span class="num">۰</span> از ۵</span></div>
+      <div style="display: flex; justify-content: space-between; font-size: 13px; color: #5A5E66"><span>اعتبار پیامک: <span class="num" style="color: #15171A">۴۲٬۰۰۰</span> تومان ≈ ۸۴ بخش</span><span>پیامک رایگان امسال: <span class="num">۱</span> مانده از ۵</span></div>
       <div style="font-size: 12.5px; color: #8A5A00">۲ لینک تا پایان سهمیه این ماه. چاپ فاکتورهای صادرشده همیشه آزاد است.</div>
     </section>
 
@@ -1998,7 +2517,7 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
     <a href="#" onclick="return false" class="btn btn-line">فقط صدور (بدون پیامک)</a>
   </section>
 
-  <div style="font-size: 12.5px; color: #5A5E66; line-height: 1.7; margin-top: auto">پیام‌ها فقط بازتاب سهمیه‌ای هستند که سرور اعلام می‌کند؛ هیچ محدودیتی در مرورگر ساخته نمی‌شود. اعتبار پیامک، پیامک آزمایشی و سهمیه لینک جدا نمایش داده می‌شوند. سقف‌های رایگان طبق تصمیم مالک: ۵۰ فاکتور و ۵۰ مشتری جدید در ماه، ۵ پیامک در سال، فقط فاکتورهای ماه جاری. سقف پایه تنظیم provider است (عدد در انتظار مالک)؛ حرفه‌ای نامحدود.</div>
+  <div style="font-size: 12.5px; color: #5A5E66; line-height: 1.7; margin-top: auto">پیام‌ها فقط بازتاب سهمیه‌ای هستند که سرور اعلام می‌کند؛ هیچ محدودیتی در مرورگر ساخته نمی‌شود. اعتبار پیامک، پیامک رایگان امسال و سهمیه لینک جدا نمایش داده می‌شوند. سقف‌های رایگان طبق تصمیم مالک: ۵۰ فاکتور و ۵۰ مشتری جدید در ماه، ۵ پیامک در سال، فقط فاکتورهای ماه جاری. سقف پایه تنظیم provider است (عدد در انتظار مالک)؛ حرفه‌ای نامحدود.</div>
 </div></div></figure>
 </div>
 <h2 class="grp">۴ — دسکتاپ ۱۲۸۰px: مسیر اصلی</h2><div class="row">
@@ -2012,7 +2531,7 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
     </div>
     <nav class="nav" aria-label="منوی اصلی" style="display: flex; gap: 4px"><a href="#" onclick="return false" class="on">فاکتور جدید</a><a href="#" onclick="return false">فاکتورها</a><a href="#" onclick="return false">مظنه</a><a href="#" onclick="return false">ماشین‌حساب</a><a href="#" onclick="return false">مشتریان و اقساط</a><a href="#" onclick="return false">تنظیمات</a></nav>
     <div style="display: flex; align-items: center; gap: 14px; font-size: 13px; color: #B8BCC4">
-      <span>حرفه‌ای (نمونه) · لینک: <span class="num">۴۰</span> · پیامک: <span class="num">۱۲۰</span> بخش</span>
+      <span>پایه (نمونه) · لینک: <span class="num">۲</span> مانده · پیامک: <span class="num">≈ ۸۴</span> بخش</span>
       <a href="#" onclick="return false" style="min-height: 40px; display: inline-flex; align-items: center; padding: 0 14px; border: 1.5px solid #2A2E35; border-radius: 999px; text-decoration: none; color: #F4F1EA">علی نمونه</a>
     </div>
   </header>
@@ -2177,7 +2696,7 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
         <strong>خریدار</strong>
         <div style="display: flex; flex-direction: column; gap: 4px"><label class="lbl" for="cn">نام خریدار</label><input id="cn" class="input" type="text" value="خانم رضایی"></div>
         <div style="display: flex; flex-direction: column; gap: 4px"><label class="lbl" for="cm">شماره موبایل مشتری</label><input id="cm" class="input num" type="tel" value="۰۹۱۲ ۰۰۰ ۰۰۰۰" style="direction: ltr; text-align: right"><span style="font-size: 12px; color: #5A5E66; line-height: 1.6">روی فاکتور چاپ می‌شود. برای «صدور و ارسال پیامکی» لازم و برای «فقط صدور» اختیاری است. در صفحه بررسی QR منتشر نمی‌شود.</span></div>
-        <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 36px"><input type="checkbox" style="width: 18px; height: 18px"> ذخیره در دفتر مشتریان (پلن حرفه‌ای)</label>
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 36px"><input type="checkbox" style="width: 18px; height: 18px"> ذخیره در دفتر مشتریان (همه پلن‌ها؛ در سقف ماهانه)</label>
       </section>
 
       <section style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px">
@@ -2194,7 +2713,7 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
       <section style="background: #FFFFFF; border: 1.5px dashed #D9D3C7; border-radius: 20px; padding: 12px 16px; display: flex; flex-direction: column; gap: 4px; font-size: 13px">
         <div style="display: flex; justify-content: space-between"><strong>پیامک پس از صدور</strong><span style="color: #5A5E66">۱ بخش · از ۵ پیامک رایگان امسال: ۱ مانده</span></div>
         <div style="display: flex; justify-content: space-between; font-size: 12.5px"><span style="color: #5A5E66">بعد از آن از اعتبار: <span class="num">۴۲٬۰۰۰</span> تومان ≈ <span class="num">۸۴</span> بخش</span><a href="#" onclick="return false" style="font-weight: 500">خرید پیامک بیشتر</a></div>
-        <div style="color: #5A5E66; line-height: 1.6">«طلافروشی نمونه: فاکتور شما صادر شد. مشاهده: talata.ir/i/•••• (نمونه)» · لینک اشتراک ۴۱ از ۵۰ باقی‌مانده</div>
+        <div style="color: #5A5E66; line-height: 1.6">«طلافروشی نمونه: فاکتور شما صادر شد. مشاهده: talata.ir/i/•••• (نمونه)» · لینک اشتراک ۲ از ۱۰۰ باقی‌مانده</div>
       </section>
 
       <a href="#" onclick="return false" class="btn btn-gold">صدور و ارسال پیامکی</a>
@@ -2452,7 +2971,7 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
       <section style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 12px 16px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: center">
         <div><div style="font-size: 12.5px; color: #5A5E66">پلن فعلی</div><strong>پایه (ماهانه) · تا <span class="num">۱۴۰۵/۰۸/۰۱</span></strong></div>
         <div><div style="display: flex; justify-content: space-between; font-size: 12.5px"><span>لینک فاکتور این ماه</span><span class="num"><strong>۹۸</strong> از ۱۰۰</span></div><div class="meter" style="margin-top: 4px"><span style="width: 98%"></span></div><div style="font-size: 12px; color: #8A5A00">۲ لینک مانده؛ چاپ فاکتورهای صادرشده همیشه آزاد است.</div></div>
-        <div style="font-size: 13px; color: #5A5E66">اعتبار پیامک: <strong class="num" style="color: #15171A">۴۲٬۰۰۰</strong> تومان ≈ ۸۴ بخش · پیامک آزمایشی: <span class="num">۰</span> از ۵</div>
+        <div style="font-size: 13px; color: #5A5E66">اعتبار پیامک: <strong class="num" style="color: #15171A">۴۲٬۰۰۰</strong> تومان ≈ ۸۴ بخش · پیامک رایگان امسال: <span class="num">۱</span> مانده از ۵</div>
       </section>
 
       <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
@@ -2850,7 +3369,7 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
   <header style="background: #121417; color: #F4F1EA; display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 12px 16px">
     <div style="display: flex; align-items: center; justify-content: space-between">
       <h1 style="margin: 0; font-size: 20px; font-weight: 700">فاکتورها</h1>
-      <span style="font-size: 12.5px; color: #B8BCC4">این ماه: <span class="num">۴۲</span> فاکتور · لینک: <span class="num">۴۰</span> مانده</span>
+      <span style="font-size: 12.5px; color: #B8BCC4">این ماه: <span class="num">۴۲</span> فاکتور · لینک: <span class="num">۱</span> مانده</span>
     </div>
     <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">جست‌وجوی فاکتور</label>
     <div style="display: flex; align-items: center; gap: 8px; background: #FFFFFF; border-radius: 10px; padding: 0 12px; min-height: 46px">
@@ -2930,7 +3449,7 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
 
     <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
       <a href="#" onclick="return false" class="btn btn-dark">چاپ / ذخیره PDF</a>
-      <a href="#" onclick="return false" class="btn btn-line">کپی لینک (۴۰ مانده)</a>
+      <a href="#" onclick="return false" class="btn btn-line">کپی لینک (۱ مانده)</a>
       <a href="#" onclick="return false" class="btn btn-line">ارسال پیامک</a>
       <a href="#" onclick="return false" class="btn btn-line">فاکتور جایگزین</a>
     </div>
@@ -3284,7 +3803,7 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
       <section class="card" aria-label="وضعیت‌ها" style="gap: 0">
         <div class="st"><span>فاکتور</span><span class="badge" style="background: #E3F3EC; color: #1F7A4D">قطعی</span></div>
         <div class="st"><span>پیامک به <span class="num" dir="ltr">۰۹۱۲ ۰۰۰ ۰۰۰۰</span></span><span class="badge" style="background: #E6EEFF; color: #1D4ED8">در صف ارسال · ۱ بخش</span></div>
-        <div class="st"><span>لینک اشتراک</span><span style="font-size: 13.5px; color: #5A5E66">ساخته شد · <span class="num">۴۰</span> از ۵۰ باقی‌مانده</span></div>
+        <div class="st"><span>لینک اشتراک</span><span style="font-size: 13.5px; color: #5A5E66">ساخته شد · <span class="num">۱</span> از ۱۰۰ باقی‌مانده</span></div>
         <div class="st"><span>ارسال دوباره</span><a href="#" onclick="return false" class="btn btn-off" style="min-height: 40px" aria-disabled="true">پس از نتیجه ارسال</a></div>
         <div style="font-size: 12.5px; color: #5A5E66; padding-top: 8px; line-height: 1.6">وضعیت پیامک جدا از فاکتور است. ارسال ناموفق فاکتور را برنمی‌گرداند و فاکتور تکراری نمی‌سازد. مانده اعتبار پیامک ≈ <span class="num">۸۳</span> بخش · <a href="#" onclick="return false">خرید پیامک</a></div>
       </section>
@@ -3303,7 +3822,7 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
 
   <main style="flex-grow: 1; padding: 20px 32px 24px 32px; display: flex; flex-direction: column; gap: 14px">
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px">
-      <div><h1 style="margin: 0; font-size: 21px; font-weight: 700">فاکتورها</h1><div style="font-size: 12.5px; color: #5A5E66">این ماه <span class="num">۴۲</span> فاکتور · لینک اشتراک <span class="num">۴۰</span> از ۵۰ مانده · صدور و چاپ محدود نیست</div></div>
+      <div><h1 style="margin: 0; font-size: 21px; font-weight: 700">فاکتورها</h1><div style="font-size: 12.5px; color: #5A5E66">این ماه <span class="num">۴۲</span> فاکتور · لینک اشتراک <span class="num">۲</span> از ۱۰۰ مانده · فاکتور <span class="num">۴۲</span> از ۵۰۰ (پلن پایه)</div></div>
       <a href="#" onclick="return false" class="btn btn-gold">+ فاکتور جدید</a>
     </div>
     <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
@@ -3556,61 +4075,6 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
       <div style="font-size: 12.5px; color: #5A5E66">همین پنجره هنگام «مشتری جدید» با متن «۵۰ مشتری جدید این ماه ثبت شد» نمایش داده می‌شود؛ مشتریان قبلی و فاکتور برای آن‌ها آزاد است و نام و موبایل مشتری جدید روی فاکتور قابل ثبت است. هنگام «صدور و ارسال پیامکی» با اعتبار تمام‌شده، همین پنجره «اعتبار پیامک تمام شد» را با دکمه «خرید پیامک» و «فقط صدور» نشان می‌دهد؛ فاکتور همیشه صادر می‌شود.</div>
     </div>
   </div>
-</div></div></figure>
-<figure id="b-Provider" class="board"><figcaption>محیط provider — مدیریت سرویس <span class="dim">1280×900</span></figcaption><div class="frame" style="width:1280px"><div dir="rtl" style="width: 1280px; min-height: 900px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex">
-  <aside class="side" style="width: 230px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 20px 14px; display: flex; flex-direction: column; gap: 4px">
-    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 16px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا · مدیریت</div>
-    <a href="#" onclick="return false" class="on">فروشگاه‌ها و پلن‌ها</a><a href="#" onclick="return false">درخواست‌های ارتقا</a><a href="#" onclick="return false">سلامت نرخ</a><a href="#" onclick="return false">پیامک و صف</a><a href="#" onclick="return false">سوابق (audit)</a><a href="#" onclick="return false">تنظیمات سرویس</a>
-    <div style="margin-top: auto; font-size: 12px; color: #B8BCC4; padding: 0 8px">کاربر provider · بدون دسترسی به اطلاعات خصوصی مشتریان فروشگاه‌ها</div>
-  </aside>
-
-  <main style="flex: 1; min-width: 0; padding: 20px 28px 24px 28px; display: flex; flex-direction: column; gap: 14px">
-    <div style="display: flex; justify-content: space-between; align-items: center"><h1 style="margin: 0; font-size: 21px; font-weight: 700">وضعیت سرویس</h1><span class="hint">به‌روزرسانی <span class="num">۱۴:۲۴</span> · داده نمونه</span></div>
-
-    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
-      <div class="tile"><span class="l">فروشگاه‌های فعال</span><span class="v num">۱۲۸</span><span class="l">رایگان <span class="num">۸۱</span> · پایه <span class="num">۳۲</span> · حرفه‌ای <span class="num">۱۵</span></span></div>
-      <div class="tile"><span class="l">درخواست‌های ارتقا در انتظار</span><span class="v num">۳</span><span class="l"><a href="#" onclick="return false" style="font-weight: 500">بررسی و فعال‌سازی</a></span></div>
-      <div class="tile"><span class="l">نرخ طلای ۱۸ عیار</span><span class="v"><span class="badge" style="background: #E3F3EC; color: #1F7A4D; font-size: 13px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>تازه</span></span><span class="l">دریافت <span class="num">۱۴:۲۱</span> · هر ۱۸۰ ثانیه · خطای ۲۴ ساعت اخیر: <span class="num">۲</span></span></div>
-      <div class="tile"><span class="l">صف پیامک</span><span class="v num">۱۲ <span style="font-size: 13px; font-weight: 400; color: #5A5E66">در انتظار</span></span><span class="l"><span class="badge" style="background: #FBE9E7; color: #B3261E"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 8v5M12 16h.01"></path></svg>۱ ناموفق</span> · <span class="num">۴</span> در حال بررسی نتیجه</span></div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; align-items: start">
-      <section class="card" aria-label="فروشگاه‌ها">
-        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px"><h2>فروشگاه‌ها</h2><input class="input" type="search" placeholder="نام فروشگاه یا موبایل کسب‌وکار" aria-label="جست‌وجو" style="width: 260px"></div>
-        <table>
-          <thead><tr><th style="min-width: 150px">فروشگاه</th><th>پلن</th><th>پایان دوره</th><th class="n">لینک این ماه</th><th>وضعیت</th><th>اقدام</th></tr></thead>
-          <tbody>
-            <tr><td><strong>طلافروشی نمونه</strong><br><span class="hint num" dir="ltr" style="white-space: nowrap; display: inline-block">۰۹۱۲ ۰۰۰ ۰۰۰۰</span></td><td>پایه · ماهانه</td><td class="num">۱۴۰۵/۰۸/۰۱</td><td class="n">۹۸ / ۱۰۰</td><td><span class="badge" style="background: #FBF0D9; color: #8A5A00">درخواست ارتقا به حرفه‌ای</span></td><td><a href="#" onclick="return false" class="btn btn-gold" style="min-height: 36px">فعال‌سازی</a></td></tr>
-            <tr><td><strong>گالری زر</strong><br><span class="hint num" dir="ltr" style="white-space: nowrap; display: inline-block">۰۹۱۳ ۰۰۰ ۰۰۰۰</span></td><td>حرفه‌ای · سالانه</td><td class="num">۱۴۰۶/۰۲/۱۰</td><td class="n">۲۱۰ / ۱۰۰۰</td><td><span class="badge" style="background: #E3F3EC; color: #1F7A4D">فعال</span></td><td><a href="#" onclick="return false" class="btn btn-line" style="min-height: 36px">تمدید</a></td></tr>
-            <tr><td><strong>طلای سپهر</strong><br><span class="hint num" dir="ltr" style="white-space: nowrap; display: inline-block">۰۹۱۴ ۰۰۰ ۰۰۰۰</span></td><td>رایگان</td><td>—</td><td class="n">۱۰ / ۱۰</td><td><span class="badge" style="background: #ECEAE6; color: #4A4A4A">سهمیه لینک تمام</span></td><td><a href="#" onclick="return false" class="btn btn-line" style="min-height: 36px">جزئیات</a></td></tr>
-            <tr><td><strong>جواهری نور</strong><br><span class="hint num" dir="ltr" style="white-space: nowrap; display: inline-block">۰۹۱۵ ۰۰۰ ۰۰۰۰</span></td><td>پایه · سالانه</td><td class="num">۱۴۰۵/۰۷/۲۰</td><td class="n">۴۴ / ۱۰۰</td><td><span class="badge" style="background: #FBF0D9; color: #8A5A00">۷ روز تا پایان</span></td><td><a href="#" onclick="return false" class="btn btn-line" style="min-height: 36px">تمدید</a></td></tr>
-          </tbody>
-        </table>
-        <div class="hint">۱ تا ۲۵ از ۱۲۸ · فیلتر: پلن، پایان دوره، سهمیه تمام‌شده</div>
-      </section>
-
-      <section class="card" aria-label="فعال‌سازی دستی" style="box-shadow: inset 0 0 0 2px #D4A53C">
-        <h2>فعال‌سازی / تمدید دستی — طلافروشی نمونه</h2>
-        <div class="hint">تا اتصال درگاه، پس از دریافت وجه اینجا ثبت می‌شود. هر فعال‌سازی با نام کاربر provider، زمان و مرجع پرداخت در سوابق می‌ماند و قابل حذف نیست.</div>
-        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
-          <div><label style="font-size: 12.5px; font-weight: 500" for="pp">پلن</label><select id="pp" class="input"><option>حرفه‌ای</option><option>پایه</option><option>رایگان (پایان دوره)</option></select></div>
-          <div><label style="font-size: 12.5px; font-weight: 500" for="pd">دوره</label><select id="pd" class="input"><option>سالانه · ۱۰٬۹۰۰٬۰۰۰ تومان</option><option>ماهانه · ۱٬۹۰۰٬۰۰۰ تومان</option></select></div>
-          <div><label style="font-size: 12.5px; font-weight: 500" for="ps">شروع</label><input id="ps" class="input num" type="text" value="۱۴۰۵/۰۷/۱۳"></div>
-          <div><label style="font-size: 12.5px; font-weight: 500" for="pe">پایان (خودکار)</label><input id="pe" class="input num" type="text" value="۱۴۰۶/۰۷/۱۳" readonly="readonly"></div>
-          <div style="grid-column: span 2"><label style="font-size: 12.5px; font-weight: 500" for="pr">مرجع پرداخت *</label><input id="pr" class="input" type="text" value="" placeholder="شماره پیگیری کارت‌به‌کارت / رسید"></div>
-          <div style="grid-column: span 2"><label style="font-size: 12.5px; font-weight: 500" for="pn">یادداشت</label><input id="pn" class="input" type="text" value=""></div>
-        </div>
-        <label style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; min-height: 36px"><input type="checkbox" style="width: 18px; height: 18px"> شارژ پیامک هم ثبت شود (مبلغ تومانی، حداقل ۱۰۰ هزار)</label>
-        <div style="display: flex; gap: 10px"><a href="#" onclick="return false" class="btn btn-gold">ثبت فعال‌سازی</a><a href="#" onclick="return false" class="btn btn-line">انصراف</a></div>
-      </section>
-    </div>
-
-    <section class="card" aria-label="سلامت نرخ و پیامک" style="flex-direction: row; gap: 24px; font-size: 13.5px">
-      <div style="flex: 1"><h2>سلامت نرخ</h2><div class="hint">provider: بازار نمونه · آخرین دریافت موفق <span class="num">۱۴:۲۱</span> · تأخیر میانه <span class="num">۳</span> ثانیه · قفل single-flight فعال · آستانه قدیمی‌شدن <span class="num">۲۴۰</span> ثانیه</div></div>
-      <div style="flex: 1"><h2>پیامک</h2><div class="hint">provider پیامک: نمونه · تحویل ۲۴ ساعت اخیر <span class="num">۳۱۲</span> · ناموفق <span class="num">۱</span> (<a href="#" onclick="return false">reconciliation</a>) · اعتبار پنل provider <span class="num">۱۲٬۴۰۰</span> بخش</div></div>
-      <div style="flex: 1"><h2>outbox و صف</h2><div class="hint">رویدادهای در انتظار <span class="num">۰</span> · تأخیر صف <span class="num">۱</span> ثانیه · رزروهای در انتظار تطبیق <span class="num">۴</span></div></div>
-    </section>
-  </main>
 </div></div></figure>
 </div>
 <h2 class="grp">۱۱ — مظنه و ماشین‌حساب طلایی (موبایل و دسکتاپ) · پیش‌نمایش نسخه ۲</h2><div class="row">
@@ -4026,6 +4490,174 @@ figcaption .dim{direction:ltr;unicode-bidi:isolate;font-size:11px}
     <section class="band" style="background: #FBF6E8; box-shadow: inset 0 0 0 2px #D4A53C; flex-direction: row; align-items: center; gap: 10px"><span style="color: #8A5A00"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span><div class="hint" style="color: #15171A"><strong>حالت سوم — در حال بررسی:</strong> بانک هنوز نتیجه را نداده. تا <span class="num">۱۰</span> دقیقه خودکار بررسی می‌کنیم و پیامک می‌دهیم؛ دوباره پرداخت نکنید.</div></section>
   </main>
 </div></div></figure>
+</div>
+<h2 class="grp">۱۳ — مدیریت سرویس (provider) نسخه ۱</h2><div class="row">
+<figure id="b-Provider" class="board"><figcaption>مدیریت سرویس — داشبورد <span class="dim">1280×900</span></figcaption><div class="scalebox" style="width:960px;height:675px"><div class="frame" style="width:1280px;transform:scale(0.75);transform-origin:top right"><div dir="rtl" style="width: 1280px; min-height: 900px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 15px; line-height: 1.5; display: flex">
+  <aside class="side" aria-label="منوی مدیریت سرویس" style="width: 232px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 4px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا</div>
+    <div style="padding: 0 8px 12px 8px; font-size: 12px; color: #B8BCC4">مدیریت سرویس · نسخه ۱</div>
+    <a href="#" onclick="return false" class="on">داشبورد</a><a href="#" onclick="return false">فروشگاه‌ها<span class="cnt num">۱۲۸</span></a><a href="#" onclick="return false">پلن‌ها و قیمت‌ها</a><a href="#" onclick="return false">پرداخت‌ها<span class="cnt num">۲</span></a><a href="#" onclick="return false">پیامک<span class="cnt num">۱</span></a><a href="#" onclick="return false">نرخ و مظنه</a><a href="#" onclick="return false">قواعد مالیات</a><a href="#" onclick="return false">اتصال‌ها</a><a href="#" onclick="return false">کارکنان و دسترسی</a><a href="#" onclick="return false">سوابق (audit)</a><a href="#" onclick="return false">سلامت سیستم</a>
+    <div style="margin-top: auto; font-size: 11.5px; color: #B8BCC4; padding: 10px 8px 0 8px; line-height: 1.6">مریم کاظمی · نقش: مالک سرویس<br>ورود با موبایل + Passkey · <a href="#" style="color: #E0B44C">خروج</a></div>
+  </aside>
+  <main style="flex: 1; min-width: 0; padding: 20px 26px 24px 26px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div><h1 style="margin: 0; font-size: 21px; font-weight: 700">داشبورد</h1><div class="hint">وضعیت سرویس در یک نگاه · به‌روزرسانی <span class="num">۱۴:۲۴</span> · اعداد امروز از ۰۰:۰۰ به وقت تهران</div></div><div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"><span class="badge info">داده نمونه</span></div></div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: start"><div class="tile"><span class="l">فروشگاه‌های فعال</span><span class="v num">۱۲۸</span><span class="l">رایگان <span class="num">۸۱</span> · پایه <span class="num">۳۲</span> · حرفه‌ای <span class="num">۱۵</span></span></div><div class="tile"><span class="l">دریافتی این ماه (با مالیات)</span><span class="v num">۸۴٬۶۹۰٬۰۰۰ <span style="font-size: 13px; font-weight: 400; color: #5A5E66">تومان</span></span><span class="l">پلن <span class="num">۶۹٬۸۳۰٬۰۰۰</span> · پیامک <span class="num">۱۴٬۸۶۰٬۰۰۰</span> · مالیات <span class="num">۷٬۷۰۰٬۰۰۰</span></span></div><div class="tile"><span class="l">فاکتور صادرشده امروز</span><span class="v num">۴۱۲</span><span class="l">↑ <span class="num">۸٪</span> نسبت به میانگین ۷ روز · ۳ ابطال</span></div><div class="tile"><span class="l">ثبت‌نام جدید این هفته</span><span class="v num">۱۴</span><span class="l"><span class="num">۵</span> هنوز پروفایل کسب‌وکار ناقص</span></div></div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: start"><div class="tile"><span class="l">نرخ طلا (۱۸۰ ثانیه)</span><span><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>به‌روز</span></span><span class="l">آخرین دریافت <span class="num">۱۴:۲۱</span> · <a href="#" onclick="return false">جزئیات</a></span></div><div class="tile"><span class="l">پیامک (۲۴ ساعت)</span><span><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>۴ نامشخص</span></span><span class="l">تحویل <span class="num">۳۱۲</span> · ناموفق <span class="num">۱</span> · <a href="#" onclick="return false">صف</a></span></div><div class="tile"><span class="l">درگاه پرداخت</span><span><span class="badge info">حالت آزمایشی (Mock)</span></span><span class="l">PSP در انتظار انتخاب مالک · <a href="#" onclick="return false">اتصال‌ها</a></span></div><div class="tile"><span class="l">صف و زمان‌بندها</span><span><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>سالم</span></span><span class="l">تأخیر صف <span class="num">۱</span> ثانیه · کار ناموفق <span class="num">۰</span> · <a href="#" onclick="return false">سیستم</a></span></div></div>
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px; align-items: start"><section class="card"><div style="display: flex; justify-content: space-between"><h2>هشدارهای باز</h2><span class="hint">مرتب بر اساس اولویت</span></div><table><thead><tr><th>اولویت</th><th>هشدار</th><th>از</th><th>اقدام</th></tr></thead><tbody><tr><td><span class="badge err"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>بحرانی</span></td><td>۱ پرداخت با عدم تطابق مبلغ (TL-PLAN-1405-0011)</td><td>۱۰ دقیقه پیش</td><td><a href="#" onclick="return false">بررسی</a></td></tr><tr><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>هشدار</span></td><td>۴ پیامک با وضعیت نامشخص بیش از ۳۰ دقیقه</td><td>۳۵ دقیقه پیش</td><td><a href="#" onclick="return false">تطبیق</a></td></tr><tr><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>هشدار</span></td><td>۲ پرداخت «در حال بررسی» در صف reconcile</td><td>۸ دقیقه پیش</td><td><a href="#" onclick="return false">مشاهده</a></td></tr><tr><td><span class="badge info">اطلاع</span></td><td>قاعده مالیات GOLD_SERVICES v2 از ۱۴۰۵/۰۸/۰۱ فعال می‌شود</td><td>دیروز</td><td><a href="#" onclick="return false">جزئیات</a></td></tr></tbody></table></section><section class="card"><h2>کارهای امروز</h2><div class="white"><div class="row"><span>پرداخت‌های نیازمند بررسی دستی</span><a href="#" onclick="return false" class="num">۱</a></div><div class="row"><span>اشتراک‌هایی که ۷ روز دیگر تمام می‌شوند</span><a href="#" onclick="return false" class="num">۹</a></div><div class="row"><span>فروشگاه‌های به سقف رسیده (رایگان)</span><a href="#" onclick="return false" class="num">۶</a></div><div class="row"><span>شارژ پیامک رایگانِ در حال انقضا (پایان ماه)</span><span class="num">۳</span></div><div class="row"><span>درخواست‌های پشتیبانی با شماره مرجع</span><span class="num">۲</span></div></div><div class="hint">provider فقط داده عملیاتی فروشگاه‌ها را می‌بیند؛ نام و موبایل مشتریان فروشگاه‌ها و محتوای فاکتورها نمایش داده نمی‌شود.</div></section></div>
+  </main>
+</div></div></div></figure>
+<figure id="b-AdminTenants" class="board"><figcaption>مدیریت — فروشگاه‌ها <span class="dim">1280×900</span></figcaption><div class="scalebox" style="width:960px;height:675px"><div class="frame" style="width:1280px;transform:scale(0.75);transform-origin:top right"><div dir="rtl" style="width: 1280px; min-height: 900px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 15px; line-height: 1.5; display: flex">
+  <aside class="side" aria-label="منوی مدیریت سرویس" style="width: 232px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 4px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا</div>
+    <div style="padding: 0 8px 12px 8px; font-size: 12px; color: #B8BCC4">مدیریت سرویس · نسخه ۱</div>
+    <a href="#" onclick="return false">داشبورد</a><a href="#" onclick="return false" class="on">فروشگاه‌ها<span class="cnt num">۱۲۸</span></a><a href="#" onclick="return false">پلن‌ها و قیمت‌ها</a><a href="#" onclick="return false">پرداخت‌ها<span class="cnt num">۲</span></a><a href="#" onclick="return false">پیامک<span class="cnt num">۱</span></a><a href="#" onclick="return false">نرخ و مظنه</a><a href="#" onclick="return false">قواعد مالیات</a><a href="#" onclick="return false">اتصال‌ها</a><a href="#" onclick="return false">کارکنان و دسترسی</a><a href="#" onclick="return false">سوابق (audit)</a><a href="#" onclick="return false">سلامت سیستم</a>
+    <div style="margin-top: auto; font-size: 11.5px; color: #B8BCC4; padding: 10px 8px 0 8px; line-height: 1.6">مریم کاظمی · نقش: مالک سرویس<br>ورود با موبایل + Passkey · <a href="#" style="color: #E0B44C">خروج</a></div>
+  </aside>
+  <main style="flex: 1; min-width: 0; padding: 20px 26px 24px 26px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div><h1 style="margin: 0; font-size: 21px; font-weight: 700">فروشگاه‌ها</h1><div class="hint">همه tenantها · جست‌وجو با نام فروشگاه، موبایل کسب‌وکار، شماره مرجع پرداخت یا توکن بررسی فاکتور</div></div><div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"><a href="#" class="btn btn-line">خروجی CSV</a><span class="badge info">داده نمونه</span></div></div>
+    <section class="card" style="flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: 10px">
+      <div class="f" style="flex: 2; min-width: 240px"><label>جست‌وجو</label><input class="input num" type="search" value=""></div><div class="f" style="flex: 1"><label>پلن</label><select class="input"><option selected="selected">همه</option><option>رایگان</option><option>پایه</option><option>حرفه‌ای</option></select></div><div class="f" style="flex: 1"><label>وضعیت</label><select class="input"><option selected="selected">همه</option><option>فعال</option><option>معلق</option><option>پروفایل ناقص</option></select></div><div class="f" style="flex: 1"><label>سهمیه</label><select class="input"><option selected="selected">همه</option><option>به سقف رسیده</option><option>نزدیک سقف</option></select></div><div class="f" style="flex: 1"><label>پایان دوره</label><select class="input"><option selected="selected">همه</option><option>۷ روز آینده</option><option>منقضی‌شده</option></select></div>
+      <a href="#" class="btn btn-dark">اعمال</a>
+    </section>
+    <section class="card">
+      <div class="seg" role="tablist" aria-label="نمای سریع"><a href="#" class="on">همه <span class="num">۱۲۸</span></a><a href="#">به سقف رسیده <span class="num">۶</span></a><a href="#">۷ روز تا پایان <span class="num">۹</span></a><a href="#">پروفایل ناقص <span class="num">۵</span></a><a href="#">معلق <span class="num">۱</span></a></div>
+      <table><thead><tr><th>فروشگاه</th><th>پلن</th><th>پایان دوره</th><th class="n">فاکتور این ماه</th><th class="n">مشتری جدید این ماه</th><th class="n">اعتبار پیامک (تومان)</th><th>وضعیت</th><th></th></tr></thead><tbody><tr class="sel"><td><strong>طلافروشی نمونه</strong><br><span class="hint num" dir="ltr">۰۹۱۲ ۰۰۰ ۰۰۰۰</span></td><td>پایه · ماهانه</td><td>۱۴۰۵/۰۸/۰۱</td><td class="n">۴۸ / ۵۰۰</td><td class="n">۱۲ / ۵۰۰</td><td class="n">۴۲٬۰۰۰</td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>فعال</span></td><td><a href="#" onclick="return false">مشاهده</a></td></tr><tr><td><strong>گالری زر</strong><br><span class="hint num" dir="ltr">۰۹۱۳ ۰۰۰ ۰۰۰۰</span></td><td>حرفه‌ای · سالانه</td><td>۱۴۰۶/۰۲/۱۰</td><td class="n">۳۱۲ / —</td><td class="n">۴۵ / —</td><td class="n">۶۱۰٬۵۰۰</td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>فعال</span></td><td><a href="#" onclick="return false">مشاهده</a></td></tr><tr><td><strong>طلای سپهر</strong><br><span class="hint num" dir="ltr">۰۹۱۴ ۰۰۰ ۰۰۰۰</span></td><td>رایگان</td><td>—</td><td class="n">۵۰ / ۵۰</td><td class="n">۹ / ۵۰</td><td class="n">۰</td><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>به سقف فاکتور رسید</span></td><td><a href="#" onclick="return false">مشاهده</a></td></tr><tr><td><strong>جواهری نور</strong><br><span class="hint num" dir="ltr">۰۹۱۵ ۰۰۰ ۰۰۰۰</span></td><td>پایه · سالانه</td><td>۱۴۰۵/۰۷/۲۰</td><td class="n">۱۸۷ / ۵۰۰</td><td class="n">۲۲ / ۵۰۰</td><td class="n">۱۸٬۵۰۰</td><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>۷ روز تا پایان</span></td><td><a href="#" onclick="return false">مشاهده</a></td></tr><tr><td><strong>زرگری امید</strong><br><span class="hint num" dir="ltr">۰۹۱۶ ۰۰۰ ۰۰۰۰</span></td><td>رایگان</td><td>—</td><td class="n">۳ / ۵۰</td><td class="n">۱ / ۵۰</td><td class="n">۰</td><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>پروفایل ناقص</span></td><td><a href="#" onclick="return false">مشاهده</a></td></tr><tr><td><strong>طلای ماهان</strong><br><span class="hint num" dir="ltr">۰۹۱۷ ۰۰۰ ۰۰۰۰</span></td><td>حرفه‌ای · ماهانه</td><td>۱۴۰۵/۰۷/۲۹</td><td class="n">۹۸ / —</td><td class="n">۱۴ / —</td><td class="n">۲۲۱٬۰۰۰</td><td><span class="badge err"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>معلق (درخواست مالک)</span></td><td><a href="#" onclick="return false">مشاهده</a></td></tr></tbody></table>
+      <div style="display: flex; justify-content: space-between" class="hint"><span>۱ تا ۲۵ از ۱۲۸ · مرتب‌سازی: آخرین فعالیت</span><span><a href="#">قبلی</a> · <span class="num">۱</span> از <span class="num">۶</span> · <a href="#">بعدی</a></span></div>
+    </section>
+    <div class="hint">سقف‌ها از پیکربندی پلن خوانده می‌شوند («—» یعنی نامحدود). عدد سقف پایه (۵۰۰) پیشنهادی و در انتظار مالک است.</div>
+  </main>
+</div></div></div></figure>
+<figure id="b-AdminTenantDetail" class="board"><figcaption>مدیریت — جزئیات فروشگاه و اقدام دستی <span class="dim">1280×1000</span></figcaption><div class="scalebox" style="width:960px;height:750px"><div class="frame" style="width:1280px;transform:scale(0.75);transform-origin:top right"><div dir="rtl" style="width: 1280px; min-height: 1000px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 15px; line-height: 1.5; display: flex">
+  <aside class="side" aria-label="منوی مدیریت سرویس" style="width: 232px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 4px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا</div>
+    <div style="padding: 0 8px 12px 8px; font-size: 12px; color: #B8BCC4">مدیریت سرویس · نسخه ۱</div>
+    <a href="#" onclick="return false">داشبورد</a><a href="#" onclick="return false" class="on">فروشگاه‌ها<span class="cnt num">۱۲۸</span></a><a href="#" onclick="return false">پلن‌ها و قیمت‌ها</a><a href="#" onclick="return false">پرداخت‌ها<span class="cnt num">۲</span></a><a href="#" onclick="return false">پیامک<span class="cnt num">۱</span></a><a href="#" onclick="return false">نرخ و مظنه</a><a href="#" onclick="return false">قواعد مالیات</a><a href="#" onclick="return false">اتصال‌ها</a><a href="#" onclick="return false">کارکنان و دسترسی</a><a href="#" onclick="return false">سوابق (audit)</a><a href="#" onclick="return false">سلامت سیستم</a>
+    <div style="margin-top: auto; font-size: 11.5px; color: #B8BCC4; padding: 10px 8px 0 8px; line-height: 1.6">مریم کاظمی · نقش: مالک سرویس<br>ورود با موبایل + Passkey · <a href="#" style="color: #E0B44C">خروج</a></div>
+  </aside>
+  <main style="flex: 1; min-width: 0; padding: 20px 26px 24px 26px; display: flex; flex-direction: column; gap: 14px">
+<a href="#" onclick="return false" class="hint" style="text-decoration: none">← فروشگاه‌ها</a><div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div><h1 style="margin: 0; font-size: 21px; font-weight: 700">طلافروشی نمونه</h1><div class="hint">tenant <span class="num" dir="ltr">01J9X…K2</span> · ثبت‌نام <span class="num">۱۴۰۵/۰۳/۰۲</span> · مالک: علی نمونه <span class="num" dir="ltr">۰۹۱۲ ۰۰۰ ۰۰۰۰</span></div></div><div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"><a href="#" class="btn btn-danger">تعلیق موقت</a><span class="badge info">داده نمونه</span></div></div>
+    <nav class="tabs" aria-label="بخش‌های فروشگاه"><a href="#" class="on">خلاصه و پلن</a><a href="#">سهمیه‌ها</a><a href="#">اعتبار پیامک</a><a href="#">پرداخت‌ها</a><a href="#">قابلیت‌های ویژه</a><a href="#">کاربران</a><a href="#">سوابق</a></nav>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1.1fr; gap: 12px; align-items: start"><section class="card"><h2>پروفایل کسب‌وکار</h2><div class="white"><div class="row"><span class="hint">نام</span><span>طلافروشی نمونه</span></div><div class="row"><span class="hint">موبایل کسب‌وکار</span><span class="num" dir="ltr">۰۹۱۲ ۰۰۰ ۰۰۰۰</span></div><div class="row"><span class="hint">آدرس</span><span>تهران، خیابان نمونه</span></div><div class="row"><span class="hint">تلفن ثابت</span><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>ثبت نشده</span></div><div class="row"><span class="hint">نوع کسب‌وکار</span><span>طلافروشی</span></div><div class="row"><span class="hint">کاربران</span><span class="num">۲</span></div></div><div class="hint">ویرایش پروفایل فقط توسط خود فروشگاه؛ provider فقط مشاهده می‌کند.</div></section><section class="card"><h2>اشتراک فعلی</h2><div class="white"><div class="row"><span class="hint">پلن</span><strong>پایه · ماهانه</strong></div><div class="row"><span class="hint">دوره</span><span class="num">۱۴۰۵/۰۷/۰۱ تا ۱۴۰۵/۰۸/۰۱</span></div><div class="row"><span class="hint">منبع</span><span>پرداخت آنلاین · <a href="#" onclick="return false">TL-PLAN-1405-0003</a></span></div><div class="row"><span class="hint">فاکتور این ماه</span><span class="num">۴۸ از ۵۰۰</span></div><div class="row"><span class="hint">مشتری جدید این ماه</span><span class="num">۱۲ از ۵۰۰</span></div><div class="row"><span class="hint">لینک این ماه</span><span class="num">۹۸ از ۱۰۰</span></div><div class="row"><span class="hint">اعتبار پیامک</span><span class="num">۴۲٬۰۰۰ تومان ≈ ۸۴ بخش</span></div></div><div class="hint">تاریخچه: رایگان ← پایه (۱۴۰۵/۰۵/۱۱) · ۲ تمدید</div></section><section class="card em"><h2>اقدام دستی provider</h2><div class="seg"><a href="#" class="on">پلن</a><a href="#">اعتبار پیامک</a><a href="#">قابلیت ویژه</a></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start"><div class="f"><label>پلن</label><select class="input"><option selected="selected">حرفه‌ای</option><option>پایه</option></select></div><div class="f"><label>دوره</label><select class="input"><option selected="selected">سالانه</option><option>ماهانه</option></select></div><div class="f"><label>شروع</label><input class="input num" type="text" value="۱۴۰۵/۰۷/۱۳"></div><div class="f"><label>پایان (خودکار)</label><input class="input num" type="text" value="۱۴۰۶/۰۷/۱۳" readonly="readonly" style="background: #F4F1EA"></div></div><div class="white"><div class="row"><span class="hint">قیمت پلن</span><span class="num">۱۰٬۹۰۰٬۰۰۰</span></div><div class="row"><span class="hint">مالیات ۱۰٪</span><span class="num">۱٬۰۹۰٬۰۰۰</span></div><div class="row"><strong>مبلغ دریافتی</strong><strong class="num">۱۱٬۹۹۰٬۰۰۰ تومان</strong></div></div><div class="f"><label>مرجع پرداخت * (کارت‌به‌کارت / رسید بانکی)</label><input class="input num" type="text" value=""></div><div class="f"><label>دلیل * (در سوابق می‌ماند)</label><input class="input num" type="text" value=""></div><div style="display: flex; gap: 8px"><a href="#" class="btn btn-gold">ثبت با تأیید دوباره</a><a href="#" class="btn btn-line">انصراف</a></div><div class="hint">فقط نقش «مالک سرویس» یا «مالی». قابل حذف نیست؛ اصلاح با ثبت معکوس.</div></section></div>
+    <section class="card"><div style="display: flex; justify-content: space-between"><h2>آخرین رویدادها</h2><a href="#" onclick="return false" class="hint">همه سوابق این فروشگاه</a></div><table><thead><tr><th>زمان</th><th>کاربر</th><th>رویداد</th><th>جزئیات</th></tr></thead><tbody><tr><td><span class="num">۱۴۰۵/۰۷/۱۳ ۱۴:۳۱</span></td><td>سیستم (پرداخت)</td><td>sms_credit.purchased</td><td>۲۰۰٬۰۰۰ اعتبار · TL-SMS-1405-0021</td></tr><tr><td><span class="num">۱۴۰۵/۰۷/۱۳ ۱۰:۰۲</span></td><td>علی نمونه</td><td>invoice.voided</td><td>فاکتور ۱۴۰۵-۰۰۰۹ · دلیل: اشتباه وزن</td></tr><tr><td><span class="num">۱۴۰۵/۰۷/۰۱ ۰۰:۰۰</span></td><td>سیستم</td><td>subscription.renewed</td><td>پایه ماهانه</td></tr><tr><td><span class="num">۱۴۰۵/۰۶/۲۰ ۱۸:۱۴</span></td><td>علی نمونه</td><td>layout.updated</td><td>قالب فروشگاهی v4</td></tr></tbody></table></section>
+  </main>
+</div></div></div></figure>
+<figure id="b-AdminPlans" class="board"><figcaption>مدیریت — پلن‌ها، قیمت‌ها، مالیات خرید، شارژ پیامک <span class="dim">1280×1100</span></figcaption><div class="scalebox" style="width:960px;height:825px"><div class="frame" style="width:1280px;transform:scale(0.75);transform-origin:top right"><div dir="rtl" style="width: 1280px; min-height: 1100px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 15px; line-height: 1.5; display: flex">
+  <aside class="side" aria-label="منوی مدیریت سرویس" style="width: 232px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 4px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا</div>
+    <div style="padding: 0 8px 12px 8px; font-size: 12px; color: #B8BCC4">مدیریت سرویس · نسخه ۱</div>
+    <a href="#" onclick="return false">داشبورد</a><a href="#" onclick="return false">فروشگاه‌ها<span class="cnt num">۱۲۸</span></a><a href="#" onclick="return false" class="on">پلن‌ها و قیمت‌ها</a><a href="#" onclick="return false">پرداخت‌ها<span class="cnt num">۲</span></a><a href="#" onclick="return false">پیامک<span class="cnt num">۱</span></a><a href="#" onclick="return false">نرخ و مظنه</a><a href="#" onclick="return false">قواعد مالیات</a><a href="#" onclick="return false">اتصال‌ها</a><a href="#" onclick="return false">کارکنان و دسترسی</a><a href="#" onclick="return false">سوابق (audit)</a><a href="#" onclick="return false">سلامت سیستم</a>
+    <div style="margin-top: auto; font-size: 11.5px; color: #B8BCC4; padding: 10px 8px 0 8px; line-height: 1.6">مریم کاظمی · نقش: مالک سرویس<br>ورود با موبایل + Passkey · <a href="#" style="color: #E0B44C">خروج</a></div>
+  </aside>
+  <main style="flex: 1; min-width: 0; padding: 20px 26px 24px 26px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div><h1 style="margin: 0; font-size: 21px; font-weight: 700">پلن‌ها و قیمت‌ها</h1><div class="hint">پیکربندی تجاری؛ کد هیچ عددی را ثابت ندارد. تغییرات به‌صورت نسخه جدید با تاریخ اجرا منتشر می‌شوند و روی سفارش‌های باز و فاکتورهای صادرشده اثر ندارند.</div></div><div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"><a href="#" class="btn btn-line">پیش‌نمایش صفحه پلن کاربر</a><a href="#" class="btn btn-gold">انتشار نسخه ۴</a><span class="badge info">داده نمونه</span></div></div>
+    <div class="hint">نسخه فعال: <strong>۳</strong> از <span class="num">۱۴۰۵/۰۷/۰۵</span> · پیش‌نویس: <strong>۴</strong> (تغییر: سقف پایه) · اجرا از: <input class="input num" value="۱۴۰۵/۰۸/۰۱" style="max-width: 130px; display: inline-block; min-height: 32px"></div>
+    <div style="display: grid; grid-template-columns: 1.45fr 1fr; gap: 12px; align-items: start"><section class="card"><h2>قیمت پلن‌ها (تومان، بدون مالیات)</h2><table><thead><tr><th>پلن</th><th>ماهانه</th><th>سالانه</th><th>با ۱۰٪ مالیات</th></tr></thead><tbody><tr><td>رایگان</td><td>۰</td><td>۰</td><td>۰</td></tr><tr><td>پایه</td><td><input class="input num" value="۷۹۰٬۰۰۰" style="min-width: 120px"></td><td><input class="input num" value="۷٬۹۰۰٬۰۰۰" style="min-width: 120px"></td><td><span class="num">۸۶۹٬۰۰۰<br>۸٬۶۹۰٬۰۰۰</span></td></tr><tr><td>حرفه‌ای</td><td><input class="input num" value="۱٬۹۰۰٬۰۰۰" style="min-width: 120px"></td><td><input class="input num" value="۱۰٬۹۰۰٬۰۰۰" style="min-width: 120px"></td><td><span class="num">۲٬۰۹۰٬۰۰۰<br>۱۱٬۹۹۰٬۰۰۰</span></td></tr></tbody></table><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>ماهانه پایه (۷۹۰ هزار) در انتظار تأیید مالک</span><h2>سقف‌ها و قابلیت‌ها</h2><table><thead><tr><th>قابلیت / سهمیه</th><th>رایگان</th><th>پایه</th><th>حرفه‌ای</th></tr></thead><tbody><tr><td>مظنه، ماشین‌حساب طلایی</td><td>✓</td><td>✓</td><td>✓</td></tr><tr><td>فاکتور در ماه</td><td><input class="input num" value="۵۰" style="max-width: 90px"></td><td><input class="input num" value="۵۰۰" style="max-width: 90px"></td><td>نامحدود</td></tr><tr><td>مشتری جدید در ماه</td><td><input class="input num" value="۵۰" style="max-width: 90px"></td><td><input class="input num" value="۵۰۰" style="max-width: 90px"></td><td>نامحدود</td></tr><tr><td>لینک اشتراک در ماه</td><td><input class="input num" value="۱۰" style="max-width: 90px"></td><td><input class="input num" value="۱۰۰" style="max-width: 90px"></td><td><input class="input num" value="۱٬۰۰۰" style="max-width: 90px"></td></tr><tr><td>پیامک رایگان در سال</td><td><input class="input num" value="۵" style="max-width: 90px"></td><td>—</td><td>—</td></tr><tr><td>تاریخچه فاکتورها و گزارش مالی</td><td>فقط ماه جاری</td><td>همه</td><td>همه</td></tr><tr><td>لوگو، دو قالب، ویرایش ظاهر</td><td>—</td><td>✓</td><td>✓</td></tr><tr><td>اقساط و یادآوری</td><td>—</td><td>—</td><td>✓</td></tr></tbody></table><div class="hint">قابلیت‌ها با کلید (مثل <span dir="ltr">invoice.customize</span>) به سرور می‌روند؛ منطق دامنه هرگز نام پلن را بررسی نمی‌کند.</div></section><div style="display: flex; flex-direction: column; gap: 12px"><section class="card"><h2>مالیات بر ارزش افزوده خرید</h2><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start"><div class="f"><label>نرخ (٪)</label><input class="input num" type="text" value="۱۰"></div><div class="f"><label>گرد کردن</label><select class="input"><option selected="selected">ریال، نیم به بالا</option></select></div></div><label style="display: flex; gap: 8px; align-items: center; font-size: 13.5px"><input type="checkbox" class="chk" checked="checked"> قیمت‌ها بدون مالیات اعلام می‌شوند</label><div class="hint">نرخ در هر سفارش snapshot می‌شود.</div></section><section class="card"><h2>شارژ پیامک</h2><table><thead><tr><th>پلن</th><th>هر بخش (تومان)</th><th>حداقل خرید</th><th>انتقال مانده</th></tr></thead><tbody><tr><td>رایگان</td><td><input class="input num" value="۸۵۰"></td><td><input class="input num" value="۴۰۰٬۰۰۰"></td><td><select class="input" aria-label="انتقال مانده"><option>منقضی</option></select></td></tr><tr><td>پایه</td><td><input class="input num" value="۵۰۰"></td><td><input class="input num" value="۱۰۰٬۰۰۰"></td><td><select class="input" aria-label="انتقال مانده"><option>منتقل</option></select></td></tr><tr><td>حرفه‌ای</td><td><input class="input num" value="۳۵۰"></td><td><input class="input num" value="۱۰۰٬۰۰۰"></td><td><select class="input" aria-label="انتقال مانده"><option>منتقل</option></select></td></tr></tbody></table><div class="f"><label>بسته‌های مجاز (تومان، با ویرگول)</label><input class="input num" type="text" value="۱۰۰٬۰۰۰، ۲۰۰٬۰۰۰، ۳۰۰٬۰۰۰، ۵۰۰٬۰۰۰، ۱٬۰۰۰٬۰۰۰"></div><div class="f"><label>هنگام تغییر پلن</label><select class="input"><option selected="selected">مانده حفظ، قیمت بخش پلن جدید (فرض در انتظار تأیید)</option></select></div></section><section class="card"><h2>سیاست باقی‌مانده هنگام ارتقا</h2><div class="f"><label>proration</label><select class="input"><option selected="selected">روزهای باقی‌مانده به انتهای دوره جدید اضافه شود (پیش‌فرض پیاده‌سازی)</option><option>بدون احتساب</option></select></div><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>در انتظار تصمیم مالک</span></section></div></div>
+  </main>
+</div></div></div></figure>
+<figure id="b-AdminPayments" class="board"><figcaption>مدیریت — پرداخت‌ها و reconcile <span class="dim">1280×900</span></figcaption><div class="scalebox" style="width:960px;height:675px"><div class="frame" style="width:1280px;transform:scale(0.75);transform-origin:top right"><div dir="rtl" style="width: 1280px; min-height: 900px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 15px; line-height: 1.5; display: flex">
+  <aside class="side" aria-label="منوی مدیریت سرویس" style="width: 232px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 4px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا</div>
+    <div style="padding: 0 8px 12px 8px; font-size: 12px; color: #B8BCC4">مدیریت سرویس · نسخه ۱</div>
+    <a href="#" onclick="return false">داشبورد</a><a href="#" onclick="return false">فروشگاه‌ها<span class="cnt num">۱۲۸</span></a><a href="#" onclick="return false">پلن‌ها و قیمت‌ها</a><a href="#" onclick="return false" class="on">پرداخت‌ها<span class="cnt num">۲</span></a><a href="#" onclick="return false">پیامک<span class="cnt num">۱</span></a><a href="#" onclick="return false">نرخ و مظنه</a><a href="#" onclick="return false">قواعد مالیات</a><a href="#" onclick="return false">اتصال‌ها</a><a href="#" onclick="return false">کارکنان و دسترسی</a><a href="#" onclick="return false">سوابق (audit)</a><a href="#" onclick="return false">سلامت سیستم</a>
+    <div style="margin-top: auto; font-size: 11.5px; color: #B8BCC4; padding: 10px 8px 0 8px; line-height: 1.6">مریم کاظمی · نقش: مالک سرویس<br>ورود با موبایل + Passkey · <a href="#" style="color: #E0B44C">خروج</a></div>
+  </aside>
+  <main style="flex: 1; min-width: 0; padding: 20px 26px 24px 26px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div><h1 style="margin: 0; font-size: 21px; font-weight: 700">پرداخت‌ها</h1><div class="hint">سفارش‌های خرید پلن و شارژ پیامک · مبالغ با مالیات · درگاه: حالت آزمایشی (Mock)</div></div><div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"><a href="#" class="btn btn-line">خروجی مالی ماه</a><span class="badge info">داده نمونه</span></div></div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: start"><div class="tile"><span class="l">انجام‌شده امروز</span><span class="v num">۱۱</span><span class="l"><span class="num">۹٬۴۲۰٬۰۰۰</span> تومان</span></div><div class="tile"><span class="l">در حال بررسی (reconcile)</span><span class="v num">۲</span><span class="l">تلاش بعدی خودکار تا ۲۴ ساعت</span></div><div class="tile"><span class="l">ناموفق / لغو امروز</span><span class="v num">۴</span><span class="l">بیشترین علت: لغو توسط کاربر</span></div><div class="tile"><span class="l">نیازمند بررسی دستی</span><span class="v num">۱</span><span class="l"><span class="badge err"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>عدم تطابق مبلغ</span></span></div></div>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 12px; align-items: start"><section class="card"><div class="seg"><a href="#" class="on">همه</a><a href="#">نیازمند اقدام <span class="num">۳</span></a><a href="#">انجام‌شده</a><a href="#">ناموفق</a><a href="#">پلن</a><a href="#">پیامک</a></div><table><thead><tr><th>وضعیت</th><th>مرجع</th><th>فروشگاه</th><th>محصول</th><th class="n">مبلغ سفارش</th><th class="n">تأییدشده بانک</th><th>زمان</th></tr></thead><tbody><tr><td><span class="badge err"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>عدم تطابق مبلغ</span></td><td><span dir="ltr" style="white-space: nowrap">TL-PLAN-1405-0011</span></td><td>گالری زر</td><td>پلن حرفه‌ای سالانه</td><td class="n">۱۱٬۹۹۰٬۰۰۰</td><td class="n">۱۰٬۹۹۰٬۰۰۰</td><td><span class="num">۱۴:۱۲</span></td></tr><tr class="sel"><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>در حال بررسی</span></td><td><span dir="ltr" style="white-space: nowrap">TL-SMS-1405-0024</span></td><td>جواهری نور</td><td>شارژ ۳۰۰ هزار</td><td class="n">۳۳۰٬۰۰۰</td><td class="n">—</td><td><span class="num">۱۴:۱۶</span></td></tr><tr><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>در حال بررسی</span></td><td><span dir="ltr" style="white-space: nowrap">TL-PLAN-1405-0012</span></td><td>زرگری امید</td><td>پلن پایه ماهانه</td><td class="n">۸۶۹٬۰۰۰</td><td class="n">—</td><td><span class="num">۱۴:۱۹</span></td></tr><tr><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>انجام‌شده</span></td><td><span dir="ltr" style="white-space: nowrap">TL-SMS-1405-0021</span></td><td>طلافروشی نمونه</td><td>شارژ ۲۰۰ هزار</td><td class="n">۲۲۰٬۰۰۰</td><td class="n">۲۲۰٬۰۰۰</td><td><span class="num">۱۴:۳۱</span></td></tr><tr><td><span class="badge err"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>ناموفق</span></td><td><span dir="ltr" style="white-space: nowrap">TL-SMS-1405-0022</span></td><td>طلافروشی نمونه</td><td>شارژ ۲۰۰ هزار</td><td class="n">۲۲۰٬۰۰۰</td><td class="n">—</td><td><span class="num">۱۴:۰۵</span></td></tr><tr><td><span class="badge off">منقضی</span></td><td><span dir="ltr" style="white-space: nowrap">TL-PLAN-1405-0010</span></td><td>طلای سپهر</td><td>پلن پایه سالانه</td><td class="n">۸٬۶۹۰٬۰۰۰</td><td class="n">—</td><td><span class="num">۱۲:۴۰</span></td></tr></tbody></table></section><section class="card em" style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; align-items: start"><div style="grid-column: span 2; display: flex; justify-content: space-between; align-items: center"><h2>جزئیات سفارش انتخاب‌شده · <span dir="ltr">TL-SMS-1405-0024</span></h2><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>در حال بررسی</span></div><div class="white"><div class="row"><span class="hint">فروشگاه</span><a href="#" onclick="return false">جواهری نور</a></div><div class="row"><span class="hint">محصول</span><span>شارژ پیامک · پلن پایه</span></div><div class="row"><span class="hint">مبلغ بسته / مالیات / کل</span><span class="num">۳۰۰٬۰۰۰ / ۳۰٬۰۰۰ / ۳۳۰٬۰۰۰</span></div><div class="row"><span class="hint">authority درگاه</span><span class="num" dir="ltr">A0000000000000000000000412</span></div><div class="row"><span class="hint">callback</span><span class="num">۱۴:۱۷ · verify timeout</span></div><div class="row"><span class="hint">تلاش‌های reconcile</span><span class="num">۳ · بعدی ۱۴:۲۸</span></div></div><div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-start"><a href="#" class="btn btn-dark">استعلام دوباره از بانک</a><a href="#" class="btn btn-line">نمایش پاسخ خام (پوشانده)</a></div><div class="hint">تأیید دستی فقط با شماره پیگیری بانک و دلیل، توسط نقش «مالی»؛ fulfillment همان مسیر خودکار و یک‌بار است. برگشت وجه خارج از برنامه انجام و اینجا ثبت می‌شود.</div><div style="display: flex; gap: 8px"><a href="#" class="btn btn-gold">ثبت تأیید دستی…</a><a href="#" class="btn btn-danger">علامت ناموفق…</a></div></section></div>
+  </main>
+</div></div></div></figure>
+<figure id="b-AdminSms" class="board"><figcaption>مدیریت — پیامک، صف و OTP <span class="dim">1280×1000</span></figcaption><div class="scalebox" style="width:960px;height:750px"><div class="frame" style="width:1280px;transform:scale(0.75);transform-origin:top right"><div dir="rtl" style="width: 1280px; min-height: 1000px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 15px; line-height: 1.5; display: flex">
+  <aside class="side" aria-label="منوی مدیریت سرویس" style="width: 232px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 4px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا</div>
+    <div style="padding: 0 8px 12px 8px; font-size: 12px; color: #B8BCC4">مدیریت سرویس · نسخه ۱</div>
+    <a href="#" onclick="return false">داشبورد</a><a href="#" onclick="return false">فروشگاه‌ها<span class="cnt num">۱۲۸</span></a><a href="#" onclick="return false">پلن‌ها و قیمت‌ها</a><a href="#" onclick="return false">پرداخت‌ها<span class="cnt num">۲</span></a><a href="#" onclick="return false" class="on">پیامک<span class="cnt num">۱</span></a><a href="#" onclick="return false">نرخ و مظنه</a><a href="#" onclick="return false">قواعد مالیات</a><a href="#" onclick="return false">اتصال‌ها</a><a href="#" onclick="return false">کارکنان و دسترسی</a><a href="#" onclick="return false">سوابق (audit)</a><a href="#" onclick="return false">سلامت سیستم</a>
+    <div style="margin-top: auto; font-size: 11.5px; color: #B8BCC4; padding: 10px 8px 0 8px; line-height: 1.6">مریم کاظمی · نقش: مالک سرویس<br>ورود با موبایل + Passkey · <a href="#" style="color: #E0B44C">خروج</a></div>
+  </aside>
+  <main style="flex: 1; min-width: 0; padding: 20px 26px 24px 26px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div><h1 style="margin: 0; font-size: 21px; font-weight: 700">پیامک</h1><div class="hint">صف ارسال، وضعیت‌های نامشخص، بودجه OTP و قواعد بخش‌بندی · provider پیامک: نمونه (adapter)</div></div><div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"><span class="badge info">داده نمونه</span></div></div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: start"><div class="tile"><span class="l">ارسال ۲۴ ساعت</span><span class="v num">۳۲۴</span><span class="l">فاکتور <span class="num">۲۸۱</span> · یادآوری <span class="num">۴۳</span></span></div><div class="tile"><span class="l">تحویل‌شده</span><span class="v num">۳۱۲</span><span class="l">پذیرفته‌شده و منتظر گزارش <span class="num">۷</span></span></div><div class="tile"><span class="l">نامشخص بیش از ۳۰ دقیقه</span><span class="v num">۴</span><span class="l"><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>نیازمند تطبیق</span></span></div><div class="tile"><span class="l">OTP امروز (بودجه عملیاتی)</span><span class="v num">۱۸۶</span><span class="l">از سقف روزانه <span class="num">۲٬۰۰۰</span> · نرخ‌محدودیت فعال</span></div></div>
+    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px; align-items: start"><section class="card"><div class="seg"><a href="#" class="on">نیازمند اقدام <span class="num">۵</span></a><a href="#">در صف <span class="num">۱۲</span></a><a href="#">همه</a></div><table><thead><tr><th>وضعیت</th><th>فروشگاه</th><th>نوع</th><th class="n">بخش</th><th class="n">هزینه (تومان)</th><th class="n">تلاش</th><th>زمان</th><th></th></tr></thead><tbody><tr><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>نامشخص</span></td><td>گالری زر</td><td>فاکتور</td><td class="n">۱</td><td class="n">۳۵۰</td><td class="n">۲</td><td><span class="num">۱۳:۴۸</span></td><td><a href="#">استعلام</a></td></tr><tr><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>نامشخص</span></td><td>گالری زر</td><td>یادآوری قسط</td><td class="n">۲</td><td class="n">۷۰۰</td><td class="n">۱</td><td><span class="num">۱۳:۵۰</span></td><td><a href="#">استعلام</a></td></tr><tr><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>نامشخص</span></td><td>طلافروشی نمونه</td><td>فاکتور</td><td class="n">۱</td><td class="n">۵۰۰</td><td class="n">۲</td><td><span class="num">۱۳:۵۲</span></td><td><a href="#">استعلام</a></td></tr><tr><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>نامشخص</span></td><td>جواهری نور</td><td>فاکتور</td><td class="n">۱</td><td class="n">۵۰۰</td><td class="n">۱</td><td><span class="num">۱۳:۵۵</span></td><td><a href="#">استعلام</a></td></tr><tr><td><span class="badge err"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>رد قطعی</span></td><td>طلای سپهر</td><td>فاکتور</td><td class="n">۱</td><td class="n">رایگان سالانه</td><td class="n">۱</td><td><span class="num">۱۱:۰۲</span></td><td>رزرو آزاد شد</td></tr></tbody></table><div class="hint">شماره گیرنده‌ها برای provider ماسک‌شده است (<span dir="ltr">0912***0000</span>). ارسال دوباره فقط توسط خود فروشگاه؛ اینجا فقط تطبیق وضعیت.</div></section><div style="display: flex; flex-direction: column; gap: 12px"><section class="card"><h2>قواعد بخش‌بندی</h2><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start"><div class="f"><label>فارسی (Unicode) تک‌بخش</label><input class="input num" type="text" value="۷۰"></div><div class="f"><label>هر بخش در چندبخشی</label><input class="input num" type="text" value="۶۷"></div><div class="f"><label>لاتین تک‌بخش</label><input class="input num" type="text" value="۱۶۰"></div><div class="f"><label>هر بخش لاتین چندبخشی</label><input class="input num" type="text" value="۱۵۳"></div></div><div class="hint">اعداد پیش‌فرض رایج؛ با مستندات provider انتخابی تأیید شوند.</div></section><section class="card"><h2>بودجه و محدودیت OTP</h2><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start"><div class="f"><label>سقف روزانه کل</label><input class="input num" type="text" value="۲٬۰۰۰"></div><div class="f"><label>هر شماره در ساعت</label><input class="input num" type="text" value="۵"></div></div><label style="display: flex; gap: 8px; align-items: center; font-size: 13.5px"><input type="checkbox" class="chk" checked="checked"> هشدار در ۸۰٪ بودجه</label></section><section class="card"><h2>قالب پیش‌فرض پیامک فاکتور</h2><div class="white hint" style="padding: 10px 12px">{shop_name}: فاکتور شما صادر شد. مشاهده: {invoice_link}</div><div class="hint">پلن رایگان همین قالب ثابت را دارد؛ {invoice_link} حذف‌شدنی نیست.</div></section></div></div>
+  </main>
+</div></div></div></figure>
+<figure id="b-AdminQuotes" class="board"><figcaption>مدیریت — نرخ و مظنه <span class="dim">1280×960</span></figcaption><div class="scalebox" style="width:960px;height:720px"><div class="frame" style="width:1280px;transform:scale(0.75);transform-origin:top right"><div dir="rtl" style="width: 1280px; min-height: 960px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 15px; line-height: 1.5; display: flex">
+  <aside class="side" aria-label="منوی مدیریت سرویس" style="width: 232px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 4px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا</div>
+    <div style="padding: 0 8px 12px 8px; font-size: 12px; color: #B8BCC4">مدیریت سرویس · نسخه ۱</div>
+    <a href="#" onclick="return false">داشبورد</a><a href="#" onclick="return false">فروشگاه‌ها<span class="cnt num">۱۲۸</span></a><a href="#" onclick="return false">پلن‌ها و قیمت‌ها</a><a href="#" onclick="return false">پرداخت‌ها<span class="cnt num">۲</span></a><a href="#" onclick="return false">پیامک<span class="cnt num">۱</span></a><a href="#" onclick="return false" class="on">نرخ و مظنه</a><a href="#" onclick="return false">قواعد مالیات</a><a href="#" onclick="return false">اتصال‌ها</a><a href="#" onclick="return false">کارکنان و دسترسی</a><a href="#" onclick="return false">سوابق (audit)</a><a href="#" onclick="return false">سلامت سیستم</a>
+    <div style="margin-top: auto; font-size: 11.5px; color: #B8BCC4; padding: 10px 8px 0 8px; line-height: 1.6">مریم کاظمی · نقش: مالک سرویس<br>ورود با موبایل + Passkey · <a href="#" style="color: #E0B44C">خروج</a></div>
+  </aside>
+  <main style="flex: 1; min-width: 0; padding: 20px 26px 24px 26px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div><h1 style="margin: 0; font-size: 21px; font-weight: 700">نرخ و مظنه</h1><div class="hint">دریافت مرکزی هر ۱۸۰ ثانیه برای همه فروشگاه‌ها · هیچ مرورگری مستقیم به provider نرخ وصل نمی‌شود</div></div><div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"><span class="badge info">داده نمونه</span></div></div>
+    <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; align-items: start"><section class="card"><div style="display: flex; justify-content: space-between"><h2>وضعیت دارایی‌ها</h2><span class="hint">آخرین دریافت موفق <span class="num">۱۴:۲۱:۰۴</span> · بعدی <span class="num">۱۴:۲۴:۰۴</span></span></div><table><thead><tr><th>دارایی</th><th class="n">مقدار</th><th>واحد</th><th>نسبت به قبلی</th><th>وضعیت</th><th>منبع</th></tr></thead><tbody><tr><td>۱۸ عیار — خرید <span dir="ltr" class="hint">GOLD_18_BUY</span></td><td class="n">۹٬۹۰۰٬۰۰۰</td><td>تومان/گرم</td><td>↑ ۰٫۳٪</td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>به‌روز</span></td><td>بازار نمونه</td></tr><tr><td>۱۸ عیار — فروش <span dir="ltr" class="hint">GOLD_18_SELL</span></td><td class="n">۱۰٬۰۰۰٬۰۰۰</td><td>تومان/گرم</td><td>↑ ۰٫۳٪</td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>به‌روز</span></td><td>بازار نمونه</td></tr><tr><td>۲۴ عیار <span dir="ltr" class="hint">GOLD_24</span></td><td class="n">۱۳٬۳۳۳٬۰۰۰</td><td>تومان/گرم</td><td>↑ ۰٫۳٪</td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>به‌روز</span></td><td>بازار نمونه</td></tr><tr><td>دلار <span dir="ltr" class="hint">USD_IRR</span></td><td class="n">۱۰۰٬۰۰۰</td><td>تومان</td><td>بدون تغییر</td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>به‌روز</span></td><td>بازار نمونه</td></tr><tr><td>انس جهانی <span dir="ltr" class="hint">XAU_USD</span></td><td class="n">۲٬۶۵۰</td><td>دلار/اونس</td><td>↓ ۰٫۲٪</td><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>قدیمی (۹ دقیقه)</span></td><td>provider جهانی نمونه</td></tr></tbody></table><h2>آخرین دریافت‌ها</h2><table><thead><tr><th>زمان</th><th>نتیجه</th><th>مدت</th><th>یادداشت</th></tr></thead><tbody><tr><td><span class="num">۱۴:۲۱:۰۴</span></td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>موفق</span></td><td><span class="num">۳۱۲ms</span></td><td>—</td></tr><tr><td><span class="num">۱۴:۱۸:۰۴</span></td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>موفق</span></td><td><span class="num">۲۹۸ms</span></td><td>—</td></tr><tr><td><span class="num">۱۴:۱۵:۰۴</span></td><td><span class="badge err"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>خطا</span></td><td><span class="num">۵۰۰۰ms</span></td><td>timeout؛ زمان دریافت تازه نشد</td></tr><tr><td><span class="num">۱۴:۱۲:۰۴</span></td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>موفق</span></td><td><span class="num">۳۴۰ms</span></td><td>—</td></tr></tbody></table></section><div style="display: flex; flex-direction: column; gap: 12px"><section class="card"><h2>آستانه‌ها</h2><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start"><div class="f"><label>تناوب دریافت (ثانیه)</label><input class="input num" type="text" value="۱۸۰" readonly="readonly" style="background: #F4F1EA"></div><div class="f"><label>«قدیمی» پس از (دقیقه)</label><input class="input num" type="text" value="۸"></div><div class="f"><label>timeout هر درخواست (ثانیه)</label><input class="input num" type="text" value="۵"></div><div class="f"><label>هشدار پس از خطای پیاپی</label><input class="input num" type="text" value="۳"></div></div><div class="hint">تناوب ۱۸۰ ثانیه الزام مالک است و از اینجا تغییر نمی‌کند.</div></section><section class="card em"><h2>نرخ اضطراری سراسری</h2><div class="hint">فقط وقتی provider نرخ از کار افتاده. همه فروشگاه‌ها برچسب «نرخ اعلامی طلاتا (دستی)» می‌بینند؛ فاکتورهای قبلی تغییر نمی‌کنند؛ هر فروشگاه همچنان می‌تواند نرخ دستی خودش را بگذارد.</div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start"><div class="f"><label>۱۸ عیار فروش (تومان/گرم)</label><input class="input num" type="text" value=""></div><div class="f"><label>اعتبار تا</label><select class="input"><option selected="selected">۳۰ دقیقه</option><option>۱ ساعت</option><option>تا لغو دستی</option></select></div></div><div class="f"><label>دلیل *</label><input class="input num" type="text" value=""></div><div style="display: flex; gap: 8px"><a href="#" class="btn btn-gold">اعمال با تأیید دوباره</a></div></section></div></div>
+  </main>
+</div></div></div></figure>
+<figure id="b-AdminTax" class="board"><figcaption>مدیریت — قواعد مالیات نسخه‌دار <span class="dim">1280×900</span></figcaption><div class="scalebox" style="width:960px;height:675px"><div class="frame" style="width:1280px;transform:scale(0.75);transform-origin:top right"><div dir="rtl" style="width: 1280px; min-height: 900px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 15px; line-height: 1.5; display: flex">
+  <aside class="side" aria-label="منوی مدیریت سرویس" style="width: 232px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 4px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا</div>
+    <div style="padding: 0 8px 12px 8px; font-size: 12px; color: #B8BCC4">مدیریت سرویس · نسخه ۱</div>
+    <a href="#" onclick="return false">داشبورد</a><a href="#" onclick="return false">فروشگاه‌ها<span class="cnt num">۱۲۸</span></a><a href="#" onclick="return false">پلن‌ها و قیمت‌ها</a><a href="#" onclick="return false">پرداخت‌ها<span class="cnt num">۲</span></a><a href="#" onclick="return false">پیامک<span class="cnt num">۱</span></a><a href="#" onclick="return false">نرخ و مظنه</a><a href="#" onclick="return false" class="on">قواعد مالیات</a><a href="#" onclick="return false">اتصال‌ها</a><a href="#" onclick="return false">کارکنان و دسترسی</a><a href="#" onclick="return false">سوابق (audit)</a><a href="#" onclick="return false">سلامت سیستم</a>
+    <div style="margin-top: auto; font-size: 11.5px; color: #B8BCC4; padding: 10px 8px 0 8px; line-height: 1.6">مریم کاظمی · نقش: مالک سرویس<br>ورود با موبایل + Passkey · <a href="#" style="color: #E0B44C">خروج</a></div>
+  </aside>
+  <main style="flex: 1; min-width: 0; padding: 20px 26px 24px 26px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div><h1 style="margin: 0; font-size: 21px; font-weight: 700">قواعد مالیات</h1><div class="hint">قواعد نسخه‌دار به ازای دسته؛ فاکتور هنگام صدور شناسه و نسخه قاعده را snapshot می‌کند. همه قواعد «نمونه» تا تأیید کارشناس مالیاتی.</div></div><div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"><a href="#" class="btn btn-gold">نسخه جدید قاعده</a><span class="badge info">داده نمونه</span></div></div>
+    <section class="card"><table><thead><tr><th>دسته</th><th>شناسه / نسخه</th><th>پایه مشمول</th><th>نرخ</th><th>از تاریخ</th><th>تا تاریخ</th><th>وضعیت</th><th class="n">فاکتورهای استفاده‌کننده</th></tr></thead><tbody><tr><td>طلا — خدمات <span class="hint" dir="ltr">GOLD_SERVICES</span></td><td><span dir="ltr">GOLD_SERVICES v1</span></td><td>اجرت + سود + کمیسیون (بدون ارزش طلا)</td><td>۱۰٪</td><td>۱۴۰۵/۰۱/۰۱</td><td>۱۴۰۵/۰۷/۳۰</td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>فعال</span></td><td class="n"><span class="num">۱۸٬۴۲۰</span></td></tr><tr><td>طلا — خدمات</td><td><span dir="ltr">GOLD_SERVICES v2</span></td><td>همان</td><td>۱۰٪</td><td>۱۴۰۵/۰۸/۰۱</td><td>—</td><td><span class="badge info">زمان‌بندی‌شده</span></td><td class="n">۰</td></tr><tr><td>متفرقه <span class="hint" dir="ltr">MISC</span></td><td><span dir="ltr">MISC v1</span></td><td>قیمت نهایی ردیف (مالیات جدا محاسبه نمی‌شود)</td><td>۰٪</td><td>۱۴۰۵/۰۱/۰۱</td><td>—</td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>فعال</span></td><td class="n"><span class="num">۲٬۱۱۰</span></td></tr><tr><td>نقره <span class="hint" dir="ltr">SILVER</span></td><td>—</td><td>رزرو نسخه ۲</td><td>—</td><td>—</td><td>—</td><td><span class="badge off">غیرفعال</span></td><td class="n">—</td></tr><tr><td>سکه <span class="hint" dir="ltr">COIN</span></td><td>—</td><td>رزرو نسخه ۲</td><td>—</td><td>—</td><td>—</td><td><span class="badge off">غیرفعال</span></td><td class="n">—</td></tr><tr><td>طلای آب‌شده <span class="hint" dir="ltr">MELTED_GOLD</span></td><td>—</td><td>رزرو نسخه ۲</td><td>—</td><td>—</td><td>—</td><td><span class="badge off">غیرفعال</span></td><td class="n">—</td></tr></tbody></table></section>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start"><section class="card em"><h2>نسخه جدید — GOLD_SERVICES v2</h2><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start"><div class="f"><label>نرخ (٪)</label><input class="input num" type="text" value="۱۰"></div><div class="f"><label>از تاریخ</label><input class="input num" type="text" value="۱۴۰۵/۰۸/۰۱"></div><div class="f"><label>پایه مشمول</label><select class="input"><option selected="selected">اجرت + سود + کمیسیون</option></select></div><div class="f"><label>گرد کردن</label><select class="input"><option selected="selected">IRR_LINE_HALF_UP_V1</option></select></div></div><div class="f"><label>مرجع قانونی / یادداشت *</label><input class="input num" type="text" value=""></div><div class="hint">نسخه فعال پس از تاریخ اجرا ویرایش‌پذیر نیست؛ اصلاح فقط با نسخه جدید. vectors محاسبه با هر نسخه اجرا می‌شوند.</div></section><section class="card"><h2>مالیات خرید اشتراک و پیامک</h2><div class="white"><div class="row"><span class="hint">مالیات بر ارزش افزوده</span><strong class="num">۱۰٪</strong></div><div class="row"><span class="hint">محل تنظیم</span><a href="#" onclick="return false">پلن‌ها و قیمت‌ها</a></div></div><div class="hint">مالیات فروش طلاتا به فروشگاه‌ها جدا از قواعد مالیات فاکتورهای طلای فروشگاه‌هاست.</div></section></div>
+  </main>
+</div></div></div></figure>
+<figure id="b-AdminIntegrations" class="board"><figcaption>مدیریت — اتصال‌ها (درگاه، پیامک، نرخ) <span class="dim">1280×900</span></figcaption><div class="scalebox" style="width:960px;height:675px"><div class="frame" style="width:1280px;transform:scale(0.75);transform-origin:top right"><div dir="rtl" style="width: 1280px; min-height: 900px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 15px; line-height: 1.5; display: flex">
+  <aside class="side" aria-label="منوی مدیریت سرویس" style="width: 232px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 4px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا</div>
+    <div style="padding: 0 8px 12px 8px; font-size: 12px; color: #B8BCC4">مدیریت سرویس · نسخه ۱</div>
+    <a href="#" onclick="return false">داشبورد</a><a href="#" onclick="return false">فروشگاه‌ها<span class="cnt num">۱۲۸</span></a><a href="#" onclick="return false">پلن‌ها و قیمت‌ها</a><a href="#" onclick="return false">پرداخت‌ها<span class="cnt num">۲</span></a><a href="#" onclick="return false">پیامک<span class="cnt num">۱</span></a><a href="#" onclick="return false">نرخ و مظنه</a><a href="#" onclick="return false">قواعد مالیات</a><a href="#" onclick="return false" class="on">اتصال‌ها</a><a href="#" onclick="return false">کارکنان و دسترسی</a><a href="#" onclick="return false">سوابق (audit)</a><a href="#" onclick="return false">سلامت سیستم</a>
+    <div style="margin-top: auto; font-size: 11.5px; color: #B8BCC4; padding: 10px 8px 0 8px; line-height: 1.6">مریم کاظمی · نقش: مالک سرویس<br>ورود با موبایل + Passkey · <a href="#" style="color: #E0B44C">خروج</a></div>
+  </aside>
+  <main style="flex: 1; min-width: 0; padding: 20px 26px 24px 26px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div><h1 style="margin: 0; font-size: 21px; font-weight: 700">اتصال‌ها</h1><div class="hint">همه ارتباط‌های بیرونی پشت adapter. کلیدها رمزشده ذخیره می‌شوند و پس از ذخیره نمایش داده نمی‌شوند.</div></div><div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"><span class="badge info">داده نمونه</span></div></div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start"><section class="card"><div style="display: flex; justify-content: space-between; align-items: center"><h2>درگاه پرداخت</h2><span class="badge info">Mock</span></div><div class="white"><div class="row"><span class="hint">adapter</span><span><span dir="ltr">mock</span></span></div><div class="row"><span class="hint">PSP واقعی</span><span><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>در انتظار انتخاب مالک</span></span></div><div class="row"><span class="hint">callback</span><span><span dir="ltr" class="num">/pay/callback/{gateway}</span></span></div><div class="row"><span class="hint">مهلت سفارش</span><span>۲۰ دقیقه</span></div><div class="row"><span class="hint">نمایش «برگشت وجه تا»</span><span>۷۲ ساعت</span></div></div><div style="display: flex; gap: 8px; flex-wrap: wrap"><a href="#" class="btn btn-dark">سناریوی آزمایشی…</a><a href="#" class="btn btn-line">افزودن درگاه</a></div><div class="hint">در حالت Mock، صفحه نتیجه و رسید برچسب «آزمایشی» دارند.</div></section><section class="card"><div style="display: flex; justify-content: space-between; align-items: center"><h2>ارائه‌دهنده پیامک</h2><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>سالم</span></div><div class="white"><div class="row"><span class="hint">adapter</span><span><span dir="ltr">sms_sample</span></span></div><div class="row"><span class="hint">خط فرستنده</span><span><span class="num" dir="ltr">3000••••</span></span></div><div class="row"><span class="hint">کلید API</span><span>•••••••• (تنظیم‌شده)</span></div><div class="row"><span class="hint">webhook وضعیت</span><span><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>امضای معتبر</span></span></div><div class="row"><span class="hint">آخرین خطا</span><span>دیروز ۲۲:۱۰</span></div></div><div style="display: flex; gap: 8px; flex-wrap: wrap"><a href="#" class="btn btn-dark">ارسال آزمایشی به شماره من</a><a href="#" class="btn btn-line">ویرایش</a></div><div class="hint">ارسال آزمایشی هزینه را از بودجه عملیاتی کم می‌کند، نه از اعتبار فروشگاه‌ها.</div></section><section class="card"><div style="display: flex; justify-content: space-between; align-items: center"><h2>provider نرخ</h2><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>سالم</span></div><div class="white"><div class="row"><span class="hint">adapter اصلی</span><span><span dir="ltr">market_sample</span></span></div><div class="row"><span class="hint">adapter انس</span><span><span dir="ltr">global_sample</span></span></div><div class="row"><span class="hint">نگاشت دارایی‌ها</span><span>۵ از ۵</span></div><div class="row"><span class="hint">کلید</span><span>•••••••• (تنظیم‌شده)</span></div><div class="row"><span class="hint">حالت</span><span>زنده نیست؛ داده نمونه</span></div></div><div style="display: flex; gap: 8px; flex-wrap: wrap"><a href="#" class="btn btn-dark">دریافت آزمایشی</a><a href="#" class="btn btn-line">ویرایش نگاشت</a></div><div class="hint">هیچ اتصال زنده‌ای بدون شواهد «فعال» نمایش داده نمی‌شود.</div></section></div>
+    <section class="card"><h2>دامنه و لینک‌های عمومی</h2><div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-items: start"><div class="f"><label>دامنه لینک فاکتور و بررسی</label><input class="input num" type="text" value="talata.ir"></div><div class="f"><label>مسیر بررسی QR</label><input class="input num" type="text" value="/v/{token}" readonly="readonly" style="background: #F4F1EA"></div><div class="f"><label>مسیر فاکتور عمومی</label><input class="input num" type="text" value="/i/{token}" readonly="readonly" style="background: #F4F1EA"></div></div><div class="hint">تغییر دامنه روی QRهای چاپ‌شده اثر ندارد؛ دامنه قبلی باید همیشه redirect بماند.</div></section>
+  </main>
+</div></div></div></figure>
+<figure id="b-AdminStaff" class="board"><figcaption>مدیریت — کارکنان و نقش‌ها <span class="dim">1280×940</span></figcaption><div class="scalebox" style="width:960px;height:705px"><div class="frame" style="width:1280px;transform:scale(0.75);transform-origin:top right"><div dir="rtl" style="width: 1280px; min-height: 940px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 15px; line-height: 1.5; display: flex">
+  <aside class="side" aria-label="منوی مدیریت سرویس" style="width: 232px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 4px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا</div>
+    <div style="padding: 0 8px 12px 8px; font-size: 12px; color: #B8BCC4">مدیریت سرویس · نسخه ۱</div>
+    <a href="#" onclick="return false">داشبورد</a><a href="#" onclick="return false">فروشگاه‌ها<span class="cnt num">۱۲۸</span></a><a href="#" onclick="return false">پلن‌ها و قیمت‌ها</a><a href="#" onclick="return false">پرداخت‌ها<span class="cnt num">۲</span></a><a href="#" onclick="return false">پیامک<span class="cnt num">۱</span></a><a href="#" onclick="return false">نرخ و مظنه</a><a href="#" onclick="return false">قواعد مالیات</a><a href="#" onclick="return false">اتصال‌ها</a><a href="#" onclick="return false" class="on">کارکنان و دسترسی</a><a href="#" onclick="return false">سوابق (audit)</a><a href="#" onclick="return false">سلامت سیستم</a>
+    <div style="margin-top: auto; font-size: 11.5px; color: #B8BCC4; padding: 10px 8px 0 8px; line-height: 1.6">مریم کاظمی · نقش: مالک سرویس<br>ورود با موبایل + Passkey · <a href="#" style="color: #E0B44C">خروج</a></div>
+  </aside>
+  <main style="flex: 1; min-width: 0; padding: 20px 26px 24px 26px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div><h1 style="margin: 0; font-size: 21px; font-weight: 700">کارکنان و دسترسی</h1><div class="hint">ورود کارکنان با موبایل + کد پیامکی و Passkey اجباری؛ دسترسی بر اساس نقش</div></div><div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"><a href="#" class="btn btn-gold">دعوت همکار</a><span class="badge info">داده نمونه</span></div></div>
+    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px; align-items: start"><section class="card"><h2>کارکنان</h2><table><thead><tr><th>نام</th><th>نقش</th><th>Passkey</th><th>آخرین ورود</th><th></th></tr></thead><tbody><tr><td>مریم کاظمی<br><span class="hint num" dir="ltr">۰۹۱۲ ۱۱۱ ۰۰۰۰</span></td><td>مالک سرویس</td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>۲ دستگاه</span></td><td><span class="num">امروز ۱۴:۰۲</span></td><td>—</td></tr><tr><td>رضا احمدی<br><span class="hint num" dir="ltr">۰۹۱۲ ۲۲۲ ۰۰۰۰</span></td><td>پشتیبانی</td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>۱ دستگاه</span></td><td><span class="num">امروز ۱۰:۱۵</span></td><td><a href="#">ویرایش</a></td></tr><tr><td>سارا محمدی<br><span class="hint num" dir="ltr">۰۹۱۲ ۳۳۳ ۰۰۰۰</span></td><td>مالی</td><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>ثبت نشده</span></td><td><span class="num">دیروز</span></td><td><a href="#">ویرایش</a></td></tr><tr><td>امیر رضایی<br><span class="hint num" dir="ltr">۰۹۱۲ ۴۴۴ ۰۰۰۰</span></td><td>عملیات فنی</td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>۱ دستگاه</span></td><td><span class="num">۳ روز پیش</span></td><td><a href="#">ویرایش</a></td></tr></tbody></table><div class="hint">کاربر بدون Passkey تا ثبت آن فقط داشبورد را می‌بیند. حذف کاربر نشست‌های فعال را باطل می‌کند.</div></section><section class="card"><h2>نقش‌ها و مجوزها</h2><table><thead><tr><th>مجوز</th><th>مالک سرویس</th><th>پشتیبانی</th><th>مالی</th><th>عملیات فنی</th></tr></thead><tbody><tr><td>داشبورد و سلامت</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr><tr><td>مشاهده فروشگاه‌ها</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr><tr><td>فعال‌سازی دستی پلن / اصلاح اعتبار</td><td>✓</td><td>—</td><td>✓</td><td>—</td></tr><tr><td>تأیید دستی پرداخت</td><td>✓</td><td>—</td><td>✓</td><td>—</td></tr><tr><td>ویرایش پلن‌ها و قیمت‌ها</td><td>✓</td><td>—</td><td>—</td><td>—</td></tr><tr><td>قواعد مالیات</td><td>✓</td><td>—</td><td>✓</td><td>—</td></tr><tr><td>اتصال‌ها و کلیدها</td><td>✓</td><td>—</td><td>—</td><td>✓</td></tr><tr><td>نرخ اضطراری سراسری</td><td>✓</td><td>—</td><td>—</td><td>✓</td></tr><tr><td>تعلیق فروشگاه</td><td>✓</td><td>✓ (با تأیید مالک)</td><td>—</td><td>—</td></tr><tr><td>کارکنان و نقش‌ها</td><td>✓</td><td>—</td><td>—</td><td>—</td></tr></tbody></table><div class="hint">هیچ نقشی نام/موبایل مشتریان فروشگاه‌ها یا محتوای فاکتورها را نمی‌بیند. «ورود به جای فروشگاه» در نسخه ۱ وجود ندارد.</div></section></div>
+  </main>
+</div></div></div></figure>
+<figure id="b-AdminAudit" class="board"><figcaption>مدیریت — سوابق audit <span class="dim">1280×900</span></figcaption><div class="scalebox" style="width:960px;height:675px"><div class="frame" style="width:1280px;transform:scale(0.75);transform-origin:top right"><div dir="rtl" style="width: 1280px; min-height: 900px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 15px; line-height: 1.5; display: flex">
+  <aside class="side" aria-label="منوی مدیریت سرویس" style="width: 232px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 4px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا</div>
+    <div style="padding: 0 8px 12px 8px; font-size: 12px; color: #B8BCC4">مدیریت سرویس · نسخه ۱</div>
+    <a href="#" onclick="return false">داشبورد</a><a href="#" onclick="return false">فروشگاه‌ها<span class="cnt num">۱۲۸</span></a><a href="#" onclick="return false">پلن‌ها و قیمت‌ها</a><a href="#" onclick="return false">پرداخت‌ها<span class="cnt num">۲</span></a><a href="#" onclick="return false">پیامک<span class="cnt num">۱</span></a><a href="#" onclick="return false">نرخ و مظنه</a><a href="#" onclick="return false">قواعد مالیات</a><a href="#" onclick="return false">اتصال‌ها</a><a href="#" onclick="return false">کارکنان و دسترسی</a><a href="#" onclick="return false" class="on">سوابق (audit)</a><a href="#" onclick="return false">سلامت سیستم</a>
+    <div style="margin-top: auto; font-size: 11.5px; color: #B8BCC4; padding: 10px 8px 0 8px; line-height: 1.6">مریم کاظمی · نقش: مالک سرویس<br>ورود با موبایل + Passkey · <a href="#" style="color: #E0B44C">خروج</a></div>
+  </aside>
+  <main style="flex: 1; min-width: 0; padding: 20px 26px 24px 26px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div><h1 style="margin: 0; font-size: 21px; font-weight: 700">سوابق (audit)</h1><div class="hint">append-only · هیچ رکوردی ویرایش یا حذف نمی‌شود · نگهداری طبق سیاست provider</div></div><div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"><a href="#" class="btn btn-line">خروجی CSV بازه</a><span class="badge info">داده نمونه</span></div></div>
+    <section class="card" style="flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: 10px"><div class="f" style="flex: 1.3"><label>بازه</label><input class="input num" type="text" value="۱۴۰۵/۰۷/۰۱ تا ۱۴۰۵/۰۷/۱۳"></div><div class="f" style="flex: 1"><label>بازیگر</label><select class="input"><option selected="selected">همه</option><option>کارکنان provider</option><option>سیستم</option><option>کاربران فروشگاه</option></select></div><div class="f" style="flex: 1"><label>دسته رویداد</label><select class="input"><option selected="selected">همه</option><option>پلن و اشتراک</option><option>پرداخت</option><option>اعتبار پیامک</option><option>قیمت و مالیات</option><option>نرخ</option><option>دسترسی</option><option>فاکتور</option></select></div><div class="f" style="flex: 1.2"><label>فروشگاه</label><input class="input num" type="search" value=""></div><a href="#" class="btn btn-dark">جست‌وجو</a></section>
+    <section class="card"><table><thead><tr><th>زمان</th><th>بازیگر</th><th>رویداد</th><th>هدف</th><th>جزئیات</th><th>trace</th></tr></thead><tbody><tr><td><span class="num">۱۴۰۵/۰۷/۱۳ ۱۴:۳۱</span></td><td>سیستم (پرداخت)</td><td><span dir="ltr">sms_credit.purchased</span></td><td>طلافروشی نمونه</td><td>۲۰۰٬۰۰۰ اعتبار · TL-SMS-1405-0021</td><td><span dir="ltr" class="hint">7f3a…</span></td></tr><tr><td><span class="num">۱۴۰۵/۰۷/۱۳ ۱۴:۱۲</span></td><td>سیستم (پرداخت)</td><td><span dir="ltr">billing.amount_mismatch</span></td><td>گالری زر</td><td>سفارش ۱۱٬۹۹۰٬۰۰۰ / بانک ۱۰٬۹۹۰٬۰۰۰</td><td><span dir="ltr" class="hint">2c91…</span></td></tr><tr><td><span class="num">۱۴۰۵/۰۷/۱۳ ۱۱:۴۰</span></td><td>مریم کاظمی</td><td><span dir="ltr">plans.draft_saved</span></td><td>پیکربندی پلن v4</td><td>سقف فاکتور پایه: ۵۰۰</td><td><span dir="ltr" class="hint">a0b4…</span></td></tr><tr><td><span class="num">۱۴۰۵/۰۷/۱۳ ۰۹:۰۵</span></td><td>سارا محمدی</td><td><span dir="ltr">tax_rule.scheduled</span></td><td>GOLD_SERVICES v2</td><td>از ۱۴۰۵/۰۸/۰۱ · ۱۰٪</td><td><span dir="ltr" class="hint">51de…</span></td></tr><tr><td><span class="num">۱۴۰۵/۰۷/۱۲ ۲۲:۱۰</span></td><td>سیستم</td><td><span dir="ltr">integration.sms.error</span></td><td>ارائه‌دهنده پیامک</td><td>HTTP 503 · ۳ تلاش</td><td><span dir="ltr" class="hint">c77e…</span></td></tr><tr><td><span class="num">۱۴۰۵/۰۷/۱۲ ۱۸:۰۰</span></td><td>رضا احمدی</td><td><span dir="ltr">tenant.viewed</span></td><td>طلای ماهان</td><td>مشاهده پروفایل (پشتیبانی)</td><td><span dir="ltr" class="hint">0e12…</span></td></tr><tr><td><span class="num">۱۴۰۵/۰۷/۱۲ ۱۰:۲۲</span></td><td>مریم کاظمی</td><td><span dir="ltr">tenant.suspended</span></td><td>طلای ماهان</td><td>درخواست کتبی مالک فروشگاه</td><td><span dir="ltr" class="hint">9ab0…</span></td></tr><tr><td><span class="num">۱۴۰۵/۰۷/۱۱ ۰۸:۳۰</span></td><td>امیر رضایی</td><td><span dir="ltr">staff.passkey_added</span></td><td>امیر رضایی</td><td>دستگاه: لپ‌تاپ کار</td><td><span dir="ltr" class="hint">4d88…</span></td></tr></tbody></table>
+      <div class="hint">۱ تا ۵۰ از ۲٬۴۱۸ · هیچ کد OTP، توکن، کلید یا شماره کامل گیرنده در سوابق ذخیره نمی‌شود.</div></section>
+  </main>
+</div></div></div></figure>
+<figure id="b-AdminSystem" class="board"><figcaption>مدیریت — سلامت سیستم <span class="dim">1280×900</span></figcaption><div class="scalebox" style="width:960px;height:675px"><div class="frame" style="width:1280px;transform:scale(0.75);transform-origin:top right"><div dir="rtl" style="width: 1280px; min-height: 900px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 15px; line-height: 1.5; display: flex">
+  <aside class="side" aria-label="منوی مدیریت سرویس" style="width: 232px; flex-shrink: 0; background: #121417; color: #F4F1EA; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 0 8px 4px 8px; color: #E0B44C; font-weight: 700; font-size: 18px"><svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>طلاتا</div>
+    <div style="padding: 0 8px 12px 8px; font-size: 12px; color: #B8BCC4">مدیریت سرویس · نسخه ۱</div>
+    <a href="#" onclick="return false">داشبورد</a><a href="#" onclick="return false">فروشگاه‌ها<span class="cnt num">۱۲۸</span></a><a href="#" onclick="return false">پلن‌ها و قیمت‌ها</a><a href="#" onclick="return false">پرداخت‌ها<span class="cnt num">۲</span></a><a href="#" onclick="return false">پیامک<span class="cnt num">۱</span></a><a href="#" onclick="return false">نرخ و مظنه</a><a href="#" onclick="return false">قواعد مالیات</a><a href="#" onclick="return false">اتصال‌ها</a><a href="#" onclick="return false">کارکنان و دسترسی</a><a href="#" onclick="return false">سوابق (audit)</a><a href="#" onclick="return false" class="on">سلامت سیستم</a>
+    <div style="margin-top: auto; font-size: 11.5px; color: #B8BCC4; padding: 10px 8px 0 8px; line-height: 1.6">مریم کاظمی · نقش: مالک سرویس<br>ورود با موبایل + Passkey · <a href="#" style="color: #E0B44C">خروج</a></div>
+  </aside>
+  <main style="flex: 1; min-width: 0; padding: 20px 26px 24px 26px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px"><div><h1 style="margin: 0; font-size: 21px; font-weight: 700">سلامت سیستم</h1><div class="hint">صف‌ها، زمان‌بندها، کارهای ناموفق و پشتیبان‌گیری</div></div><div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0"><span class="badge info">داده نمونه</span></div></div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: start"><div class="tile"><span class="l">تأخیر صف</span><span class="v num">۱ <span style="font-size: 13px; font-weight: 400; color: #5A5E66">ثانیه</span></span><span><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>سالم</span></span></div><div class="tile"><span class="l">کارهای ناموفق</span><span class="v num">۰</span><span><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>بدون مورد</span></span></div><div class="tile"><span class="l">outbox در انتظار</span><span class="v num">۰</span><span><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>سالم</span></span></div><div class="tile"><span class="l">آخرین پشتیبان</span><span class="v num" style="font-size: 20px">امروز ۰۳:۰۰</span><span><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>تمرین بازیابی: ۴۵ روز پیش</span></span></div></div>
+    <section class="card"><h2>زمان‌بندها</h2><table><thead><tr><th>کار</th><th>تناوب</th><th>آخرین اجرا</th><th>مدت</th><th>نتیجه</th><th>بعدی</th></tr></thead><tbody><tr><td>دریافت مرکزی نرخ</td><td>هر ۱۸۰ ثانیه</td><td><span class="num">۱۴:۲۱:۰۴</span></td><td><span class="num">۰٫۳s</span></td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>موفق</span></td><td><span class="num">۱۴:۲۴:۰۴</span></td></tr><tr><td>reconcile پرداخت</td><td>هر ۱ دقیقه</td><td><span class="num">۱۴:۲۳</span></td><td><span class="num">۱٫۱s</span></td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>موفق</span></td><td><span class="num">۱۴:۲۴</span></td></tr><tr><td>انقضای سفارش‌های رهاشده</td><td>هر ۵ دقیقه</td><td><span class="num">۱۴:۲۰</span></td><td><span class="num">۰٫۲s</span></td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>موفق</span></td><td><span class="num">۱۴:۲۵</span></td></tr><tr><td>تطبیق پیامک نامشخص</td><td>هر ۱ دقیقه</td><td><span class="num">۱۴:۲۳</span></td><td><span class="num">۰٫۸s</span></td><td><span class="badge warn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"></path></svg>۴ مانده</span></td><td><span class="num">۱۴:۲۴</span></td></tr><tr><td>انقضای شارژ رایگان + هشدار</td><td>روزانه ۰۰:۰۵</td><td><span class="num">امروز ۰۰:۰۵</span></td><td><span class="num">۲s</span></td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>موفق</span></td><td><span class="num">فردا ۰۰:۰۵</span></td></tr><tr><td>یادآوری اقساط</td><td>روزانه ۱۰:۰۰</td><td><span class="num">امروز ۱۰:۰۰</span></td><td><span class="num">۹s</span></td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>۴۳ ارسال</span></td><td><span class="num">فردا ۱۰:۰۰</span></td></tr><tr><td>پشتیبان پایگاه داده</td><td>روزانه ۰۳:۰۰</td><td><span class="num">امروز ۰۳:۰۰</span></td><td><span class="num">۴m</span></td><td><span class="badge ok"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>موفق</span></td><td><span class="num">فردا ۰۳:۰۰</span></td></tr></tbody></table></section>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start"><section class="card"><h2>کارهای ناموفق</h2><div class="white hint" style="padding: 14px; text-align: center">موردی نیست. کار ناموفق با شناسه، خطای خلاصه و دکمه «اجرای دوباره» اینجا می‌آید؛ اجرای دوباره idempotent است.</div></section><section class="card"><h2>نسخه و محیط</h2><div class="white"><div class="row"><span class="hint">نسخه برنامه</span><span class="num" dir="ltr">1.0.0-rc.3</span></div><div class="row"><span class="hint">محیط</span><span class="badge info">staging</span></div><div class="row"><span class="hint">آخرین استقرار</span><span class="num">۱۴۰۵/۰۷/۱۲ ۱۹:۴۰</span></div><div class="row"><span class="hint">مهاجرت‌های اجرانشده</span><span class="num">۰</span></div></div></section></div>
+  </main>
+</div></div></div></figure>
 </div>
 </body>
 </html>

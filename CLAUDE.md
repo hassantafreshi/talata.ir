@@ -1,6 +1,6 @@
 # Talata project instructions
 
-This repository currently contains planning documents. The owner requested prompts, not an application implementation in this documentation change. Start any build from `docs/IMPLEMENTATION_GUIDE.md` (doc map, modules, APIs, jobs, build order, open decisions).
+This repository currently contains planning documents. The owner requested prompts, not an application implementation in this documentation change. Start any build from `docs/IMPLEMENTATION_GUIDE.md` (doc map, modules, APIs, jobs, build order, open decisions). For an external coding model (ChatGPT/Codex), use `docs/handoff/` (system prompt, ordered task cards, per-screen specs with all states including the v1 admin console, API examples, QA checklist) and the standalone screen references in `docs/design/reference-html/`.
 
 For future implementation requests, read:
 

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>تنظیمات — ورود سریع، شماره ورود، کاربران (دسکتاپ)</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: DesktopSecurity · 1280x900.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border-radius:999px;font-weight:700;font-size:14px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 16px;gap:8px}
+.btn-gold{background:#D4A53C;color:#15171A}
+.btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+.nav a{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:15px;font-weight:500}
+.nav a.on{background:#2A2E35;color:#E0B44C}
+.side a{display:flex;align-items:center;justify-content:space-between;min-height:46px;padding:0 14px;border-radius:999px;text-decoration:none;color:#15171A;font-size:15px}
+.side a.on{background:#F4F1EA;box-shadow:inset 0 0 0 2px #D4A53C;font-weight:700}
+.card{background:#F4F1EA;border:0;border-radius:20px;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.input{min-height:44px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:15px;box-sizing:border-box;color:#15171A;font-family:inherit}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:9px 10px;border-bottom:1px solid #D9D3C7;text-align:right;vertical-align:middle}
+th{font-weight:500;color:#5A5E66;font-size:12.5px}
+.sw{width:40px;height:24px;border-radius:999px;background:#1F7A4D;position:relative;display:inline-block}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#FFFFFF}
+.sw.off{background:#D9D3C7}
+.sw.off::after{left:auto;right:3px}
+h2{margin:0;font-size:16px;font-weight:700}
+.hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 1280px; min-height: 900px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 12px 32px; background: #121417; color: #F4F1EA">
+    <div style="display: flex; align-items: center; gap: 12px"><svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke="#E0B44C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg><span style="font-size: 21px; font-weight: 700; color: #E0B44C">طلاتا</span><span style="color: #2A2E35">|</span><span style="font-size: 15px; color: #B8BCC4">طلافروشی نمونه</span></div>
+    <nav class="nav" aria-label="منوی اصلی" style="display: flex; gap: 4px"><a href="DesktopRate.html">فاکتور جدید</a><a href="DesktopInvoiceList.html">فاکتورها</a><a href="DesktopMazneh.html">مظنه</a><a href="DesktopCalculator.html">ماشین‌حساب</a><a href="DesktopCustomers.html">مشتریان و اقساط</a><a href="DesktopSettings.html" class="on">تنظیمات</a></nav>
+  </header>
+
+  <div style="display: flex; gap: 24px; padding: 20px 32px 24px 32px; flex-grow: 1; align-items: flex-start">
+    <aside class="side" style="width: 240px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px">
+      <a href="DesktopSettings.html">اطلاعات کسب‌وکار</a><a href="DesktopLayout.html">ظاهر فاکتور</a><a href="DesktopSecurity.html" class="on">کاربران فروشگاه</a><a href="DesktopPlans.html">پلن و اعتبار</a><a href="DesktopSecurity.html" class="on">ورود سریع (Passkey)</a><a href="DesktopSecurity.html" class="on">شماره ورود و بازیابی</a>
+      <a href="DesktopSmsBuy.html">خرید پیامک <span style="font-size: 12px; color: #5A5E66">۸۴ بخش مانده</span></a>
+    </aside>
+
+    <main style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+      <section class="card" aria-label="ورود سریع">
+        <div style="display: flex; justify-content: space-between; align-items: center"><h2>ورود سریع با اثر انگشت / قفل دستگاه (Passkey)</h2><a href="DesktopSecurity.html" class="btn btn-gold">افزودن این دستگاه</a></div>
+        <div class="hint">اختیاری است؛ پیامک همیشه راه بازیابی می‌ماند. اثر انگشت یا چهره به طلاتا فرستاده نمی‌شود. حذف در سرور، ورود با آن دستگاه را فوراً غیرفعال می‌کند؛ پاک‌کردن از خود دستگاه جداست.</div>
+        <table>
+          <thead><tr><th>دستگاه</th><th>افزوده‌شده</th><th>آخرین استفاده</th><th>اقدام</th></tr></thead>
+          <tbody>
+            <tr><td>گوشی سامسونگ من <span class="badge" style="background: #E3F3EC; color: #1F7A4D">فعال</span></td><td class="num">۱۴۰۵/۰۶/۰۱</td><td class="num">دیروز ۱۸:۱۰</td><td><a href="DesktopSecurity.html" class="btn btn-line" style="min-height: 36px">تغییر نام</a> <a href="DesktopSecurity.html" class="btn btn-line" style="min-height: 36px; color: #B3261E">حذف</a></td></tr>
+            <tr><td>لپ‌تاپ فروشگاه (Windows Hello)</td><td class="num">۱۴۰۵/۰۷/۱۰</td><td class="num">امروز ۰۹:۰۲</td><td><a href="DesktopSecurity.html" class="btn btn-line" style="min-height: 36px">تغییر نام</a> <a href="DesktopSecurity.html" class="btn btn-line" style="min-height: 36px; color: #B3261E">حذف</a></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card" aria-label="شماره ورود">
+        <h2>شماره ورود و بازیابی پیامکی</h2>
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+          <div><div class="hint">شماره فعلی ورود (خصوصی؛ روی فاکتور چاپ نمی‌شود)</div><strong class="num" dir="ltr" style="font-size: 18px; display: inline-block">۰۹۱۲ ۳۴۵ ۶۷۸۹</strong></div>
+          <div style="display: flex; gap: 8px; align-items: center; margin-inline-start: auto"><input class="input num" type="tel" placeholder="شماره جدید" aria-label="شماره جدید" style="width: 200px; direction: ltr; text-align: right"><a href="DesktopSecurity.html" class="btn btn-line">شروع تغییر شماره</a></div>
+        </div>
+        <div class="hint">تغییر شماره دو مرحله دارد: کد پیامکی به شماره فعلی، سپس کد به شماره جدید. تا تأیید هر دو، چیزی تغییر نمی‌کند. شماره کسب‌وکار (عمومی) در «اطلاعات کسب‌وکار» جداگانه است.</div>
+      </section>
+
+      <section class="card" aria-label="کاربران فروشگاه">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><h2>کاربران فروشگاه</h2><div style="display: flex; gap: 8px"><input class="input num" type="tel" placeholder="موبایل کاربر جدید" aria-label="موبایل کاربر جدید" style="width: 200px; direction: ltr; text-align: right"><a href="DesktopSecurity.html" class="btn btn-gold">دعوت</a></div></div>
+        <table>
+          <thead><tr><th>کاربر</th><th>نقش</th><th>صدور فاکتور</th><th>ابطال / جایگزین</th><th>مشتریان و پرداخت</th><th>تنظیمات</th><th>پلن و پرداخت</th><th>اقدام</th></tr></thead>
+          <tbody>
+            <tr><td><strong>علی نمونه</strong><br><span class="num" dir="ltr" style="font-size: 12.5px; color: #5A5E66">۰۹۱۲ ۳۴۵ ۶۷۸۹</span></td><td><span class="badge" style="background: #121417; color: #E0B44C">مالک</span></td><td>همه</td><td>همه</td><td>همه</td><td>همه</td><td>همه</td><td><span class="hint">انتقال مالکیت با تأیید دوباره</span></td></tr>
+            <tr><td><strong>مریم نمونه</strong><br><span class="num" dir="ltr" style="font-size: 12.5px; color: #5A5E66">۰۹۳۵ ۰۰۰ ۰۰۰۰</span></td><td>فروشنده</td><td><span class="sw" role="switch" aria-checked="true" aria-label="صدور"></span></td><td><span class="sw off" role="switch" aria-checked="false" aria-label="ابطال"></span></td><td><span class="sw" role="switch" aria-checked="true" aria-label="مشتریان"></span></td><td><span class="sw off" role="switch" aria-checked="false" aria-label="تنظیمات"></span></td><td><span class="sw off" role="switch" aria-checked="false" aria-label="پلن"></span></td><td><a href="DesktopSecurity.html" class="btn btn-line" style="min-height: 36px; color: #B3261E">حذف</a></td></tr>
+            <tr style="color: #5A5E66"><td><span class="num" dir="ltr" style="display: inline-block">۰۹۱۹ ۰۰۰ ۰۰۰۰</span><br><span style="font-size: 12.5px">دعوت ۱۴۰۵/۰۷/۱۲</span></td><td><span class="badge" style="background: #FBF0D9; color: #8A5A00">در انتظار</span></td><td colspan="5">پس از اولین ورود با کد پیامکی فعال می‌شود</td><td><a href="DesktopSecurity.html" class="btn btn-line" style="min-height: 36px">ارسال دوباره</a> <a href="DesktopSecurity.html" class="btn btn-line" style="min-height: 36px; color: #B3261E">لغو</a></td></tr>
+          </tbody>
+        </table>
+        <div class="hint">هر کاربر با موبایل خودش وارد می‌شود؛ رمز مشترک وجود ندارد. تغییر دسترسی بلافاصله اعمال و در سوابق ثبت می‌شود.</div>
+      </section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

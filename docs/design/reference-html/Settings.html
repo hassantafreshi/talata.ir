@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>تنظیمات — موبایل</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: Settings · 390x844.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
+.item{display:flex;align-items:center;gap:12px;background:#F4F1EA;border:0;border-radius:20px;padding:12px 14px;text-decoration:none;color:#15171A;min-height:64px}
+.item .ic{width:40px;height:40px;border-radius:10px;background:#121417;color:#E0B44C;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.item .t{display:flex;flex-direction:column;flex:1;min-width:0;gap:2px}
+.item .s{font-size:12.5px;color:#5A5E66}
+.tab{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-height:56px;justify-content:center;font-size:11.5px;font-weight:500;color:#B8BCC4;text-decoration:none}
+.tab.on{color:#E0B44C}
+h2{margin:6px 2px 0 2px;font-size:13px;font-weight:700;color:#5A5E66}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 390px; min-height: 844px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="background: #121417; color: #F4F1EA; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 12px 16px">
+    <h1 style="margin: 0; font-size: 20px; font-weight: 700">تنظیمات</h1>
+    <div style="display: flex; flex-direction: column; align-items: flex-end; font-size: 12px; color: #B8BCC4"><span>علی نمونه · مالک</span><span class="num" dir="ltr">۰۹۱۲ ۳۴۵ ۶۷۸۹</span></div>
+  </header>
+
+  <main style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 16px 16px; flex-grow: 1">
+    <h2>فروشگاه</h2>
+    <a href="Customers.html" class="item">
+      <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg></span>
+      <span class="t"><strong>مشتریان و اقساط</strong><span class="s">۳۸ مشتری · ثبت مشتری در همه پلن‌ها؛ اقساط و یادآوری در حرفه‌ای</span></span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A5E66" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+    </a>
+    <a href="BusinessInfo.html" class="item">
+      <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l1-5h16l1 5M4 10v10h16V10M9 20v-6h6v6"></path></svg></span>
+      <span class="t"><strong>اطلاعات کسب‌وکار</strong><span class="s">نام، موبایل و آدرس پیش از اولین صدور لازم است</span></span>
+      <span class="badge" style="background: #FBF0D9; color: #8A5A00">۱ مورد ناقص</span>
+    </a>
+    <a href="LayoutMobile.html" class="item">
+      <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg></span>
+      <span class="t"><strong>ظاهر فاکتور</strong><span class="s">قالب «فروشگاهی» · لوگو در هدر · پایه و حرفه‌ای</span></span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A5E66" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+    </a>
+    <a href="Users.html" class="item">
+      <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2 20c0-4 3-6 7-6s7 2 7 6"></path><path d="M17 8h5M19.5 5.5v5"></path></svg></span>
+      <span class="t"><strong>کاربران فروشگاه</strong><span class="s">۲ کاربر · دسترسی صدور و ابطال جداگانه</span></span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A5E66" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+    </a>
+
+    <h2>پلن و اعتبار</h2>
+    <a href="Plans.html" class="item">
+      <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v12H3zM3 11h18"></path></svg></span>
+      <span class="t"><strong>پلن و اعتبار · پایه (نمونه) تا ۱۴۰۵/۰۸/۰۱ · تغییر پلن</strong><span class="s">لینک فاکتور: <span class="num">۹۹</span> از ۱۰۰ · پیامک رایگان امسال: <span class="num">۱</span> مانده از ۵ · اعتبار پیامک: <span class="num">۴۲٬۰۰۰</span> تومان ≈ <span class="num">۸۴</span> بخش</span></span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A5E66" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+    </a>
+    <a href="SmsBuy.html" class="item">
+      <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"></path><path d="M8 9h8M8 12h5"></path></svg></span>
+      <span class="t"><strong>خرید پیامک</strong><span class="s">مانده <span class="num">۴۲٬۰۰۰</span> تومان ≈ <span class="num">۸۴</span> بخش · هر بخش <span class="num">۵۰۰</span> تومان · شارژ از ۱۰۰ هزار تومان</span></span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A5E66" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+    </a>
+
+    <h2>ورود و امنیت</h2>
+    <div class="item" style="flex-direction: column; align-items: stretch; gap: 8px">
+      <div style="display: flex; align-items: center; gap: 12px">
+        <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11a5 5 0 0 1 10 0v2a5 5 0 0 1-1 3"></path><path d="M9.5 11a2.5 2.5 0 0 1 5 0v3"></path><path d="M12 11v6"></path><path d="M5 9a7 7 0 0 1 14 0"></path></svg></span>
+        <span class="t"><strong>ورود سریع با اثر انگشت / قفل دستگاه</strong><span class="s">فعال روی ۱ دستگاه · پیامک همیشه راه بازیابی است</span></span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #D9D3C7; padding-top: 8px; font-size: 14px">
+        <span>گوشی سامسونگ من <span style="font-size: 12px; color: #5A5E66">· افزوده ۱۴۰۵/۰۶/۰۱ · آخرین استفاده دیروز</span></span>
+        <a href="Settings.html" style="color: #B3261E; font-weight: 500; min-height: 36px; display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 4px">حذف</a>
+      </div>
+      <a href="Settings.html" style="min-height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 1.5px solid #15171A; border-radius: 999px; font-weight: 500; text-decoration: none; color: #15171A">افزودن دستگاه دیگر</a>
+    </div>
+    <a href="Settings.html" class="item">
+      <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg></span>
+      <span class="t"><strong>شماره ورود و بازیابی پیامکی</strong><span class="s"><span class="num" dir="ltr">۰۹۱۲ ۳۴۵ ۶۷۸۹</span> · تغییر فقط با تأیید دوباره هر دو شماره</span></span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5A5E66" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+    </a>
+
+    <a href="Login.html" style="margin-top: auto; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; border: 1.5px solid #D9D3C7; background: #FFFFFF; color: #B3261E; font-weight: 500; text-decoration: none">خروج از حساب (پیش‌نویس‌ها حفظ می‌شوند)</a>
+  </main>
+
+  <nav aria-label="منوی اصلی" style="display: flex; background: #121417; padding: 6px 4px 14px 4px">
+    <a href="Main.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>فاکتور جدید</a>
+    <a href="InvoiceList.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l5 5v13H6z"></path><path d="M9 12h7M9 16h7"></path></svg>فاکتورها</a>
+    <a href="Mazneh.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-6 4 4 5-7 4 5"></path></svg>مظنه</a>
+    <a href="Calculator.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8M8 12h3M13 12h3M8 16h3M13 16h3"></path></svg>ماشین‌حساب</a>
+    <a href="Settings.html" class="tab on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>بیشتر</a>
+  </nav>
+</div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>قرارداد اقساط جدید و ثبت پرداخت — دسکتاپ</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: DesktopInstallments · 1280x900.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:999px;font-weight:700;font-size:15px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 18px;gap:8px}
+.btn-gold{background:#D4A53C;color:#15171A}
+.btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+.card{background:#F4F1EA;border:0;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.q{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
+.q span{display:inline-flex;width:24px;height:24px;border-radius:50%;background:#121417;color:#E0B44C;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.seg{display:flex;border:0;border-radius:999px;overflow:hidden;background:#ECE8DF;padding:3px;gap:2px}
+.seg button{flex:1;min-height:42px;border:0;background:transparent;font-family:inherit;font-size:14px;font-weight:500;color:#5A5E66;cursor:pointer;border-radius:999px}
+.seg button.on{background:#121417;color:#E0B44C}
+.unitbox{display:flex;align-items:center;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;min-height:46px;box-sizing:border-box;overflow:hidden}
+.unitbox input{border:0;min-height:44px;flex:1;min-width:0;padding:0 12px;font-size:18px;font-family:inherit;color:#15171A;background:transparent}
+.unitbox span{padding:0 10px;font-size:13px;color:#5A5E66;border-inline-start:1.5px solid #D9D3C7;min-height:44px;display:inline-flex;align-items:center;background:#ECE8DF}
+.input{min-height:46px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:15px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+.l{font-size:12.5px;font-weight:500;color:#5A5E66}
+.hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:7px 10px;border-bottom:1px solid #D9D3C7;text-align:right}
+th{font-weight:500;color:#5A5E66;font-size:12px}
+td.n,th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lbl{font-size:12px;color:#1D4ED8;background:#E6EEFF;padding:3px 10px;border-radius:999px;align-self:flex-start}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 1280px; min-height: 900px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 14px; padding: 12px 32px; background: #121417; color: #F4F1EA">
+    <a href="DesktopCustomers.html" aria-label="بازگشت" style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 10px; color: #F4F1EA; border: 1.5px solid #2A2E35"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></a>
+    <h1 style="margin: 0; font-size: 21px; font-weight: 700">مشتریان و اقساط › خانم رضایی</h1>
+    <span class="badge" style="background: #2A2E35; color: #E0B44C">دو پنجره نمونه کنار هم</span>
+  </header>
+
+  <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; padding: 20px 32px 24px 32px; flex-grow: 1; align-items: start">
+    <section class="card" aria-label="قرارداد اقساط جدید">
+      <span class="lbl">پنجره ۱ · قرارداد اقساط جدید (سه سؤال ساده)</span>
+      <div class="q"><span>۰</span>برای کدام فروش؟</div>
+      <div class="seg"><button type="button" class="on">فاکتور <span class="num">۱۴۰۵-۰۰۰۸</span> · <span class="num">۱۰٬۰۰۰٬۰۰۰</span> تومان</button><button type="button">مبلغ مستقل</button></div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+        <div style="display: flex; flex-direction: column; gap: 6px"><div class="q"><span>۱</span>پیش‌پرداخت دریافت‌شده</div><div class="unitbox"><input class="num" type="text" inputmode="numeric" value="۲٬۰۰۰٬۰۰۰" aria-label="پیش‌پرداخت"><span>تومان</span></div></div>
+        <div style="display: flex; flex-direction: column; gap: 6px"><div class="q"><span>۲</span>چند قسط؟</div><div class="seg"><button type="button">۲</button><button type="button">۳</button><button type="button" class="on">۴</button><button type="button">۶</button><button type="button">۱۲</button></div></div>
+        <div style="display: flex; flex-direction: column; gap: 6px"><div class="q"><span>۳</span>اولین سررسید</div><input class="input num" type="text" value="۱۴۰۵/۰۸/۱۳" aria-label="اولین سررسید"></div>
+      </div>
+      <div class="hint">باقی‌مانده برای قسط‌بندی: <strong class="num" style="color: #15171A">۸٬۰۰۰٬۰۰۰</strong> تومان · فاصله: ماهانه · اگر روز در ماه بعد نبود، آخرین روز ماه.</div>
+      <table>
+        <thead><tr><th>قسط</th><th>سررسید</th><th class="n">مبلغ (تومان)</th><th>یادآوری پیامکی</th></tr></thead>
+        <tbody>
+          <tr><td>۱</td><td class="num">۱۴۰۵/۰۸/۱۳</td><td class="n">۲٬۰۰۰٬۰۰۰</td><td style="font-size: 12.5px; color: #5A5E66">۲ روز قبل · ۱ بخش</td></tr>
+          <tr><td>۲</td><td class="num">۱۴۰۵/۰۹/۱۳</td><td class="n">۲٬۰۰۰٬۰۰۰</td><td style="font-size: 12.5px; color: #5A5E66">۲ روز قبل · ۱ بخش</td></tr>
+          <tr><td>۳</td><td class="num">۱۴۰۵/۱۰/۱۳</td><td class="n">۲٬۰۰۰٬۰۰۰</td><td style="font-size: 12.5px; color: #5A5E66">۲ روز قبل · ۱ بخش</td></tr>
+          <tr><td>۴</td><td class="num">۱۴۰۵/۱۱/۱۳</td><td class="n">۲٬۰۰۰٬۰۰۰ <span style="font-size: 11px; color: #5A5E66">(اختلاف گردکردن: ۰)</span></td><td style="font-size: 12.5px; color: #5A5E66">۲ روز قبل · ۱ بخش</td></tr>
+          <tr><td colspan="2" style="font-weight: 700">جمع اقساط + پیش‌پرداخت</td><td class="n" style="font-weight: 700">۱۰٬۰۰۰٬۰۰۰</td><td></td></tr>
+        </tbody>
+      </table>
+      <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 36px"><input type="checkbox" checked="checked" style="width: 18px; height: 18px"> یادآوری پیامکی فعال (هر پیامک ۱ بخش از اعتبار؛ قابل توقف)</label>
+      <div style="display: flex; gap: 10px"><a href="DesktopCustomers.html" class="btn btn-gold">ثبت قرارداد اقساط</a><a href="DesktopCustomers.html" class="btn btn-line">انصراف</a><span class="hint" style="align-self: center">ثبت قرارداد = برنامه سررسید؛ دریافت پول با «ثبت پرداخت».</span></div>
+    </section>
+
+    <section class="card" aria-label="ثبت پرداخت" style="box-shadow: inset 0 0 0 2px #D4A53C">
+      <span class="lbl">پنجره ۲ · ثبت پرداخت دریافتی</span>
+      <div class="hint">پولی که واقعاً گرفته‌اید را ثبت می‌کنید؛ درگاه پرداختی وجود ندارد. پرداخت جزئی مجاز است و ثبت اشتباه با دلیل قابل برگشت است.</div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><label class="l" for="pa">مبلغ دریافتی</label><div class="unitbox"><input id="pa" class="num" type="text" inputmode="numeric" value="۲٬۰۰۰٬۰۰۰"><span>تومان</span></div></div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+        <div style="display: flex; flex-direction: column; gap: 4px"><label class="l" for="pm">روش</label><select id="pm" class="input"><option>نقدی</option><option>کارت‌خوان</option><option>کارت‌به‌کارت</option><option>سایر</option></select></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><label class="l" for="pd">تاریخ دریافت</label><input id="pd" class="input num" type="text" value="۱۴۰۵/۰۷/۱۳"></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><label class="l" for="pr">مرجع (اختیاری)</label><input id="pr" class="input" type="text" value="" placeholder="شماره پیگیری یا توضیح"></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><span class="l">نسبت‌دادن به</span><div class="seg"><button type="button" class="on">قسط ۲ (سررسید گذشته)</button><button type="button">قدیمی‌ترین بدهی</button><button type="button">انتخاب دستی</button></div></div>
+      <div style="background: #E6EEFF; color: #1D4ED8; border-radius: 10px; padding: 8px 12px; font-size: 13px">پس از ثبت: قسط ۲ «پرداخت شد»، مانده کل <span class="num">۴٬۰۰۰٬۰۰۰</span> تومان، یادآوری قسط ۲ متوقف می‌شود.</div>
+      <div style="display: flex; gap: 10px"><a href="DesktopCustomers.html" class="btn btn-gold">ثبت پرداخت</a><a href="DesktopCustomers.html" class="btn btn-line">انصراف</a></div>
+    </section>
+  </div>
+</div>
+</body>
+</html>

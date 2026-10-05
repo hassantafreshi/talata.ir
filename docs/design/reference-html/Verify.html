@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>بررسی اصالت فاکتور — نمای مشتری پس از اسکن</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: Verify · 390x844.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:500}
+.card{background:#F4F1EA;border:0;border-radius:20px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.line{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:14px}
+.line .k{color:#5A5E66}
+h2{margin:0;font-size:14px;font-weight:700;color:#5A5E66}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 390px; min-height: 844px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="background: #121417; color: #F4F1EA; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px">
+    <span style="font-size: 17px; font-weight: 700">بررسی اصالت فاکتور</span>
+    <span style="display: inline-flex; align-items: center; gap: 6px; color: #E0B44C; font-weight: 700; font-size: 16px">
+      <svg width="24" height="24" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>
+      طلاتا
+    </span>
+  </header>
+
+  <main style="display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 20px 16px; flex-grow: 1">
+    <section style="background: #E3F3EC; border: 0; border-radius: 20px; padding: 14px; display: flex; gap: 12px; align-items: flex-start">
+      <span style="display: inline-flex; width: 40px; height: 40px; border-radius: 50%; background: #1F7A4D; color: #FFFFFF; align-items: center; justify-content: center; flex-shrink: 0">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg>
+      </span>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <strong style="font-size: 16px; line-height: 1.5">این فاکتور با شماره <span class="num">۱۴۰۵-۰۰۱۲</span> در طلاتا ثبت شده است.</strong>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #1F7A4D"><span class="badge" style="background: #1F7A4D; color: #FFFFFF">قطعی</span><span>صدور <span class="num">۱۴۰۵/۰۷/۱۳ · ۱۴:۲۵</span></span></div>
+      </div>
+    </section>
+
+    <div style="font-size: 13px; color: #5A5E66; line-height: 1.6; padding: 0 4px">شماره فاکتور، نام فروشگاه، اقلام و مبلغ زیر را با برگه کاغذی مقایسه کنید. کپی QR روی برگه تغییریافته، آن برگه را تأیید نمی‌کند.</div>
+
+    <section class="card" aria-label="فروشگاه">
+      <h2>فروشنده</h2>
+      <div style="font-weight: 700; font-size: 17px">طلافروشی نمونه</div>
+      <div style="font-size: 13px; color: #5A5E66">تهران، خیابان نمونه، پلاک ۱ · تلفن <span class="num" dir="ltr">۰۲۱-۰۰۰۰۰۰۰</span></div>
+    </section>
+
+    <section class="card" aria-label="اقلام">
+      <h2>اقلام</h2>
+      <div style="display: flex; flex-direction: column; gap: 2px; border-bottom: 1px solid #D9D3C7; padding-bottom: 8px">
+        <div class="line"><strong>النگو ۱۸ عیار</strong><strong class="num">۲۱٬۵۶۲٬۰۰۰</strong></div>
+        <div style="font-size: 12.5px; color: #5A5E66">طلا · <span class="num">۲</span> گرم · ۱۸ عیار (۷۵۰) · نرخ <span class="num">۱۰٬۰۰۰٬۰۰۰</span>/گرم</div>
+        <div style="font-size: 12.5px; color: #5A5E66">ارزش طلا <span class="num">۲۰٬۰۰۰٬۰۰۰</span> · اجرت <span class="num">۴۰۰٬۰۰۰</span> · سود <span class="num">۱٬۰۲۰٬۰۰۰</span> · مالیات <span class="num">۱۴۲٬۰۰۰</span></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 2px; padding-top: 4px">
+        <div class="line"><strong>جعبه هدیه</strong><strong class="num">۲۰۰٬۰۰۰</strong></div>
+        <div style="font-size: 12.5px; color: #5A5E66">متفرقه · قیمت ثبت‌شده ردیف</div>
+      </div>
+    </section>
+
+    <section class="card" aria-label="جمع">
+      <div class="line"><span class="k">جمع طلا</span><span class="num">۲۱٬۵۶۲٬۰۰۰</span></div>
+      <div class="line"><span class="k">جمع متفرقه</span><span class="num">۲۰۰٬۰۰۰</span></div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid #15171A; padding-top: 8px">
+        <span style="font-weight: 700">مبلغ نهایی</span>
+        <span class="num" style="font-weight: 700; font-size: 22px">۲۱٬۷۶۲٬۰۰۰ <span style="font-size: 12px; font-weight: 400; color: #5A5E66">تومان</span></span>
+      </div>
+    </section>
+
+    <div style="font-size: 12px; color: #5A5E66; line-height: 1.7; padding: 0 4px">این بررسی یعنی سند با رکورد ثبت‌شده در طلاتا مطابقت دارد؛ تضمین تحویل کالا، عیار آزمایشگاهی، دریافت وجه یا ثبت در سامانه مؤدیان نیست. اطلاعات خریدار در این صفحه نمایش داده نمی‌شود. برای بررسی باید به اینترنت متصل باشید.</div>
+    <div style="font-size: 12px; color: #5A5E66; text-align: center; margin-top: auto">نمونه اتود · داده و QR واقعی نیستند</div>
+  </main>
+</div>
+</body>
+</html>

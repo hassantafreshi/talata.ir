@@ -21,6 +21,8 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [ ] Colors/logo/font/toolkit explicitly approved by owner (see `docs/design/STAGE_A_REVIEW_REQUEST.md`).
 - [x] Owner plan prices, quotas and SMS credit, مظنه/calculator contract and v2 business-type roadmap documented (2026-10-05); reflected in the draft boards.
 - [ ] Quotas enforced server-side (Free: 50 invoices and 50 new customers per month, current-month history, 5 free SMS per year; Basic configurable caps; Professional unlimited) with friendly notices.
+- [x] ChatGPT handoff package (`docs/handoff/`), standalone reference HTML for all 68 boards and v1 service-admin boards (12 screens) prepared (2026-10-05).
+- [ ] Service admin console v1 (`/provider/*`): staff passkey auth, roles, dashboard, tenants and manual actions, versioned pricing, payments, SMS, quotes, tax rules, integrations, audit, system health.
 - [x] Build package documented: implementation guide, payments/SMS credit contract, SMS purchase and bank-return boards (2026-10-05).
 - [ ] 10% VAT on plan and SMS-credit purchases: configurable rate snapshotted per order, base/VAT/payable shown separately, credit equals pre-VAT amount.
 - [ ] Billing module with MockGateway: plan purchase, SMS top-up, server-sourced result page, reconcile, receipts; real PSP after owner selection.

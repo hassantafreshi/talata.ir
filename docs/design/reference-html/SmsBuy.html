@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>خرید پیامک — موبایل</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: SmsBuy · 390x1180.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.btn{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:999px;font-weight:700;font-size:16px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%;text-align:center;padding:0 12px;gap:8px}
+.btn-gold{background:#D4A53C;color:#15171A}
+.btn-dark{background:#121417;color:#F4F1EA}
+.btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+.band{background:#F4F1EA;border:0;border-radius:20px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.hero{background:#121417;color:#F4F1EA;border-radius:24px;padding:16px;box-shadow:0 14px 28px -16px rgba(0,0,0,.55);display:flex;flex-direction:column;gap:8px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px;padding:7px 0;border-top:1px solid #E6E1D6}
+.row:first-child{border-top:0}
+.hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+.amt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:60px;padding:8px 14px;border-radius:16px;background:#F4F1EA;color:#15171A;text-decoration:none;box-sizing:border-box;justify-content:center}
+.amt.on{background:#FBF6E8;box-shadow:inset 0 0 0 2px #D4A53C}
+.amt strong{font-size:16px}
+.amt span{font-size:12px;color:#5A5E66}
+.lbl{font-size:12px;background:#E6EEFF;color:#1D4ED8;padding:3px 10px;border-radius:999px;align-self:flex-start}
+.ok{width:56px;height:56px;border-radius:50%;background:#1F7A4D;color:#FFFFFF;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.bad{width:56px;height:56px;border-radius:50%;background:#B3261E;color:#FFFFFF;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.tab{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-height:56px;justify-content:center;font-size:11.5px;font-weight:500;color:#B8BCC4;text-decoration:none}
+.tab.on{color:#E0B44C}
+.tab svg{stroke:currentColor}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 390px; min-height: 1180px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="background: #121417; color: #F4F1EA; display: flex; align-items: center; gap: 10px; padding: 12px 16px"><a href="Settings.html" aria-label="بازگشت" style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 10px; color: #F4F1EA"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></a><h1 style="margin: 0; font-size: 19px; font-weight: 700; flex-grow: 1">خرید پیامک</h1><span class="badge" style="background: #2A2E35; color: #E0B44C">قیمت‌ها نمونه از تنظیمات سرویس</span></header>
+  <main style="display: flex; flex-direction: column; gap: 12px; padding: 14px 16px 20px 16px; flex-grow: 1">
+    <section class="band" aria-label="وضعیت اعتبار">
+      <div class="row"><span>پلن فعلی</span><strong>پایه · هر بخش <span class="num">۵۰۰</span> تومان</strong></div>
+      <div class="row"><span>مانده اعتبار</span><strong class="num">۴۲٬۰۰۰ تومان ≈ ۸۴ بخش</strong></div>
+      <div class="row"><span>پیامک رایگان امسال</span><span class="num">۰ از ۵ مانده</span></div>
+      <div class="hint">در پلن پایه و حرفه‌ای مانده شارژ به ماه بعد منتقل می‌شود. پیامک فاکتور معمولاً <span class="num">۱</span> تا <span class="num">۲</span> بخش است؛ پیش از هر ارسال، تعداد بخش و هزینه را می‌بینید.</div>
+    </section>
+    <div style="display: flex; justify-content: space-between; align-items: baseline"><strong style="font-size: 16px">مبلغ شارژ را انتخاب کنید</strong><span class="hint">حداقل <span class="num">۱۰۰</span> هزار تومان · بدون مالیات</span></div>
+    <div role="radiogroup" aria-label="مبلغ شارژ" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px"><a href="#" role="radio" aria-checked="false" class="amt"><strong class="num">۱۰۰ هزار تومان</strong><span class="num">≈ ۲۰۰ بخش</span></a><a href="#" role="radio" aria-checked="true" class="amt on"><strong class="num">۲۰۰ هزار تومان</strong><span class="num">≈ ۴۰۰ بخش</span></a><a href="#" role="radio" aria-checked="false" class="amt"><strong class="num">۳۰۰ هزار تومان</strong><span class="num">≈ ۶۰۰ بخش</span></a><a href="#" role="radio" aria-checked="false" class="amt"><strong class="num">۵۰۰ هزار تومان</strong><span class="num">≈ ۱٬۰۰۰ بخش</span></a><a href="#" role="radio" aria-checked="false" class="amt"><strong class="num">۱ میلیون تومان</strong><span class="num">≈ ۲٬۰۰۰ بخش</span></a></div>
+    <section class="hero" aria-label="خلاصه خرید">
+      <div style="display: flex; justify-content: space-between; font-size: 13.5px"><span style="color: #B8BCC4">مبلغ شارژ (اعتبار شما)</span><strong class="num">۲۰۰٬۰۰۰ تومان</strong></div>
+      <div style="display: flex; justify-content: space-between; font-size: 13.5px"><span style="color: #B8BCC4">مالیات بر ارزش افزوده <span class="num">۱۰٪</span></span><strong class="num">۲۰٬۰۰۰ تومان</strong></div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid #2A2E35; padding-top: 6px"><span style="color: #F4F1EA; font-size: 14px; font-weight: 700">قابل پرداخت</span><strong class="num" style="font-size: 26px; color: #E0B44C">۲۲۰٬۰۰۰ <span style="font-size: 14px; color: #F4F1EA; font-weight: 500">تومان</span></strong></div>
+      <div style="display: flex; justify-content: space-between; font-size: 13.5px"><span style="color: #B8BCC4">≈ تعداد بخش با قیمت پلن شما</span><strong class="num">۴۰۰ بخش</strong></div>
+      <div style="display: flex; justify-content: space-between; font-size: 13.5px"><span style="color: #B8BCC4">مانده پس از شارژ</span><strong class="num">۲۴۲٬۰۰۰ تومان ≈ ۴۸۴ بخش</strong></div>
+      <div style="display: flex; justify-content: space-between; font-size: 13.5px"><span style="color: #B8BCC4">نمونه: پیامک سه‌بخشی</span><span class="num">۳ × ۵۰۰ = ۱٬۵۰۰ تومان</span></div>
+    </section>
+    <a href="PayReturnSms.html" class="btn btn-gold">پرداخت <span class="num">۲۲۰٬۰۰۰</span> تومان از درگاه بانک</a>
+    <div class="hint" style="text-align: center"><span class="num">۱۰٪</span> مالیات بر ارزش افزوده به مبلغ بسته اضافه می‌شود و کل اعتبار بسته برای پیامک می‌ماند. به درگاه بانک منتقل می‌شوید و پس از پرداخت به طلاتا برمی‌گردید. شارژ بلافاصله پس از تأیید بانک اضافه می‌شود؛ رسید در «پلن و اعتبار» می‌ماند.</div>
+    <div class="band" style="background: #FBF6E8; box-shadow: inset 0 0 0 2px #D4A53C"><strong style="font-size: 14px">اگر پلن رایگان دارید</strong><div class="hint">هر بخش <span class="num">۸۵۰</span> تومان، حداقل شارژ <span class="num">۴۰۰</span> هزار تومان (+ <span class="num">۱۰٪</span> مالیات) و مانده تا پایان همین ماه معتبر است (به ماه بعد منتقل نمی‌شود). با پلن پایه هر بخش <span class="num">۵۰۰</span> تومان می‌شود و مانده می‌ماند.</div></div>
+    <a href="Plans.html" class="hint" style="text-align: center; margin-top: auto; text-decoration: underline; text-underline-offset: 4px">قیمت هر بخش را با تغییر پلن کمتر کنید (حرفه‌ای: ۳۵۰ تومان)</a>
+  </main>
+  <nav aria-label="منوی اصلی" style="display: flex; background: #121417; padding: 6px 4px 14px 4px">
+    <a href="Main.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>فاکتور جدید</a>
+    <a href="InvoiceList.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l5 5v13H6z"></path><path d="M9 12h7M9 16h7"></path></svg>فاکتورها</a>
+    <a href="Mazneh.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-6 4 4 5-7 4 5"></path></svg>مظنه</a>
+    <a href="Calculator.html" class="tab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M8 7h8M8 12h3M13 12h3M8 16h3M13 16h3"></path></svg>ماشین‌حساب</a>
+    <a href="Settings.html" class="tab on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>بیشتر</a>
+  </nav>
+</div>
+</body>
+</html>

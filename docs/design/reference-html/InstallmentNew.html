@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>قرارداد اقساط جدید — موبایل</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: InstallmentNew · 390x1240.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.btn{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:999px;font-weight:700;font-size:16px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%;text-align:center;padding:0 10px}
+.btn-gold{background:#D4A53C;color:#15171A}
+.btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+.card{background:#F4F1EA;border:0;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.q{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px}
+.q span{display:inline-flex;width:26px;height:26px;border-radius:50%;background:#121417;color:#E0B44C;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.seg{display:flex;border:0;border-radius:999px;overflow:hidden;background:#ECE8DF;padding:3px;gap:2px}
+.seg button{flex:1;min-height:44px;border:0;background:transparent;font-family:inherit;font-size:15px;font-weight:500;color:#5A5E66;cursor:pointer;border-radius:999px}
+.seg button.on{background:#121417;color:#E0B44C}
+.unitbox{display:flex;align-items:center;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;min-height:48px;box-sizing:border-box;overflow:hidden}
+.unitbox input{border:0;min-height:46px;flex:1;min-width:0;padding:0 12px;font-size:19px;font-family:inherit;color:#15171A;background:transparent}
+.unitbox span{padding:0 10px;font-size:13px;color:#5A5E66;border-inline-start:1.5px solid #D9D3C7;min-height:46px;display:inline-flex;align-items:center;background:#ECE8DF}
+.input{min-height:48px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:16px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+.row{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-top:1px solid #D9D3C7}
+.row:first-child{border-top:0}
+.hint{font-size:12.5px;color:#5A5E66;line-height:1.6}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 390px; min-height: 1240px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="background: #121417; color: #F4F1EA; display: flex; align-items: center; gap: 10px; padding: 12px 16px">
+    <a href="CustomerDetail.html" aria-label="بازگشت" style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 10px; color: #F4F1EA"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></a>
+    <h1 style="margin: 0; font-size: 19px; font-weight: 700; flex-grow: 1">قرارداد اقساط جدید</h1>
+    <span class="badge" style="background: #2A2E35; color: #E0B44C">خانم رضایی</span>
+  </header>
+
+  <main style="display: flex; flex-direction: column; gap: 10px; padding: 12px 16px 16px 16px; flex-grow: 1">
+    <section class="card">
+      <div class="q"><span>۰</span>این اقساط برای کدام فروش است؟</div>
+      <div class="seg"><button type="button" class="on">فاکتور <span class="num">۱۴۰۵-۰۰۰۸</span></button><button type="button">مبلغ مستقل</button></div>
+      <div class="hint">فاکتور قطعی <span class="num">۱۴۰۵-۰۰۰۸</span> · <span class="num">۱۰٬۰۰۰٬۰۰۰</span> تومان · خانم رضایی. مبلغ اصل از فاکتور می‌آید و قابل تغییر نیست.</div>
+    </section>
+
+    <section class="card">
+      <div class="q"><span>۱</span>پیش‌پرداخت چقدر دریافت شده؟</div>
+      <div class="unitbox"><input class="num" type="text" inputmode="numeric" value="۲٬۰۰۰٬۰۰۰" aria-label="پیش‌پرداخت"><span>تومان</span></div>
+      <div class="hint">اگر چیزی نگرفته‌اید، صفر بگذارید. باقی‌مانده برای قسط‌بندی: <strong class="num" style="color: #15171A">۸٬۰۰۰٬۰۰۰</strong> تومان</div>
+    </section>
+
+    <section class="card">
+      <div class="q"><span>۲</span>چند قسط؟</div>
+      <div class="seg"><button type="button">۲</button><button type="button">۳</button><button type="button" class="on">۴</button><button type="button">۶</button><button type="button">۱۲</button><button type="button">دیگر…</button></div>
+      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px"><span>فاصله قسط‌ها</span><div class="seg" style="width: 170px"><button type="button" class="on">ماهانه</button><button type="button">هفتگی</button></div></div>
+    </section>
+
+    <section class="card">
+      <div class="q"><span>۳</span>اولین سررسید کی باشد؟</div>
+      <input class="input num" type="text" value="۱۴۰۵/۰۸/۱۳" aria-label="اولین سررسید">
+      <div class="hint">سررسیدهای بعدی هر ماه همین روز. اگر روز در ماه بعد وجود نداشت، آخرین روز همان ماه.</div>
+    </section>
+
+    <section class="card" aria-label="پیش‌نمایش اقساط" style="box-shadow: inset 0 0 0 2px #D4A53C">
+      <strong>پیش‌نمایش پیش از ثبت</strong>
+      <div class="row"><span>قسط ۱ · <span class="num">۱۴۰۵/۰۸/۱۳</span></span><span class="num">۲٬۰۰۰٬۰۰۰</span></div>
+      <div class="row"><span>قسط ۲ · <span class="num">۱۴۰۵/۰۹/۱۳</span></span><span class="num">۲٬۰۰۰٬۰۰۰</span></div>
+      <div class="row"><span>قسط ۳ · <span class="num">۱۴۰۵/۱۰/۱۳</span></span><span class="num">۲٬۰۰۰٬۰۰۰</span></div>
+      <div class="row"><span>قسط ۴ · <span class="num">۱۴۰۵/۱۱/۱۳</span></span><span class="num">۲٬۰۰۰٬۰۰۰</span></div>
+      <div class="row" style="font-weight: 700"><span>جمع اقساط + پیش‌پرداخت</span><span class="num">۱۰٬۰۰۰٬۰۰۰ تومان</span></div>
+      <div class="hint">اگر تقسیم رُند نشود، اختلاف گردکردن روی قسط آخر می‌نشیند و همین‌جا نشان داده می‌شود.</div>
+      <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 40px; border-top: 1px solid #D9D3C7; padding-top: 8px"><input type="checkbox" checked="checked" style="width: 20px; height: 20px"> یادآوری پیامکی ۲ روز قبل از هر سررسید (هر پیامک ۱ بخش از اعتبار)</label>
+    </section>
+
+    <a href="CustomerDetail.html" class="btn btn-gold">ثبت قرارداد اقساط</a>
+    <a href="CustomerDetail.html" class="btn btn-line">انصراف</a>
+    <div class="hint" style="text-align: center">ثبت قرارداد یعنی برنامه سررسید؛ دریافت پول جداگانه با «ثبت پرداخت» انجام می‌شود.</div>
+  </main>
+</div>
+</body>
+</html>

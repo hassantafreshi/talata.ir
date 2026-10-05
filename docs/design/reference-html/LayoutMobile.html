@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>ظاهر فاکتور — ویرایشگر ساده موبایل</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: LayoutMobile · 390x1180.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
+.seg{display:flex;border:0;border-radius:999px;overflow:hidden;background:#ECE8DF;padding:3px;gap:2px}
+.seg button{flex:1;min-height:40px;border:0;background:transparent;font-family:inherit;font-size:14px;font-weight:500;color:#5A5E66;cursor:pointer;border-radius:999px;padding:0 6px}
+.seg button.on{background:#121417;color:#E0B44C}
+.blk{background:#F4F1EA;border:0;border-radius:20px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.blk .hd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ud{display:inline-flex;border:0;border-radius:999px;overflow:hidden;background:#ECE8DF;padding:3px;gap:2px}
+.ud button{width:44px;min-height:40px;border:0;background:#FFFFFF;font-family:inherit;cursor:pointer;color:#15171A;display:inline-flex;align-items:center;justify-content:center;border-radius:999px}
+.ud button+button{border-inline-start:0}
+.sw{display:inline-flex;align-items:center;gap:8px;font-size:14px;min-height:40px}
+.sw input{width:20px;height:20px}
+.pv{font-size:7px;line-height:1.4;color:#15171A}
+.btn{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:999px;font-weight:700;font-size:16px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 12px}
+.btn-gold{background:#D4A53C;color:#15171A}
+.btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+h2{margin:4px 2px 0 2px;font-size:13px;font-weight:700;color:#5A5E66}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 390px; min-height: 1180px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="background: #121417; color: #F4F1EA; display: flex; align-items: center; gap: 10px; padding: 12px 16px">
+    <a href="Settings.html" aria-label="بازگشت" style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 10px; color: #F4F1EA"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></a>
+    <h1 style="margin: 0; font-size: 19px; font-weight: 700; flex-grow: 1">ظاهر فاکتور</h1>
+    <span class="badge" style="background: #FBF0D9; color: #8A5A00">تغییر ذخیره‌نشده</span>
+  </header>
+
+  <main style="display: flex; flex-direction: column; gap: 10px; padding: 12px 16px 16px 16px; flex-grow: 1">
+    <section aria-label="پیش‌نمایش" class="blk" style="gap: 10px">
+      <div class="hd">
+        <strong>پیش‌نمایش با داده نمونه</strong>
+        <div class="seg" style="width: 170px"><button type="button" class="on">چاپ</button><button type="button">موبایل</button></div>
+      </div>
+      <div style="background: #FFFFFF; border: 1px solid #15171A; width: 100%; aspect-ratio: 210/297; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; gap: 6px; position: relative">
+        <div style="position: absolute; top: 4px; right: 6px; font-size: 8px; color: #1D4ED8; background: #E6EEFF; padding: 1px 5px; border-radius: 4px">هدر</div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; border-bottom: 1px solid #15171A; padding: 10px 0 6px 0">
+          <div class="pv" style="display: flex; gap: 6px; align-items: center"><span style="width: 22px; height: 22px; background: #D9D3C7; border-radius: 3px; display: inline-block"></span><span><strong style="font-size: 9px">طلافروشی نمونه</strong><br>تهران، خیابان نمونه · <span class="num">۰۲۱-۰۰۰۰۰۰۰</span></span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; border: 1.5px dashed #8A5A00; padding: 3px; border-radius: 4px"><span style="width: 30px; height: 30px; background: repeating-linear-gradient(90deg, #15171A 0 3px, #FFFFFF 3px 6px); display: inline-block"></span><span style="font-size: 6px; color: #8A5A00">QR ثابت</span></div>
+        </div>
+        <div class="pv" style="display: flex; justify-content: space-between"><span>خریدار: خانم رضایی · <span class="num">۰۹۱۲ ۰۰۰ ۰۰۰۰</span></span><span>فاکتور <span class="num">۱۴۰۵-۰۰۱۲</span></span></div>
+        <div style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1">
+          <div style="height: 8px; background: #ECEAE6"></div><div style="height: 8px; background: #F4F1EA"></div><div style="height: 8px; background: #ECEAE6"></div>
+        </div>
+        <div class="pv" style="text-align: left; font-weight: 700; font-size: 8px">قابل پرداخت <span class="num">۲۱٬۷۶۲٬۰۰۰</span> تومان</div>
+        <div style="border-top: 1px solid #D9D3C7; padding-top: 4px; position: relative" class="pv">
+          <div style="position: absolute; top: -9px; right: 0; font-size: 8px; color: #1D4ED8; background: #E6EEFF; padding: 1px 5px; border-radius: 4px">فوتر</div>
+          <div style="text-align: center">talata-sample.ir · اینستاگرام @sample · مجوز اتحادیه ۱۲۳۴</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px"><a href="LayoutMobile.html" class="btn btn-line" style="flex: 1">چاپ نمونه</a><span style="font-size: 12px; color: #5A5E66; flex: 1.4; line-height: 1.5">چاپ نمونه فاکتور صادر نمی‌کند و پیامک یا سهمیه مصرف نمی‌کند.</span></div>
+    </section>
+
+    <h2>۱ — انتخاب قالب</h2>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+      <a href="LayoutMobile.html" style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 10px; text-decoration: none; color: #15171A; display: flex; flex-direction: column; gap: 4px; min-height: 64px"><strong>ساده و خوانا</strong><span style="font-size: 12px; color: #5A5E66">سیاه‌وسفید کم‌مصرف</span></a>
+      <a href="LayoutMobile.html" style="background: #FBF6E8; border: 0; box-shadow: inset 0 0 0 2px #D4A53C; border-radius: 20px; padding: 10px; text-decoration: none; color: #15171A; display: flex; flex-direction: column; gap: 4px; min-height: 64px"><strong>فروشگاهی ✓</strong><span style="font-size: 12px; color: #5A5E66">لوگو، تماس، فوتر شبکه‌ها</span></a>
+    </div>
+
+    <h2>۲ — جای هر بخش (بدون کشیدن)</h2>
+    <div class="blk">
+      <div class="hd"><strong>لوگوی فروشگاه</strong><div class="ud"><button type="button" aria-label="بالا"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"></path></svg></button><button type="button" aria-label="پایین"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></button></div></div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <div class="seg"><button type="button" class="on">هدر</button><button type="button">فوتر</button></div>
+        <div class="seg"><button type="button" class="on">راست</button><button type="button">وسط</button><button type="button">چپ</button></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 13px; color: #5A5E66">اندازه لوگو</span><div class="seg" style="width: 190px"><button type="button">کوچک</button><button type="button" class="on">متوسط</button><button type="button">بزرگ</button></div></div>
+    </div>
+    <div class="blk">
+      <div class="hd"><strong>آدرس</strong><div class="ud"><button type="button" aria-label="بالا"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"></path></svg></button><button type="button" aria-label="پایین"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></button></div></div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <div class="seg"><button type="button" class="on">هدر</button><button type="button">فوتر</button></div>
+        <div class="seg"><button type="button" class="on">راست</button><button type="button">وسط</button><button type="button">چپ</button></div>
+      </div>
+      <div style="font-size: 12px; color: #5A5E66">نام فروشگاه، تماس و آدرس همیشه چاپ می‌شوند؛ فقط جایشان عوض می‌شود.</div>
+    </div>
+    <div class="blk">
+      <div class="hd"><strong>وب‌سایت و شبکه‌های اجتماعی</strong><label class="sw"><input type="checkbox" checked="checked"> نمایش</label></div>
+      <div class="seg"><button type="button">هدر</button><button type="button" class="on">فوتر</button></div>
+    </div>
+    <div class="blk">
+      <div class="hd"><strong>شماره مجوز اتحادیه</strong><label class="sw"><input type="checkbox" checked="checked"> نمایش</label></div>
+      <div class="seg"><button type="button">هدر</button><button type="button" class="on">فوتر</button></div>
+    </div>
+    <div class="blk" style="background: #FFFFFF; border: 1.5px dashed #D9D3C7">
+      <div class="hd"><strong>QR بررسی اصالت</strong><span class="badge" style="background: #ECEAE6; color: #4A4A4A">ثابت: بالا، سمت چپ</span></div>
+      <div style="font-size: 12px; color: #5A5E66">قابل جابه‌جایی یا مخفی‌شدن نیست؛ لوگو و متن‌ها نمی‌توانند روی آن بیفتند.</div>
+    </div>
+
+    <details style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 4px 14px">
+      <summary style="min-height: 44px; display: flex; align-items: center; font-weight: 700; cursor: pointer">تنظیمات بیشتر (اندازه متن، تراکم، ستون‌ها، کادر امضا، چاپ A4)</summary>
+      <div style="display: flex; flex-direction: column; gap: 10px; padding: 6px 0 12px 0">
+        <div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 14px">اندازه متن</span><div class="seg" style="width: 170px"><button type="button" class="on">معمولی</button><button type="button">درشت</button></div></div>
+        <div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 14px">تراکم</span><div class="seg" style="width: 170px"><button type="button" class="on">راحت</button><button type="button">فشرده</button></div></div>
+        <label class="sw"><input type="checkbox" checked="checked"> ستون توضیح کالا</label>
+        <label class="sw"><input type="checkbox"> ستون نرخ واحد و تفکیک اجزا</label>
+        <label class="sw"><input type="checkbox" checked="checked"> کادر امضا و مهر</label>
+        <label class="sw"><input type="checkbox" checked="checked"> یادداشت پایانی عمومی</label>
+      </div>
+    </details>
+  </main>
+
+  <footer style="position: sticky; bottom: 0; background: #FFFFFF; border-top: 1px solid #E6E1D6; padding: 10px 16px 16px 16px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+    <a href="LayoutMobile.html" class="btn btn-line" style="font-size: 14px">برگشت یک مرحله</a>
+    <a href="Settings.html" class="btn btn-line" style="font-size: 14px">لغو تغییرات</a>
+    <a href="Settings.html" class="btn btn-gold" style="font-size: 15px">ذخیره ظاهر</a>
+  </footer>
+</div>
+</body>
+</html>

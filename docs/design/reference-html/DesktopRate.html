@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>دسکتاپ — نرخ و شروع</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: DesktopRate · 1280x860.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.btn{display:flex;align-items:center;justify-content:center;min-height:66px;border-radius:999px;font-weight:700;font-size:26px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%}
+.btn-gold{background:#E0B44C;color:#15171A}
+.btn-gold:hover{color:#15171A;background:#D4A53C}
+.nav a{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:15px;font-weight:500}
+.nav a.on{background:#2A2E35;color:#E0B44C}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:500}
+.num{font-variant-numeric:tabular-nums}
+.st{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-top:1px solid #D9D3C7;font-size:14px;line-height:1.6}
+.st:first-child{border-top:0}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 1280px; min-height: 860px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.6; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 12px 32px; background: #121417; color: #F4F1EA">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <svg width="36" height="36" viewBox="0 0 48 48" fill="none" stroke="#E0B44C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>
+      <span style="font-size: 22px; font-weight: 700; color: #E0B44C">طلاتا</span>
+      <span style="color: #2A2E35">|</span>
+      <span style="font-size: 15px; color: #B8BCC4">طلافروشی نمونه</span>
+    </div>
+    <nav class="nav" aria-label="منوی اصلی" style="display: flex; gap: 4px"><a href="DesktopRate.html" class="on">فاکتور جدید</a><a href="DesktopInvoiceList.html">فاکتورها</a><a href="DesktopMazneh.html">مظنه</a><a href="DesktopCalculator.html">ماشین‌حساب</a><a href="DesktopCustomers.html">مشتریان و اقساط</a><a href="DesktopSettings.html">تنظیمات</a></nav>
+    <div style="display: flex; align-items: center; gap: 14px; font-size: 13px; color: #B8BCC4">
+      <span>پایه (نمونه) · لینک: <span class="num">۲</span> مانده · پیامک: <span class="num">≈ ۸۴</span> بخش</span>
+      <a href="DesktopSettings.html" style="min-height: 40px; display: inline-flex; align-items: center; padding: 0 14px; border: 1.5px solid #2A2E35; border-radius: 999px; text-decoration: none; color: #F4F1EA">علی نمونه</a>
+    </div>
+  </header>
+
+  <main style="flex-grow: 1; padding: 32px 40px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-content: start">
+    <section aria-label="قیمت روز" style="grid-column: span 7; background: #121417; color: #F4F1EA; border: 0; border-radius: 26px; padding: 32px; box-shadow: 0 14px 28px -16px rgba(0,0,0,.55); display: flex; flex-direction: column; gap: 18px">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 700">فاکتور جدید</h1>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+        <div style="font-size: 20px; font-weight: 500">قیمت هر گرم طلای ۱۸ عیار</div>
+        <span class="badge" style="background: #2A2E35; color: #E0B44C">عدد نمونه — نرخ واقعی نیست</span>
+      </div>
+      <div style="display: flex; align-items: baseline; gap: 14px">
+        <div class="num" style="font-size: 68px; font-weight: 700; line-height: 1.15; letter-spacing: -1px; color: #E0B44C">۱۰٬۰۰۰٬۰۰۰</div>
+        <div style="font-size: 26px; font-weight: 500; color: #B8BCC4">تومان</div>
+      </div>
+      <a href="DesktopItems.html" class="btn btn-gold">شروع</a>
+      <div style="display: flex; align-items: center; justify-content: space-between; font-size: 15px; color: #B8BCC4">
+        <span>آخرین دریافت: <span class="num" style="color: #F4F1EA; font-weight: 500">۱۴:۲۱</span> · منبع: بازار (نمونه) · به‌روزرسانی هر ۳ دقیقه</span>
+        <span class="badge" style="background: #1F7A4D; color: #FFFFFF">به‌روز</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; border-top: 1px solid #2A2E35; padding-top: 16px; color: #B8BCC4">
+        <div style="display: flex; justify-content: space-between; font-size: 15px"><span>طلای ۲۴ عیار</span><span class="num" style="font-weight: 500; color: #F4F1EA">۱۳٬۳۳۳٬۰۰۰ تومان</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 15px"><span>دلار</span><span class="num" style="font-weight: 500; color: #F4F1EA">۱۰۰٬۰۰۰ تومان</span></div>
+      </div>
+      <div style="display: flex; gap: 20px; font-size: 15px">
+        <a href="DesktopItems.html" style="min-height: 44px; display: inline-flex; align-items: center; font-weight: 500; text-decoration: underline; text-underline-offset: 4px; color: #E0B44C">نرخ در دسترس نیست؟ ثبت نرخ دستی</a>
+        <a href="DesktopItems.html" style="min-height: 44px; display: inline-flex; align-items: center; font-weight: 500; text-decoration: underline; text-underline-offset: 4px; color: #B8BCC4">فاکتور فقط متفرقه</a>
+      </div>
+    </section>
+
+    <div style="grid-column: span 5; display: flex; flex-direction: column; gap: 16px">
+      <a href="DesktopReview.html" style="display: flex; align-items: center; justify-content: space-between; background: #F4F1EA; border: 0; border-radius: 20px; padding: 14px 18px; text-decoration: none; color: #15171A; min-height: 64px">
+        <span style="display: flex; flex-direction: column"><strong>ادامه پیش‌نویس قبلی</strong><span style="font-size: 13px; color: #5A5E66">۲ ردیف · ذخیره‌شده ۱۴:۰۵ · خانم رضایی</span></span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>
+      </a>
+      <aside aria-label="وضعیت‌های نرخ" style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 20px 24px; display: flex; flex-direction: column; gap: 2px">
+        <h2 style="margin: 0 0 6px 0; font-size: 16px; font-weight: 700">وضعیت‌های نرخ (برای تأیید نمایش)</h2>
+        <div class="st"><span class="badge" style="background: #E3F3EC; color: #1F7A4D; flex-shrink: 0">به‌روز</span><span>دریافت در ۴ دقیقه اخیر. شروع با همین عدد انجام می‌شود.</span></div>
+        <div class="st"><span class="badge" style="background: #FBF0D9; color: #8A5A00; flex-shrink: 0">قدیمی</span><span>آخرین دریافت <span class="num">۱۳:۵۰</span>؛ دریافت تازه ناموفق. زمان واقعی می‌ماند و صفر نمایش داده نمی‌شود.</span></div>
+        <div class="st"><span class="badge" style="background: #E6EEFF; color: #1D4ED8; flex-shrink: 0">تغییر کرد</span><span>در لحظه شروع نرخ تازه رسید: «نرخ تازه <span class="num">۱۰٬۰۵۰٬۰۰۰</span> — ادامه با این عدد؟» قبل از ادامه پذیرش می‌گیرد.</span></div>
+        <div class="st"><span class="badge" style="background: #FBF0D9; color: #8A5A00; flex-shrink: 0">دستی</span><span>نرخ را خودتان وارد کرده‌اید. روی فاکتور «نرخ دستی» نوشته می‌شود.</span></div>
+        <div class="st"><span class="badge" style="background: #ECEAE6; color: #4A4A4A; flex-shrink: 0">آفلاین</span><span>اینترنت قطع است. آخرین نرخ دریافت‌شده <span class="num">۱۴:۲۱</span> با برچسب می‌ماند؛ صدور و ارسال تا اتصال غیرفعال است.</span></div>
+        <div class="st"><span class="badge" style="background: #FBE9E7; color: #B3261E; flex-shrink: 0">خطا</span><span>سرویس نرخ پاسخ نمی‌دهد. صفحه از بین نمی‌رود؛ نرخ دستی یا فاکتور فقط متفرقه در دسترس است.</span></div>
+      </aside>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>تنظیمات — پلن و اعتبار (دسکتاپ)</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: DesktopPlans · 1280x1260.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:999px;font-weight:700;font-size:15px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;padding:0 16px;width:100%}
+.btn-gold{background:#D4A53C;color:#15171A}
+.btn-dark{background:#121417;color:#F4F1EA}
+.btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500}
+.nav a{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 14px;border-radius:999px;text-decoration:none;color:#F4F1EA;font-size:15px;font-weight:500}
+.nav a.on{background:#2A2E35;color:#E0B44C}
+.side a{display:flex;align-items:center;justify-content:space-between;min-height:46px;padding:0 14px;border-radius:999px;text-decoration:none;color:#15171A;font-size:15px}
+.side a.on{background:#F4F1EA;box-shadow:inset 0 0 0 2px #D4A53C;font-weight:700}
+.seg{display:inline-flex;border:0;border-radius:999px;overflow:hidden;background:#ECE8DF;padding:3px;gap:2px}
+.seg button{min-height:40px;border:0;background:transparent;font-family:inherit;font-size:14px;font-weight:500;color:#5A5E66;cursor:pointer;border-radius:999px;padding:0 16px}
+.seg button.on{background:#121417;color:#E0B44C}
+.plan{background:#F4F1EA;border:0;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.plan ul{margin:0;padding-inline-start:18px;font-size:13.5px;line-height:1.8}
+.plan li.off{color:#5A5E66;text-decoration:line-through}
+.price .big{font-size:26px;font-weight:700;line-height:1.2}
+.meter{height:8px;border-radius:999px;background:#ECEAE6;overflow:hidden}
+.meter span{display:block;height:100%;background:#8A5A00}
+.row{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-top:1px solid #D9D3C7}
+.row:first-child{border-top:0}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 1280px; min-height: 1260px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 12px 32px; background: #121417; color: #F4F1EA">
+    <div style="display: flex; align-items: center; gap: 12px">
+      <svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke="#E0B44C" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 3l18 10.5v21L24 45 6 34.5v-21z"></path><path d="M24 14v20M13 19h22M13 19l-4 8h8zM35 19l-4 8h8zM18 34h12"></path></svg>
+      <span style="font-size: 21px; font-weight: 700; color: #E0B44C">طلاتا</span><span style="color: #2A2E35">|</span><span style="font-size: 15px; color: #B8BCC4">طلافروشی نمونه</span>
+    </div>
+    <nav class="nav" aria-label="منوی اصلی" style="display: flex; gap: 4px"><a href="DesktopRate.html">فاکتور جدید</a><a href="DesktopInvoiceList.html">فاکتورها</a><a href="DesktopMazneh.html">مظنه</a><a href="DesktopCalculator.html">ماشین‌حساب</a><a href="DesktopCustomers.html">مشتریان و اقساط</a><a href="DesktopSettings.html" class="on">تنظیمات</a></nav>
+  </header>
+
+  <div style="display: flex; gap: 24px; padding: 20px 32px 24px 32px; flex-grow: 1; align-items: flex-start">
+    <aside class="side" style="width: 240px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px">
+      <a href="DesktopSettings.html">اطلاعات کسب‌وکار</a>
+      <a href="DesktopLayout.html">ظاهر فاکتور</a>
+      <a href="DesktopSettings.html">کاربران فروشگاه</a>
+      <a href="DesktopPlans.html" class="on">پلن و اعتبار</a>
+      <a href="DesktopSmsBuy.html">خرید پیامک <span style="font-size: 12px; color: #5A5E66">۸۴ بخش مانده</span></a>
+      <a href="DesktopSettings.html">ورود سریع (Passkey)</a>
+      <a href="DesktopSettings.html">شماره ورود و بازیابی</a>
+    </aside>
+
+    <main style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px">
+        <div><h1 style="margin: 0; font-size: 21px; font-weight: 700">پلن و اعتبار</h1><div style="font-size: 12.5px; color: #5A5E66">قیمت‌ها نمونه و از تنظیمات سرویس خوانده می‌شوند.</div></div>
+        <div class="seg" role="radiogroup" aria-label="دوره پرداخت"><button type="button">ماهانه</button><button type="button" class="on">سالانه (ارزان‌تر)</button></div>
+      </div>
+
+      <section style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 12px 16px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: center">
+        <div><div style="font-size: 12.5px; color: #5A5E66">پلن فعلی</div><strong>پایه (ماهانه) · تا <span class="num">۱۴۰۵/۰۸/۰۱</span></strong></div>
+        <div><div style="display: flex; justify-content: space-between; font-size: 12.5px"><span>لینک فاکتور این ماه</span><span class="num"><strong>۹۸</strong> از ۱۰۰</span></div><div class="meter" style="margin-top: 4px"><span style="width: 98%"></span></div><div style="font-size: 12px; color: #8A5A00">۲ لینک مانده؛ چاپ فاکتورهای صادرشده همیشه آزاد است.</div></div>
+        <div style="font-size: 13px; color: #5A5E66">اعتبار پیامک: <strong class="num" style="color: #15171A">۴۲٬۰۰۰</strong> تومان ≈ ۸۴ بخش · پیامک رایگان امسال: <span class="num">۱</span> مانده از ۵</div>
+      </section>
+
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
+        <section class="plan" aria-label="رایگان">
+          <div style="display: flex; justify-content: space-between; align-items: center"><strong style="font-size: 17px">رایگان</strong><span class="badge" style="background: #ECEAE6; color: #4A4A4A">همیشه رایگان</span></div>
+          <div class="price"><span class="big num">۰</span> <span style="color: #5A5E66">تومان</span></div>
+          <ul><li>مظنه و ماشین‌حساب طلایی بدون محدودیت</li><li><span class="num">۵۰</span> فاکتور · <span class="num">۵۰</span> مشتری جدید در ماه</li><li><span class="num">۵</span> پیامک در سال · <span class="num">۱۰</span> لینک در ماه</li><li>فقط ماه جاری؛ بدون گزارش مالی · قالب ثابت با نشان طلاتا</li><li class="off">لوگو و ویرایش ظاهر</li><li class="off">اقساط و یادآوری</li></ul>
+          <a href="DesktopPlans.html" class="btn btn-line" style="margin-top: auto">تغییر به رایگان در پایان دوره</a>
+        </section>
+        <section class="plan" aria-label="پایه" style="box-shadow: inset 0 0 0 2px #15171A">
+          <div style="display: flex; justify-content: space-between; align-items: center"><strong style="font-size: 17px">پایه</strong><span class="badge" style="background: #E3F3EC; color: #1F7A4D">پلن فعلی</span></div>
+          <div class="price"><span class="big num">۷٫۹</span> <span>میلیون تومان</span> <span style="color: #5A5E66; font-size: 12.5px">در سال</span></div>
+          <div style="font-size: 12px; color: #5A5E66">ماهانه <span class="num">۷۹۰</span> هزار تومان · سالانه ≈ <span class="num">۶۵۸</span> هزار در ماه (<span class="num">۱۷٪</span> صرفه‌جویی)</div>
+          <div style="font-size: 12px; color: #8A5A00">+ <span class="num">۱۰٪</span> مالیات بر ارزش افزوده · قابل پرداخت سالانه <span class="num">۸٬۶۹۰٬۰۰۰</span> · ماهانه <span class="num">۸۶۹٬۰۰۰</span></div>
+          <ul><li>همه امکانات رایگان · همه ماه‌ها و گزارش مالی</li><li>سقف بالاتر فاکتور و مشتری جدید · <span class="num">۱۰۰</span> لینک در ماه · پیامک با اعتبار</li><li>لوگوی فروشگاه، بدون نشان طلاتا</li><li>دو قالب و ویرایش ظاهر فاکتور · ویرایش متن پیامک</li><li class="off">اقساط و یادآوری پیامکی</li></ul>
+          <a href="DesktopPlans.html" class="btn btn-dark" style="margin-top: auto">تمدید سالانه پایه</a>
+        </section>
+        <section class="plan" aria-label="حرفه‌ای" style="background: #FBF6E8; box-shadow: inset 0 0 0 2px #D4A53C">
+          <div style="display: flex; justify-content: space-between; align-items: center"><strong style="font-size: 17px">حرفه‌ای</strong><span class="badge" style="background: #121417; color: #E0B44C; white-space: nowrap">پیشنهادی</span></div>
+          <div class="price"><span class="big num">۱۰٫۹</span> <span>میلیون تومان</span> <span style="color: #5A5E66; font-size: 12.5px">در سال</span></div>
+          <div style="font-size: 12px; color: #5A5E66">ماهانه <span class="num">۱٫۹</span> میلیون تومان · سالانه ≈ <span class="num">۹۰۸</span> هزار در ماه</div>
+          <div style="font-size: 12px; color: #8A5A00">+ <span class="num">۱۰٪</span> مالیات بر ارزش افزوده · قابل پرداخت سالانه <span class="num">۱۱٬۹۹۰٬۰۰۰</span> · ماهانه <span class="num">۲٬۰۹۰٬۰۰۰</span></div>
+          <ul><li>همه امکانات پایه · فاکتور و مشتری نامحدود</li><li><span class="num">۱٬۰۰۰</span> لینک در ماه</li><li>قرارداد اقساط، ثبت پرداخت</li><li>یادآوری پیامکی اقساط</li></ul>
+          <a href="DesktopPayReturnPlan.html" class="btn btn-gold" style="margin-top: auto">ارتقا به حرفه‌ای</a>
+        </section>
+      </div>
+
+      <section class="plan" aria-label="شارژ پیامک" style="background: #FFFFFF; border: 1.5px dashed #D9D3C7; flex-direction: row; align-items: flex-start; gap: 24px">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 8px"><div><strong>شارژ پیامک</strong> <span class="badge" style="background: #FBF0D9; color: #8A5A00">همه پلن‌ها</span></div><div style="font-size: 12.5px; color: #5A5E66; line-height: 1.6">اعتبار تومانی؛ هزینه هر بخش پیامک از آن کم می‌شود (سه‌بخشی در پایه: <span class="num">۳ × ۵۰۰ = ۱٬۵۰۰</span> تومان). ۵ پیامک رایگان سالانه اول مصرف می‌شود.</div><table style="width: 100%; border-collapse: collapse; font-size: 13px"><thead><tr style="color: #5A5E66; font-size: 12px"><th style="text-align: right; padding: 4px 0; font-weight: 500">پلن</th><th style="text-align: right; padding: 4px 0; font-weight: 500">هر بخش</th><th style="text-align: right; padding: 4px 0; font-weight: 500">حداقل شارژ</th><th style="text-align: right; padding: 4px 0; font-weight: 500">مانده</th></tr></thead><tbody>
+<tr style="border-top: 1px solid #E6E1D6"><td style="padding: 6px 0">رایگان</td><td class="num" style="padding: 6px 0">۸۵۰ تومان</td><td class="num" style="padding: 6px 0">۴۰۰ هزار</td><td style="padding: 6px 0; color: #8A5A00">تا پایان ماه</td></tr>
+<tr style="border-top: 1px solid #E6E1D6"><td style="padding: 6px 0">پایه</td><td class="num" style="padding: 6px 0">۵۰۰ تومان</td><td class="num" style="padding: 6px 0">۱۰۰ هزار</td><td style="padding: 6px 0; color: #1F7A4D">منتقل می‌شود</td></tr>
+<tr style="border-top: 1px solid #E6E1D6"><td style="padding: 6px 0">حرفه‌ای</td><td class="num" style="padding: 6px 0">۳۵۰ تومان</td><td class="num" style="padding: 6px 0">۱۰۰ هزار</td><td style="padding: 6px 0; color: #1F7A4D">منتقل می‌شود</td></tr></tbody></table></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 10px"><div style="font-size: 13px; font-weight: 500">مبلغ شارژ</div><div role="radiogroup" aria-label="مبلغ شارژ (تومان)" style="display: flex; flex-wrap: wrap; gap: 6px"><a href="#" role="radio" aria-checked="false" style="min-height: 40px; padding: 0 14px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 13.5px; font-weight: 500; text-decoration: none; background: #ECE8DF; color: #15171A">۱۰۰ هزار</a><a href="#" role="radio" aria-checked="true" style="min-height: 40px; padding: 0 14px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 13.5px; font-weight: 500; text-decoration: none; background: #121417; color: #E0B44C">۲۰۰ هزار</a><a href="#" role="radio" aria-checked="false" style="min-height: 40px; padding: 0 14px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 13.5px; font-weight: 500; text-decoration: none; background: #ECE8DF; color: #15171A">۳۰۰ هزار</a><a href="#" role="radio" aria-checked="false" style="min-height: 40px; padding: 0 14px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 13.5px; font-weight: 500; text-decoration: none; background: #ECE8DF; color: #15171A">۵۰۰ هزار</a><a href="#" role="radio" aria-checked="false" style="min-height: 40px; padding: 0 14px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 13.5px; font-weight: 500; text-decoration: none; background: #ECE8DF; color: #15171A">۱ میلیون</a></div><div style="font-size: 12.5px; color: #5A5E66">پلن پایه: <span class="num">۲۰۰</span> هزار تومان (پرداخت با ۱۰٪ مالیات: <span class="num">۲۲۰</span> هزار) ≈ <span class="num">۴۰۰</span> بخش · مانده فعلی <span class="num">۴۲٬۰۰۰</span> تومان ≈ <span class="num">۸۴</span> بخش</div><a href="DesktopSmsBuy.html" class="btn btn-line" style="width: auto; align-self: flex-start">خرید پیامک · شارژ ۲۰۰ هزار تومان</a></div>
+      </section>
+    </main>
+
+    <aside aria-label="درخواست ارتقا" style="width: 340px; flex-shrink: 0; background: #FBF6E8; border: 0; box-shadow: inset 0 0 0 2px #D4A53C; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+      <strong style="font-size: 17px">درخواست ارتقا به حرفه‌ای</strong>
+      <div class="row"><span>دوره</span><strong>سالانه</strong></div>
+      <div class="row"><span>قیمت پلن</span><span class="num">۱۰٬۹۰۰٬۰۰۰ تومان</span></div>
+      <div class="row"><span>مالیات بر ارزش افزوده ۱۰٪</span><span class="num">۱٬۰۹۰٬۰۰۰ تومان</span></div>
+      <div class="row"><span>قابل پرداخت</span><strong class="num">۱۱٬۹۹۰٬۰۰۰ تومان</strong></div>
+      <div class="row"><span>شروع</span><span class="num">امروز ۱۴۰۵/۰۷/۱۳</span></div>
+      <div class="row"><span>پایان دوره</span><span class="num">۱۴۰۶/۰۷/۱۳</span></div>
+      <div class="row"><span>باقی‌مانده پلن پایه</span><span style="font-size: 13px; color: #5A5E66">۱۸ روز؛ طبق سیاست سرویس لحاظ می‌شود</span></div>
+      <div style="font-size: 12.5px; color: #5A5E66; line-height: 1.6; border-top: 1px solid #D9D3C7; padding-top: 8px">با «پرداخت از درگاه بانک» به بانک منتقل می‌شوید و پس از پرداخت به صفحه نتیجه برمی‌گردید. پلن فقط پس از تأیید بانک فعال می‌شود؛ باقی‌مانده پلن فعلی طبق سیاست سرویس لحاظ می‌شود.</div>
+      <a href="DesktopPayReturnPlan.html" class="btn btn-gold">پرداخت از درگاه بانک و ارتقا</a>
+      <a href="DesktopPlans.html" class="btn btn-line">انصراف</a>
+      <div style="font-size: 12px; color: #5A5E66; text-align: center">پاسخ دیرهنگام بانک: «در حال بررسی؛ دوباره پرداخت نکنید»</div>
+    </aside>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1840">
+<title>وایرفریم مسیر اصلی</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: Flow · 1840x560.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.step{flex:1;min-width:0;background:#FFFFFF;border:2px solid #15171A;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:330px;box-sizing:border-box}
+.step h2{margin:0;font-size:17px;font-weight:700;display:flex;gap:8px;align-items:center}
+.step h2 span{display:inline-flex;width:28px;height:28px;border-radius:50%;background:#121417;color:#E0B44C;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.step ul{margin:0;padding-inline-start:18px;font-size:13.5px;line-height:1.7;color:#15171A}
+.wire{border:1.5px dashed #5A5E66;border-radius:8px;padding:8px;font-size:12px;color:#5A5E66;display:flex;flex-direction:column;gap:4px;margin-top:auto}
+.wire div{border:1px solid #D9D3C7;border-radius:4px;padding:2px 6px;background:#F4F1EA}
+.wire .dk{background:#121417;color:#E0B44C;border-color:#121417}
+.arrow{display:flex;align-items:center;justify-content:center;width:32px;flex-shrink:0;color:#15171A}
+.branch{background:#FBF0D9;border:1.5px solid #8A5A00;color:#15171A;border-radius:10px;padding:10px 14px;font-size:13.5px;line-height:1.6;flex:1}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 1840px; height: 560px; box-sizing: border-box; background: #F4F1EA; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px">
+  <div style="display: flex; align-items: stretch; gap: 0">
+    <section class="step">
+      <h2><span>۱</span>ورود با موبایل (۲ صفحه)</h2>
+      <ul>
+        <li>صفحه ۱: فقط شماره موبایل بزرگ + «دریافت کد»</li>
+        <li>صفحه ۲: ۶ خانه بزرگ، پرشدن خودکار از پیامک، جای‌گذاری</li>
+        <li>«ویرایش شماره»، شمارنده ارسال دوباره، «کد نرسید؟»</li>
+        <li>ثبت‌نام جدا ندارد؛ ورود سریع با اثر انگشت برای دفعات بعد</li>
+      </ul>
+      <div class="wire"><div>شماره موبایل</div><div class="dk">دریافت کد پیامکی</div><div>[ ۶ خانه کد ]</div><div class="dk">ورود</div></div>
+    </section>
+    <div class="arrow"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div>
+    <section class="step">
+      <h2><span>۲</span>پیشنهاد اختیاری Passkey</h2>
+      <ul>
+        <li>فقط بعد از اولین ورود موفق</li>
+        <li>«فعال‌سازی با اثر انگشت یا قفل گوشی»</li>
+        <li>«فعلاً نه» بدون جریمه؛ پیامک می‌ماند</li>
+        <li>نسخه نمایشی: احراز هویت واقعی جعل نمی‌شود</li>
+      </ul>
+      <div class="wire"><div>توضیح کوتاه ۳ خطی</div><div class="dk">فعال‌سازی</div><div>فعلاً نه</div></div>
+    </section>
+    <div class="arrow"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div>
+    <section class="step" style="border-color: #D4A53C; border-width: 3px">
+      <h2><span>۳</span>نرخ بزرگ و شروع</h2>
+      <ul>
+        <li>نام فروشگاه + «فاکتور جدید»</li>
+        <li>کارت تیره: «قیمت هر گرم طلای ۱۸ عیار» عدد طلایی بزرگ + تومان</li>
+        <li>دکمه بزرگ «شروع» بلافاصله زیر قیمت</li>
+        <li>زمان دریافت، وضعیت، «هر ۳ دقیقه»؛ لینک «مظنه کامل»؛ تب‌های «مظنه» و «ماشین‌حساب»</li>
+      </ul>
+      <div class="wire"><div class="dk" style="font-size: 16px; font-weight: 700">۱۰٬۰۰۰٬۰۰۰ تومان</div><div style="background: #E0B44C; color: #15171A; border-color: #E0B44C; font-weight: 700">شروع</div><div>۱۴:۲۱ · به‌روز · هر ۳ دقیقه</div></div>
+    </section>
+    <div class="arrow"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div>
+    <section class="step">
+      <h2><span>۴</span>اقلام طلا / متفرقه</h2>
+      <ul>
+        <li>«افزودن ردیف» ثابت بالای فهرست (موبایل و دسکتاپ)</li>
+        <li>هر ردیف: «طلا | متفرقه»؛ طلا: نام، وزن خالص، عیار پیش‌فرض ۱۸ (۷۵۰)، اجرت٪، سود٪، تخفیف</li>
+        <li>متفرقه: عنوان + قیمت ردیف دستی، بدون قواعد طلا</li>
+        <li>نرخ معامله ثابت؛ «استفاده از نرخ جدید» آگاهانه</li>
+      </ul>
+      <div class="wire"><div style="background: #E0B44C; color: #15171A; border-color: #E0B44C">+ افزودن ردیف (ثابت)</div><div>ردیف ۱ · طلا · ۲ گرم · ۱۸ عیار</div><div>ردیف ۲ · متفرقه · جعبه هدیه</div><div class="dk">جمع ← مرور فاکتور</div></div>
+    </section>
+    <div class="arrow"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div>
+    <section class="step">
+      <h2><span>۵</span>مرور، خریدار و صدور</h2>
+      <ul>
+        <li>ردیف‌ها + اجزای طلا؛ مالیات فقط روی اجرت/سود</li>
+        <li>نام خریدار و شماره موبایل مشتری (روی فاکتور چاپ می‌شود)</li>
+        <li>پیش‌نمایش پیامک: شماره، متن، هزینه، سهمیه لینک</li>
+        <li>دو اقدام: «صدور و ارسال پیامکی» / «فقط صدور»</li>
+      </ul>
+      <div class="wire"><div>ردیف‌ها و جمع‌ها</div><div>نام خریدار · موبایل مشتری</div><div style="background: #E0B44C; color: #15171A; border-color: #E0B44C">صدور و ارسال پیامکی</div><div>فقط صدور</div></div>
+    </section>
+    <div class="arrow"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></div>
+    <section class="step">
+      <h2><span>۶</span>فاکتور، QR و ارسال</h2>
+      <ul>
+        <li>فاکتور قطعی با شماره، نرخ snapshot، نام/موبایل خریدار</li>
+        <li>QR «بررسی اصالت فاکتور» بالای سمت چپ چاپ + لینک قابل لمس</li>
+        <li>وضعیت پیامک جدا: در صف / تحویل / ناموفق / در حال بررسی</li>
+        <li>چاپ، کپی لینک (سهمیه)، ارسال دوباره؛ نمای مشتری موبایلی</li>
+      </ul>
+      <div class="wire"><div>فاکتور ۱۴۰۵-۰۰۱۲ · قطعی · [QR]</div><div>پیامک: در صف ارسال</div><div>چاپ | لینک | ارسال دوباره</div></div>
+    </section>
+  </div>
+
+  <div style="display: flex; gap: 14px">
+    <div class="branch"><strong>نرخ در دسترس نیست:</strong> صفحه نرخ از بین نمی‌رود؛ وضعیت «قدیمی / آفلاین» با زمان واقعی؛ «ثبت نرخ دستی» طبق سیاست و «فاکتور فقط متفرقه».</div>
+    <div class="branch"><strong>تغییر نرخ در لحظه شروع:</strong> عدد تازه با برچسب نمایش داده می‌شود و پذیرش می‌گیرد؛ هیچ نرخ دیده‌نشده‌ای جایگزین نمی‌شود.</div>
+    <div class="branch"><strong>اطلاعات کسب‌وکار ناقص:</strong> پیش از اولین صدور، فرم کوتاه «تکمیل اطلاعات و برگشت به فاکتور»؛ ردیف‌ها حفظ می‌شوند.</div>
+    <div class="branch"><strong>قطع اینترنت / خطای پیامک:</strong> ردیف‌ها و فوکوس حفظ؛ صدور تا اتصال غیرفعال، نه جعلی؛ خطای پیامک فاکتور را برنمی‌گرداند و فاکتور تکراری نمی‌سازد.</div>
+  </div>
+</div>
+</body>
+</html>

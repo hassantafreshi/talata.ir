@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>دسکتاپ — مرور، مشتری و صدور</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: DesktopReview · 1280x860.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.btn{display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:999px;font-weight:700;font-size:18px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%;padding:0 16px;text-align:center}
+.btn-gold{background:#D4A53C;color:#15171A}
+.btn-gold:hover{color:#15171A;background:#C2962F}
+.btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #15171A;font-weight:500}
+.btn-line:hover{color:#15171A}
+.btn-soft{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-weight:500;font-size:15px;min-height:46px}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
+.line{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:15px}
+.line .k{color:#5A5E66}
+.lbl{font-size:12.5px;font-weight:500;color:#5A5E66}
+.input{min-height:44px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:16px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid #D9D3C7;text-align:right;vertical-align:top}
+th{font-weight:500;color:#5A5E66;font-size:12px}
+td.n,th.n{text-align:left;font-variant-numeric:tabular-nums;white-space:nowrap}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 1280px; min-height: 860px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 16px; padding: 12px 32px; background: #121417; color: #F4F1EA">
+    <a href="DesktopItems.html" aria-label="بازگشت به ویرایش" style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 10px; color: #F4F1EA; border: 1.5px solid #2A2E35">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+    </a>
+    <h1 style="margin: 0; font-size: 22px; font-weight: 700">مرور، مشتری و صدور</h1>
+    <span class="badge" style="background: #2A2E35; color: #E0B44C">حالت نمونه — صدور واقعی به سرور نیاز دارد</span>
+  </header>
+
+  <div style="display: flex; gap: 24px; padding: 20px 32px 24px 32px; flex-grow: 1; align-items: flex-start">
+    <main style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+      <section aria-label="پیش‌نمایش فاکتور" style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 24px 28px; display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #8A5A00; padding-bottom: 10px">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <div style="font-size: 20px; font-weight: 700">طلافروشی نمونه</div>
+            <div style="font-size: 13px; color: #5A5E66">تهران، خیابان نمونه، پلاک ۱ · تلفن <span class="num" dir="ltr">۰۲۱-۰۰۰۰۰۰۰</span></div>
+            <div style="font-size: 13px; color: #5A5E66">پیش‌نویس · شماره و تاریخ پس از صدور · قالب «فروشگاهی»</div>
+          </div>
+          <div style="width: 96px; height: 96px; border: 1.5px dashed #8A5A00; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #8A5A00; text-align: center; line-height: 1.4">جای QR بررسی اصالت<br>(پس از صدور)</div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 13.5px; background: #F4F1EA; border-radius: 8px; padding: 8px 12px">
+          <span>خریدار: <strong>خانم رضایی</strong> · <span class="num" dir="ltr">۰۹۱۲ ۰۰۰ ۰۰۰۰</span></span>
+          <span style="color: #5A5E66">از فیلدهای سمت چپ پر می‌شود</span>
+        </div>
+        <table>
+          <thead><tr><th>#</th><th>شرح</th><th class="n">وزن (گرم)</th><th>عیار</th><th class="n">نرخ هر گرم</th><th class="n">اجرت</th><th class="n">سود</th><th class="n">مالیات</th><th class="n">مبلغ (تومان)</th></tr></thead>
+          <tbody>
+            <tr><td class="num">۱</td><td>النگو ۱۸ عیار</td><td class="n">۲</td><td>۱۸ (۷۵۰)</td><td class="n">۱۰٬۰۰۰٬۰۰۰</td><td class="n">۴۰۰٬۰۰۰</td><td class="n">۱٬۰۲۰٬۰۰۰</td><td class="n">۱۴۲٬۰۰۰</td><td class="n"><strong>۲۱٬۵۶۲٬۰۰۰</strong></td></tr>
+            <tr><td class="num">۲</td><td>جعبه هدیه <span style="color: #5A5E66; font-size: 12px">(متفرقه، قیمت دستی)</span></td><td class="n">—</td><td>—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="n"><strong>۲۰۰٬۰۰۰</strong></td></tr>
+          </tbody>
+        </table>
+        <div style="display: flex; gap: 24px; font-size: 13px; color: #5A5E66">
+          <span>نرخ معامله: <span class="num">۱۰٬۰۰۰٬۰۰۰</span> تومان/گرم ۱۸ عیار در <span class="num">۱۴:۲۱</span> (نمونه)</span>
+          <span>مالیات <span class="num">۱۰٪</span> فقط روی اجرت و سود ردیف‌های طلا (قاعده نمونه)</span>
+        </div>
+      </section>
+      <div style="display: flex; gap: 12px">
+        <a href="DesktopItems.html" class="btn btn-soft" style="width: auto">ویرایش ردیف‌ها</a>
+        <a href="DesktopLayout.html" class="btn btn-soft" style="width: auto">ظاهر فاکتور</a>
+      </div>
+    </main>
+
+    <aside aria-label="مشتری، جمع و صدور" style="width: 400px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px">
+      <section style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px">
+        <strong>خریدار</strong>
+        <div style="display: flex; flex-direction: column; gap: 4px"><label class="lbl" for="cn">نام خریدار</label><input id="cn" class="input" type="text" value="خانم رضایی"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><label class="lbl" for="cm">شماره موبایل مشتری</label><input id="cm" class="input num" type="tel" value="۰۹۱۲ ۰۰۰ ۰۰۰۰" style="direction: ltr; text-align: right"><span style="font-size: 12px; color: #5A5E66; line-height: 1.6">روی فاکتور چاپ می‌شود. برای «صدور و ارسال پیامکی» لازم و برای «فقط صدور» اختیاری است. در صفحه بررسی QR منتشر نمی‌شود.</span></div>
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; min-height: 36px"><input type="checkbox" style="width: 18px; height: 18px"> ذخیره در دفتر مشتریان (همه پلن‌ها؛ در سقف ماهانه)</label>
+      </section>
+
+      <section style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px">
+        <div class="line"><span class="k">ارزش طلا</span><span class="num">۲۰٬۰۰۰٬۰۰۰</span></div>
+        <div class="line"><span class="k">اجرت · سود · مالیات</span><span class="num" style="font-size: 13px">۴۰۰٬۰۰۰ · ۱٬۰۲۰٬۰۰۰ · ۱۴۲٬۰۰۰</span></div>
+        <div class="line" style="border-top: 1px dashed #D9D3C7; padding-top: 8px"><span class="k">جمع طلا</span><strong class="num">۲۱٬۵۶۲٬۰۰۰</strong></div>
+        <div class="line"><span class="k">جمع متفرقه</span><strong class="num">۲۰۰٬۰۰۰</strong></div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid #15171A; padding-top: 10px">
+          <span style="font-weight: 700">مبلغ قابل پرداخت</span>
+          <span class="num" style="font-weight: 700; font-size: 26px">۲۱٬۷۶۲٬۰۰۰ <span style="font-size: 13px; font-weight: 400; color: #5A5E66">تومان</span></span>
+        </div>
+      </section>
+
+      <section style="background: #FFFFFF; border: 1.5px dashed #D9D3C7; border-radius: 20px; padding: 12px 16px; display: flex; flex-direction: column; gap: 4px; font-size: 13px">
+        <div style="display: flex; justify-content: space-between"><strong>پیامک پس از صدور</strong><span style="color: #5A5E66">۱ بخش · از ۵ پیامک رایگان امسال: ۱ مانده</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 12.5px"><span style="color: #5A5E66">بعد از آن از اعتبار: <span class="num">۴۲٬۰۰۰</span> تومان ≈ <span class="num">۸۴</span> بخش</span><a href="DesktopSmsBuy.html" style="font-weight: 500">خرید پیامک بیشتر</a></div>
+        <div style="color: #5A5E66; line-height: 1.6">«طلافروشی نمونه: فاکتور شما صادر شد. مشاهده: talata.ir/i/•••• (نمونه)» · لینک اشتراک ۲ از ۱۰۰ باقی‌مانده</div>
+      </section>
+
+      <a href="DesktopIssued.html" class="btn btn-gold">صدور و ارسال پیامکی</a>
+      <a href="DesktopIssued.html" class="btn btn-line">فقط صدور (بدون پیامک)</a>
+      <div style="font-size: 12.5px; color: #5A5E66; line-height: 1.6">صدور یک‌بار و قطعی است؛ دوبار کلیک یا قطع شبکه فاکتور تکراری نمی‌سازد. پس از صدور: شماره، QR، چاپ، کپی لینک. وضعیت پیامک جداگانه نشان داده می‌شود.</div>
+    </aside>
+  </div>
+</div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # راهنمای ساخت طلاتا — بسته آماده برنامه‌نویسی
 
-وضعیت: 2026-10-05. این سند نقطه شروع تیم برنامه‌نویسی است: کدام سند قرارداد است، ماژول‌ها و جدول‌ها، API، کارهای زمان‌بندی‌شده، ترتیب ساخت و تعریف تمام‌شدن. جزئیات در اسناد مرجع است و این‌جا تکرار نمی‌شود؛ اگر تناقضی دیدید، سند مرجع ستون «منبع» برنده است و تناقض باید در همان PR ثبت شود.
+وضعیت: 2026-10-05. **برای ساخت با ChatGPT یا عامل مشابه از `docs/handoff/README.md` شروع کنید** (دستور ثابت، ۲۳ کارت کار به ترتیب، مشخصات همه صفحات با حالت‌ها، نمونه API، چک‌لیست). این سند نقطه شروع تیم برنامه‌نویسی است: کدام سند قرارداد است، ماژول‌ها و جدول‌ها، API، کارهای زمان‌بندی‌شده، ترتیب ساخت و تعریف تمام‌شدن. جزئیات در اسناد مرجع است و این‌جا تکرار نمی‌شود؛ اگر تناقضی دیدید، سند مرجع ستون «منبع» برنده است و تناقض باید در همان PR ثبت شود.
 
 ## ۱. نقشه اسناد
 
@@ -16,6 +16,8 @@
 | نسخه ۲ و زیرساختی که فاز ۱ می‌سازد | `ROADMAP_V2_BUSINESS_TYPES.md` | فقط §۳ آن در فاز ۱ |
 | صفحات، اجزا، متن‌ها، حالت‌ها | `design/UI_BUILD_SPEC.md` + `design/PAGE_COVERAGE.md` + بوم و `design/proposed/screenshots/` | پیشنهادی تا تأیید پالت/لوگو/toolkit |
 | توکن‌ها و قرارداد فرانت | `design/tokens/`, `design/contracts/frontend-adapters.ts`, `calculation-vectors.json` | پیشنهادی (پالت ۱ پیش‌فرض کاری) |
+| بسته تحویل برای مدل برنامه‌نویس | `handoff/` + `design/reference-html/` | آماده؛ مرجع ظاهری پیشنهادی |
+| پنل مدیریت سرویس نسخه ۱ | `handoff/04_SCREENS_ADMIN.md` + تابلوهای `Provider`, `Admin*` | آماده ساخت |
 | تصمیم‌های تأییدشده و باز UI | `design/UI_APPROVED_DECISIONS.md` | مرجع وضعیت تأیید |
 | چک‌لیست پیشرفت | `PHASE_1_CHECKLIST.md` | با هر milestone به‌روز شود |
 
@@ -64,7 +66,7 @@ docs/{adr,architecture,operations}
 | مشتری و اقساط | `GET|POST /api/customers`, `GET /api/customers/{id}`, `POST /api/agreements`, `POST /api/agreements/{id}/payments`, `POST /api/payments/{id}/reverse` |
 | تنظیمات | `GET|PUT /api/settings/profile`, `POST /api/settings/logo`, `GET|PUT /api/settings/layout`, `GET /api/entitlements` |
 | پرداخت و پیامک | `GET /api/billing/offers`, `POST /api/billing/orders`, `GET /api/billing/orders[/{id}]`, `GET /api/billing/orders/{id}/receipt`, `GET /api/sms/credit`, `GET|POST /pay/callback/{gateway}`, `GET /pay/result/{order}` |
-| provider | `/provider/*` (جدا، با نقش provider) |
+| provider | `/provider/*` (جدا، با نقش provider): `GET /provider/api/dashboard`، `tenants` (+`/{id}`, `manual-activation`, `sms-credit-adjustments`, `feature-overrides`, `suspend`)، `pricing/versions` (+`draft`, `publish`)، `payments` (+`inquire`, `manual-confirm`, `mark-failed`, `export.csv`)، `sms/messages`، `quotes/status` (+`thresholds`, `emergency-rate`)، `tax-rules`، `integrations` (+`test`)، `staff`، `audit`، `system` — جزئیات در `handoff/04_SCREENS_ADMIN.md` |
 
 قالب پاسخ: decimal string برای پول/وزن/نرخ، ریال در API، خطای ساخت‌یافته `{code, message_fa, trace_id}`. قرارداد نوع‌ها: `design/contracts/frontend-adapters.ts`.
 

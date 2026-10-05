@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>فونت فارسی و toolkit پیشنهادی</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: Type · 1280x760.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+h2{margin:0;font-size:18px;font-weight:700}
+.num{font-variant-numeric:tabular-nums}
+.row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid #D9D3C7;font-size:14px}
+.row:first-child{border-top:0}
+.k{color:#5A5E66}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:6px 8px;border-bottom:1px solid #D9D3C7;text-align:right;vertical-align:top;line-height:1.6}
+th{font-weight:500;color:#5A5E66;font-size:12px}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 1280px; min-height: 760px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; padding: 28px 32px; display: flex; flex-direction: column; gap: 16px">
+  <h1 style="margin: 0; font-size: 22px; font-weight: 700">فونت فارسی و toolkit — پیشنهاد برای تأیید (بدون تغییر نسبت به نسخه قبل)</h1>
+
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px">
+    <section style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <h2>فونت: Vazirmatn (مجوز SIL OFL 1.1)</h2>
+        <span style="font-size: 12px; background: #121417; color: #E0B44C; padding: 3px 10px; border-radius: 999px">self-host، بدون CDN خارجی</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px; border: 1px dashed #D9D3C7; border-radius: 10px; padding: 12px 14px">
+        <div class="num" style="font-size: 44px; font-weight: 700; line-height: 1.2">۲۱٬۷۶۲٬۰۰۰ <span style="font-size: 18px; font-weight: 500; color: #5A5E66">تومان</span></div>
+        <div style="font-size: 20px; font-weight: 500">قیمت هر گرم طلای ۱۸ عیار</div>
+        <div style="font-size: 16px">وزن خالص طلا را به گرم وارد کنید؛ وزن سنگ و قسمت‌های غیرطلایی را وارد نکنید.</div>
+        <div style="font-size: 14px; color: #5A5E66">آخرین نرخ دریافت‌شده: <span class="num">۱۴:۲۱</span> · به‌روزرسانی هر ۳ دقیقه · <span dir="ltr" class="num">0123456789</span> · <span class="num">۰۱۲۳۴۵۶۷۸۹</span></div>
+      </div>
+      <table>
+        <thead><tr><th>مورد</th><th>پیشنهاد</th></tr></thead>
+        <tbody>
+          <tr><td>وزن‌ها</td><td>۴۰۰ متن، ۵۰۰ برچسب/دکمه فرعی، ۷۰۰ عدد قیمت و اقدام اصلی (فایل متغیر یک وزن‌مجموعه)</td></tr>
+          <tr><td>اندازه پایه</td><td><span class="num">۱۶px</span> متن، <span class="num">۱۴px</span> کمکی (حداقل)، <span class="num">۴۴–۶۴px</span> قیمت؛ ارقام هم‌عرض (tabular) برای ستون مبلغ</td></tr>
+          <tr><td>حجم اندازه‌گیری‌شده</td><td>زیرمجموعه عربی/فارسی متغیر <span class="num" dir="ltr">45.2 KiB</span> + لاتین پایه <span class="num" dir="ltr">33.7 KiB</span> = حدود <span class="num" dir="ltr">79 KiB</span> (فایل‌های عمومی Google Fonts v16، دانلود ۱۴۰۵/۰۷/۱۳). بودجه فونت ضروری: ≤ <span class="num" dir="ltr">80 KiB</span>.</td></tr>
+          <tr><td>برنامه self-host</td><td>ساخت زیرمجموعه خودمان از نسخه رسمی: فارسی/عربی + ارقام فارسی و لاتین + ASCII پایه، حذف لاتین گسترده؛ preload فقط فایل فارسی؛ <span dir="ltr">font-display: swap</span> با fallback «Tahoma/Segoe UI» و اندازه‌گیری دوباره قبل از ادعای بودجه.</td></tr>
+          <tr><td>جایگزین در صورت رد</td><td>Vazir (نسخه قدیمی‌تر همان خانواده) یا Sahel؛ هر دو OFL. فونت لاتین تزئینی جداگانه لازم نیست.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <h2>Toolkit: مسیر A — PrimeVue Unstyled + طراحی اختصاصی</h2>
+        <span style="font-size: 12px; background: #FBF0D9; color: #8A5A00; padding: 3px 10px; border-radius: 999px">مشروط به سنجش حجم؛ هنوز نصب نشده</span>
+      </div>
+      <table>
+        <thead><tr><th>مورد</th><th>پیشنهاد</th></tr></thead>
+        <tbody>
+          <tr><td>Stack</td><td>Laravel + Inertia + Vue 3 + TypeScript + Vite؛ یک toolkit اصلی، بدون Next.js جدا</td></tr>
+          <tr><td>چرا PrimeVue Unstyled</td><td>رفتار آماده و دسترس‌پذیر برای Select، Dialog، Toast، DataTable و فرم‌ها با import تک‌کامپوننت؛ RTL مستند؛ ظاهر کاملاً از توکن‌های طلاتا می‌آید نه theme آماده</td></tr>
+          <tr><td>چه چیزهایی از آن نمی‌گیریم</td><td>Button، فیلد عددی با واحد، InvoiceRow، TotalSummary، نوار وضعیت نرخ: اختصاصی و سبک نوشته می‌شوند تا بسته ورود/نرخ کوچک بماند</td></tr>
+          <tr><td>بودجه حجم (قرارداد)</td><td>ورود و نرخ/شروع ≤ <span class="num" dir="ltr">150 KiB</span> JS gzip و ≤ <span class="num" dir="ltr">300 KiB</span> کل؛ فرم فاکتور ≤ <span class="num" dir="ltr">220/400 KiB</span>؛ فاکتور عمومی سرور-رندر ≤ <span class="num" dir="ltr">20 KiB</span> JS</td></tr>
+          <tr><td>شرط قفل‌شدن انتخاب</td><td>یک برش production (ورود + نرخ/شروع + فاکتور ترکیبی) ساخته و با پروفایل A/B اندازه‌گیری شود؛ رد بودجه = بازبینی با Reka UI (گزینه B) با همان معیار</td></tr>
+          <tr><td>ابزار طراحی</td><td>Impeccable فقط راهنمای نقد/ساده‌سازی در زمان توسعه؛ وابستگی مرورگر نمی‌شود. UI UX Pro Max حداکثر منبع کمکی</td></tr>
+          <tr><td>آیکون</td><td>SVG خطی انتخابی (مثل همین اتود)، inline یا sprite محلی؛ بدون بسته آیکون کامل</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size: 13px; color: #5A5E66; line-height: 1.6">هیچ عدد سرعت یا حجم bundle برای کتابخانه‌ها در این مرحله اندازه‌گیری نشده است؛ فقط حجم فونت واقعاً سنجیده شده. نصب پس از تأیید مالک با نسخه و مجوز ثبت‌شده انجام می‌شود.</div>
+    </section>
+  </div>
+
+  <div style="font-size: 13px; color: #5A5E66; line-height: 1.7">توکن‌های پایه پس از تأیید: فاصله <span class="num" dir="ltr">4/8/12/16/24/32</span>، گوشه <span class="num" dir="ltr">8/10/12/16</span>، خط <span class="num" dir="ltr">1.5px</span>، هدف لمس ≥ <span class="num" dir="ltr">44px</span> (اقدام اصلی <span class="num" dir="ltr">56–64px</span>)، حلقه فوکوس <span class="num" dir="ltr">3px</span> آبی. حالت روشن تنها حالت فاز ۱.</div>
+</div>
+</body>
+</html>

@@ -4,7 +4,7 @@
 
 بسته را اینجا ببینید:
 
-- بوم اتود (۵۷ تابلو، مسیر موبایل قابل کلیک): <https://claude.ai/artifact/XX1xTurU6kU3P5SZdmGXKE>
+- بوم اتود (۶۸ تابلو، مسیر موبایل قابل کلیک): <https://claude.ai/artifact/XX1xTurU6kU3P5SZdmGXKE>
 - نسخه آفلاین همان اتود: `docs/design/proposed/preview.html` · اسکرین‌شات هر تابلو: `docs/design/proposed/screenshots/`
 - جزئیات: `proposed/palette.md`، `proposed/logo-concept-*.svg`، `proposed/typography-toolkit.md`
 

@@ -12,6 +12,7 @@
 | [UI/UX tool shortlist](docs/research/UI_UX_TOOL_SHORTLIST.md) | گزینه‌های بررسی‌شده برای Claude، کتابخانه‌ها و لینک نمونه‌ها |
 | [Implementation checklist](docs/PHASE_1_CHECKLIST.md) | معیارهای پذیرش و پیگیری مراحل |
 | [Performance budget](docs/PERFORMANCE_BUDGET.md) | معیار حجم اولیه و آزمون سرعت روی اینترنت ضعیف |
+| [ChatGPT build package](docs/handoff/README.md) | بسته تحویل برای ساخت سریع با ChatGPT: دستور ثابت، ۲۳ کارت کار، مشخصات همه صفحات فروشگاه، عمومی، پرداخت و مدیریت با حالت‌ها، نمونه API، چک‌لیست؛ مرجع HTML صفحات در `docs/design/reference-html/` |
 | [Implementation guide](docs/IMPLEMENTATION_GUIDE.md) | نقطه شروع ساخت: نقشه اسناد، ماژول‌ها و جدول‌ها، API، کارهای زمان‌بندی‌شده، ترتیب ساخت، تصمیم‌های باز |
 | [Payments and SMS credit](docs/PAYMENTS_AND_SMS_CREDIT.md) | خرید پلن و شارژ پیامک از درگاه بانک، صفحه بازگشت موفق/ناموفق، دفتر اعتبار پیامک |
 | [Plans and quotas](docs/PLANS_AND_QUOTAS.md) | قیمت پلن‌ها، سهمیه‌ها و شارژ پیامک به تصمیم مالک (رایگان: ۵۰ فاکتور و ۵۰ مشتری جدید در ماه، فقط ماه جاری، ۵ پیامک در سال؛ شارژ پیامک تومانی) |

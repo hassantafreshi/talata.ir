@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>ورود — کد پیامکی</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: Otp · 390x844.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.btn{display:flex;align-items:center;justify-content:center;min-height:60px;border-radius:999px;font-weight:700;font-size:20px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%;padding:8px 16px;text-align:center;gap:10px}
+.btn-gold{background:#D4A53C;color:#15171A}
+.btn-gold:hover{color:#15171A;background:#C2962F}
+.btn-line{background:#FFFFFF;color:#15171A;border:1.5px solid #D9D3C7;font-size:17px;font-weight:500}
+.btn-line:hover{color:#15171A}
+.btn-wait{background:#ECEAE6;color:#4A4A4A;border:0;font-size:17px;font-weight:500}
+.code{width:50px;height:64px;border:0;border-bottom:3px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;font-size:30px;font-weight:700;text-align:center;box-sizing:border-box;font-family:inherit;color:#15171A;padding:0}
+.code.on{border-color:#D4A53C}
+.hint{font-size:14px;color:#5A5E66;line-height:1.7}
+.num{font-variant-numeric:tabular-nums}
+details summary{cursor:pointer;font-weight:500;min-height:44px;display:flex;align-items:center}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 390px; min-height: 844px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.6; display: flex; flex-direction: column">
+  <header style="background: #121417; color: #F4F1EA; padding: 14px 16px; display: flex; align-items: center; gap: 10px">
+    <a href="Login.html" aria-label="بازگشت" style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 10px; color: #F4F1EA">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+    </a>
+    <span style="font-size: 18px; font-weight: 700">ورود به طلاتا</span>
+    <span style="margin-inline-start: auto; font-size: 13px; color: #B8BCC4">مرحله ۲ از ۲</span>
+  </header>
+
+  <main style="display: flex; flex-direction: column; gap: 18px; padding: 28px 24px 24px 24px; flex-grow: 1">
+    <h1 style="margin: 0; font-size: 24px; font-weight: 700; line-height: 1.4">کد پیامک‌شده را وارد کنید</h1>
+    <div style="display: flex; align-items: center; justify-content: space-between; background: #F4F1EA; border: 0; border-radius: 20px; padding: 10px 14px">
+      <span style="font-size: 15px">پیامک به <strong class="num" dir="ltr">۰۹۱۲ ۳۴۵ ۶۷۸۹</strong></span>
+      <a href="Login.html" style="min-height: 40px; display: inline-flex; align-items: center; padding: 0 10px; font-weight: 500; text-decoration: underline; text-underline-offset: 4px">ویرایش شماره</a>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <label for="c1" style="font-size: 15px; font-weight: 500">کد ۶ رقمی</label>
+      <div dir="ltr" style="display: flex; gap: 8px; justify-content: center">
+        <input id="c1" class="code num" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" value="۴" aria-label="رقم اول">
+        <input class="code num" type="text" inputmode="numeric" maxlength="1" value="۸" aria-label="رقم دوم">
+        <input class="code num" type="text" inputmode="numeric" maxlength="1" value="۲" aria-label="رقم سوم">
+        <input class="code num on" type="text" inputmode="numeric" maxlength="1" value="" aria-label="رقم چهارم">
+        <input class="code num" type="text" inputmode="numeric" maxlength="1" value="" aria-label="رقم پنجم">
+        <input class="code num" type="text" inputmode="numeric" maxlength="1" value="" aria-label="رقم ششم">
+      </div>
+      <div class="hint" style="text-align: center">کد معمولاً خودکار پر می‌شود. اگر نشد، آن را از پیامک کپی و همین‌جا جای‌گذاری کنید. با کامل‌شدن کد، ورود خودکار انجام می‌شود.</div>
+    </div>
+
+    <a href="Passkey.html" class="btn btn-gold">ورود</a>
+
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <a href="Otp.html" class="btn btn-wait" aria-disabled="true">ارسال دوباره کد تا <span class="num" style="margin-inline-start: 6px">۰۱:۳۰</span></a>
+      <div class="hint" style="text-align: center">پیامک معمولاً زیر ۳۰ ثانیه می‌رسد. بعد از پایان زمان، دکمه بالا فعال می‌شود.</div>
+    </div>
+
+    <details style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 4px 14px">
+      <summary>کد نرسید؟</summary>
+      <ul style="margin: 0 0 10px 0; padding-inline-start: 18px; font-size: 14px; color: #5A5E66; line-height: 1.8">
+        <li>آنتن گوشی و فضای خالی صندوق پیامک را بررسی کنید.</li>
+        <li>بعد از پایان شمارنده، «ارسال دوباره کد» را بزنید.</li>
+        <li>اگر شماره اشتباه است، «ویرایش شماره» را بزنید؛ ردیف‌های فاکتور شما از بین نمی‌رود.</li>
+      </ul>
+    </details>
+
+    <div style="margin-top: auto; background: #FBE9E7; color: #B3261E; border-radius: 12px; padding: 10px 14px; font-size: 14px; display: flex; gap: 8px; align-items: flex-start">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0; margin-top: 3px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h.01"></path></svg>
+      <span>نمونه حالت خطا: کد درست نیست. یک بار دیگر به پیامک نگاه کنید (۲ تلاش دیگر).</span>
+    </div>
+  </main>
+</div>
+</body>
+</html>

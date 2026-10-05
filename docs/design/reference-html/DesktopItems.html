@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>دسکتاپ — فرم چندردیفی</title>
+<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: DesktopItems · 1280x860.
+     این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
+<style>
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+@font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-latin-subset.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+body{margin:0}
+a{color:#8A5A00}a:hover{color:#6B4600}
+.btn{display:flex;align-items:center;justify-content:center;min-height:56px;border-radius:999px;font-weight:700;font-size:19px;text-decoration:none;box-sizing:border-box;border:0;cursor:pointer;font-family:inherit;width:100%}
+.btn-primary{background:#D4A53C;color:#15171A}
+.btn-primary:hover{color:#15171A;background:#C2962F}
+.btn-secondary{background:#FFFFFF;color:#15171A;border:1.5px solid #15171A}
+.lbl{font-size:13px;font-weight:500;color:#5A5E66}
+.input{min-height:46px;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;padding:0 12px;font-size:17px;box-sizing:border-box;color:#15171A;font-family:inherit;width:100%}
+.unitbox{display:flex;align-items:center;border:0;border-bottom:2px solid #C9C3B6;border-radius:12px 12px 0 0;background:#FFFFFF;min-height:46px;box-sizing:border-box;overflow:hidden}
+.unitbox input{border:0;min-height:44px;flex:1;min-width:0;padding:0 12px;font-size:17px;font-family:inherit;color:#15171A;background:transparent}
+.unitbox span{padding:0 10px;font-size:13px;color:#5A5E66;border-inline-start:1.5px solid #D9D3C7;min-height:44px;display:inline-flex;align-items:center;background:#ECE8DF}
+.seg{display:flex;border:1.5px solid #D9D3C7;border-radius:10px;overflow:hidden;background:#FFFFFF;width:170px}
+.seg button{flex:1;min-height:40px;border:0;background:transparent;font-family:inherit;font-size:15px;font-weight:500;color:#5A5E66;cursor:pointer;border-radius:999px}
+.seg button.on{background:#121417;color:#E0B44C}
+.num{font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
+.line{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:15px}
+.line .k{color:#5A5E66}
+.f{display:flex;flex-direction:column;gap:4px}
+</style>
+</head>
+<body style="margin:0;background:#E6E2D8">
+<div dir="rtl" style="width: 1280px; min-height: 860px; box-sizing: border-box; background: #FFFFFF; color: #15171A; font-family: Vazirmatn, Tahoma, sans-serif; font-size: 16px; line-height: 1.5; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 16px; padding: 14px 32px; background: #121417; color: #F4F1EA">
+    <a href="DesktopRate.html" aria-label="بازگشت" style="display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; border-radius: 10px; color: #F4F1EA; border: 1.5px solid #2A2E35">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+    </a>
+    <h1 style="margin: 0; font-size: 22px; font-weight: 700">اقلام فاکتور</h1>
+    <span class="badge" style="background: #2A2E35; color: #B8BCC4">پیش‌نویس ذخیره شد · ۱۴:۲۳</span>
+    <div style="margin-inline-start: auto; display: flex; align-items: center; gap: 12px; font-size: 14px">
+      <span style="color: #B8BCC4">نرخ معامله: <strong class="num" style="color: #F4F1EA">۱۰٬۰۰۰٬۰۰۰</strong> تومان/گرم ۱۸ عیار</span>
+      <span style="color: #E0B44C">نرخ تازه بازار: <span class="num" style="font-weight: 500">۱۰٬۰۵۰٬۰۰۰</span></span>
+      <a href="DesktopItems.html" style="min-height: 40px; display: inline-flex; align-items: center; padding: 0 12px; border: 1.5px solid #E0B44C; color: #E0B44C; border-radius: 999px; font-weight: 500; text-decoration: none">استفاده از نرخ جدید</a>
+    </div>
+  </header>
+
+  <div style="display: flex; gap: 24px; padding: 24px 32px; flex-grow: 1; align-items: flex-start">
+    <main style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+      <div style="position: sticky; top: 0; z-index: 2; background: #FFFFFF; padding-bottom: 4px"><a href="DesktopItems.html" class="btn btn-primary" style="min-height: 52px; font-size: 17px">+ افزودن ردیف (همیشه بالای فهرست ثابت می‌ماند)</a></div>
+      <section aria-label="ردیف ۱" style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 14px">
+          <div style="font-weight: 700; font-size: 17px">ردیف ۱</div>
+          <div class="seg" role="group" aria-label="نوع ردیف"><button type="button" class="on">طلا</button><button type="button">متفرقه</button></div>
+          <a href="DesktopItems.html" style="margin-inline-start: auto; font-size: 14px; color: #B3261E; min-height: 40px; display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 4px">حذف ردیف (قابل برگشت)</a>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px">
+          <div class="f" style="grid-column: span 5"><label class="lbl" for="n1">نام کالا</label><input id="n1" class="input" type="text" value="النگو ۱۸ عیار"></div>
+          <div class="f" style="grid-column: span 3"><label class="lbl" for="w1">وزن خالص طلا</label><div class="unitbox"><input id="w1" class="num" type="text" inputmode="decimal" value="۲"><span>گرم</span></div></div>
+          <div class="f" style="grid-column: span 4"><label class="lbl" for="p1">عیار</label><select id="p1" class="input" style="font-size: 16px"><option selected="selected">۱۸ عیار (۷۵۰)</option><option>۲۱ عیار (۸۷۵)</option><option>۲۴ عیار (۱۰۰۰)</option><option>عیار دقیق…</option></select></div>
+          <div class="f" style="grid-column: span 3"><label class="lbl" for="wg1">اجرت</label><div class="unitbox"><input id="wg1" class="num" type="text" inputmode="decimal" value="۲"><span>٪</span></div></div>
+          <div class="f" style="grid-column: span 3"><label class="lbl" for="pr1">سود</label><div class="unitbox"><input id="pr1" class="num" type="text" inputmode="decimal" value="۵"><span>٪</span></div></div>
+          <div class="f" style="grid-column: span 3"><label class="lbl" for="d1">تخفیف اجرت و سود</label><div class="unitbox"><input id="d1" class="num" type="text" inputmode="decimal" value="۰"><span>تومان</span></div></div>
+          <div class="f" style="grid-column: span 3; justify-content: flex-end"><span class="lbl">مبلغ این ردیف</span><strong class="num" style="font-size: 20px; min-height: 46px; display: inline-flex; align-items: center">۲۱٬۵۶۲٬۰۰۰ <span style="font-weight: 400; font-size: 13px; color: #5A5E66; margin-inline-start: 6px">تومان</span></strong></div>
+          <div class="f" style="grid-column: span 12"><label class="lbl" for="ds1">توضیح (اختیاری)</label><input id="ds1" class="input" type="text" value="" placeholder="مثلاً طرح، کد، سفارش مشتری"></div>
+        </div>
+        <div style="font-size: 13px; color: #5A5E66">وزن سنگ و قسمت‌های غیرطلایی را وارد نکنید. نرخ این عیار: <span class="num">۱۰٬۰۰۰٬۰۰۰</span> تومان/گرم · ارزش طلا <span class="num">۲۰٬۰۰۰٬۰۰۰</span> · اجرت <span class="num">۴۰۰٬۰۰۰</span> · سود <span class="num">۱٬۰۲۰٬۰۰۰</span> · مالیات <span class="num">۱۴۲٬۰۰۰</span></div>
+      </section>
+
+      <section aria-label="ردیف ۲" style="background: #F4F1EA; border: 0; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 14px">
+          <div style="font-weight: 700; font-size: 17px">ردیف ۲</div>
+          <div class="seg" role="group" aria-label="نوع ردیف"><button type="button">طلا</button><button type="button" class="on">متفرقه</button></div>
+          <a href="DesktopItems.html" style="margin-inline-start: auto; font-size: 14px; color: #B3261E; min-height: 40px; display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 4px; color: #B3261E">حذف ردیف (قابل برگشت)</a>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px">
+          <div class="f" style="grid-column: span 5"><label class="lbl" for="n2">عنوان (الزامی)</label><input id="n2" class="input" type="text" value="جعبه هدیه"></div>
+          <div class="f" style="grid-column: span 4"><label class="lbl" for="pm2">قیمت ردیف (الزامی)</label><div class="unitbox"><input id="pm2" class="num" type="text" inputmode="numeric" value="۲۰۰٬۰۰۰"><span>تومان</span></div></div>
+          <div class="f" style="grid-column: span 3; justify-content: flex-end"><span class="lbl">مبلغ این ردیف</span><strong class="num" style="font-size: 20px; min-height: 46px; display: inline-flex; align-items: center">۲۰۰٬۰۰۰ <span style="font-weight: 400; font-size: 13px; color: #5A5E66; margin-inline-start: 6px">تومان</span></strong></div>
+          <div class="f" style="grid-column: span 12"><label class="lbl" for="ds2">توضیح (اختیاری)</label><input id="ds2" class="input" type="text" value=""></div>
+        </div>
+        <div style="font-size: 13px; color: #5A5E66">قیمت کل همین ردیف را بنویسید. برای متفرقه وزن، عیار و محاسبه طلا به کار نمی‌رود و مالیات طلا روی آن اعمال نمی‌شود.</div>
+      </section>
+
+    </main>
+
+    <aside aria-label="جمع فاکتور" style="width: 340px; flex-shrink: 0; background: #F4F1EA; border: 0; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+      <h2 style="margin: 0; font-size: 17px; font-weight: 700">جمع فاکتور (۲ ردیف)</h2>
+      <div class="line"><span class="k">ارزش طلا (<span class="num">۲</span> گرم)</span><span class="num">۲۰٬۰۰۰٬۰۰۰</span></div>
+      <div class="line"><span class="k">اجرت</span><span class="num">۴۰۰٬۰۰۰</span></div>
+      <div class="line"><span class="k">سود</span><span class="num">۱٬۰۲۰٬۰۰۰</span></div>
+      <div class="line"><span class="k">مالیات روی اجرت و سود</span><span class="num">۱۴۲٬۰۰۰</span></div>
+      <div class="line" style="border-top: 1px dashed #D9D3C7; padding-top: 8px"><span class="k">جمع طلا</span><strong class="num">۲۱٬۵۶۲٬۰۰۰</strong></div>
+      <div class="line"><span class="k">جمع متفرقه</span><strong class="num">۲۰۰٬۰۰۰</strong></div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid #15171A; padding-top: 10px">
+        <span style="font-weight: 700">قابل پرداخت</span>
+        <span class="num" style="font-weight: 700; font-size: 24px">۲۱٬۷۶۲٬۰۰۰ <span style="font-size: 13px; font-weight: 400; color: #5A5E66">تومان</span></span>
+      </div>
+      <a href="DesktopReview.html" class="btn btn-primary" style="margin-top: 8px; background: #121417; color: #F4F1EA">مرور فاکتور</a>
+      <div style="font-size: 12px; color: #5A5E66">اعداد نمونه؛ محاسبه نهایی توسط سرور انجام می‌شود.</div>
+    </aside>
+  </div>
+</div>
+</body>
+</html>
