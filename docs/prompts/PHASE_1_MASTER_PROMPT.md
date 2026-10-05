@@ -141,7 +141,7 @@ These are required concepts, not a demand for identical class/table names. Suppl
 | Identity | OTP challenge, authentication session, PasskeyCredential, one-use WebAuthn ceremony challenge |
 | Pricing | Metal/Purity value objects, TaxRule version, TaxRuleAssignment, CalculationSnapshot, CalculationItemSnapshot, PriceSnapshot |
 | Markets | ProviderConfiguration, MarketQuote, TenantRateOverride |
-| Invoices | Invoice, InvoiceItem, immutable issued snapshot, RevisionLink, InvoiceShare, InvoiceVerification, invoice numbering counter |
+| Invoices | Invoice, InvoiceItem, InvoiceLayout, immutable issued snapshot, RevisionLink, InvoiceShare, InvoiceVerification, invoice numbering counter |
 | Parties | Party, PartyRole, contact details, optional duplicate-resolution metadata |
 | Installments | Agreement, ScheduleLine, PaymentRecord, PaymentAllocation, reversal relation, reminder policy/history |
 | SMS | Template, Message, DeliveryAttempt, CreditLedger/Reservation, webhook receipt |
@@ -273,6 +273,8 @@ Add `/app/invoices/new` as the primary new-sale entry (or an equivalent deep-lin
 
 Read `../INVOICE_DELIVERY_AND_VERIFICATION.md` as the required contract for printed QR verification, responsive invoice views and SMS-at-issuance. These are Phase 1 requirements, not implemented capabilities.
 
+Read `../INVOICE_CUSTOMIZATION.md` as the required business-profile and layout-editor contract. Both Basic and Professional can customize; the previous Professional-only rule is superseded. Require shop name, public business mobile and address before issuance (server enforced), with a landline when available and business-mobile fallback when absent. Optional website/social accounts/license numbers/logo belong to the profile on all plans; editing profile data never silently changes login identity. Calculator and drafts remain usable before profile completion.
+
 Use lifecycle `DRAFT -> FINALIZED -> VOIDED` with an explicit linked replacement/revision workflow. Sharing and payment are orthogonal statuses/derived properties: a finalized invoice can be shared repeatedly and be unpaid/partially paid/paid. Avoid a single Draft->Shared->Paid enum that loses document status. Record share events without mutating legal document content.
 
 - Draft may contain multiple independently typed GOLD/MISC items, invoice-local customer details, notes and selected template. Provide explicit add/edit/remove-row actions and a per-row name/description. Save progress with a visible save state and optimistic locking/version field.
@@ -284,13 +286,15 @@ Use lifecycle `DRAFT -> FINALIZED -> VOIDED` with an explicit linked replacement
 - Void/replacement of a linked installment agreement must be resolved explicitly in a guided workflow; block unresolved allocations/outstanding agreement linkage, never leave an active debt against a silently voided invoice.
 - Print uses issued snapshot and a documented template. A4 RTL baseline, repeated table headers, long descriptions, multiple pages, footer/page break behavior, black-and-white readability, shop identity, component breakdown, net weight/purity, dates, totals and status. Test actual browser print/PDF.
 - Place a secure verification QR at the physical upper-left of the issued sales invoice, retained in print/PDF. Generate first-party, with a four-module quiet zone and an initial ~30mm print-area target adjusted after actual scans. Drafts never carry a valid verification QR. Mobile merchant/customer invoice layouts reflow at 360/390/768px without shrinking A4 or requiring horizontal page scrolling; print CSS remains independent.
-- Free plan shows Talata branding. Branding feature is captured at issue time. Paid users may upload a validated raster logo; do not render untrusted SVG/HTML or arbitrary CSS. Professional customization is constrained options/design tokens/templates, not arbitrary scripts.
+- Free plan shows Talata branding and a fixed Simple invoice layout; all plans can edit business profile data. Basic and Professional both enable `invoice.customize`, choose between Simple and Shop presets, and display an optional validated raster shop logo. Do not render untrusted SVG/HTML or arbitrary CSS. Customization uses a versioned allowlisted schema and simple live-preview controls, not arbitrary scripts.
+- Layout controls cover per-block header/footer placement, right/center/left alignment, order, optional visibility, logo size, readable typography/accent/spacing, permitted item columns, public end notes/signature box and safe A4 print options. Protected shop identity/contact/address, invoice number/date/status, essential item data, totals/unit and the physical upper-left QR cannot be hidden or overlapped. Buttons/selectors work on mobile/keyboard without dragging; optional bounded drag-and-drop is secondary. Local undo/cancel/reset and explicit save preserve unsaved work and handle optimistic conflicts.
+- Snapshot the full layout schema/template version and business fields/logo asset version at issue; reuse it for historical print/PDF/mobile. Keep QR verification's minimal DTO and status semantics. Downgrade preserves custom settings and issued renders; subsequent Free invoices use the fixed Free layout with an explained entitlement change, while editing remains gated server-side. Do not load editor/canvas/PDF dependencies into login/calculator/public invoice routes.
 
 ## 10. Public share links and privacy
 
 `InvoiceShare` is a real entity: tenant_id, invoice_id, token hash, created_by, created_at, optional expires_at, revoked_at and access policy. Generate cryptographically random tokens with at least 128 bits entropy, ideally 32 random bytes URL-safe. Store token hashes; return raw token once. A copy-again UX may use a protected encrypted retrievable secret if explicitly designed, or regenerate after explaining prior-link invalidation. Do not promise re-copy of an irretrievable hash.
 
-Public route `/i/{token}` resolves share and tenant independently of authentication. No predictable IDs, phone numbers or sequential invoice numbers in the URL. Public response uses a minimal DTO, no authenticated invoice serializer or internal Party record. Mask private phone/customer identifiers, omit address/private notes/credentials by default, and show only the invoice customer-visible content chosen at issue. A link grants possession-based access; tell the merchant to share it with the intended customer.
+Public route `/i/{token}` resolves share and tenant independently of authentication. No predictable IDs, phone numbers or sequential invoice numbers in the URL. Public response uses a minimal DTO, no authenticated invoice serializer or internal Party record. Mask private phone/customer identifiers, omit customer address/private notes/credentials by default, and show only the invoice customer-visible content chosen at issue. Required public business address/contact are seller identity fields, distinct from private customer/login data. A link grants possession-based access; tell the merchant to share it with the intended customer.
 
 Support revoke/regenerate/optional expiry and test old-token behavior. Public pages have noindex, no sitemap inclusion, restrictive Referrer-Policy, appropriate private/no-store caching and no third-party tracking. Never cache invoices through the PWA worker. Rate limit token resolution and avoid storing raw tokens in logs/analytics. Immutable URLs retain document snapshot while clearly reflecting void/replacement status.
 
@@ -312,10 +316,10 @@ Enforce `can(capability)` and `quota(resource)` on server; UI only reflects them
 | --- | --- | --- | --- |
 | calculator.use | yes | yes | yes |
 | invoice.finalize / invoice.print | yes | yes | yes |
-| shop profile | essential fields | full | full |
+| shop profile | required + optional fields | required + optional fields | required + optional fields |
 | invoice.hide_provider_brand | no | yes | yes |
 | invoice.shop_logo | no | yes | yes |
-| invoice.customize | no | no | yes |
+| invoice.customize | no | yes | yes |
 | invoice_links limit per configured period | 10 | 100 | 1000 |
 | invoice.social_share | yes | yes | yes |
 | invoice.sms_share | trial allowance only | yes | yes |
@@ -457,6 +461,7 @@ Tests must verify behavior and invariants, not merely mirror methods:
 - 180-second central/client gold-refresh cadence, foreground/reconnect refresh, single-flight provider calls, failed-fetch freshness and frozen transaction-rate behavior. New-invoice entry shows large current price and Start below it; changed-value acceptance, stale/manual and MISC-only paths work. Global quote remains unchanged by tenant edits.
 - Effective tax-rule switching and immutable historical snapshots.
 - Duplicate finalization/retry/concurrent numbering and forbidden mutations of issued inputs.
+- Business-profile issuance guard, optional landline/business-mobile fallback and private login/customer distinction; both presets and Basic/Professional editor rights vs Free fixed layout, direct-API permission/tenant checks, protected fields/QR, mobile controls, local undo/reset/conflicts and logo validation. Shop/layout/asset/plan changes preserve historical renders; new downgraded invoices follow Free rules.
 - Printed upper-left QR resolves the same issued snapshot; stable reprint, void/replacement/revocation, privacy, cross-tenant/invalid tokens and quota-independent verification checked. Actual PDF/paper scan and mobile responsive invoice evidence required; no draft/offline false validation.
 - Customer-mobile issue-and-SMS vs only-issue, Persian-number normalization, missing/invalid destination, insufficient link/SMS quota, post-issue share/send failure and unknown reconciliation; repeated taps/network retries yield one invoice and one initial send intent.
 - Quota races, period boundaries, trial grants, revocation/regeneration, downgrade and preserved existing repayment/read behavior.

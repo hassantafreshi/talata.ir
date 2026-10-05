@@ -15,6 +15,7 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [x] Rapid UI execution prompt written with a wireframe/visual-identity approval stage before detailed implementation.
 - [x] Upper-left printed QR, secure mobile verification and responsive invoice contract documented.
 - [x] Customer mobile at issue, explicit issue-and-SMS/only-issue and independent delivery recovery documented.
+- [x] Required business profile, landline/mobile fallback, optional public fields and two-preset customization for Basic AND Professional documented; obsolete Professional-only rule removed.
 - [ ] Owner selects design skill and component toolkit.
 - [ ] Overall wireframe/visual proposal shown and colors/logo/font/toolkit explicitly approved by owner.
 - [ ] Approved design decisions recorded and detailed UI contract finalized.
@@ -65,6 +66,12 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [ ] Conditional validation, incomplete rows, type switching, removal recovery and mixed totals verified against documented examples.
 - [ ] Finalization idempotency, numbering and quota races tested.
 - [ ] Issued values, shop details, template and branding are stable snapshots.
+- [ ] Business name/mobile/address required server-side before issue; optional landline fallback, optional website/social/licenses/logo and return-to-draft completion flow work on every plan.
+- [ ] Business contact is separate from login/customer identity; public-contact notice, valid URLs/phone parsing and logo-upload checks implemented.
+- [ ] Simple/Shop presets and Basic/Professional layout rights work; Free profile edit vs fixed layout, server permission checks and tenant isolation verified.
+- [ ] Per-block header/footer/alignment/order, optional visibility/logo sizing, permitted columns/readable appearance and print settings work with local preview, undo/cancel/reset/save/conflict recovery.
+- [ ] Mobile/keyboard editing works without dragging; protected QR/essential fields cannot hide/overlap, and long-address/logo/multi-page layouts remain readable.
+- [ ] Complete layout/schema/template/business-field/asset snapshot preserves old print/mobile views after edits/downgrade; stored custom settings retained while new Free invoices use fixed template.
 - [ ] Issued edits/deletes rejected; void/replacement and installment consequences defined.
 - [ ] Print A4, multi-page Persian and browser Save as PDF verified.
 - [ ] QR at physical upper-left survives print/PDF and reprint; actual paper/PDF scanning and four-module quiet zone checked.

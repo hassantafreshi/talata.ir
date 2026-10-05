@@ -10,6 +10,7 @@ For future implementation requests, read:
 4. `docs/research/UI_UX_TOOL_SHORTLIST.md` when choosing design tools.
 5. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
 6. `docs/INVOICE_DELIVERY_AND_VERIFICATION.md` for invoice QR verification, responsive invoice views and customer-mobile SMS at issuance.
+7. `docs/INVOICE_CUSTOMIZATION.md` for mandatory business profile, contact fallback, two preset invoices and novice-friendly layout editing on Basic AND Professional.
 
 ## Durable constraints
 
@@ -23,6 +24,8 @@ For future implementation requests, read:
 - Review includes customer mobile and explicit صدور و ارسال پیامکی / فقط صدور actions. SMS shares the same issued invoice via outbox; failures/unknown sends do not roll back or duplicate issuance. Customer login/OTP or Professional customer management is not required.
 - Draft invoices support repeated GOLD/MISC rows and per-row product name/description. GOLD defaults to 18K/750 with editable purity and proportional pricing; MISC requires manual title and final row price and never inherits gold calculations/tax classification.
 - Features and quotas enforced server-side; no business logic branching on plan names.
+- Require shop name, business mobile and address before first invoice issuance; landline if available, with business mobile as fallback. Website/social accounts/licenses/logo are optional profile fields. Keep public business contact distinct from login and customer mobile.
+- Both Basic and Professional have invoice.customize: two presets, live print/mobile preview, simple header/footer and right/center/left controls for business blocks/logo, optional-field visibility and guarded appearance/column settings. Free uses a fixed layout. Protect required invoice data and upper-left QR; snapshot the layout/assets so later edits/downgrades never rewrite issued invoices.
 - Provider integrations behind adapters. Demo data must be visibly labelled.
 - Gold feed refreshes centrally every 180 seconds. New-invoice entry shows the current 18K price prominently with شروع immediately below; Start captures the displayed accepted rate, and background updates never silently reprice the transaction.
 - No full accounting, inventory, silver, melted-gold, Modian integration, or commerce in Phase 1.
