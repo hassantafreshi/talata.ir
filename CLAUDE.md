@@ -13,6 +13,7 @@ For future implementation requests, read:
 
 - Laravel modular monolith; true tenant isolation from the first migration.
 - Persian-first, RTL, designed for very low digital literacy.
+- Mobile number is the primary account identifier; first login/registration uses SMS OTP, without mandatory username/email/password. Afterwards users may opt into WebAuthn/Passkey login via fingerprint, face or device lock. Keep SMS recovery, verify assertions server-side, never collect biometrics, and preserve tenant authorization; login messages do not consume invoice-sharing trial credits.
 - Decimal money/weight/rates, explicit units, authoritative server calculations.
 - Snapshot finalized documents. Never silently recalculate historical invoices.
 - Draft invoices support repeated GOLD/MISC rows and per-row product name/description. GOLD defaults to 18K/750 with editable purity and proportional pricing; MISC requires manual title and final row price and never inherits gold calculations/tax classification.

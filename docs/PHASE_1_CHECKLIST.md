@@ -6,6 +6,8 @@ Status: documentation prepared; application work has not started. Check boxes re
 
 - [x] Phase 1 master implementation prompt written.
 - [x] Independent UX discovery prompt written.
+- [x] Owner-confirmed mobile-number sign-in/registration and SMS OTP flow documented explicitly.
+- [x] Optional Passkey/fingerprint-or-device-unlock enrollment after initial verified mobile login documented.
 - [x] Owner clarification documented: repeatable GOLD/MISC rows, editable 18K-default purity, manual miscellaneous price and per-row product name/description.
 - [x] Primary-source UI/design-tool shortlist prepared.
 - [ ] Owner selects design skill and component toolkit.
@@ -25,6 +27,12 @@ Status: documentation prepared; application work has not started. Check boxes re
 
 - [ ] Tenant memberships and provider/merchant access implemented.
 - [ ] OTP normalization, expiry, replay prevention, throttling and session security tested.
+- [ ] Shared mobile-first login/registration supports Persian digits, paste/autofill, edit-number/resend and expiry/delivery errors without requiring email/password.
+- [ ] Normalized phone uniqueness, idempotent first-account/shop provisioning and invitation/membership authorization verified.
+- [ ] Tenant invoice-SMS quota/trial depletion never prevents login OTP; identity-message abuse controls remain enforced.
+- [ ] Optional Passkey enrollment after recent verified mobile login, returning login, credential management/revocation and SMS recovery implemented.
+- [ ] Server verifies WebAuthn challenge/type/origin/RP/signature/ownership/user verification; expiry/replay/revoked-credential and tenant-authorization tests pass.
+- [ ] Skip/cancel/unsupported/lost-device flows work; biometrics are never collected by Talata; virtual-authenticator evidence is separate from real-device tests.
 - [ ] Permissions, feature flags and atomic quota primitives implemented.
 - [ ] Two demo tenants prove HTTP, relation, cache, job and file isolation.
 - [ ] Provider administration can manage plans/subscriptions/configuration with audit.

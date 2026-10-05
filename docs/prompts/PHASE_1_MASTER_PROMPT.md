@@ -16,7 +16,7 @@ All customer-facing and merchant-facing labels, help, validation, email/SMS temp
 Deliver in Phase 1:
 
 1. Provider administration: tenants, memberships, plans, subscriptions, module entitlements, quota rules, tax configurations, integrations and operational health.
-2. Mobile-number OTP login, tenant selection where applicable, owner/staff access and provider access.
+2. Mobile number is the primary account identifier: SMS one-time-code first registration/login, plus optional Passkey/device-unlock login enabled after verified mobile sign-in, tenant selection where applicable, owner/staff access and provider access. Phase 1 does not require a username, email or password to sign in.
 3. Central market feed for 18K gold, 24K gold and USD, with visible provenance, timestamps and freshness.
 4. Standalone gold calculator: editable effective 18K rate, weight, purity default 750, wage percentage, profit percentage, component-aware discount and tax rule.
 5. Multi-item draft invoices with independently typed GOLD and MISC rows (including mixed invoices), authoritative finalization, printable layout, browser Save as PDF, public secure links, share actions and SMS delivery.
@@ -95,7 +95,41 @@ One `Tenant` represents one shop/business in Phase 1. A user may have membership
 - No cross-tenant ownership references for parties, calculation snapshots, invoice items, payments or attachments. Test even when UUIDs are used.
 - Staff permission baseline: Owner, Manager, Seller; model Accountant/Cashier role permissions for future use without shipping unused workflows. Permissions are capabilities, not hard-coded role checks throughout controllers.
 
+### Mobile-number sign-in — owner-confirmed requirement
+
+Use one clear initial/fallback entry flow: `شماره موبایل -> دریافت کد پیامکی -> تأیید کد -> ورود`. This supports returning-user login and first-time account registration; do not add a separate email/password registration screen. After the first verified mobile login, the user may explicitly enable the optional Passkey/device-unlock flow below for later logins. Email may be an optional contact field, never a prerequisite for either flow.
+
+- A normalized, verified mobile number uniquely identifies a User globally; tenant membership determines shop access. Equivalent `09...`/`+98...` and Persian/Arabic/Latin-digit representations resolve to the same identity. A customer's phone stored on an invoice/Party does not grant merchant access or create a merchant membership.
+- Create a new account only after successful single-use OTP verification. If no membership exists, route to minimal owner/shop onboarding under the registration policy. Invited staff join only through a valid invitation matching the verified phone; existing users return to their shop or tenant selector. Possession of a phone number never grants provider/staff privileges without server-managed authorization.
+- Verification/account provisioning is idempotent: retries do not create duplicate users, shops or memberships. Reuse the same verified identity for additional tenant memberships rather than making separate accounts per shop.
+- Login OTP sending must remain available when invoice-sharing trial credits are exhausted or a merchant plan/SMS balance changes. Use the separate operational identity-message budget with abuse controls; do not charge login against the five tenant trial segments.
+- Return the user to a validated in-app destination after login, preserving allowed drafts; never trust arbitrary return URLs. Provide logout/session-expiry recovery. Protect changing the sign-in phone with a dedicated re-verification policy, not a normal editable profile field that silently switches account identity.
+
 OTP: normalize Iranian `09...` and `+98...` to canonical form; accept Persian/Arabic digits. Challenge-bound hashed codes, expiry, attempt limits, resend cooldown, IP/mobile/device-aware throttles, generic enumeration-resistant responses, single-use consumption and session rotation. Never log codes. Development OTP driver is explicit and disabled outside development/testing. Separate OTP messages/operational budget from tenant marketing/share trial credits. Add CSRF/session protection and secure cookie configuration. Do not invent a real SMS integration without credentials.
+
+### Optional fingerprint/device-unlock login after mobile verification
+
+Owner-requested Phase 1 scope: after a successful mobile/SMS sign-in, offer optional `فعال‌سازی ورود با اثر انگشت یا قفل دستگاه (Passkey)`. Skipping leaves SMS login usable; this is an account security preference, not a paid-plan feature. Returning users with a registered credential can authenticate with a Passkey without requesting a new SMS on every login.
+
+Implement WebAuthn/Passkeys over the canonical HTTPS authentication origin with a maintained server verification library compatible with the chosen Laravel/PHP versions. Use official documentation and pin the dependency; do not implement cryptographic verification from scratch. Biometrics remain with the device/authenticator; Talata stores credential metadata and a public key, never fingerprints or biometric templates. The OS may approve through fingerprint, face recognition or device PIN/lock. A website cannot guarantee or reliably detect that fingerprint was the specific verification method; product copy must explain the available alternatives.
+
+- **Enrollment:** only a logged-in user with recent successful mobile OTP verification may add a credential. Create a short-lived, one-use server registration challenge bound to user/session and ceremony. On explicit user action, invoke the browser registration ceremony with user verification required, a discoverable credential and privacy-preserving attestation settings. Persist only after full server validation; cancellation never enables a toggle or marks setup complete. Exclude already registered credentials to prevent duplicates.
+- **Subsequent login:** offer an explicit Passkey sign-in action where browser support permits. Discoverable authentication can select the account in the OS/browser without retyping the mobile number; a mobile-first credential lookup may also be offered without exposing account/credential existence. Verify the assertion server-side, resolve the actual credential owner, rotate session and re-evaluate memberships/roles before routing. Do not trust a client-submitted phone, user ID or tenant ID as credential ownership proof.
+- **Verification:** use distinct one-use registration/authentication challenges, expiry and replay protection; validate ceremony type, challenge, allowed origin, RP ID/hash, user presence and user verification, signature, credential ownership and active/revoked state. Enforce secure handling of cross-origin/top-origin signals. Apply standards-aware signature-counter/backup-state handling; do not universally require a monotonically increasing nonzero counter from synced credentials. Tests must cover invalid signatures/challenges/origins, expired/replayed ceremonies and absent verification flags.
+- **Credential model:** user-owned global PasskeyCredential (not tenant-owned), unique credential identifier scoped appropriately to the RP, opaque stable user handle, public key/algorithm, transports and relevant authenticator metadata, created_at, last_used_at, revoked_at and optional user-chosen label. Use no phone/PII in the opaque user handle. A credential proves user identity; tenant authorization remains separate.
+- **Management:** settings list registered credentials with labels and dates; allow add/rename/revoke with recent authentication appropriate to the action. Revoking on the server disables subsequent assertions even if the OS retains its copy; explain OS-side removal separately. Support more than one credential per user. Do not confuse sign-out with deleting a credential.
+- **Recovery/support:** SMS entry remains available for unsupported browsers, cancellation, lost/replaced devices, missing/revoked credentials and failed authentication. After SMS recovery, the owner can revoke a lost credential and enroll another. Do not create another account or erase invoices when a Passkey is missing. A Passkey may sync through the user's OS/password manager; do not promise it is confined to one physical phone or available on every device.
+- **Origin/domain boundary:** register and authenticate on the central trusted application origin, with configured RP ID and exact allowed origins independent of arbitrary Host headers. Future merchant invoice domains do not automatically become authentication origins or share these credentials. Development uses a standards-permitted secure context; production requires HTTPS. No credentials/challenges/auth responses in service-worker caches or localStorage bearer-token substitutes.
+- **UX/availability:** feature-detect WebAuthn and platform user-verifying capability rather than user-agent strings. Capability detection does not prove a fingerprint sensor exists. The OS authentication sheet follows a user action; no repeated automatic prompts. Always keep an obvious SMS fallback. Activation on a shared sales-counter device is opt-in with a brief explanation of shared-device implications; never silently enroll it.
+
+Acceptance: first SMS login -> choose enable -> device prompt -> verified registration -> logout -> successful Passkey login to the same user -> correct tenant access; skip/cancel leaves SMS flow unchanged; revoked credential cannot sign in; unsupported environment and lost-device recovery work without data loss. Use virtual authenticators for protocol/browser automation and real supported mobile/PWA/desktop checks for actual device UX; do not claim hardware fingerprint testing from a mocked credential.
+
+Implementation references (verify current compatibility at build time):
+
+- https://www.w3.org/TR/webauthn-3/
+- https://developer.mozilla.org/en-US/docs/Web/Security/Authentication/Passkeys
+- https://developers.google.com/identity/passkeys/
+- https://developers.google.com/identity/passkeys/ux/communicating-passkeys
 
 ## 6. Data model and invariants
 
@@ -104,6 +138,7 @@ These are required concepts, not a demand for identical class/table names. Suppl
 | Area | Minimum entities/concepts |
 | --- | --- |
 | SaaS | Tenant, ShopProfile, User, Membership, Role/Permission, Plan, PlanFeature, PlanQuota, Subscription, TenantFeatureOverride, QuotaPeriod, QuotaUsage/Reservation |
+| Identity | OTP challenge, authentication session, PasskeyCredential, one-use WebAuthn ceremony challenge |
 | Pricing | Metal/Purity value objects, TaxRule version, TaxRuleAssignment, CalculationSnapshot, CalculationItemSnapshot, PriceSnapshot |
 | Markets | ProviderConfiguration, MarketQuote, TenantRateOverride |
 | Invoices | Invoice, InvoiceItem, immutable issued snapshot, RevisionLink, InvoiceShare, invoice numbering counter |
@@ -354,7 +389,7 @@ Inspect repo; document assumptions, dependency versions, ERD, module contracts, 
 
 ### M1 — SaaS identity and isolation
 
-Tenant/membership, OTP development and real adapter contract, roles/permissions, plans/features/quotas, provider administration foundations. Integration tests prove tenant isolation across HTTP, jobs and cache. Seed at least two demo tenants with distinct data.
+Tenant/membership, mobile OTP development and real adapter contract, optional Passkey enrollment/login/management with SMS recovery, roles/permissions, plans/features/quotas, provider administration foundations. Integration tests prove tenant isolation across HTTP, jobs and cache. Seed at least two demo tenants with distinct data.
 
 ### M2 — Quotes and calculator
 
@@ -381,7 +416,8 @@ Tests must verify behavior and invariants, not merely mirror methods:
 - Exact calculation examples plus boundary/property tests, component discount reconciliation, line totals, purity and currency conversion; client/server fixtures identical.
 - Repeatable GOLD/MISC rows, MISC-only and mixed invoices, editable 18K-default per-row purity, independent recalculation, manual final-row prices, conditional validation, type switching, add/remove recovery, stable ordering and name/description snapshots in print/public views. Verify MISC rows never enter gold taxable bases or gold-weight totals.
 - Cross-tenant read/write/foreign-key attacks, public share lookup, staff permissions, provider boundary, queue/cache scopes.
-- OTP expiry/reuse/brute-force/rate limiting and secret redaction.
+- Mobile-first login/registration plus opt-in Passkey after verified SMS login; normalized unique phone identity, no duplicate user/tenant after verification retries, invitation/member authorization and safe return routing; login remains independent of tenant sharing credits. OTP expiry/reuse/brute-force/rate limiting and secret redaction.
+- Passkey enrollment authorization, distinct one-use challenges, cryptographic assertion verification, origin/RP/ownership checks, replay/expiry, user verification, revocation, unsupported/cancelled flows and SMS recovery; virtual-authenticator tests distinguished from real fingerprint/face/PIN device checks.
 - Price outage/stale/manual/quote-change acknowledgment; global quote unchanged by tenant edits.
 - Effective tax-rule switching and immutable historical snapshots.
 - Duplicate finalization/retry/concurrent numbering and forbidden mutations of issued inputs.
