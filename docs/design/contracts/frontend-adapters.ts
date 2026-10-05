@@ -229,11 +229,12 @@ export interface SettingsAdapter {
 
 export type BillingProduct = 'PLAN' | 'SMS_CREDIT';
 export type BillingOrderStatus = 'CREATED' | 'AWAITING_PAYMENT' | 'VERIFYING' | 'PENDING_VERIFICATION' | 'PAID' | 'FULFILLED' | 'FAILED' | 'EXPIRED';
-export interface BillingOffers { plans: PlanOffer[]; sms: SmsCredit; current_plan: { id: PlanId; period?: BillingPeriod; ends_at_local?: LocalDateTime }; gateway_mode: 'live' | 'mock' }
+export interface BillingOffers { vat_rate_percent: DecimalString; prices_exclude_vat: true; plans: PlanOffer[]; sms: SmsCredit; current_plan: { id: PlanId; period?: BillingPeriod; ends_at_local?: LocalDateTime }; gateway_mode: 'live' | 'mock' }
 export type ReturnTo = { route: 'review'; draft_id: string } | { route: 'issued'; invoice_id: string } | { route: 'settings' } | { route: 'customers' } | { route: 'plans' };
 export interface BillingOrderResult {
   order_id: string; public_ref: string; product: BillingProduct; status: BillingOrderStatus;
-  amount_irr: DecimalString; created_at: IsoDateTime; paid_at?: IsoDateTime;
+  /** Prices exclude VAT; amount_irr = subtotal_irr + vat_irr is what the gateway charges. */
+  subtotal_irr: DecimalString; vat_rate_percent: DecimalString; vat_irr: DecimalString; amount_irr: DecimalString; created_at: IsoDateTime; paid_at?: IsoDateTime;
   bank_ref_id?: string; failure?: { bank_code?: string; message_fa: string };
   plan?: { id: PlanId; period: BillingPeriod; ends_at_local: LocalDateTime; carry_over_days?: number };
   sms?: { added_irr: DecimalString; balance_irr: DecimalString; approx_segments: number; carries_over: boolean; expires_at?: IsoDateTime };

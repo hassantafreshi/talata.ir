@@ -261,5 +261,44 @@
     "سقف فاکتور و مشتری جدید پایه",
     "بسته‌های شارژ رایگان بالاتر از حداقل ۴۰۰ هزار",
     "رفتار مانده شارژ هنگام تغییر پلن"
-  ]
+  ],
+  "tax": {
+    "vat_rate_percent": "10",
+    "prices_exclude_vat": true,
+    "applies_to": [
+      "plan",
+      "sms_credit"
+    ],
+    "rounding": "IRR_HALF_UP",
+    "sms_credit_equals": "subtotal_excluding_vat",
+    "note_fa": "۱۰٪ مالیات بر ارزش افزوده هنگام پرداخت به قیمت پلن و بسته پیامک اضافه می‌شود و در UI جدا نمایش داده می‌شود.",
+    "examples_toman": {
+      "basic_monthly": {
+        "subtotal": "790000",
+        "vat": "79000",
+        "total": "869000"
+      },
+      "basic_yearly": {
+        "subtotal": "7900000",
+        "vat": "790000",
+        "total": "8690000"
+      },
+      "professional_monthly": {
+        "subtotal": "1900000",
+        "vat": "190000",
+        "total": "2090000"
+      },
+      "professional_yearly": {
+        "subtotal": "10900000",
+        "vat": "1090000",
+        "total": "11990000"
+      },
+      "sms_200k": {
+        "subtotal": "200000",
+        "vat": "20000",
+        "total": "220000",
+        "credit": "200000"
+      }
+    }
+  }
 }

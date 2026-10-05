@@ -19,13 +19,14 @@
 - شارژ پیامک: مبالغ مجاز `sms_credit.pack_amounts_toman` (۱۰۰/۲۰۰/۳۰۰/۵۰۰ هزار، ۱ میلیون)؛ حداقل به ازای پلن `sms_credit.min_purchase_toman` (رایگان ۴۰۰ هزار، پایه و حرفه‌ای ۱۰۰ هزار)؛ در رایگان فقط مبالغ ≥ حداقل نمایش داده می‌شوند. مبلغ آزاد پذیرفته نمی‌شود.
 - قیمت هر بخش در **لحظه ارسال** از پلن فعلی tenant خوانده می‌شود: رایگان ۸۵۰، پایه ۵۰۰، حرفه‌ای ۳۵۰ تومان.
 - مانده پایه/حرفه‌ای به ماه بعد منتقل می‌شود؛ مانده خریدشده در رایگان پایان همان ماه تقویمی (منطقه زمانی tenant) منقضی می‌شود.
+- **مالیات بر ارزش افزوده ۱۰٪** (تصمیم مالک): قیمت پلن‌ها و بسته‌ها بدون مالیات است؛ `vat_irr = round_half_up(subtotal_irr × tax.vat_rate_percent / 100)` و `amount_irr = subtotal_irr + vat_irr` همان مبلغی است که به درگاه فرستاده و verify می‌شود. نرخ مالیات در سفارش snapshot می‌شود. اعتبار پیامک = `subtotal_irr` (مالیات جزو اعتبار نیست). نمونه: بسته ۲۰۰ هزار → پرداخت ۲۲۰ هزار؛ حرفه‌ای سالانه ۱۰٫۹ میلیون → ۱۱٫۹۹ میلیون.
 - سرور تنها مرجع مبلغ است؛ کلاینت فقط `product`، `plan_id`/`period` یا `pack_amount` انتخابی را می‌فرستد.
 
 ## ۳. مدل داده (حداقل)
 
 | جدول | فیلدهای کلیدی | قیدها |
 | --- | --- | --- |
-| `billing_orders` | `id` (ULID)، `public_ref` (مثل `TL-SMS-1405-0021`)، `tenant_id`، `created_by`، `product` (`PLAN`/`SMS_CREDIT`)، `plan_id`، `period`، `pack_amount_irr`، `amount_irr` (NUMERIC(24,0))، `price_snapshot` (JSON: نسخه پیکربندی، قیمت بخش، حداقل)، `status`، `idempotency_key`، `expires_at`، `fulfilled_at` | unique(`tenant_id`, `idempotency_key`)؛ unique(`public_ref`)؛ `amount_irr > 0` |
+| `billing_orders` | `id` (ULID)، `public_ref` (مثل `TL-SMS-1405-0021`)، `tenant_id`، `created_by`، `product` (`PLAN`/`SMS_CREDIT`)، `plan_id`، `period`، `pack_amount_irr`، `subtotal_irr`، `vat_rate_percent`، `vat_irr`، `amount_irr` (= subtotal + vat، NUMERIC(24,0))، `price_snapshot` (JSON: نسخه پیکربندی، قیمت بخش، حداقل)، `status`، `idempotency_key`، `expires_at`، `fulfilled_at` | unique(`tenant_id`, `idempotency_key`)؛ unique(`public_ref`)؛ `amount_irr > 0` |
 | `payment_attempts` | `id`، `order_id`، `gateway` (کد adapter)، `authority` (شناسه درگاه)، `amount_irr`، `status`، `ref_id` (شماره پیگیری بانک)، `card_mask` (فقط اگر درگاه بدهد، ماسک‌شده)، `bank_code`، `raw_result_redacted` (JSON)، `callback_at`، `verified_at` | unique(`gateway`, `authority`)؛ یک attempt `VERIFYING` در هر لحظه برای هر سفارش |
 | `subscriptions` (موجود) | + `source_order_id`، `starts_at`، `ends_at`، `carry_over_days`، `activated_by` (`PAYMENT`/`PROVIDER`) | هیچ همپوشانی فعال برای یک tenant |
 | `sms_credit_lots` | `id`، `tenant_id`، `source` (`PURCHASE`/`FREE_YEARLY`/`PROVIDER_ADJUST`)، `source_order_id`، `amount_irr`، `remaining_irr`، `carries_over` (bool)، `expires_at` (nullable)، `plan_at_purchase` | `remaining_irr` بین ۰ و `amount_irr` |
@@ -74,13 +75,13 @@ CREATED ──redirect──▶ AWAITING_PAYMENT ──callback──▶ VERIFYI
 ### ۵.۳ fulfillment
 
 - `PLAN`: پایان اشتراک فعلی همین لحظه، شروع اشتراک جدید؛ باقی‌مانده پلن قبلی طبق `activation.proration_policy` (فعلاً `TO_BE_DEFINED_BY_PROVIDER`؛ پیش‌فرض پیاده‌سازی: روزهای باقی‌مانده پلن پرداختی هم‌سطح یا پایین‌تر به `carry_over_days` تبدیل و به انتهای دوره جدید اضافه شود؛ قابل تغییر). کش قابلیت‌ها/سهمیه‌ها باطل می‌شود. تمدید همان پلن: شروع از پایان دوره فعلی.
-- `SMS_CREDIT`: یک `sms_credit_lot` با `carries_over` و `expires_at` بر اساس پلن **در لحظه خرید** (رایگان: پایان ماه تقویمی؛ پایه/حرفه‌ای: بدون انقضا) + ورودی `CREDIT`.
+- `SMS_CREDIT`: یک `sms_credit_lot` به مبلغ `subtotal_irr` (بدون مالیات) با `carries_over` و `expires_at` بر اساس پلن **در لحظه خرید** (رایگان: پایان ماه تقویمی؛ پایه/حرفه‌ای: بدون انقضا) + ورودی `CREDIT`.
 - هر دو با audit (`actor = PAYMENT`, `order_id`, `ref_id`).
 
 ### ۵.۴ صفحه نتیجه `/pay/result/{order_id}`
 
 - server-rendered یا داده از `GET /api/billing/orders/{id}`؛ **وضعیت فقط از سرور**، هرگز از query string درگاه.
-- `FULFILLED` → موفق: مبلغ، نتیجه (پلن و تاریخ پایان / مانده جدید ≈ بخش)، شماره پیگیری بانک، شماره مرجع، زمان، «ادامه» به مقصد ذخیره‌شده (`return_to`: مرور فاکتور، مشتریان، تنظیمات)، «رسید پرداخت».
+- `FULFILLED` → موفق: قیمت پایه، مالیات ۱۰٪، مبلغ پرداخت‌شده، نتیجه (پلن و تاریخ پایان / مانده جدید ≈ بخش)، شماره پیگیری بانک، شماره مرجع، زمان، «ادامه» به مقصد ذخیره‌شده (`return_to`: مرور فاکتور، مشتریان، تنظیمات)، «رسید پرداخت».
 - `FAILED`/`EXPIRED` → ناموفق: «مبلغی کم نشده؛ اگر کم شده بانک برمی‌گرداند»، علت قابل فهم (نگاشت `bank_code` به متن فارسی)، شماره مرجع، وضعیت بدون تغییر، «تلاش دوباره»، مسیر جایگزین (مثلاً «فقط صدور بدون پیامک»)، لینک پشتیبانی.
 - `PENDING_VERIFICATION`/`VERIFYING` → در حال بررسی: poll هر ۵ ثانیه تا ۲ دقیقه، سپس پیام «نتیجه را پیامک می‌کنیم؛ دوباره پرداخت نکنید».
 - اگر کاربر login نیست (session منقضی در درگاه)، صفحه فقط وضعیت کلی و شماره مرجع را نشان می‌دهد و پس از ورود جزئیات کامل.
@@ -147,6 +148,7 @@ interface PaymentGateway {
 
 | کلید | متن |
 | --- | --- |
+| `billing.vat_line` | مالیات بر ارزش افزوده {vat_rate}٪: {vat} تومان · قابل پرداخت {total} تومان |
 | `billing.redirect_hint` | به درگاه بانک منتقل می‌شوید و پس از پرداخت به طلاتا برمی‌گردید. |
 | `billing.success.sms` | پرداخت انجام شد. {amount} تومان شارژ پیامک اضافه شد. |
 | `billing.success.plan` | پرداخت انجام شد. پلن {plan} {period} از همین لحظه فعال است. |
@@ -158,6 +160,7 @@ interface PaymentGateway {
 
 ## ۱۱. تست‌های پذیرش
 
+- مالیات ۱۰٪: `amount = subtotal + vat` در سفارش، درگاه، verify، رسید و صفحه نتیجه یکسان؛ اعتبار پیامک برابر subtotal؛ تغییر نرخ در پیکربندی روی سفارش‌های باز اثر ندارد.
 - قیمت‌ها از پیکربندی؛ مبلغ دست‌کاری‌شده کلاینت رد می‌شود؛ حداقل رایگان ۴۰۰ هزار و مبالغ غیرمجاز رد می‌شوند.
 - سناریوهای `MockGateway`: موفق، لغو، عدم تطابق مبلغ، timeout ← reconcile موفق/ناموفق، callback تکراری و هم‌زمان (فقط یک fulfillment)، بازکردن دوباره صفحه نتیجه، session منقضی.
 - خرید پلن: قابلیت‌ها/سهمیه‌ها پس از `FULFILLED` تغییر می‌کنند و پیش از آن نه؛ تمدید زنجیره‌ای؛ بدون همپوشانی.
@@ -171,4 +174,4 @@ interface PaymentGateway {
 1. انتخاب درگاه پرداخت (PSP) و قرارداد آن.
 2. سیاست باقی‌مانده پلن قبلی هنگام ارتقا (proration).
 3. رفتار مانده شارژ هنگام تغییر پلن و بسته‌های رایگان بالاتر از ۴۰۰ هزار.
-4. صدور فاکتور رسمی اشتراک طلاتا برای فروشگاه‌ها و مالیات آن.
+4. صدور فاکتور رسمی اشتراک طلاتا (با مالیات ۱۰٪) برای فروشگاه‌ها و الزامات سامانه مؤدیان طرف طلاتا.
