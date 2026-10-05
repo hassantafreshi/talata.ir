@@ -1,0 +1,367 @@
+# Talata.ir — Phase 1 Master Implementation Prompt
+
+Status: execution specification for a future build request. UI toolkit and final visual direction remain pending owner selection.
+Date: 2026-10-05.
+
+## 1. Your role and mission
+
+Act as a senior Laravel engineer, product architect and test engineer. Build Talata.ir, a Persian-first, multi-tenant SaaS for Iranian jewelry merchants. The provider sells access to independent modules. Merchants have very low digital literacy but understand their trade. The product must help them calculate a gold sale, issue a stable invoice, print/share it and, on the Professional entitlement set, manage customers and installments with minimal confusion.
+
+Read the entire specification before changing code. Inspect repository files, instructions and existing dependencies. Preserve existing work. If starting from an empty repository, scaffold a maintainable modular monolith. First produce a concise plan, data model, module dependency map, risk/decision register and milestone checklist, then implement the authorized scope incrementally. Make routine reversible engineering decisions; ask only for missing choices that materially change business behavior. Do not stop after scaffolding or a decorative demo.
+
+All customer-facing and merchant-facing labels, help, validation, email/SMS templates and empty states must be natural Persian. Technical identifiers and documentation may be English. Use `lang=fa`, RTL, correct Persian typography and explicit units.
+
+## 2. Scope and non-goals
+
+Deliver in Phase 1:
+
+1. Provider administration: tenants, memberships, plans, subscriptions, module entitlements, quota rules, tax configurations, integrations and operational health.
+2. Mobile-number OTP login, tenant selection where applicable, owner/staff access and provider access.
+3. Central market feed for 18K gold, 24K gold and USD, with visible provenance, timestamps and freshness.
+4. Standalone gold calculator: editable effective 18K rate, weight, purity default 750, wage percentage, profit percentage, component-aware discount and tax rule.
+5. Multi-item draft invoices, authoritative finalization, printable layout, browser Save as PDF, public secure links, share actions and SMS delivery.
+6. Tenant shop profile, owner/staff permissions, branding and invoice customization controlled by features.
+7. Free/Basic/Professional feature and quota engine; five one-time trial SMS credits per tenant.
+8. Professional customer management and installments, manual payment recording, overdue status and reminders.
+9. Audit events, reliable queues, error handling, PWA app shell and controlled offline calculator behavior.
+10. Custom-domain-ready routing interfaces, but automatic DNS/TLS provisioning is deferred.
+
+Explicitly defer: full accounting, double-entry financial postings, metal ledger postings, inventory, barcode operations, assay/melted gold, silver calculations, customer OTP account portal, native apps, payment gateway, online shop, Modian submissions and automatic custom-domain provisioning. Create clear extension contracts and ADRs, not placeholder CRUD for every future module. Do not expose nonfunctional future menus.
+
+The printable sales invoice is not automatically a legally submitted tax-system invoice. No UI badge may imply tax submission or government approval.
+
+## 3. Technology and decisions
+
+- Backend: a currently supported stable Laravel version, with compatible PHP and dependencies verified against official documentation at implementation time. Pin exact resolved versions and commit lockfiles.
+- Proposed frontend: Vue 3 + TypeScript + Inertia + Vite, a single Laravel application with client navigation and real URLs. This is a proposal, not an instruction to pick an unapproved UI library. If evidence supports a different compatible approach, document an ADR before changing the architecture.
+- Proposed database: PostgreSQL for transactions, composite constraints and exact numeric types. Redis for queues/cache/rate limits where available. Local development may use simpler drivers, but concurrency/tenant integration tests must use production-equivalent SQL behavior.
+- Tests: Laravel feature/unit tests using Pest or PHPUnit; browser flow tests with Playwright or equivalent when available. Use official docs, not outdated package snippets.
+- Shared exact arithmetic: server decimal/value-object calculation engine; browser decimal library for preview parity. Never calculate money with native PHP float or JavaScript Number arithmetic.
+- Dates: UTC persistence; default merchant timezone `Asia/Tehran`, configurable. Persian calendar is presentation/input conversion; business dates and billing boundaries use explicit timezone rules.
+- Frontend component library and third-party design skills: PENDING. Consult the shortlist, wait for the owner's selection, then lock one primary toolkit. Do not install all candidates.
+- Server-generated downloadable PDF may be added only if a tested Persian shaping/RTL renderer is available. Baseline is an accurate printable invoice and browser Save as PDF; never expose a fake PDF button.
+
+Provide environment configuration examples without real secrets, reproducible setup commands and sensible dev fixtures. Do not deploy production automatically.
+
+## 4. Architecture and module independence
+
+Use a modular monolith with explicit Application/Domain/Infrastructure/Presentation boundaries where useful; avoid ceremony for simple CRUD. Core contains primitives/contracts and tenant context, not every business model. Suggested layout:
+
+```text
+app/Core/{Tenancy,Money,Metal,Access,Events,Clock}
+app/Modules/Saas
+app/Modules/Identity
+app/Modules/MarketPrices
+app/Modules/Pricing
+app/Modules/Invoices
+app/Modules/Parties
+app/Modules/Installments
+app/Modules/Sms
+app/Modules/Notifications
+app/Modules/PublicInvoices
+app/Modules/Audit
+app/Modules/Domains
+resources/js/{pages,components,composables,domain,layouts}
+tests/{Unit,Feature,Browser}
+docs/{adr,architecture,operations}
+```
+
+Use interfaces/application services to cross boundaries. Modules must not reach into another module's controllers or private persistence details. Do not use microservices for the MVP.
+
+| Module | Required dependencies | Optional integration |
+| --- | --- | --- |
+| MarketPrices | Core, provider configuration | tenant overrides |
+| Pricing/Calculator | exact primitives, tax profiles | market prices, invoices |
+| Invoices | Pricing contracts, tenant/access | Parties, SMS, Installments |
+| Parties | tenant/access | invoice and installment history |
+| Installments | tenant/access, Party identity, money | invoice linkage, notification adapter |
+| SMS | tenant/access, credit accounting | invoice and reminder events |
+| PublicInvoices | share-token resolver, immutable invoice read model | domain resolver |
+
+Customers can exist without invoices. Installment agreements can be standalone with a party and explicit principal, or linked to a finalized invoice. Pricing must run with manual input if MarketPrices is disabled/unavailable. If Invoices is disabled, calculator still works and no create-invoice action is shown. SMS disabling never prevents invoice finalization. No financial record creation depends on SMS provider success.
+
+Future extension modules: FinancialLedger, MetalLedger, Inventory, Assay, Silver, Payments, ModianConnector, Commerce and customer account portal. Define versioned events such as `InvoiceFinalized`, `InvoiceVoided`, `InstallmentPaymentRecorded`, `InvoiceShareCreated`, with event ID, schema version, tenant ID, actor, occurrence time and object ID. Persist an outbox entry in the same transaction as critical state changes; consumers are idempotent. Do not post real ledger entries in Phase 1.
+
+## 5. Tenancy and identity
+
+One `Tenant` represents one shop/business in Phase 1. A user may have memberships in multiple tenants. One user identity is not equivalent to one shop. Future multiple branches can be represented later without weakening tenant isolation.
+
+- Tenant-owned rows carry a non-null `tenant_id`; globally managed rows are explicitly documented as global.
+- Tenant context comes from authenticated membership and validated routing, never a client-supplied tenant ID alone.
+- Enforce scoped queries, policies and tenant-aware composite foreign keys/unique constraints where supported. A global ORM scope alone is insufficient.
+- Scope caches, exports, file paths, queue jobs, locks, notifications and search results by tenant. Jobs reconstruct tenant context and clear it after execution.
+- Global resources include raw provider quotes, users, plan definitions, shared default tax profiles and integration configuration. Tenant tax assignments and overrides are scoped.
+- Provider administrator access is distinct and audited. High-risk provider account changes require recent authentication; privileged OTP policy is stricter. Impersonation is deferred unless explicitly requested.
+- No cross-tenant ownership references for parties, calculation snapshots, invoice items, payments or attachments. Test even when UUIDs are used.
+- Staff permission baseline: Owner, Manager, Seller; model Accountant/Cashier role permissions for future use without shipping unused workflows. Permissions are capabilities, not hard-coded role checks throughout controllers.
+
+OTP: normalize Iranian `09...` and `+98...` to canonical form; accept Persian/Arabic digits. Challenge-bound hashed codes, expiry, attempt limits, resend cooldown, IP/mobile/device-aware throttles, generic enumeration-resistant responses, single-use consumption and session rotation. Never log codes. Development OTP driver is explicit and disabled outside development/testing. Separate OTP messages/operational budget from tenant marketing/share trial credits. Add CSRF/session protection and secure cookie configuration. Do not invent a real SMS integration without credentials.
+
+## 6. Data model and invariants
+
+These are required concepts, not a demand for identical class/table names. Supply an ERD, migrations, indexes, constraints and relation ownership notes.
+
+| Area | Minimum entities/concepts |
+| --- | --- |
+| SaaS | Tenant, ShopProfile, User, Membership, Role/Permission, Plan, PlanFeature, PlanQuota, Subscription, TenantFeatureOverride, QuotaPeriod, QuotaUsage/Reservation |
+| Pricing | Metal/Purity value objects, TaxRule version, TaxRuleAssignment, CalculationSnapshot, CalculationItemSnapshot, PriceSnapshot |
+| Markets | ProviderConfiguration, MarketQuote, TenantRateOverride |
+| Invoices | Invoice, InvoiceItem, immutable issued snapshot, RevisionLink, InvoiceShare, invoice numbering counter |
+| Parties | Party, PartyRole, contact details, optional duplicate-resolution metadata |
+| Installments | Agreement, ScheduleLine, PaymentRecord, PaymentAllocation, reversal relation, reminder policy/history |
+| SMS | Template, Message, DeliveryAttempt, CreditLedger/Reservation, webhook receipt |
+| Ops | AuditEvent, OutboxEvent, IntegrationHealth, optional DomainMapping interface/minimal model |
+
+Money:
+
+- Persist currency as IRR, never an ambiguous `amount`. UI can default to تومان with an always-visible label; conversion is exactly 10 IRR = 1 toman. Tenant display preference is explicit.
+- Persist posted monetary values as integer rials in adequate-width columns (e.g. `NUMERIC(24,0)`); serialize exact values as decimal strings. USD display quotes have their own asset/quote currency/unit metadata.
+- Use weight in grams with at least 6 decimal storage places and 3 visible default places. Normalize input carefully; never silently round a user's entered weight before calculation.
+- Purity is parts per thousand: 750 means 18K; permitted range >0 and <=1000, with category-specific validation. Stones/non-gold weight are not counted as gold. Phase 1 accepts net gold weight and explicitly labels it; gemstone valuation is deferred.
+- Rates are exact decimals; distinguish 2 percent from 0.02 fraction in API contracts.
+- Define bounds and overflow limits; reject negative weights, prices, rates, discounts or nonfinite/exponent input unless explicitly supported.
+
+Invoice item snapshots independently store: description, quantity if applicable, net weight, metal, purity, input unit, reference 18K quote, effective rate, metal value, wage type/rate/amount, profit policy/rate/amount, commission, discount scope and component allocations, taxable base, VAT rate/rule ID+version, VAT, final total, rounding policy and formula version.
+
+Do not store only weight, price and total. Keep raw inputs, calculated pre-discount components, applied discount allocation, post-discount components and rounded outputs. Capture customer display details (if supplied), shop name/contact/address/logo asset version, branding entitlement, invoice template version and seller at issue time. Later shop edits and plan downgrade cannot rewrite an issued document.
+
+`Party` has multiple possible roles; Customer is one role. No global customer sharing. Free/Basic invoices may have optional customer name/phone captured as invoice-local fields without enabling a managed customer database. Creating/selecting persistent Parties requires customer-management entitlement; standalone installment agreements require a Party.
+
+## 7. Calculation engine: exact and auditable
+
+Implement a pure Pricing service with immutable inputs/outputs and no dependency on HTTP, Eloquent, Invoices or a live provider. Frontend preview and backend authoritative calculation use an explicitly versioned contract.
+
+Initial policy identifier: `GOLD_IR_V1`. Regulatory configuration is separate from the formula identifier. Wage model supports `PERCENT`, `PER_GRAM`, `FIXED`, `MIXED` as typed concepts; only `PERCENT` is enabled for Phase 1. Reject other modes with a clear capability validation, rather than partially calculating them. Commission is modeled and zero/hidden in Phase 1.
+
+For each item, before discounts:
+
+```text
+M = net_weight_g * reference_18k_price_irr_per_g * (purity_ppt / 750)
+W0 = M * wage_percent / 100
+P0 = (M + W0) * profit_percent / 100
+C0 = 0 in Phase 1
+```
+
+Gold component tax profile: original metal is excluded from the services taxable base. The agreed sample VAT setting is 10 percent on eligible wage/profit/commission. Load the rate from a versioned effective-date rule, never a literal 0.10 in domain code. Seed a clearly labeled demonstration rule; operational activation records an official source reference, reviewer and effective date. This document does not independently certify the statutory rate. No silent fallback if no applicable rule exists at finalization.
+
+Tax rules contain: category, applicable components, rate, effective interval, version, source reference, verification status and superseded relationship. Reject overlapping active intervals. Updating a rule creates a version; old snapshots retain old rules. Silver never inherits the gold tax profile. Invoice issue date in the tenant timezone determines tax-rule selection.
+
+### Discount policy
+
+Expose a simple Phase 1 field `تخفیف اجرت و سود` with explicit scope `TAXABLE_COMPONENTS`; optional advanced scope choices `WAGE` and `PROFIT`. Accept an exact fixed amount in the selected display currency, converted to IRR before pricing. Phase 1 does not allow discounts to metal or direct discounts to VAT. `ITEM` is a future concept, disabled until its allocation policy is specified.
+
+- Calculate M, W0, P0 and C0 first. Discount does not recalculate the pre-discount profit formula; it reduces the chosen components under this versioned policy.
+- Validate requested discount <= eligible component sum, never silently clamp or produce a negative taxable base.
+- For `TAXABLE_COMPONENTS`, allocate proportionally to W0/P0/C0 using exact arithmetic; reconcile integer-rial allocation by deterministic largest-remainder, with stable component order as tie breaker. Store allocation details.
+- Define posted `W`, `P`, `C` as rounded pre-discount components minus their integer-rial allocated discounts. M is unchanged.
+- `B = W + P + C`, `V = round_irr(B * vat_rate_percent / 100)`, `T = M + W + P + C + V`.
+- Do not subtract the same discount from T again. The final total already uses discounted components.
+- Discount validation/allocations are per item. Invoice-wide discount is deferred; UI may apply a requested allocation to explicit items, never hide allocation in a total field.
+
+### Rounding and parity
+
+Use sufficient internal precision (minimum 18 fractional places or a justified stronger policy) for intermediates. Posted pre-discount M/W0/P0/C0 round HALF_UP to whole IRR. Tax uses the posted discounted taxable base and rounds HALF_UP once per line. Invoice totals are the sum of posted line components, not a second unrounded recomputation. Save `rounding_policy=IRR_LINE_HALF_UP_V1`. Clearly display any display-unit fraction; do not change legal/posting totals to obtain a prettier toman number.
+
+Use explicit decimal strings across JSON. Build shared fixtures that the browser and server both pass. In preview, show invalid/incomplete input state rather than a misleading zero total. Debounce network recalculation; immediate local preview is labeled until validated. Server always recomputes finalization and ignores client totals.
+
+Required worked examples (IRR):
+
+| Example | Input | Expected output |
+| --- | --- | --- |
+| Base | 2g, 750, Price18=100,000,000, wage=2%, profit=5%, VAT rule=10% | M=200,000,000; W0=4,000,000; P0=10,200,000; B=14,200,000; V=1,420,000; T=215,620,000 |
+| Wage discount | same inputs, discount 1,000,000 scoped WAGE | W=3,000,000; P=10,200,000; B=13,200,000; V=1,320,000; T=214,520,000 |
+| Purity | 1g, purity 900, Price18=100,000,000, zero wage/profit | M=120,000,000; B=0; V=0; T=120,000,000 |
+| Currency | displayed 10,000,000 toman per gram | stored quote 100,000,000 IRR per gram |
+
+Also test zero wage, zero profit, full eligible discount, proportional allocation residuals, maximum precision weight, limits/overflow, no rule, changed tax rates, Persian/Arabic digit parsing and multiple lines. Assert T equals the sum of posted components and VAT never includes original gold in this profile.
+
+## 8. Market price module
+
+Define `PriceProvider` and normalized `MarketQuote` contracts. Asset examples: `GOLD_18`, `GOLD_24`, `USD_IRR`; specify quote currency and unit for every provider field. USD/IRR is a currency exchange quote, not a gold per-gram price. Verify whether each provider reports rial or toman; never infer by magnitude.
+
+- Secrets/configuration only on backend. Poll centrally with locks/scheduler, not once per merchant tab. Cache and keep controlled history; use retries/backoff and health reporting.
+- Persist source/provider, provider quote time if available, fetched_at, normalized amount, asset, unit, status, conversion provenance and verification of mapping.
+- Configurable poll/freshness policies; starting development assumptions: poll 60s, stale threshold 180s. Document these as tunable assumptions, not provider guarantees.
+- Distinguish LIVE/FRESH, STALE, UNAVAILABLE, MANUAL and OFFLINE in the UI with text plus status indicators. An old cached value is never labeled live.
+- Tenant override affects only that tenant; transaction-level editable price does not mutate the global quote. Store override actor, reason, original value and time.
+- If 24K is derived rather than fetched, label it derived and retain the conversion policy. Never fabricate a provider timestamp.
+- Calculator captures a rate for the current transaction. Background feed updates do not silently change the filled calculation. Present the new rate and an explicit `استفاده از نرخ جدید` action.
+- Finalization compares the reviewed draft fingerprint with authoritative inputs/rules/quote policy. If inputs, applicable rule or accepted price materially changed, return a review-required response and preserve fields. Merchant may explicitly retain a permitted manual/older rate with recorded acknowledgment; configurable stale-rate policy determines whether finalization is allowed.
+- Development ships a visible mock provider; production integration requires documented real API mapping, credentials and contract tests. No claim that rates are live while using fixtures.
+
+PriceSnapshot stores provider quote, merchant-effective value, currency/unit, source, fetched_at, quote_time, used_at, freshness status, override flag/reason/actor and quoted asset. Drafts may be repriced explicitly; finalized invoices never reference mutable current price for display.
+
+## 9. Invoice lifecycle and finalization
+
+Use lifecycle `DRAFT -> FINALIZED -> VOIDED` with an explicit linked replacement/revision workflow. Sharing and payment are orthogonal statuses/derived properties: a finalized invoice can be shared repeatedly and be unpaid/partially paid/paid. Avoid a single Draft->Shared->Paid enum that loses document status. Record share events without mutating legal document content.
+
+- Draft may contain multiple items, invoice-local customer details, notes and selected template. Save progress with a visible save state and optimistic locking/version field.
+- Finalization is one database transaction: validate tenant/permission/features, applicable rule, input version, reviewed fingerprint and effective rate; calculate authoritative outputs; allocate tenant invoice number; create immutable snapshot; persist audit/outbox; commit.
+- Invoice number unique per tenant, allocated concurrency-safely. Finalization has a tenant-scoped idempotency key and request hash; retry same key/input returns the same result, key with different input is rejected. Double tap cannot issue two invoices.
+- Issued financial inputs and outputs cannot be edited or hard-deleted by normal endpoints. Void requires permission and reason; replacement creates a new linked invoice and snapshots its own rate/rules. Existing public views clearly show void/replaced state.
+- Payments and communications append independently to issued documents. Payment reversal is a recorded compensating action; no silent alteration of history.
+- Full/partial sales refunds are outside Phase 1. Reserve concepts but do not simulate tax correction submission.
+- Void/replacement of a linked installment agreement must be resolved explicitly in a guided workflow; block unresolved allocations/outstanding agreement linkage, never leave an active debt against a silently voided invoice.
+- Print uses issued snapshot and a documented template. A4 RTL baseline, repeated table headers, long descriptions, multiple pages, footer/page break behavior, black-and-white readability, shop identity, component breakdown, net weight/purity, dates, totals and status. Test actual browser print/PDF.
+- Free plan shows Talata branding. Branding feature is captured at issue time. Paid users may upload a validated raster logo; do not render untrusted SVG/HTML or arbitrary CSS. Professional customization is constrained options/design tokens/templates, not arbitrary scripts.
+
+## 10. Public share links and privacy
+
+`InvoiceShare` is a real entity: tenant_id, invoice_id, token hash, created_by, created_at, optional expires_at, revoked_at and access policy. Generate cryptographically random tokens with at least 128 bits entropy, ideally 32 random bytes URL-safe. Store token hashes; return raw token once. A copy-again UX may use a protected encrypted retrievable secret if explicitly designed, or regenerate after explaining prior-link invalidation. Do not promise re-copy of an irretrievable hash.
+
+Public route `/i/{token}` resolves share and tenant independently of authentication. No predictable IDs, phone numbers or sequential invoice numbers in the URL. Public response uses a minimal DTO, no authenticated invoice serializer or internal Party record. Mask private phone/customer identifiers, omit address/private notes/credentials by default, and show only the invoice customer-visible content chosen at issue. A link grants possession-based access; tell the merchant to share it with the intended customer.
+
+Support revoke/regenerate/optional expiry and test old-token behavior. Public pages have noindex, no sitemap inclusion, restrictive Referrer-Policy, appropriate private/no-store caching and no third-party tracking. Never cache invoices through the PWA worker. Rate limit token resolution and avoid storing raw tokens in logs/analytics. Immutable URLs retain document snapshot while clearly reflecting void/replacement status.
+
+Public link generation is independent of domain. Build a `PublicInvoiceUrlBuilder` and `TenantDomainResolver` interface; central origin works in Phase 1. Domain entities may carry PENDING/VERIFYING/ACTIVE/FAILED and verification metadata, but automatic DNS/TLS setup is future work. Never trust arbitrary Host or user redirects. If domain activation is later added, verify ownership and host allowlist before routing. Do not let custom domains bypass tenant checks.
+
+## 11. Plans, features and quota engine
+
+Enforce `can(capability)` and `quota(resource)` on server; UI only reflects them. No `if plan == professional` in business services. Capabilities combine module activation, permissions, subscription/overrides and quotas. Snapshot relevant issue-time entitlements for historical documents.
+
+| Capability/resource | Free | Basic | Professional |
+| --- | --- | --- | --- |
+| calculator.use | yes | yes | yes |
+| invoice.finalize / invoice.print | yes | yes | yes |
+| shop profile | essential fields | full | full |
+| invoice.hide_provider_brand | no | yes | yes |
+| invoice.shop_logo | no | yes | yes |
+| invoice.customize | no | no | yes |
+| invoice_links limit per configured period | 10 | 100 | 1000 |
+| invoice.social_share | yes | yes | yes |
+| invoice.sms_share | trial allowance only | yes | yes |
+| sms.template_edit | no | yes | yes |
+| customers.manage | no | no | yes |
+| installments.manage | no | no | yes |
+| installments.sms_remind | no | no | yes |
+
+Quota assumptions for the initial seed: one subscription-month interval, displayed start/end in tenant local time; Free uses its own explicit monthly anchor. The owner has not specified a period, so make this configurable and record the assumption. All timestamps use half-open intervals and a frozen clock in tests.
+
+- Link quota counts first successful share creation for a distinct invoice in the period. Re-copy/share via social/reuse active link and token regeneration do not count again. Revocation does not refund historical usage. Document this counting rule; quota consumption is transactional and concurrency-safe.
+- Finalizing/printing a sales invoice does not consume link quota. Link quota exhaustion never prevents calculation or printing. No silent unlimited invoice creation throttling represented as a plan limit; abuse controls are separate.
+- Historical valid links remain readable after downgrade/period end unless revoked/expired; creation rights follow current entitlements. Downgrade preserves issued snapshots and financial records. Customer/installment records remain readable/exportable, and payment recording for existing debts remains available with appropriate permission; new agreements/customers and paid reminders are gated. Do not strand repayment workflows behind an upgrade.
+- Five lifetime trial SMS credits per tenant are separate from plan definitions. An explicit trial grant enables only invoice SMS sharing even on Free until exhausted; free template remains fixed. Professional reminders require the appropriate feature and paid SMS balance. Trial credits are not refreshed by changing plans.
+- Link quota, SMS message segments, paid SMS balance and operational OTP budget are different resources. Display them separately.
+- No payment gateway is assumed. Provider can activate/extend subscriptions manually with audit until billing integration is selected. Prices, checkout and renewal commercial terms remain configuration, not invented values.
+
+## 12. SMS and notifications
+
+Adapters: SMS provider send/status/webhook, template renderer, segment estimator and notification dispatcher. Use persisted message ID, tenant context and idempotency key.
+
+- Safe placeholders allow `{shop_name}`, `{invoice_link}`, optionally recipient-safe details. Invoice link placeholder is protected in the editor. Preview the final rendered text before send, recipient and segment cost.
+- Treat the suggested 35-character link reservation as a provisional editing aid, not a valid final size rule. Estimate on the actual URL and encoding. Persian usually requires Unicode SMS; concatenation capacity and pricing are provider-specific. Define configurable segment rules; test with the selected provider contract, emoji/surrogate pairs and long URLs. Do not blindly count JavaScript string length.
+- One trial credit equals one provider-billable segment in the initial assumption; show if a composed message uses multiple segments. Document/configure the policy.
+- Reservation occurs atomically before queueing. Definite rejection releases reservation; accepted sends consume it. Timeout/unknown delivery remains reserved until reconciliation, preventing duplicate send/refund loops. Persist provider ID and attempt history. Provider idempotency or explicit ambiguous-send handling is required before automatic retries.
+- Delivery states QUEUED/SENDING/ACCEPTED/DELIVERED/FAILED/UNKNOWN/CANCELLED are distinct. `ACCEPTED` does not mean delivered. Webhooks authenticated, replay-protected and idempotent; suppress duplicates and tenant mismatch.
+- No automatic initial invoice SMS unless merchant explicitly enables it; sharing shows cost and destination. Reminders require the merchant to enable a schedule and appropriate recipient consent/opt-out handling. Do not send real messages from fixtures/testing.
+- Reminders are skipped for paid/voided/inactive agreements, opted-out recipients, quiet hours and unavailable entitlement/balance. Recheck before dispatch. Use unique agreement/schedule/due-date/policy keys so scheduler retries do not spam.
+- Jobs failing to send do not change invoice amount or payment state. Show retry/recovery in Persian and provider health separately.
+
+## 13. Customers and installments
+
+Professional customer records: name, normalized phone, optional notes and minimal necessary fields. Search by phone/name with tenant scoping. Offer duplicate suggestions, never auto-merge. Limit collection of national ID/address to a confirmed business need; those are not default required fields.
+
+Invoice-local fields allow issuing without onboarding a customer. Professional users may save/link them to a Party explicitly. Customer history derives from scoped records and is understandable as `فاکتورها`, `پرداخت‌ها`, `اقساط`, not ledger jargon.
+
+Installment MVP:
+
+1. Link to a finalized invoice or start a standalone agreement with a customer and explicit principal.
+2. Input down payment actually received, count, first due date, frequency and optional custom schedule. No interest/late fee engine in Phase 1; amounts cannot silently include financing charges.
+3. For an invoice, principal is invoice final total minus posted allocated payments/down payment. Prevent duplicate active agreements/over-allocation to the same invoice. Validate currency and linked Party ownership.
+4. Draft preview shows every due date, each amount, total installments, actual down payment and principal. Exact integer-rial amounts sum to principal; distribute remainder deterministically to the final installment or another documented policy.
+5. Persian month/date scheduling must define end-of-month behavior, leap years and timezone. Store due dates as local business dates and tested conversion; do not approximate a month as 30 days.
+6. Manual payments record amount, paid_at, method (cash/card/bank/other), reference, actor and optional note; card entry is a reference, never sensitive card credentials. Receipts are idempotent. No gateway settlement is implied.
+7. Allocate payments to schedule lines oldest due first by explicit policy; support partial payments. Lock affected agreement/rows to avoid overpayment under concurrency. Reject excess unless an explicit credit policy is later added.
+8. Balance and PAID/PARTIAL/DUE/OVERDUE derive from schedule and valid allocations. Reversals restore balance with an audit trail. No double-entry accounting claim.
+9. At most one active reminder policy per applicable line/channel; merchant controls days before/after, quiet hours and timezone. Explain delivery failure and credit shortage without deleting debt.
+10. Void/replacement of linked invoices includes an explicit agreement settlement/transfer/cancellation process with preserved records. No unpaid obligations are dropped.
+
+## 14. App navigation, PWA and offline
+
+Routes include `/app/calculator`, `/app/invoices`, `/app/invoices/{id}`, `/app/customers`, `/app/installments`, `/app/settings`; provider routes under `/provider`. Use client navigation, browser back/forward and deep links that work after refresh. Define shared navigation and pending/save states. Do not reload the entire page on routine module navigation.
+
+- Manifest with name/short_name, versioned icons including maskable, start_url, scope and standalone display; HTTPS deployment documented. Provide an install action only when browser support permits; explain iOS installation as needed.
+- Worker caches static app-shell assets and a controlled offline fallback. Never cache authenticated HTML/API, public invoices, OTP, mutable financial records or tokens with a generic cache-all strategy.
+- Offline calculator uses locally available manual/last-known quote and exact arithmetic with `آفلاین؛ آخرین نرخ دریافت‌شده ...`. Never finalizes or sends SMS offline. If policy/rules are missing offline, explain limitations.
+- Local draft storage is opt-in, minimal and tenant/user-scoped; avoid customer PII by default, with expiry and visible deletion. Clear on logout/tenant switch. If customers are needed, design explicit security/storage consent rather than silently persisting them.
+- Draft synchronization after reconnect is explicit, version/conflict-aware and never auto-issues. Revalidate rates and effective rules before a review/finalization.
+- Worker updates show a nonintrusive refresh prompt; never replace the page during unsaved calculation. Handle network retry without duplicate mutations.
+- iOS/Android/desktop capability detection and progressive enhancement; no invented guarantee of unpublished 2027 standards. Web Push/native notifications are future options, not a Phase 1 deliverable.
+
+## 15. UX requirements and provisional design boundary
+
+Read `UI_UX_DISCOVERY_PROMPT.md`. Design around the merchant's transaction, not a generic KPI dashboard. The merchant home emphasizes starting a calculation, continuing a draft and finding a recent invoice; provider operational metrics belong in provider UI.
+
+- Always explicit تومان/ریال, گرم, عیار and percent next to numeric inputs and totals.
+- Persian/Arabic/Latin number entry, pasted thousand separators and Persian decimal separator supported through a strict parser. Preserve caret position; do not reformat every keystroke destructively. Ambiguous currency input requires explicit unit, not a guess.
+- Progressive disclosure for less-common fields. Main path: calculate -> review -> finalize -> print/share. No mandatory customer registration for a simple cash invoice.
+- Clear labels (`صدور فاکتور`, `پیش‌نویس`, `چاپ`, `کپی لینک`, `ثبت پرداخت`) instead of internal jargon. Inline help explains consequences and actual state.
+- A large clear total and breakdown must remain readable. New feed quotes, unsaved work, quota limit and offline state have distinct copy/actions.
+- Input errors preserve all fields; predictable numeric keypad, tab order and touch targets. Critical failures get persistent recoverable feedback, not toast-only messages.
+- Show immutable-document consequences before issue and recoverable state on return. Confirmation is reserved for meaningful irreversible actions, not every click.
+- Target accessible WCAG 2.2 AA interactions/contrast; actual browser/assistive tests required. Toolkit marketing is not accessibility evidence.
+
+Do not choose a color palette, install a design skill, copy a dashboard starter or finalize UI until the owner selects the design approach. Neutral wireframes/research can be prepared. Uniqueness is in product-specific composition, typography, hierarchy and helpful behavior; changing library alone does not solve generic design.
+
+## 16. Security, privacy and reliability
+
+- Authorization for every action, tenant ownership at object boundaries, CSRF/XSS/injection defenses, escaped merchant text and constrained uploads. No arbitrary template HTML/CSS execution.
+- Secure secrets, minimal public DTOs, cache/log redaction, encrypted sensitive integration credentials and appropriate protected storage. Never commit credentials or actual customer data.
+- Audit who changed prices, tax profiles, permissions, subscriptions, finalized/voided invoices, shared/revoked links and recorded/reversed payments. Avoid logging private payloads/codes/tokens. Preserve append-only audit semantics; retention policy is configurable.
+- Atomic transactions/locks for invoice numbering, finalization, quotas, SMS reservations and installment allocation. Prefer idempotent services and transactional outbox to brittle sequences.
+- Document backups and a restore drill, key/asset handling, queue/scheduler operation, failed-job recovery and provider outage behavior. A backup checkbox without a tested recovery procedure is not enough.
+- Define request validation, optimistic concurrency and structured error responses; merchant-friendly text, technical trace IDs for support. No stack traces in production.
+- Basic health/metrics: quote freshness, queue lag, provider error rate, reminder backlog, reservations awaiting reconciliation and failed financial operations. Provider screens do not expose private merchant details unnecessarily.
+- Asset retention must preserve referenced issued logos/templates; later file cleanup cannot break historical invoices.
+
+## 17. Implementation milestones
+
+### M0 — Decisions and skeleton
+
+Inspect repo; document assumptions, dependency versions, ERD, module contracts, tenant strategy, numeric/rounding/currency conventions and UI-selection boundary. Set up app, migrations, dev fixtures, CI, exact arithmetic and framework checks. No unselected toolkit installation.
+
+### M1 — SaaS identity and isolation
+
+Tenant/membership, OTP development and real adapter contract, roles/permissions, plans/features/quotas, provider administration foundations. Integration tests prove tenant isolation across HTTP, jobs and cache. Seed at least two demo tenants with distinct data.
+
+### M2 — Quotes and calculator
+
+Mock/live provider adapter path with explicit mode, freshness, overrides, effective tax rules, pure exact engine, fixtures and standalone calculator contract. Verify sample formulas and browser/server parity. Manual pricing works without market module/integration.
+
+### M3 — Invoice vertical slice
+
+Drafts/items, review fingerprint, idempotent finalization/numbering, issued snapshots, history and void/replacement path, print layout, secure share token lifecycle and transactional link quota. Test rates/profile/plan changes do not rewrite issued content.
+
+### M4 — Messaging and Professional workflows
+
+SMS adapter/outbox/reservations/status, final-text preview, five trial segments, provider health; Party records, standalone and invoice-linked installments, exact schedules, partial payments/reversal, overdue and idempotent consent-aware reminders.
+
+### M5 — Selected UI, PWA and release verification
+
+After the owner supplies the chosen toolkit/design direction, create the final design contract and implement merchant/provider/public UI. Verify novice flows, phone/desktop RTL, printing, accessibility, offline, deep links and updates. Write operations/runbook, integration setup and release checklist.
+
+Each milestone ends with changed files, checks actually run, evidence, known limitations and next step. Update the checklist honestly. Do not mark live integration, user research or production readiness complete when only mocked.
+
+## 18. Required test coverage and acceptance
+
+Tests must verify behavior and invariants, not merely mirror methods:
+
+- Exact calculation examples plus boundary/property tests, component discount reconciliation, line totals, purity and currency conversion; client/server fixtures identical.
+- Cross-tenant read/write/foreign-key attacks, public share lookup, staff permissions, provider boundary, queue/cache scopes.
+- OTP expiry/reuse/brute-force/rate limiting and secret redaction.
+- Price outage/stale/manual/quote-change acknowledgment; global quote unchanged by tenant edits.
+- Effective tax-rule switching and immutable historical snapshots.
+- Duplicate finalization/retry/concurrent numbering and forbidden mutations of issued inputs.
+- Quota races, period boundaries, trial grants, revocation/regeneration, downgrade and preserved existing repayment/read behavior.
+- SMS Unicode/URL segment estimates, reservation failure/unknown reconciliation, idempotency/webhook duplicates, opted-out/paid/void reminders skipped.
+- Installment remainder/month-end/partial payments/reversals/concurrent allocation and invoice-void linkage handling.
+- Browser flows: login -> calculate -> review -> issue -> print/share; Professional customer -> schedule -> record payment; offline -> recovery without duplicate issue; direct URL and back/forward.
+- RTL screenshots at 360/390/768/1280 widths, long Persian names, large values, 200% zoom and keyboard focus; multi-page print/PDF smoke check.
+
+## 19. Deliverables and completion report
+
+Deliver working application code within the authorized implementation scope, migrations/seeders, lockfiles, setup/environment docs, ERD/module map, ADRs, operations guidance, feature/quota definitions, exact fixtures, meaningful tests and a completed evidence-backed checklist.
+
+Before final reporting run appropriate tests, lint/type/build checks and browser/print checks available in the environment. State missing credentials/browser/tool support plainly and distinguish mock from live providers. Summarize what works, how verified and what remains. Do not claim a legal Modian integration, a native app, a certified tax invoice or field-tested novice usability.
+
+For this planning stage, the owner's next decision is a design-toolkit/style selection from `UI_UX_TOOL_SHORTLIST.md`. Preserve that decision boundary while keeping the backend specification concrete.
