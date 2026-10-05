@@ -10,6 +10,7 @@
 | [UX-first preliminary prompt](docs/prompts/UI_UX_DISCOVERY_PROMPT.md) | پرامپ اولیه تحقیق و طراحی تجربه کاربری؛ مستقل از کتابخانه |
 | [UI/UX tool shortlist](docs/research/UI_UX_TOOL_SHORTLIST.md) | گزینه‌های بررسی‌شده برای Claude، کتابخانه‌ها و لینک نمونه‌ها |
 | [Implementation checklist](docs/PHASE_1_CHECKLIST.md) | معیارهای پذیرش و پیگیری مراحل |
+| [Performance budget](docs/PERFORMANCE_BUDGET.md) | معیار حجم اولیه و آزمون سرعت روی اینترنت ضعیف |
 
 ## نحوه استفاده با Claude Code
 
@@ -36,5 +37,6 @@ Record assumptions and progress in docs; implement in small verified milestones.
 - ماشین‌حساب مستقل؛ حسابداری، انبار، آب‌شده و اتصال مؤدیان در فازهای بعد.
 - نرخ مالیات تنظیم‌پذیر بر اساس تاریخ اثرگذاری؛ پیش‌فرض نمونه ۱۰٪ روی خدمات مشمول، با ثبت منبع تأیید برای استفاده عملیاتی.
 - PWA و جابه‌جایی بدون بارگذاری کامل؛ نرخ آفلاین با برچسب صریح آخرین به‌روزرسانی.
+- سرعت روی اینترنت ضعیف اولویت اصلی است؛ بارگذاری بخش‌ها هنگام نیاز، فونت/دارایی‌های اصلی مستقل از CDN خارجی و سنجش حجم واقعی خروجی الزامی است.
 
 Prepared: 2026-10-05.

@@ -13,6 +13,7 @@ For future implementation requests, read:
 
 - Laravel modular monolith; true tenant isolation from the first migration.
 - Persian-first, RTL, designed for very low digital literacy.
+- Fast usable loading on weak/unreliable Iran internet is a core acceptance requirement. Read `docs/PERFORMANCE_BUDGET.md`; split routes/import only needed components, self-host critical assets and measure production cold/warm slow-network journeys. Do not claim a toolkit is lightweight or timings are achieved without evidence.
 - Mobile number is the primary account identifier; first login/registration uses SMS OTP, without mandatory username/email/password. Afterwards users may opt into WebAuthn/Passkey login via fingerprint, face or device lock. Keep SMS recovery, verify assertions server-side, never collect biometrics, and preserve tenant authorization; login messages do not consume invoice-sharing trial credits.
 - Decimal money/weight/rates, explicit units, authoritative server calculations.
 - Snapshot finalized documents. Never silently recalculate historical invoices.

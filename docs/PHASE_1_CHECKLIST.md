@@ -10,6 +10,7 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [x] Optional Passkey/fingerprint-or-device-unlock enrollment after initial verified mobile login documented.
 - [x] Owner clarification documented: repeatable GOLD/MISC rows, editable 18K-default purity, manual miscellaneous price and per-row product name/description.
 - [x] Primary-source UI/design-tool shortlist prepared.
+- [x] Owner priority documented: low-bandwidth loading, production asset budgets and weak-network acceptance profiles.
 - [ ] Owner selects design skill and component toolkit.
 - [ ] Final UI prompt prepared after selection.
 - [ ] Owner requests implementation work.
@@ -77,6 +78,7 @@ Status: documentation prepared; application work has not started. Check boxes re
 ## M5 — Selected design and PWA
 
 - [ ] One primary toolkit selected and compatibility spike completed.
+- [ ] Selected toolkit production slice passes login/calculator route and transfer budgets; no eager unrelated modules/icons.
 - [ ] Product-specific layout and tokens implemented from approved final UI prompt.
 - [ ] Merchant, provider and public environments use appropriate separate hierarchies.
 - [ ] Persian digits, numeric input, explicit units and mixed-direction text verified.
@@ -86,10 +88,14 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [ ] Manifest, icons, app shell, direct routes and back/forward tested.
 - [ ] Offline quote labeling, draft policy, safe reconnection and worker updates tested.
 - [ ] Sensitive requests/documents excluded from worker cache.
+- [ ] Production cold/warm weak-network profiles and local numeric-preview responsiveness pass `docs/PERFORMANCE_BUDGET.md` with retained traces.
+- [ ] Essential fonts/assets self-hosted; public invoice independent of merchant bundle; chunk retry/interrupted network preserve draft inputs.
+- [ ] Real supported lower-end phone and representative Iran-network checks recorded or explicitly pending.
 
 ## Release evidence
 
 - [ ] Test, type/lint and build outputs recorded.
+- [ ] Critical asset/payload regression gates and bundle report recorded; target timings distinguished from actual measurements.
 - [ ] Actual live integration setup distinguished from mocks.
 - [ ] Scheduler, queues, outbox and failure recovery documented.
 - [ ] Backup restore and historical-asset preservation verified.

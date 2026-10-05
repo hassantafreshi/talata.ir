@@ -7,7 +7,7 @@ Date: 2026-10-05.
 
 Act as a senior Laravel engineer, product architect and test engineer. Build Talata.ir, a Persian-first, multi-tenant SaaS for Iranian jewelry merchants. The provider sells access to independent modules. Merchants have very low digital literacy but understand their trade. The product must help them calculate a gold sale, issue a stable invoice, print/share it and, on the Professional entitlement set, manage customers and installments with minimal confusion.
 
-Read the entire specification before changing code. Inspect repository files, instructions and existing dependencies. Preserve existing work. If starting from an empty repository, scaffold a maintainable modular monolith. First produce a concise plan, data model, module dependency map, risk/decision register and milestone checklist, then implement the authorized scope incrementally. Make routine reversible engineering decisions; ask only for missing choices that materially change business behavior. Do not stop after scaffolding or a decorative demo.
+Read the entire specification and `docs/PERFORMANCE_BUDGET.md` before changing code. Fast usable loading on weak/unreliable internet in Iran is an owner-confirmed core acceptance requirement. Inspect repository files, instructions and existing dependencies. Preserve existing work. If starting from an empty repository, scaffold a maintainable modular monolith. First produce a concise plan, data model, module dependency map, risk/decision register and milestone checklist, then implement the authorized scope incrementally. Make routine reversible engineering decisions; ask only for missing choices that materially change business behavior. Do not stop after scaffolding or a decorative demo.
 
 All customer-facing and merchant-facing labels, help, validation, email/SMS templates and empty states must be natural Persian. Technical identifiers and documentation may be English. Use `lang=fa`, RTL, correct Persian typography and explicit units.
 
@@ -355,6 +355,17 @@ Routes include `/app/calculator`, `/app/invoices`, `/app/invoices/{id}`, `/app/c
 - Worker updates show a nonintrusive refresh prompt; never replace the page during unsaved calculation. Handle network retry without duplicate mutations.
 - iOS/Android/desktop capability detection and progressive enhancement; no invented guarantee of unpublished 2027 standards. Web Push/native notifications are future options, not a Phase 1 deliverable.
 
+### Performance-first delivery on weak internet
+
+Treat `docs/PERFORMANCE_BUDGET.md` as the required performance contract, including compressed route/asset budgets, production-build checks, specified cold/warm network profiles and honest evidence reporting. Its numbers are project targets, not previously measured performance. Library choice remains pending the owner, and must then pass a representative production-slice measurement.
+
+- Split routes and import only needed components/icons. Login/calculator must not eagerly fetch customer tables, provider screens, charts, heavyweight PDF code or entire UI/icon libraries.
+- Use exact local preview so typing weight, changing purity and entering miscellaneous prices do not need a network round trip per keystroke. Keep server-authoritative financial commits and existing offline/security policies intact.
+- Self-host essential fonts/assets; avoid blocking third-party CDNs, remote fonts or decorative media. Static caching/compression never means caching private invoices or auth data.
+- Keep payloads small and paginated, poll only compact quotes with pause/backoff, and avoid broad prefetch on constrained networks. No artificial splash/animation delay or destructive refresh while editing.
+- Public invoice is a lightweight server-rendered view independent of the merchant application bundle. Select host/CDN only after latency/reachability evidence from the intended market; no assumption that a named provider is always faster in Iran.
+- Verify loading and usable input on the specified slow network/CPU profiles, not only localhost or a Lighthouse score. Record budget regressions; do not claim measured speed until tests are actually run.
+
 ## 15. UX requirements and provisional design boundary
 
 Read `UI_UX_DISCOVERY_PROMPT.md`. Design around the merchant's transaction, not a generic KPI dashboard. The merchant home emphasizes starting a calculation, continuing a draft and finding a recent invoice; provider operational metrics belong in provider UI.
@@ -405,7 +416,7 @@ SMS adapter/outbox/reservations/status, final-text preview, five trial segments,
 
 ### M5 — Selected UI, PWA and release verification
 
-After the owner supplies the chosen toolkit/design direction, create the final design contract and implement merchant/provider/public UI. Verify novice flows, phone/desktop RTL, printing, accessibility, offline, deep links and updates. Write operations/runbook, integration setup and release checklist.
+After the owner supplies the chosen toolkit/design direction, create the final design contract and implement merchant/provider/public UI. Verify novice flows, phone/desktop RTL, printing, accessibility, offline, deep links, updates and the required low-bandwidth budgets/profiles. Write operations/runbook, integration setup and release checklist.
 
 Each milestone ends with changed files, checks actually run, evidence, known limitations and next step. Update the checklist honestly. Do not mark live integration, user research or production readiness complete when only mocked.
 
@@ -426,6 +437,7 @@ Tests must verify behavior and invariants, not merely mirror methods:
 - Installment remainder/month-end/partial payments/reversals/concurrent allocation and invoice-void linkage handling.
 - Browser flows: login -> calculate -> review -> issue -> print/share; Professional customer -> schedule -> record payment; offline -> recovery without duplicate issue; direct URL and back/forward.
 - RTL screenshots at 360/390/768/1280 widths, long Persian names, large values, 200% zoom and keyboard focus; multi-page print/PDF smoke check.
+- Production-build route/transfer budgets, cold/warm weak-network profiles, exact local-preview responsiveness, critical third-party-domain independence and interrupted/chunk-retry journeys per `docs/PERFORMANCE_BUDGET.md`; speed targets remain pending until evidenced.
 
 ## 19. Deliverables and completion report
 
