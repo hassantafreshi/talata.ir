@@ -11,8 +11,11 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [x] Owner clarification documented: repeatable GOLD/MISC rows, editable 18K-default purity, manual miscellaneous price and per-row product name/description.
 - [x] Primary-source UI/design-tool shortlist prepared.
 - [x] Owner priority documented: low-bandwidth loading, production asset budgets and weak-network acceptance profiles.
+- [x] Owner-required 180-second gold refresh and large-price/Start invoice entry documented.
+- [x] Rapid UI execution prompt written with a wireframe/visual-identity approval stage before detailed implementation.
 - [ ] Owner selects design skill and component toolkit.
-- [ ] Final UI prompt prepared after selection.
+- [ ] Overall wireframe/visual proposal shown and colors/logo/font/toolkit explicitly approved by owner.
+- [ ] Approved design decisions recorded and detailed UI contract finalized.
 - [ ] Owner requests implementation work.
 
 ## M0 — Foundations
@@ -46,6 +49,9 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [ ] Effective rules, exact discounts and HALF_UP line rounding implemented.
 - [ ] Master prompt sample fixtures pass; browser/server results match.
 - [ ] Quote updates never silently change an accepted transaction rate.
+- [ ] Gold scheduler/visible-client refresh every 180 seconds, foreground/reconnect and single-flight behavior tested with a controlled clock.
+- [ ] New-invoice entry shows large 18K price, unit/time/status and شروع immediately below; Start captures the visible accepted rate and handles a changed value explicitly.
+- [ ] Stale/missing quote, manual rate and MISC-only entry remain recoverable; no fabricated fresh timestamp.
 
 ## M3 — Invoices and public views
 
@@ -78,6 +84,7 @@ Status: documentation prepared; application work has not started. Check boxes re
 ## M5 — Selected design and PWA
 
 - [ ] One primary toolkit selected and compatibility spike completed.
+- [ ] Stage A approval completed before Stage B detail work; approved design reused without routine per-page approval loops.
 - [ ] Selected toolkit production slice passes login/calculator route and transfer budgets; no eager unrelated modules/icons.
 - [ ] Product-specific layout and tokens implemented from approved final UI prompt.
 - [ ] Merchant, provider and public environments use appropriate separate hierarchies.

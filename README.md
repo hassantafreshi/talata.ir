@@ -8,6 +8,7 @@
 | --- | --- |
 | [Phase 1 Master Prompt](docs/prompts/PHASE_1_MASTER_PROMPT.md) | پرامپ اجرایی کامل معماری، داده، محاسبات، امنیت، پلن‌ها و مراحل ساخت |
 | [UX-first preliminary prompt](docs/prompts/UI_UX_DISCOVERY_PROMPT.md) | پرامپ اولیه تحقیق و طراحی تجربه کاربری؛ مستقل از کتابخانه |
+| [Rapid UI/UX execution prompt](docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md) | اتود کلی و تأیید رنگ/لوگو، سپس اجرای سریع UI در پروژه |
 | [UI/UX tool shortlist](docs/research/UI_UX_TOOL_SHORTLIST.md) | گزینه‌های بررسی‌شده برای Claude، کتابخانه‌ها و لینک نمونه‌ها |
 | [Implementation checklist](docs/PHASE_1_CHECKLIST.md) | معیارهای پذیرش و پیگیری مراحل |
 | [Performance budget](docs/PERFORMANCE_BUDGET.md) | معیار حجم اولیه و آزمون سرعت روی اینترنت ضعیف |
@@ -24,7 +25,17 @@ Respect the pending UI selection. Do not install a UI library or design skill ye
 Record assumptions and progress in docs; implement in small verified milestones.
 ```
 
-تصمیم کتابخانه UI، ابزار طراحی و جهت بصری هنوز گرفته نشده است. بریف UX اکنون قابل استفاده است، اما پرامپ نهایی UI بعد از انتخاب صاحب پروژه اضافه می‌شود. این ریپو در این مرحله حاوی مستندات است؛ اپلیکیشن هنوز پیاده‌سازی نشده است.
+تصمیم کتابخانه UI، ابزار طراحی و جهت بصری هنوز گرفته نشده است. پرامپ اجرای سریع UI آماده است: ابتدا اتود قابل مشاهده و تأیید رنگ، لوگو، فونت و ابزار، سپس جزئیات و پیاده‌سازی. این ریپو در این مرحله حاوی مستندات است؛ اپلیکیشن هنوز پیاده‌سازی نشده است.
+
+برای شروع مرحله طراحی با Claude Code:
+
+```text
+Read CLAUDE.md and docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md.
+Execute Stage A first: present the overall wireframe and visual proposal,
+including colors, logo/wordmark, Persian typography and proposed toolkit.
+Wait for my explicit approval of that package before detailed production UI.
+After approval, implement Stage B efficiently and verify the existing requirements.
+```
 
 ## تصمیم‌های پایه
 
@@ -33,6 +44,7 @@ Record assumptions and progress in docs; implement in small verified milestones.
 - پس از اولین ورود تأییدشده با موبایل، فعال‌سازی اختیاری ورود با اثر انگشت، تشخیص چهره یا قفل دستگاه از طریق Passkey؛ ورود پیامکی برای بازیابی باقی می‌ماند.
 - محاسبات دقیق و نسخه‌دار؛ ذخیره مستقل اصل طلا، اجرت، سود، حق‌العمل، تخفیف و مالیات.
 - فاکتور قطعی با تصویر ثابت نرخ، اطلاعات فروشگاه و خروجی محاسبات.
+- تازه‌شدن مرکزی نرخ طلا هر سه دقیقه؛ نمایش بزرگ نرخ ۱۸ عیار در شروع فاکتور با دکمه «شروع» زیر آن و ثبت نرخ پذیرفته‌شده برای معامله.
 - فاکتور چندردیفی با انتخاب «طلا/متفرقه» برای هر ردیف؛ عیار طلا پیش‌فرض ۱۸ و قابل تغییر با نرخ متناسب، قیمت دستی متفرقه و نام/توضیح مستقل هر کالا.
 - ماشین‌حساب مستقل؛ حسابداری، انبار، آب‌شده و اتصال مؤدیان در فازهای بعد.
 - نرخ مالیات تنظیم‌پذیر بر اساس تاریخ اثرگذاری؛ پیش‌فرض نمونه ۱۰٪ روی خدمات مشمول، با ثبت منبع تأیید برای استفاده عملیاتی.

@@ -8,6 +8,7 @@ For future implementation requests, read:
 2. `docs/prompts/UI_UX_DISCOVERY_PROMPT.md`
 3. `docs/PHASE_1_CHECKLIST.md`
 4. `docs/research/UI_UX_TOOL_SHORTLIST.md` when choosing design tools.
+5. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
 
 ## Durable constraints
 
@@ -20,12 +21,13 @@ For future implementation requests, read:
 - Draft invoices support repeated GOLD/MISC rows and per-row product name/description. GOLD defaults to 18K/750 with editable purity and proportional pricing; MISC requires manual title and final row price and never inherits gold calculations/tax classification.
 - Features and quotas enforced server-side; no business logic branching on plan names.
 - Provider integrations behind adapters. Demo data must be visibly labelled.
+- Gold feed refreshes centrally every 180 seconds. New-invoice entry shows the current 18K price prominently with شروع immediately below; Start captures the displayed accepted rate, and background updates never silently reprice the transaction.
 - No full accounting, inventory, silver, melted-gold, Modian integration, or commerce in Phase 1.
 - Existing specification assumptions must be documented and configurable, not presented as discovered business facts.
 - UI toolkit, design skill and visual direction are PENDING OWNER SELECTION.
 - Do not default to shadcn, a generic SaaS dashboard, or an unrelated React/Next stack.
 - No third-party design skill or library installation until selected. Reading public documentation is allowed.
-- Final UI implementation follows a later owner-selected design prompt. Backend foundations, domain logic, tests and neutral UX flows can proceed under a future implementation request.
+- UI execution follows the prepared rapid implementation prompt. The owner explicitly requires the overall draft and colors/logo to be approved before detailed production UI. Propose a concrete review package first; after approval proceed without repeated per-page confirmation. Backend foundations, domain logic, tests and neutral UX flows can proceed under a future implementation request.
 - Never claim legal certification, live integration, usability testing, or passed checks without evidence.
 
 Record progress and decisions so subsequent sessions continue rather than restart.

@@ -17,7 +17,7 @@ Deliver in Phase 1:
 
 1. Provider administration: tenants, memberships, plans, subscriptions, module entitlements, quota rules, tax configurations, integrations and operational health.
 2. Mobile number is the primary account identifier: SMS one-time-code first registration/login, plus optional Passkey/device-unlock login enabled after verified mobile sign-in, tenant selection where applicable, owner/staff access and provider access. Phase 1 does not require a username, email or password to sign in.
-3. Central market feed for 18K gold, 24K gold and USD, with visible provenance, timestamps and freshness.
+3. Central market feed for 18K gold, 24K gold and USD, with an owner-required 180-second gold refresh cadence, visible provenance, timestamps and freshness; new-invoice entry prominently shows the current 18K quote with a `شروع` button immediately below it.
 4. Standalone gold calculator: editable effective 18K rate, weight, purity default 750, wage percentage, profit percentage, component-aware discount and tax rule.
 5. Multi-item draft invoices with independently typed GOLD and MISC rows (including mixed invoices), authoritative finalization, printable layout, browser Save as PDF, public secure links, share actions and SMS delivery.
 6. Tenant shop profile, owner/staff permissions, branding and invoice customization controlled by features.
@@ -248,7 +248,7 @@ Define `PriceProvider` and normalized `MarketQuote` contracts. Asset examples: `
 
 - Secrets/configuration only on backend. Poll centrally with locks/scheduler, not once per merchant tab. Cache and keep controlled history; use retries/backoff and health reporting.
 - Persist source/provider, provider quote time if available, fetched_at, normalized amount, asset, unit, status, conversion provenance and verification of mapping.
-- Configurable poll/freshness policies; starting development assumptions: poll 60s, stale threshold 180s. Document these as tunable assumptions, not provider guarantees.
+- Gold refresh interval is owner-confirmed: **180 seconds (3 minutes)**. Seed `gold_refresh_interval_seconds=180` in configuration; use one centrally scheduled provider refresh, a single-flight lock and timestamped normalized quotes. Active visible clients read compact server quote updates at that cadence, without making independent provider calls. Fetch the latest server quote on page entry and foreground/reconnect; pause client polling when hidden/offline and coalesce multi-tab activity. A failed fetch never fabricates a fresh timestamp. Freshness is separate from polling: initial configurable stale threshold is 240 seconds (one 180-second interval plus 60 seconds transport grace), documented as a technical assumption, with failed/degraded status visible immediately. Do not retain the superseded 60-second polling assumption. 24K/USD follow the shared batch cadence where the provider supports it, with separate source/status metadata.
 - Distinguish LIVE/FRESH, STALE, UNAVAILABLE, MANUAL and OFFLINE in the UI with text plus status indicators. An old cached value is never labeled live.
 - Tenant override affects only that tenant; transaction-level editable price does not mutate the global quote. Store override actor, reason, original value and time.
 - If 24K is derived rather than fetched, label it derived and retain the conversion policy. Never fabricate a provider timestamp.
@@ -257,6 +257,17 @@ Define `PriceProvider` and normalized `MarketQuote` contracts. Asset examples: `
 - Development ships a visible mock provider; production integration requires documented real API mapping, credentials and contract tests. No claim that rates are live while using fixtures.
 
 PriceSnapshot stores provider quote, merchant-effective value, currency/unit, source, fetched_at, quote_time, used_at, freshness status, override flag/reason/actor and quoted asset. Drafts may be repriced explicitly; finalized invoices never reference mutable current price for display.
+
+### New-invoice entry: current price first, then Start
+
+Add `/app/invoices/new` as the primary new-sale entry (or an equivalent deep-linkable view):
+
+1. Show a large, high-contrast current quote, labelled `قیمت هر گرم طلای ۱۸ عیار`, with an explicit تومان/ریال unit. Show last received time, source/freshness state and `به‌روزرسانی هر ۳ دقیقه` in smaller readable text. 24K/USD may appear as subordinate information; they must not compete with the main price.
+2. Place the prominent `شروع` button immediately below that price. At this stage it starts the calculation/draft flow, not finalization. The next view supports the agreed repeatable GOLD/MISC item editor and review/issue/print/share path.
+3. At entry and before starting a new gold calculation, retrieve the latest available normalized server quote. Use its actual fetched_at/quote time: `current` here is the most recently acquired feed value, not a guarantee of tick-by-tick market pricing. Do not insert a mock number or label an unavailable/stale quote live.
+4. Start captures the explicitly displayed/accepted effective rate and quote identifier/provenance in the calculation/draft. If a new server value differs from what was displayed during Start validation, update the visible rate and ask the user to accept that new value before proceeding. Do not silently substitute a rate the user has not seen. Tenant overrides are visibly distinguished from the market reference and captured accordingly.
+5. After Start, periodic feed changes update the market indicator only. Existing line calculations remain on their accepted transaction rate until the merchant selects `استفاده از نرخ جدید`; issued snapshots remain immutable. Any accepted repricing updates affected gold rows and review fingerprint, never MISC prices.
+6. For an unavailable/stale feed, provide clearly labeled manual-rate recovery under the configured policy; MISC-only invoice creation must remain possible without a gold quote. Network failures do not erase rows or pretend a draft was issued. For standalone Calculator access with Invoices disabled, the same current-price/Start interaction launches only the calculator, preserving module independence.
 
 ## 9. Invoice lifecycle and finalization
 
@@ -345,7 +356,7 @@ Installment MVP:
 
 ## 14. App navigation, PWA and offline
 
-Routes include `/app/calculator`, `/app/invoices`, `/app/invoices/{id}`, `/app/customers`, `/app/installments`, `/app/settings`; provider routes under `/provider`. Use client navigation, browser back/forward and deep links that work after refresh. Define shared navigation and pending/save states. Do not reload the entire page on routine module navigation.
+Routes include `/app/calculator`, `/app/invoices`, `/app/invoices/new`, `/app/invoices/{id}`, `/app/customers`, `/app/installments`, `/app/settings`; provider routes under `/provider`. Use client navigation, browser back/forward and deep links that work after refresh. Define shared navigation and pending/save states. Do not reload the entire page on routine module navigation.
 
 - Manifest with name/short_name, versioned icons including maskable, start_url, scope and standalone display; HTTPS deployment documented. Provide an install action only when browser support permits; explain iOS installation as needed.
 - Worker caches static app-shell assets and a controlled offline fallback. Never cache authenticated HTML/API, public invoices, OTP, mutable financial records or tokens with a generic cache-all strategy.
@@ -379,7 +390,7 @@ Read `UI_UX_DISCOVERY_PROMPT.md`. Design around the merchant's transaction, not 
 - Show immutable-document consequences before issue and recoverable state on return. Confirmation is reserved for meaningful irreversible actions, not every click.
 - Target accessible WCAG 2.2 AA interactions/contrast; actual browser/assistive tests required. Toolkit marketing is not accessibility evidence.
 
-Do not choose a color palette, install a design skill, copy a dashboard starter or finalize UI until the owner selects the design approach. Neutral wireframes/research can be prepared. Uniqueness is in product-specific composition, typography, hierarchy and helpful behavior; changing library alone does not solve generic design.
+Follow `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md`: first prepare a concrete overall wireframe/visual draft with proposed colors, logo/wordmark, typography and toolkit; obtain explicit owner approval of that review package before detailed production UI. Proposed colors/logos are allowed in this preliminary stage, but are not final choices. Do not install an unselected toolkit/design skill or copy a dashboard starter. After consolidated approval, execute the remaining authorized UI work efficiently without asking again for routine per-page details. Uniqueness is in product-specific composition, typography, hierarchy and helpful behavior; changing library alone does not solve generic design.
 
 ## 16. Security, privacy and reliability
 
@@ -429,7 +440,7 @@ Tests must verify behavior and invariants, not merely mirror methods:
 - Cross-tenant read/write/foreign-key attacks, public share lookup, staff permissions, provider boundary, queue/cache scopes.
 - Mobile-first login/registration plus opt-in Passkey after verified SMS login; normalized unique phone identity, no duplicate user/tenant after verification retries, invitation/member authorization and safe return routing; login remains independent of tenant sharing credits. OTP expiry/reuse/brute-force/rate limiting and secret redaction.
 - Passkey enrollment authorization, distinct one-use challenges, cryptographic assertion verification, origin/RP/ownership checks, replay/expiry, user verification, revocation, unsupported/cancelled flows and SMS recovery; virtual-authenticator tests distinguished from real fingerprint/face/PIN device checks.
-- Price outage/stale/manual/quote-change acknowledgment; global quote unchanged by tenant edits.
+- 180-second central/client gold-refresh cadence, foreground/reconnect refresh, single-flight provider calls, failed-fetch freshness and frozen transaction-rate behavior. New-invoice entry shows large current price and Start below it; changed-value acceptance, stale/manual and MISC-only paths work. Global quote remains unchanged by tenant edits.
 - Effective tax-rule switching and immutable historical snapshots.
 - Duplicate finalization/retry/concurrent numbering and forbidden mutations of issued inputs.
 - Quota races, period boundaries, trial grants, revocation/regeneration, downgrade and preserved existing repayment/read behavior.
@@ -445,4 +456,4 @@ Deliver working application code within the authorized implementation scope, mig
 
 Before final reporting run appropriate tests, lint/type/build checks and browser/print checks available in the environment. State missing credentials/browser/tool support plainly and distinguish mock from live providers. Summarize what works, how verified and what remains. Do not claim a legal Modian integration, a native app, a certified tax invoice or field-tested novice usability.
 
-For this planning stage, the owner's next decision is a design-toolkit/style selection from `UI_UX_TOOL_SHORTLIST.md`. Preserve that decision boundary while keeping the backend specification concrete.
+For the UI execution stage, use the rapid implementation prompt to prepare the overall draft and a consolidated owner decision on toolkit, colors, logo and structure. That approval precedes detailed UI coding; it does not certify mocks as real financial integrations.
