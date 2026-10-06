@@ -88,7 +88,12 @@ function mobileChange() {
       const sendNew = () => post('/api/security/mobile/request-new', { mobile: forms.ask.mobile.value.trim() });
       const r = await sendNew();
       busy(b, false);
-      if (!r.ok) { if (r.errors) fieldErrors(forms.ask, r.errors); else fieldErrors(forms.ask, { mobile: r.message }); return; }
+      if (!r.ok) {
+        // Verification expired or spent on too many numbers: start over from the current number.
+        if (r.code === 'MCH_FLOW' || r.code === 'MCH_TOO_MANY_TARGETS') { close(); toast(r.message, { kind: 'error', timeout: 9000 }); return; }
+        if (r.errors) fieldErrors(forms.ask, r.errors); else fieldErrors(forms.ask, { mobile: r.message });
+        return;
+      }
       setMasked(forms.new, r.data.masked);
       show('new', 'new');
       arm(forms.new, r.data.resend_after_seconds, sendNew);

@@ -33,16 +33,27 @@ final class SmsService
     public function __construct(private readonly Entitlements $entitlements, private readonly SmsCredit $credit) {}
 
     /** Login OTP: operational budget, never tenant credit. Limits are enforced by OtpService before this. */
-    public static function otpBody(string $code): string
+    public static function otpBody(string $code, string $kind = 'login'): string
     {
+        if ($kind === 'mobile_change') {
+            return "کد تغییر شماره ورود زرلیو: {$code}\nاگر خودتان درخواست نکرده‌اید، این کد را به هیچ‌کس ندهید.";
+        }
+
         return "کد ورود زرلیو: {$code}\nاین کد را به کسی ندهید.";
     }
 
-    public function queueOtp(string $mobile, string $code, string $challengeId): SmsMessage
+    /** OTP purposes (OtpService) → SMS wording kind. */
+    public static function otpKind(string $purpose): string
     {
+        return in_array($purpose, ['mch_old', 'mch_new'], true) ? 'mobile_change' : 'login';
+    }
+
+    public function queueOtp(string $mobile, string $code, string $challengeId, string $purpose = 'user'): SmsMessage
+    {
+        $kind = self::otpKind($purpose);
         $message = SmsMessage::create([
             'tenant_id' => null, 'purpose' => 'OTP', 'recipient' => $mobile,
-            'body' => self::otpBody('••••••'), 'payload' => ['code' => $code],
+            'body' => self::otpBody('••••••', $kind), 'payload' => ['code' => $code, 'kind' => $kind],
             'segments' => 1, 'cost_irr' => '0', 'charge_source' => 'OPERATIONAL', 'status' => 'QUEUED',
             'idempotency_key' => 'otp:'.$challengeId,
         ]);

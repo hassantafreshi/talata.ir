@@ -94,7 +94,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::post('/passkeys', [PasskeyController::class, 'store'])->middleware('throttle:20,1')->name('api.passkeys.store');
         Route::delete('/passkeys/{passkey}', [PasskeyController::class, 'destroy'])->whereNumber('passkey')->name('api.passkeys.destroy');
         // Login-number change (M-23): two OTP steps. Throttled hard — each step can send an SMS.
-        Route::middleware('throttle:10,10')->group(function () {
+        Route::middleware('throttle:mobile-change')->group(function () {
             Route::post('/security/mobile/start', [SecurityController::class, 'startMobileChange'])->name('api.security.mobile.start');
             Route::post('/security/mobile/verify-current', [SecurityController::class, 'verifyCurrentMobile'])->name('api.security.mobile.verify_current');
             Route::post('/security/mobile/request-new', [SecurityController::class, 'requestNewMobile'])->name('api.security.mobile.request_new');

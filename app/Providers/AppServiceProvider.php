@@ -49,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
                 'kavenegar' => new KavenegarSmsGateway(
                     (string) config('services.kavenegar.api_key'), config('services.kavenegar.sender') ?: null,
                     config('services.kavenegar.otp_template') ?: null, (string) config('services.kavenegar.base_url'), (int) config('services.kavenegar.timeout'),
+                    config('services.kavenegar.otp_template_mobile_change') ?: null,
                 ),
                 default => throw new RuntimeException('Unknown SMS driver'),
             };

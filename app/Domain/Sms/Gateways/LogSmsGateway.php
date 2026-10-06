@@ -21,7 +21,7 @@ final class LogSmsGateway implements SmsGateway
         return ['status' => 'SENT', 'provider_id' => 'log-'.Str::ulid(), 'error' => null];
     }
 
-    public function sendOtp(string $recipient, string $code, string $body): array
+    public function sendOtp(string $recipient, string $code, string $body, string $kind = 'login'): array
     {
         return $this->send($recipient, $body);
     }

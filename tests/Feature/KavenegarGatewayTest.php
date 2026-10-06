@@ -51,6 +51,19 @@ class KavenegarGatewayTest extends TestCase
         Http::assertSent(fn (Request $req) => str_ends_with($req->url(), '/sms/send.json') && $req['message'] === 'کد ورود: 482913');
     }
 
+    public function test_mobile_change_code_never_uses_the_login_template(): void
+    {
+        Http::fake(['api.kavenegar.com/*' => Http::response($this->ok(56))]);
+        // Own template configured → lookup with that template.
+        (new KavenegarSmsGateway(self::KEY, '10004346', 'talata-otp', 'https://api.kavenegar.com/v1', 10, 'talata-mobile-change'))
+            ->sendOtp('09121234567', '111222', 'body', 'mobile_change');
+        Http::assertSent(fn (Request $req) => str_ends_with($req->url(), '/verify/lookup.json') && $req['template'] === 'talata-mobile-change');
+        // No own template → plain send with our wording, never the login template.
+        $this->gateway('talata-otp')->sendOtp('09121234567', '333444', 'کد تغییر شماره ورود زرلیو: 333444', 'mobile_change');
+        Http::assertSent(fn (Request $req) => str_ends_with($req->url(), '/sms/send.json') && str_contains($req['message'], 'تغییر شماره'));
+        Http::assertNotSent(fn (Request $req) => ($req['template'] ?? null) === 'talata-otp' && ($req['token'] ?? null) === '333444');
+    }
+
     public function test_definite_errors_fail_and_ambiguous_errors_are_unknown(): void
     {
         Http::fakeSequence('api.kavenegar.com/*')

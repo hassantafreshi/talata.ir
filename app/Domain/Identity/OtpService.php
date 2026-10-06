@@ -96,7 +96,7 @@ final class OtpService
         }
         $challenge = $result;
 
-        $this->sms->queueOtp($mobile, $code, $challenge->id);
+        $this->sms->queueOtp($mobile, $code, $challenge->id, $purpose);
         Audit::record('auth.otp_requested', null, ['mobile_tail' => substr($mobile, -4)], null, 'system');
 
         return ['challenge_id' => $challenge->id, 'resend_after_seconds' => $cfg['resend_cooldown_seconds'], 'purpose' => $purpose];

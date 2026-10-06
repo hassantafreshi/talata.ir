@@ -14,12 +14,13 @@ interface SmsGateway
     public function send(string $recipient, string $body, ?string $localId = null): array;
 
     /**
-     * Login code. Providers with an approved OTP template (e.g. Kavenegar Verify Lookup) send only
-     * the code; others send $body.
+     * One-time code. $kind is 'login' or 'mobile_change' (each has its own wording/template, so a
+     * number-change code never reads like a login code). Providers with an approved template for the
+     * kind (e.g. Kavenegar Verify Lookup) send only the code; others send $body.
      *
      * @return array{status:'SENT'|'FAILED'|'UNKNOWN',provider_id:?string,error:?string}
      */
-    public function sendOtp(string $recipient, string $code, string $body): array;
+    public function sendOtp(string $recipient, string $code, string $body, string $kind = 'login'): array;
 
     /**
      * FAILED = not sent and not charged by the provider; UNDELIVERED = sent (charged) but not delivered.

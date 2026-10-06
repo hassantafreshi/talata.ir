@@ -28,6 +28,7 @@ final class KavenegarSmsGateway implements SmsGateway
         private readonly ?string $otpTemplate,
         private readonly string $baseUrl = 'https://api.kavenegar.com/v1',
         private readonly int $timeout = 10,
+        private readonly ?string $mobileChangeTemplate = null,
     ) {
         if ($apiKey === '') {
             throw new \RuntimeException('KAVENEGAR_API_KEY is not set');
@@ -44,13 +45,15 @@ final class KavenegarSmsGateway implements SmsGateway
         return $this->call('sms/send.json', array_filter(['receptor' => $recipient, 'sender' => $this->sender, 'message' => $body, 'localid' => $localId]), 'send');
     }
 
-    public function sendOtp(string $recipient, string $code, string $body): array
+    public function sendOtp(string $recipient, string $code, string $body, string $kind = 'login'): array
     {
-        if (! $this->otpTemplate) {
+        // Never fall back to the login template for another kind: its text says «کد ورود».
+        $template = $kind === 'login' ? $this->otpTemplate : ($kind === 'mobile_change' ? $this->mobileChangeTemplate : null);
+        if (! $template) {
             return $this->send($recipient, $body);
         }
 
-        return $this->call('verify/lookup.json', ['receptor' => $recipient, 'token' => $code, 'template' => $this->otpTemplate], 'lookup');
+        return $this->call('verify/lookup.json', ['receptor' => $recipient, 'token' => $code, 'template' => $template], 'lookup');
     }
 
     public function status(string $providerId): string

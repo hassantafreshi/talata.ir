@@ -19,6 +19,8 @@ return [
         'api_key' => env('KAVENEGAR_API_KEY', ''),
         'sender' => env('KAVENEGAR_SENDER'),                 // dedicated line; empty = account default
         'otp_template' => env('KAVENEGAR_OTP_TEMPLATE'),     // Verify Lookup template with %token; empty = sms/send
+        // Separate template for the login-number change code, so it never reads «کد ورود»; empty = sms/send with our own text.
+        'otp_template_mobile_change' => env('KAVENEGAR_OTP_TEMPLATE_MOBILE_CHANGE'),
         'base_url' => env('KAVENEGAR_BASE_URL', 'https://api.kavenegar.com/v1'),
         'timeout' => (int) env('KAVENEGAR_TIMEOUT', 10),
     ],
