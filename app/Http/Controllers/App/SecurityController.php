@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\App;
 
+use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Domain\Identity\MobileChange;
 use App\Domain\Identity\OtpService;
@@ -9,6 +10,8 @@ use App\Support\Mobile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Login-number change (M-23): two OTP steps in one session-scoped state machine.
@@ -120,5 +123,22 @@ class SecurityController extends BaseController
 
             throw new DomainError('MCH_FLOW', 'زمان تأیید شماره فعلی گذشت. دوباره از ابتدا شروع کنید.', 409);
         }
+    }
+
+    /**
+     * «خروج از همه دستگاه‌های دیگر» — for a lost or shared phone: every other session ends and their
+     * remember-me cookies stop working (new token); this device stays signed in with a fresh session.
+     */
+    public function signOutOtherDevices(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->setRememberToken(Str::random(60));
+        $user->save();
+        DB::table('sessions')->where('user_id', $user->id)->where('id', '!=', $request->session()->getId())->delete();
+        Auth::login($user, remember: true);
+        $request->session()->put('auth_at', now()->getTimestamp());
+        Audit::record('auth.signed_out_other_devices', $user, [], null, 'user');
+
+        return response()->json(['ok' => true]);
     }
 }

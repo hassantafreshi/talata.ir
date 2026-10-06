@@ -48,6 +48,18 @@ class UsersController extends BaseController
             throw new DomainError('VALIDATION', 'شماره موبایل درست نیست.', 422, ['errors' => ['mobile' => ['شماره موبایل درست نیست.']]]);
         }
         $tenantId = $this->tenant()->id;
+
+        // Check-then-create under the tenant row lock: two invites at once must not both pass the member cap
+        // or both invite the same number.
+        return DB::transaction(function () use ($tenantId, $mobile, $data) {
+            \App\Models\Tenant::query()->whereKey($tenantId)->lockForUpdate()->first();
+
+            return $this->createInvite($tenantId, $mobile, $data);
+        });
+    }
+
+    private function createInvite(int $tenantId, string $mobile, array $data)
+    {
         if (Membership::query()->where('tenant_id', $tenantId)->where('status', '!=', 'removed')->where(fn ($q) => $q->where('invited_mobile', $mobile)->orWhereHas('user', fn ($u) => $u->where('mobile', $mobile)))->exists()) {
             throw new DomainError('ALREADY_MEMBER', 'این شماره قبلاً عضو یا دعوت شده است.', 409);
         }

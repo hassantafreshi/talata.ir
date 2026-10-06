@@ -16,6 +16,9 @@ final class LoginService
     public function completeLogin(string $mobile): array
     {
         return DB::transaction(function () use ($mobile) {
+            // Serialize per number: two first logins at once (e.g. a «دستگاه آشنا» code and a normal code) must not
+            // both miss the row lock and race to create the same user (unique violation → 500) or two shops.
+            DB::select('SELECT pg_advisory_xact_lock(hashtext(?))', ['login:'.$mobile]);
             $user = User::query()->where('mobile', $mobile)->lockForUpdate()->first() ?? User::create(['mobile' => $mobile]);
             $user->forceFill(['last_login_at' => now()])->save();
 

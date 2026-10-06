@@ -20,6 +20,15 @@ export default function () {
 
   passkeys();
   mobileChange();
+  document.querySelector('[data-sign-out-others]')?.addEventListener('click', (e) => signOutOthers(e.currentTarget));
+}
+
+async function signOutOthers(button) {
+  if (!confirm('از همه دستگاه‌های دیگر خارج شوید؟ این دستگاه وارد می‌ماند.')) return;
+  busy(button);
+  const res = await post('/api/security/sign-out-others');
+  busy(button, false);
+  toast(res.ok ? 'از همه دستگاه‌های دیگر خارج شدید.' : res.message, { kind: res.ok ? 'info' : 'error' });
 }
 
 // Two-step login-number change, driven from a sheet. Each step talks to its own endpoint; the
@@ -135,7 +144,8 @@ async function passkeys() {
     const b = e.target.closest('[data-passkey-remove]');
     if (!b || !confirm('ورود با اثر انگشت روی این دستگاه حذف شود؟')) return;
     const res = await (await import('../lib/http.js')).del(`/api/passkeys/${b.dataset.passkeyRemove}`);
-    if (res.ok) { b.closest('li').remove(); toast('حذف شد.'); } else toast(res.message, { kind: 'error' });
+    // A removed key often means a lost phone: offer to end that phone's sessions too.
+    if (res.ok) { b.closest('li').remove(); toast('حذف شد. اگر این گوشی گم شده، از دستگاه‌های دیگر هم خارج شوید.', { timeout: 12000, action: { label: 'خروج از دستگاه‌های دیگر', onClick: () => signOutOthers(document.querySelector('[data-sign-out-others]')) } }); } else toast(res.message, { kind: 'error' });
   });
 }
 

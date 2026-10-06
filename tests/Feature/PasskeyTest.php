@@ -144,4 +144,74 @@ class PasskeyTest extends TestCase
         }
         $this->assertSame(0, DB::connection('pgsql_log')->table('system_logs')->where('level', 'error')->count(), 'no error-level log rows from hostile input');
     }
+
+    public function test_login_challenge_expires(): void
+    {
+        $user = $this->merchant();
+        $device = $this->device();
+        $this->enroll($user, $device)->assertCreated();
+        auth()->logout();
+        $options = $this->postJson('/api/auth/passkey/options')->assertOk()->json();
+        $this->travel(4)->minutes();
+        $this->postJson('/api/auth/passkey/verify', ['credential' => $device->get($options)])->assertStatus(422)->assertJsonPath('code', 'PASSKEY_FAILED');
+        $this->assertGuest();
+    }
+
+    public function test_a_removed_passkey_no_longer_signs_in(): void
+    {
+        $user = $this->merchant();
+        $device = $this->device();
+        $this->enroll($user, $device)->assertCreated();
+        $this->api('DELETE', '/api/passkeys/'.Passkey::query()->value('id'))->assertOk();
+        auth()->logout();
+        $this->flushSession();
+        $this->login($device)->assertStatus(422)->assertJsonPath('code', 'PASSKEY_FAILED');
+        $this->assertGuest();
+    }
+
+    public function test_wrong_rp_missing_user_verification_or_foreign_user_handle_are_rejected(): void
+    {
+        $user = $this->merchant();
+        $device = $this->device();
+        $this->enroll($user, $device)->assertCreated();
+        auth()->logout();
+
+        $device->rpId = 'evil.example';                 // assertion made for another site
+        $this->login($device)->assertStatus(422);
+        $device->rpId = 'localhost';
+
+        $device->flags = 0x01;                          // user present but not verified (no fingerprint/PIN)
+        $this->login($device)->assertStatus(422);
+        $device->flags = 0x05;
+
+        $realHandle = $device->userHandle;
+        $device->userHandle = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+        $this->login($device)->assertStatus(422);
+        $device->userHandle = $realHandle;
+
+        $this->assertGuest();
+        $this->login($device)->assertOk();               // the genuine assertion still works
+    }
+
+    public function test_passkey_never_opens_a_removed_membership_or_a_suspended_shop(): void
+    {
+        $user = $this->merchant();
+        $device = $this->device();
+        $this->enroll($user, $device)->assertCreated();
+        auth()->logout();
+        $this->flushSession();
+
+        $tenant = $this->tenantOf($user);
+        $tenant->forceFill(['status' => 'suspended', 'suspended_at' => now(), 'suspension_reason' => 'test'])->save();
+        $this->login($device)->assertOk();
+        // Signed in as a person, but the suspended shop's screens and APIs stay closed.
+        $this->get('/invoices')->assertStatus(403);
+        $this->api('GET', '/api/invoices')->assertStatus(403)->assertJsonPath('code', 'TENANT_SUSPENDED');
+
+        auth()->logout();
+        $this->flushSession();
+        \App\Models\Membership::query()->where('user_id', $user->id)->update(['status' => 'removed']);
+        $this->login($device)->assertStatus(422)->assertJsonPath('code', 'PASSKEY_FAILED');
+        $this->assertGuest();
+    }
 }

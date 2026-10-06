@@ -67,6 +67,8 @@
         <p class="small">شماره‌ای که با آن وارد می‌شوید: <strong class="num ltr">{{ \App\Support\Mobile::display($user->mobile) }}</strong></p>
         <p class="xs muted">این شماره فقط برای ورود است و با شماره‌ی روی فاکتور (اطلاعات کسب‌وکار) فرق دارد. برای تغییر، اول شماره فعلی و سپس شماره جدید با کد پیامکی تأیید می‌شود و از همه‌ی دستگاه‌های دیگر خارج می‌شوید.</p>
         <button type="button" class="btn btn-line block" data-mobile-change-start>تغییر شماره ورود</button>
+        <p class="xs muted">گوشی گم شده یا جای دیگری وارد شده‌اید؟ از همه دستگاه‌ها به‌جز همین یکی خارج شوید.</p>
+        <button type="button" class="btn btn-line block" data-sign-out-others data-busy-text="…">خروج از همه دستگاه‌های دیگر</button>
     </section>
 
     <template data-mch-tpl>

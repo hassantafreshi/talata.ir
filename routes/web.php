@@ -99,6 +99,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
             Route::post('/security/mobile/verify-current', [SecurityController::class, 'verifyCurrentMobile'])->name('api.security.mobile.verify_current');
             Route::post('/security/mobile/request-new', [SecurityController::class, 'requestNewMobile'])->name('api.security.mobile.request_new');
             Route::post('/security/mobile/confirm', [SecurityController::class, 'confirmMobileChange'])->name('api.security.mobile.confirm');
+            Route::post('/security/sign-out-others', [SecurityController::class, 'signOutOtherDevices'])->name('api.security.sign_out_others');
         });
         Route::post('/memberships/{membership}/switch', [UsersController::class, 'switchTenant'])->whereNumber('membership')->name('api.memberships.switch');
         Route::get('/quotes/latest', [QuoteController::class, 'latest'])->middleware('perm:mazneh.view|invoice.issue|calculator.use')->name('api.quotes.latest');
