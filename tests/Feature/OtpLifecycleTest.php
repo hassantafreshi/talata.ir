@@ -126,4 +126,30 @@ class OtpLifecycleTest extends TestCase
         $this->assertAuthenticatedAs($user);
         $this->assertDatabaseHas('audit_events', ['event' => 'auth.signed_out_other_devices', 'actor_user_id' => $user->id]);
     }
+
+    private function requestViaHttp(string $mobile): void
+    {
+        $c = $this->getJson('/api/auth/pow')->json();
+        $nonce = 0;
+        while (ProofOfWork::leadingZeroBits(hash('sha256', $c['challenge'].':'.$nonce, true)) < $c['bits']) {
+            $nonce++;
+        }
+        $this->travel(3)->seconds();
+        $this->postJson('/api/auth/otp/request', ['mobile' => $mobile, 'pow_challenge' => $c['challenge'], 'pow_nonce' => (string) $nonce])->assertOk();
+    }
+
+    public function test_code_page_learns_when_the_login_sms_failed(): void
+    {
+        // No code requested in this session: nothing to reveal.
+        $this->getJson('/api/auth/otp/status')->assertOk()->assertJsonPath('state', 'sent');
+
+        app(SmsGateway::class)->nextStatus = 'FAILED';
+        $this->requestViaHttp('09121110020');
+        $this->getJson('/api/auth/otp/status')->assertOk()->assertJsonPath('state', 'failed')->assertHeader('Cache-Control', 'no-store, private');
+
+        app(SmsGateway::class)->nextStatus = 'SENT';
+        $this->travel(config('talata.otp.resend_cooldown_seconds') + 1)->seconds();
+        $this->requestViaHttp('09121110020');
+        $this->getJson('/api/auth/otp/status')->assertOk()->assertJsonPath('state', 'sent');
+    }
 }

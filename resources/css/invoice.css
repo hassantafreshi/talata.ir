@@ -75,10 +75,11 @@
   .inv .table-scroll { overflow-x: auto; }
 }
 @media print {
-  @page { size: A4 portrait; margin: 0; }
+  /* Real page margins: with margin 0, page 2+ of a long invoice printed flush to the paper edge. */
+  @page { size: A4 portrait; margin: 12mm 12mm 10mm; }
   .print-page { background: #fff; }
   .print-tools { display: none !important; }
-  .inv { margin: 0; width: 210mm; min-height: 0; box-shadow: none; }
+  .inv { margin: 0; width: auto; min-height: 0; box-shadow: none; padding: 0; }
   .inv thead { display: table-header-group; }
   .inv tr { page-break-inside: avoid; break-inside: avoid; }
   .inv-head { break-inside: avoid; }

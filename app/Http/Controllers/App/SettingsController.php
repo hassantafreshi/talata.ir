@@ -127,7 +127,8 @@ class SettingsController extends BaseController
     public function uploadLogo(Request $request)
     {
         $tenant = $this->tenant();
-        $this->ent()->assertCan($tenant, 'invoice.shop_logo', 'نمایش لوگو روی فاکتور در پلن پایه و حرفه‌ای است.');
+        // The logo is an optional profile field on every plan; whether it is PRINTED is decided per plan at
+        // issue time (`invoice.shop_logo`, snapshot) — docs/INVOICE_CUSTOMIZATION.md.
         $request->validate(['logo' => ['required', 'file', 'max:'.config('talata.uploads.logo_max_kb'), 'mimetypes:image/png,image/jpeg,image/webp']]);
         $file = $request->file('logo');
         $info = @getimagesize($file->getRealPath());

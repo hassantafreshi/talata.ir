@@ -2,7 +2,7 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-@include('partials.head', ['cssOnly' => ! $scripts])
+@include('partials.head', ['cssOnly' => ! $scripts, 'referrer' => 'no-referrer'])
 <meta name="robots" content="noindex, nofollow">
 </head>
 <body data-page="{{ $page ?? '' }}">

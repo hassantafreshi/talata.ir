@@ -44,6 +44,10 @@ class SecurityHeaders
             $headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains';
         }
         foreach ($headers as $k => $v) {
+            // A page may ask for a stricter referrer policy (public token pages use no-referrer).
+            if ($k === 'Referrer-Policy' && $response->headers->has($k)) {
+                continue;
+            }
             $response->headers->set($k, $v);
         }
         $response->headers->remove('X-Powered-By');

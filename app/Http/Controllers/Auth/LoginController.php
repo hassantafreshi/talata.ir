@@ -11,6 +11,7 @@ use App\Domain\Identity\ProofOfWork;
 use App\Domain\Identity\TrustedDevice;
 use App\Http\Controllers\Controller;
 use App\Models\Membership;
+use App\Models\SmsMessage;
 use App\Support\Mobile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -78,6 +79,24 @@ class LoginController extends Controller
         ]);
 
         return response()->json(['next' => route('login.code'), 'resend_after_seconds' => $result['resend_after_seconds']]);
+    }
+
+    /**
+     * Whether this session's login SMS left the provider: lets the code page say «ارسال ناموفق بود» instead of
+     * leaving the person waiting. Only pending/sent/failed for the session's own code; anything unknown
+     * (including the honeypot path, which sends nothing) reads as "sent", so it reveals nothing new.
+     */
+    public function otpStatus(Request $request): JsonResponse
+    {
+        $cid = (string) $request->session()->get('otp.challenge_id', '');
+        $status = $cid !== '' ? SmsMessage::query()->where('idempotency_key', 'otp:'.$cid)->value('status') : null;
+        $state = match ($status) {
+            'FAILED' => 'failed',
+            'QUEUED', 'SENDING' => 'pending',
+            default => 'sent',
+        };
+
+        return response()->json(['state' => $state])->header('Cache-Control', 'no-store');
     }
 
     public function verifyOtp(Request $request, OtpService $otp, LoginService $login): JsonResponse

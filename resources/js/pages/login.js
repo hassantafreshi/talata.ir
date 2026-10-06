@@ -34,7 +34,13 @@ async function passkeyLogin() {
     busy(btn);
     try {
       // Options and helper module in parallel: the browser prompt follows the tap as closely as before.
-      const [opts, webauthn] = await Promise.all([post('/api/auth/passkey/options'), import('../lib/webauthn.js')]);
+      let opts, webauthn;
+      try {
+        [opts, webauthn] = await Promise.all([post('/api/auth/passkey/options'), import('../lib/webauthn.js')]);
+      } catch {
+        toast('بخشی از صفحه دریافت نشد. اینترنت را بررسی کنید و دوباره بزنید، یا با کد پیامکی وارد شوید.', { kind: 'error', timeout: 9000 });
+        return;
+      }
       if (!opts.ok) { toast(opts.message, { kind: 'error' }); return; }
       let credential;
       try { credential = await webauthn.get(opts.data); } catch (e) { toast(webauthn.errorMessage(e), { kind: 'error' }); return; }

@@ -34,14 +34,13 @@
 
     <section class="band stack-sm" aria-labelledby="logo-h">
         <h2 id="logo-h">لوگو</h2>
-        @if ($canLogo)
+        @unless ($canLogo)
+            <p class="notice info small">در پلن رایگان لوگو در پروفایل ذخیره می‌شود اما روی فاکتور چاپ نمی‌شود؛ با پلن پایه یا حرفه‌ای روی فاکتورهای بعدی می‌آید. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></p>
+        @endunless
             <img class="logo-preview {{ $profile->logo_path ? '' : 'hidden' }}" data-logo-img src="{{ $boot['logo_url'] }}" alt="لوگوی فعلی">
             <label class="btn btn-line block" for="logo-file">انتخاب تصویر لوگو</label>
             <input id="logo-file" class="sr-only" type="file" accept="image/png,image/jpeg,image/webp" data-logo-file>
             <button type="button" class="btn btn-link sm {{ $profile->logo_path ? '' : 'hidden' }}" data-logo-delete>حذف لوگو</button>
             <p class="xs muted">PNG، JPG یا WebP، حداکثر ۱ مگابایت. تصویر روی سرور دوباره ساخته می‌شود و اطلاعات پنهان آن حذف می‌شود. فاکتورهای قبلی لوگوی زمان صدور را نگه می‌دارند.</p>
-        @else
-            <p class="small muted">نمایش لوگو روی فاکتور در پلن پایه و حرفه‌ای است. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></p>
-        @endif
     </section>
 </x-layouts.app>

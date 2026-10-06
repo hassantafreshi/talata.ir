@@ -159,6 +159,8 @@ return [
 
     'public' => [
         'verify_per_minute' => 30,
+        // Customer share links (/i/…) expire after this many days; null = never (verification links /v/ never expire).
+        'share_ttl_days' => env('TALATA_SHARE_TTL_DAYS') ? (int) env('TALATA_SHARE_TTL_DAYS') : null,
     ],
 
     'customers' => [

@@ -34,6 +34,7 @@ Route::middleware('guest')->group(function () {
         Route::get('/api/auth/pow', [LoginController::class, 'pow'])->name('auth.pow');
         Route::post('/api/auth/otp/request', [LoginController::class, 'requestOtp'])->name('auth.otp.request');
         Route::post('/api/auth/otp/verify', [LoginController::class, 'verifyOtp'])->name('auth.otp.verify');
+        Route::get('/api/auth/otp/status', [LoginController::class, 'otpStatus'])->name('auth.otp.status');
         Route::post('/api/auth/passkey/options', [PasskeyLoginController::class, 'options'])->name('auth.passkey.options');
         Route::post('/api/auth/passkey/verify', [PasskeyLoginController::class, 'verify'])->name('auth.passkey.verify');
     });
@@ -131,6 +132,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
             Route::post('/agreements/{agreement}/payments', [InstallmentController::class, 'pay'])->middleware('throttle:30,1')->name('api.agreements.pay');
             Route::post('/payments/{payment}/reverse', [InstallmentController::class, 'reverse'])->name('api.payments.reverse');
             Route::post('/agreements/{agreement}/reminders', [InstallmentController::class, 'toggleReminders'])->name('api.agreements.reminders');
+            Route::post('/agreements/{agreement}/cancel', [InstallmentController::class, 'cancel'])->middleware('throttle:20,1')->name('api.agreements.cancel');
         });
 
         Route::middleware('perm:settings.manage')->group(function () {

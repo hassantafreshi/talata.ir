@@ -16,7 +16,9 @@ class PublicInvoiceController extends Controller
 {
     private function headers($response)
     {
-        return $response->header('Cache-Control', 'no-store')->header('X-Robots-Tag', 'noindex, nofollow');
+        // Token URLs must never leak through the Referer header, caches or search engines.
+        return $response->header('Cache-Control', 'no-store')->header('X-Robots-Tag', 'noindex, nofollow')
+            ->header('Referrer-Policy', 'no-referrer');
     }
 
     public function verify(string $token)
@@ -27,7 +29,13 @@ class PublicInvoiceController extends Controller
         }
         $replacement = Invoice::withoutGlobalScope('tenant')->where('replaces_invoice_id', $invoice->id)->where('status', '!=', 'draft')->exists();
 
-        return $this->headers(response()->view('public.verify', ['v' => InvoicePresenter::present($invoice, true), 'replaced' => $replacement]));
+        // Verification answers «is this invoice genuine?»: the buyer's name and (masked) mobile are not part of
+        // that answer, so they are not even handed to the view.
+        $v = InvoicePresenter::present($invoice, true);
+        $v['buyer_name'] = null;
+        $v['buyer_mobile'] = null;
+
+        return $this->headers(response()->view('public.verify', ['v' => $v, 'replaced' => $replacement]));
     }
 
     private function shared(string $token): ?Invoice
@@ -35,7 +43,8 @@ class PublicInvoiceController extends Controller
         if (! Tokens::isWellFormed($token)) {
             return null;
         }
-        $share = InvoiceShare::withoutGlobalScope('tenant')->where('token_hash', Tokens::hash($token))->whereNull('revoked_at')->first();
+        $share = InvoiceShare::withoutGlobalScope('tenant')->where('token_hash', Tokens::hash($token))->whereNull('revoked_at')
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))->first();
 
         return $share ? Invoice::withoutGlobalScope('tenant')->whereKey($share->invoice_id)->whereIn('status', ['issued', 'void'])->first() : null;
     }

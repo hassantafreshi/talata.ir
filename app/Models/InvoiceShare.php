@@ -10,13 +10,13 @@ class InvoiceShare extends Model
 {
     use BelongsToTenant;
 
-    protected $fillable = ['invoice_id', 'token', 'token_hash', 'created_by', 'revoked_at'];
+    protected $fillable = ['invoice_id', 'token', 'token_hash', 'created_by', 'revoked_at', 'expires_at'];
 
     protected $hidden = ['token', 'token_hash'];
 
     protected function casts(): array
     {
-        return ['revoked_at' => 'datetime', 'token' => 'encrypted'];
+        return ['revoked_at' => 'datetime', 'expires_at' => 'datetime', 'token' => 'encrypted'];
     }
 
     public function invoice(): BelongsTo

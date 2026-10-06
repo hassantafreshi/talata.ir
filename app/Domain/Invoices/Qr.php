@@ -9,11 +9,14 @@ use chillerlan\QRCode\QROptions;
 /** Server-rendered QR as inline SVG (no external service, CSP-safe). */
 final class Qr
 {
+    /** ISO/IEC 18004 quiet zone: at least 4 light modules on every side, or phones fail to scan printed codes. */
+    public const QUIET_ZONE = 4;
+
     public static function svg(string $url): string
     {
         $options = new QROptions([
             'outputBase64' => false, 'svgAddXmlHeader' => false, 'eccLevel' => EccLevel::M,
-            'addQuietzone' => true, 'quietzoneSize' => 2, 'drawLightModules' => false,
+            'addQuietzone' => true, 'quietzoneSize' => self::QUIET_ZONE, 'drawLightModules' => false,
             'svgUseFillAttributes' => true,
         ]);
         $svg = (new QRCode($options))->render($url);

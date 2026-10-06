@@ -84,6 +84,14 @@ class InstallmentController extends BaseController
         return response()->json(['ok' => true]);
     }
 
+    public function cancel(Request $request, InstallmentAgreement $agreement)
+    {
+        $data = $request->validate(['reason' => ['required', 'string', 'max:250']]);
+        $this->installments->cancel($agreement, $data['reason']);
+
+        return response()->json(['ok' => true]);
+    }
+
     public function toggleReminders(Request $request, InstallmentAgreement $agreement)
     {
         $enable = $request->boolean('enabled');

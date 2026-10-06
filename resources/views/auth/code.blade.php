@@ -15,6 +15,7 @@
         </div>
         <p class="hint">با کامل‌شدن کد، ورود خودکار انجام می‌شود. کد را می‌توانید از پیامک کپی و جای‌گذاری کنید.</p>
         <button class="btn btn-gold block lg" type="submit" data-busy-text="در حال ورود…">ورود</button>
+        <p class="notice err hidden" data-otp-failed role="alert">ارسال پیامک به این شماره ناموفق بود. شماره را بررسی کنید و پس از پایان شمارنده «ارسال دوباره کد» را بزنید.</p>
         <button class="btn btn-line block" type="button" data-resend disabled>ارسال دوباره کد</button>
         <details class="band"><summary>کد نرسید؟</summary><p class="hint">آنتن گوشی و فضای خالی صندوق پیامک را بررسی کنید. بعد از پایان شمارنده، «ارسال دوباره کد» را بزنید. اگر شماره اشتباه است، «ویرایش شماره» را بزنید.</p></details>
     </form>

@@ -1,4 +1,4 @@
-import { post } from '../lib/http.js';
+import { get, post } from '../lib/http.js';
 import { busy, toast } from '../lib/ui.js';
 import { toLatin, toPersian } from '../lib/digits.js';
 import { requestCode } from '../lib/otp.js';
@@ -55,11 +55,29 @@ export default function () {
       boxes.forEach((b) => { b.value = ''; }); boxes[0].focus();
       err.textContent = ''; form.querySelector('.field').classList.remove('invalid');
       toast('کد تازه فرستاده شد. همان آخرین پیامک را وارد کنید.');
+      form.dispatchEvent(new Event('otp:resent'));
       return;
     }
     toast(res.message, { kind: 'error', timeout: 8000 });
     tick();
   });
+
+  // Delivery check: a few spaced polls (weak networks: not every second) until the SMS is known sent or failed.
+  const failed = form.querySelector('[data-otp-failed]');
+  let polls = [];
+  const watch = () => {
+    polls.forEach(clearTimeout);
+    failed.classList.add('hidden');
+    polls = [4000, 10000, 20000, 40000].map((ms) => setTimeout(async () => {
+      const r = await get('/api/auth/otp/status');
+      if (!r.ok) return;
+      if (r.data.state === 'failed') { failed.classList.remove('hidden'); polls.forEach(clearTimeout); }
+      else if (r.data.state === 'sent') polls.forEach(clearTimeout);
+    }, ms));
+  };
+  watch();
+  resend.addEventListener('click', () => failed.classList.add('hidden'));
+  form.addEventListener('otp:resent', watch);
 
   if ('OTPCredential' in window) {
     navigator.credentials.get({ otp: { transport: ['sms'] } }).then((o) => { if (o?.code) { fill(o.code); submit(); } }).catch(() => {});

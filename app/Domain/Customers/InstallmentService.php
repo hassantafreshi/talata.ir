@@ -210,6 +210,30 @@ final class InstallmentService
         });
     }
 
+    /**
+     * «لغو قرارداد»: stops the schedule and its reminders (e.g. the sale is being voided or renegotiated).
+     * Payments already received stay on record; nothing is deleted. Allowed on every plan, so a shop that
+     * downgraded can still close out old agreements.
+     */
+    public function cancel(InstallmentAgreement $agreement, string $reason): InstallmentAgreement
+    {
+        $reason = trim(strip_tags($reason));
+        if (mb_strlen($reason) < 3) {
+            throw new DomainError('VALIDATION', 'دلیل لغو را بنویسید.', 422, ['errors' => ['reason' => ['دلیل لغو را بنویسید.']]]);
+        }
+
+        return DB::transaction(function () use ($agreement, $reason) {
+            $a = InstallmentAgreement::query()->whereKey($agreement->id)->lockForUpdate()->firstOrFail();
+            if ($a->status !== 'active') {
+                throw new DomainError('AGREEMENT_NOT_ACTIVE', 'این قرارداد فعال نیست.', 409);
+            }
+            $a->update(['status' => 'cancelled', 'reminders_enabled' => false]);
+            Audit::record('installment.agreement_cancelled', $a, ['reason' => mb_substr($reason, 0, 250)]);
+
+            return $a;
+        });
+    }
+
     /** Scheduler: reminders 2 days before due and on overdue days, Pro only, opt-out and quiet hours respected. */
     public function sendReminders(SmsService $sms): int
     {

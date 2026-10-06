@@ -376,12 +376,15 @@ final class InvoiceService
             if (! Invoice::query()->whereKey($invoice->id)->where('status', 'issued')->exists()) {
                 throw new DomainError('SHARE_NOT_ALLOWED', 'برای فاکتور باطل‌شده یا پیش‌نویس لینک ساخته نمی‌شود.', 409);
             }
-            $share = InvoiceShare::query()->where('invoice_id', $invoice->id)->whereNull('revoked_at')->first();
+            $share = InvoiceShare::query()->where('invoice_id', $invoice->id)->whereNull('revoked_at')
+                ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))->first();
             if ($share) {
                 return $share;
             }
             $this->entitlements->assertQuota($tenant, 'links_per_month');
-            $share = InvoiceShare::create(['invoice_id' => $invoice->id, 'token' => $st = Tokens::make(), 'token_hash' => Tokens::hash($st), 'created_by' => $user->id]);
+            $ttl = config('talata.public.share_ttl_days');
+            $share = InvoiceShare::create(['invoice_id' => $invoice->id, 'token' => $st = Tokens::make(), 'token_hash' => Tokens::hash($st), 'created_by' => $user->id,
+                'expires_at' => $ttl ? now()->addDays((int) $ttl) : null]);
             Audit::record('invoice.share_created', $invoice);
 
             return $share;
@@ -411,7 +414,7 @@ final class InvoiceService
                 throw new DomainError('NOT_ISSUED', 'فقط فاکتور قطعی قابل ابطال است.', 409);
             }
             if (InstallmentAgreement::query()->where('invoice_id', $invoice->id)->where('status', 'active')->exists()) {
-                throw new DomainError('HAS_INSTALLMENTS', 'این فاکتور قرارداد اقساط فعال دارد. ابتدا تکلیف اقساط را در صفحه مشتری مشخص کنید.', 409);
+                throw new DomainError('HAS_INSTALLMENTS', 'این فاکتور قرارداد اقساط فعال دارد. ابتدا در صفحه مشتری قرارداد را «لغو» کنید (پرداخت‌های ثبت‌شده حفظ می‌شوند)، سپس فاکتور را باطل کنید.', 409);
             }
             $invoice->forceFill([
                 'status' => 'void', 'voided_at' => now(), 'void_reason' => $reason,

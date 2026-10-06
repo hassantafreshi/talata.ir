@@ -39,6 +39,14 @@ export default function () {
     if (res.ok) { toast('پرداخت برگشت خورد.'); setTimeout(() => location.reload(), 600); } else toast(res.message, { kind: 'error' });
   }));
 
+  // «لغو قرارداد»: payments already received stay on record; needed before voiding the linked invoice.
+  document.querySelectorAll('[data-cancel-agreement]').forEach((btn) => btn.addEventListener('click', async () => {
+    const reason = prompt('دلیل لغو قرارداد را بنویسید (مثلاً «فاکتور باطل می‌شود» یا «توافق تازه»). پرداخت‌های ثبت‌شده حفظ می‌شوند.');
+    if (!reason || !reason.trim()) return;
+    const res = await post(`/api/agreements/${btn.dataset.cancelAgreement}/cancel`, { reason: reason.trim() });
+    if (res.ok) { toast('قرارداد لغو شد.'); setTimeout(() => location.reload(), 600); } else toast(res.message, { kind: 'error' });
+  }));
+
   document.querySelectorAll('[data-reminders]').forEach((box) => box.addEventListener('change', async () => {
     const res = await post(`/api/agreements/${box.dataset.reminders}/reminders`, { enabled: box.checked });
     if (res.ok) toast(res.data.enabled ? 'یادآوری فعال شد.' : 'یادآوری خاموش شد.');

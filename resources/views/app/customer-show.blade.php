@@ -54,15 +54,18 @@
                         <ul class="list">
                             @foreach ($a->payments->sortByDesc('id') as $p)
                                 <li class="list-item"><span class="body"><strong class="num">{{ toman($p->amount_irr) }} تومان</strong><span class="sub">{{ jdate($p->paid_on) }} · {{ $methods[$p->method] ?? $p->method }}@if($p->reference) · {{ $p->reference }}@endif @if($p->reversed_at) · برگشت‌خورده: {{ $p->reversal_reason }}@endif</span></span>
-                                    @if (! $p->reversed_at && $canManage && $canInstallments)<button type="button" class="btn btn-link sm" data-reverse="{{ $p->public_id }}">برگشت</button>@endif</li>
+                                    @if (! $p->reversed_at && $canManage)<button type="button" class="btn btn-link sm" data-reverse="{{ $p->public_id }}">برگشت</button>@endif</li>
                             @endforeach
                         </ul>
                     </details>
                 @endif
-                @if ($a->status === 'active' && $canInstallments && $canManage)
+                {{-- Existing debt stays payable and closable on every plan (a downgrade must not freeze it);
+                     creating agreements and SMS reminders remain Professional features. --}}
+                @if ($a->status === 'active' && $canManage)
                     <div class="cluster">
                         <button type="button" class="btn btn-dark sm" data-pay="{{ $a->public_id }}">ثبت دریافت</button>
-                        <label class="check small"><input type="checkbox" data-reminders="{{ $a->public_id }}" @checked($a->reminders_enabled) @disabled(! $a->reminder_mobile || $customer->sms_opt_out)> یادآوری پیامکی سررسید</label>
+                        @if ($canInstallments)<label class="check small"><input type="checkbox" data-reminders="{{ $a->public_id }}" @checked($a->reminders_enabled) @disabled(! $a->reminder_mobile || $customer->sms_opt_out)> یادآوری پیامکی سررسید</label>@endif
+                        <button type="button" class="btn btn-link sm" data-cancel-agreement="{{ $a->public_id }}">لغو قرارداد</button>
                     </div>
                 @endif
             </article>
