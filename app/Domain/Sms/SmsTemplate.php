@@ -63,11 +63,18 @@ final class SmsTemplate
      * Shop names travel inside SMS under our sender line. Block wording that impersonates banks,
      * government or prize/verification messages (common Iranian SMS phishing patterns).
      */
+    /** Distinctive words: matched anywhere, so glued spellings («بانکملت») are caught too. */
     public const PHISHING_WORDS = [
-        'بانک', 'شاپرک', 'ثنا', 'سامانه', 'دولت', 'یارانه', 'عدالت', 'سهام', 'پلیس', 'فتا', 'ابلاغ', 'دادگستری', 'قوه',
-        'مالیات', 'مسدود', 'اخطار', 'هشدار', 'برنده', 'جایزه', 'قرعه', 'رمز', 'کد تایید', 'کد تأیید', 'پشتیبانی', 'وام',
+        'بانک', 'شاپرک', 'سامانه', 'دولت', 'یارانه', 'عدالت', 'سهام', 'پلیس', 'ابلاغ', 'دادگستری',
+        'مالیات', 'مسدود', 'اخطار', 'هشدار', 'برنده', 'جایزه', 'قرعه', 'کد تایید', 'کد تأیید', 'پشتیبانی',
         'همراه اول', 'ایرانسل', 'رایتل', 'زرلیو',
     ];
+
+    /**
+     * Short words that also occur inside ordinary shop names («آفتاب» contains فتا, «قرمز» رمز, «دوام» وام,
+     * «استثنایی» ثنا): matched only as whole words.
+     */
+    public const PHISHING_WHOLE_WORDS = ['فتا', 'ثنا', 'رمز', 'وام', 'قوه'];
 
     public static function looksLikeImpersonation(string $text): bool
     {
@@ -75,6 +82,11 @@ final class SmsTemplate
         $t = preg_replace('/\s+/u', ' ', $t) ?? $t;
         foreach (self::PHISHING_WORDS as $w) {
             if (mb_strpos($t, $w) !== false) {
+                return true;
+            }
+        }
+        foreach (self::PHISHING_WHOLE_WORDS as $w) {
+            if (preg_match('/(?<!\p{Arabic})'.preg_quote($w, '/').'(?!\p{Arabic})/u', $t)) {
                 return true;
             }
         }

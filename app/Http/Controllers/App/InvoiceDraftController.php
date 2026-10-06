@@ -73,14 +73,19 @@ class InvoiceDraftController extends BaseController
             'use_latest_rate' => ['nullable', 'boolean'],
             'latest_rate_irr' => ['nullable', 'string', 'max:30'],
         ]);
-        $this->assertDraft($invoice);
+        // JSON endpoint: saveDraft answers NOT_DRAFT for an issued invoice instead of a page redirect.
+        $this->assertOwnDraft($invoice);
 
         return response()->json($this->invoices->saveDraft($invoice, (int) $data['version'], $data['rows'], $data['buyer'] ?? [], (bool) ($data['use_latest_rate'] ?? false), $this->tenant(), $data['latest_rate_irr'] ?? null));
     }
 
     public function destroy(Invoice $invoice)
     {
-        $this->assertDraft($invoice);
+        // JSON endpoint: an issued invoice is never deleted, and the caller is told why (not redirected).
+        if (! $invoice->isDraft()) {
+            throw new DomainError('NOT_DRAFT', 'فاکتور صادرشده حذف نمی‌شود؛ در صورت نیاز آن را باطل کنید.', 409);
+        }
+        $this->assertOwnDraft($invoice);
         $invoice->delete();
 
         return response()->json(['ok' => true, 'next' => route('invoices.new')]);

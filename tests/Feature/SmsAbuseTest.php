@@ -7,6 +7,7 @@ use App\Domain\Market\QuoteService;
 use App\Domain\Sms\SmsCredit;
 use App\Domain\Sms\SmsGateway;
 use App\Domain\Sms\SmsService;
+use App\Domain\Sms\SmsTemplate;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\ShopProfile;
@@ -312,5 +313,15 @@ class SmsAbuseTest extends TestCase
         $this->assertSame('UNKNOWN', $stuck->fresh()->status);           // ambiguous: looked up later, never resent blindly
         $this->assertSame('CANCELLED', SmsMessage::query()->where('idempotency_key', 'otp:stale')->value('status')); // expired code not sent
         $this->assertSame($before, $this->sent());
+    }
+
+    public function test_ordinary_shop_names_are_not_mistaken_for_impersonation(): void
+    {
+        foreach (['طلای آفتاب', 'گالری قرمز', 'جواهری دوام', 'طلای استثنایی', 'طلافروشی مفتاح', 'زرگری قهوه‌ای'] as $name) {
+            $this->assertFalse(SmsTemplate::looksLikeImpersonation($name), $name);
+        }
+        foreach (['پلیس فتا', 'فتا', 'سامانه ثنا', 'ثنا', 'رمز پویا', 'وام فوری', 'بانکملت', 'قوه قضاییه', 'mellatbank'] as $name) {
+            $this->assertTrue(SmsTemplate::looksLikeImpersonation($name), $name);
+        }
     }
 }

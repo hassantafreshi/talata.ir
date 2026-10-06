@@ -31,7 +31,8 @@
                     @continue
                 @endif
                 <li class="list-item"><span class="body"><strong>{{ $row->name ?: ($row->item_type === 'GOLD' ? 'طلا' : 'متفرقه') }}</strong>
-                    <span class="sub">@if($row->item_type === 'GOLD' && ($row->item_attributes['settlement'] ?? '') === 'WEIGHT')<span class="badge info">تسویه وزنی</span> @endif @if($row->item_type === 'GOLD'){{ \App\Domain\Invoices\InvoicePresenter::weight($row->net_weight_g) }} گرم · {{ \App\Domain\Invoices\InvoicePresenter::purityLabel($row->purity_ppt) }} · اجرت {{ \App\Domain\Invoices\InvoicePresenter::percent($row->wage_percent) }} · سود {{ \App\Domain\Invoices\InvoicePresenter::percent($row->profit_percent) }}@else متفرقه@endif</span></span>
+                    <span class="sub">@if($row->item_type === 'GOLD' && ($row->item_attributes['settlement'] ?? '') === 'WEIGHT')<span class="badge info">تسویه وزنی</span> @endif @if($row->item_type === 'GOLD'){{ \App\Domain\Invoices\InvoicePresenter::weight($row->net_weight_g) }} گرم · {{ \App\Domain\Invoices\InvoicePresenter::purityLabel($row->purity_ppt) }} · اجرت {{ \App\Domain\Invoices\InvoicePresenter::percent($row->wage_percent) }} · سود {{ \App\Domain\Invoices\InvoicePresenter::percent($row->profit_percent) }}@else متفرقه@endif</span>
+                    @if ($row->description)<span class="sub">{{ $row->description }}</span>@endif</span>
                     <span class="num strong nowrap">{{ $s['total_fa'] ?? '—' }}</span></li>
             @endforeach
         </ul>

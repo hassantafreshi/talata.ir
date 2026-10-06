@@ -295,6 +295,7 @@ export default function () {
     }
     // Device copy: rows only (no buyer name/mobile), dropped after LOCAL_TTL and at logout.
     try { localStorage.setItem(localKey, JSON.stringify({ base_version: version, rows: payload.rows, at: Date.now() })); } catch {}
+    if (res.code === 'NOT_DRAFT') { stopped = true; try { localStorage.removeItem(localKey); } catch {} saveState.textContent = 'این فاکتور صادر شده است و دیگر ویرایش نمی‌شود.'; toast(res.message, { kind: 'error', timeout: 15000, action: { label: 'دیدن فاکتور', onClick: () => location.reload() } }); return false; }
     if (res.code === 'DRAFT_CONFLICT') { stopped = true; saveState.textContent = 'این پیش‌نویس در جای دیگری تغییر کرد.'; toast(res.message, { kind: 'error', timeout: 15000, action: { label: 'بارگذاری دوباره', onClick: () => location.reload() } }); return false; }
     if (res.status === 401 || res.status === 419) {
       // Session ended: retrying cannot help. The edits are on this device and come back after signing in.
