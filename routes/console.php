@@ -52,6 +52,16 @@ Artisan::command('talata:sms-reconcile', function (SmsGateway $gateway, SmsServi
                 $sms->applyOutcome($m, 'FAILED', null, 'not found at provider after 30 minutes');
             }
         });
+
+    // 4) Stuck messages. QUEUED for long = the job was lost: dispatch again (SendSms claims QUEUED atomically,
+    //    so a duplicate dispatch still sends once). SENDING for long = the worker died mid-send: the outcome is
+    //    unknown, so it goes through the same lookup-then-refund path as any ambiguous send (never a blind resend).
+    //    A login code that old has expired anyway: cancel it instead of sending a useless SMS.
+    SmsMessage::query()->where('status', 'QUEUED')->where('purpose', 'OTP')->where('updated_at', '<', now()->subMinutes(10))->update(['status' => 'CANCELLED', 'last_error' => 'expired before sending', 'updated_at' => now()]);
+    SmsMessage::query()->where('status', 'QUEUED')->where('purpose', '!=', 'OTP')->where('updated_at', '<', now()->subMinutes(10))->limit(200)->pluck('id')
+        ->each(fn ($id) => \App\Jobs\SendSms::dispatch($id));
+    SmsMessage::query()->where('status', 'SENDING')->where('updated_at', '<', now()->subMinutes(10))->limit(200)->get()
+        ->each(fn (SmsMessage $m) => $sms->applyOutcome($m, 'UNKNOWN', null, 'worker stopped while sending'));
     $this->info("reconciled {$n}");
 })->purpose('Resolve SMS messages with unknown delivery status');
 

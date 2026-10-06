@@ -245,4 +245,72 @@ class SmsAbuseTest extends TestCase
         $service->sendReminders($sms);
         $this->assertSame($before, SmsMessage::query()->count());
     }
+
+    public function test_waiting_invoice_sms_go_out_when_credit_arrives_but_never_for_a_voided_invoice(): void
+    {
+        $user = $this->merchant('basic');
+        $kept = $this->issueTo($user, '09350000011');
+        $voided = $this->issueTo($user, '09350000012');
+        $this->assertSame('AWAITING_CREDIT', $kept['sms']['status']);
+        $this->api('POST', "/api/invoices/{$voided['id']}/void", ['reason' => 'WRONG_WEIGHT'])->assertOk();
+        $this->assertSame(0, $this->sent());
+
+        $this->credit($user, 10000);
+        $queued = app(SmsService::class)->releaseAwaitingCredit($this->tenantOf($user));
+
+        $this->assertSame(1, $queued);
+        $this->assertSame(1, $this->sent());
+        $this->assertSame('09350000011', app(SmsGateway::class)->sent[0]['to']);
+        $this->assertSame('CREDIT', SmsMessage::query()->where('recipient', '09350000011')->latest('id')->value('charge_source'));
+        // The voided invoice's message was cancelled (void cancels waiting sends), never announced.
+        $this->assertNotSame('SENT', SmsMessage::query()->where('recipient', '09350000012')->latest('id')->value('status'));
+    }
+
+    public function test_no_resend_while_the_previous_outcome_is_unknown(): void
+    {
+        $user = $this->merchant('professional');
+        $this->credit($user, 100000);
+        app(SmsGateway::class)->nextStatus = 'UNKNOWN';
+        $r = $this->issueTo($user, '09350000021');
+        $this->travel(15)->minutes();
+        $this->api('POST', "/api/invoices/{$r['id']}/sms")->assertStatus(409)->assertJsonPath('code', 'SMS_STATUS_UNKNOWN');
+        $this->assertSame(1, SmsMessage::query()->where('recipient', '09350000021')->count());
+    }
+
+    public function test_review_preview_counts_the_same_segments_as_the_real_message(): void
+    {
+        $user = $this->merchant('professional');
+        $this->credit($user, 100000);
+        $rate = app(QuoteService::class)->latestDto('Asia/Tehran')['value_irr'];
+        $d = $this->actingAs($user)->api('POST', '/api/invoices/drafts', ['mode' => 'MARKET', 'value_irr' => $rate])->assertCreated();
+        $s = $this->api('PUT', '/api/invoices/drafts/'.$d->json('draft_id'), ['version' => $d->json('version'), 'rows' => [[
+            'row_uid' => 'r1', 'item_type' => 'GOLD', 'name' => 'النگو', 'net_weight_g' => '1', 'purity_ppt' => '750', 'wage_percent' => '0', 'profit_percent' => '0',
+        ]], 'buyer' => ['mobile' => '09350000031']])->assertOk();
+        $preview = $this->inTenant($user, fn ($t) => app(SmsService::class)->previewFor(\App\Models\Invoice::where('public_id', $d->json('draft_id'))->first(), $t));
+        $this->api('POST', '/api/invoices/drafts/'.$d->json('draft_id').'/issue', [
+            'mode' => 'ISSUE_AND_SMS', 'version' => $s->json('version'), 'idempotency_key' => 'k-'.bin2hex(random_bytes(8)), 'buyer' => ['mobile' => '09350000031'],
+        ])->assertCreated();
+        $real = SmsMessage::query()->where('recipient', '09350000031')->firstOrFail();
+        $this->assertSame($real->segments, $preview['segments']);
+        $this->assertSame(mb_strlen($real->body), mb_strlen($preview['body']));
+    }
+
+    public function test_reconcile_picks_up_stuck_messages_without_blind_resends(): void
+    {
+        $user = $this->merchant('professional');
+        $this->credit($user, 100000);
+        app(SmsGateway::class)->nextStatus = 'UNKNOWN';
+        $this->issueTo($user, '09350000041');
+        $stuck = SmsMessage::query()->where('recipient', '09350000041')->firstOrFail();
+        SmsMessage::query()->whereKey($stuck->id)->update(['status' => 'SENDING', 'updated_at' => now()->subMinutes(11)]);
+        SmsMessage::query()->create(['tenant_id' => null, 'purpose' => 'OTP', 'recipient' => '09350000042', 'body' => 'x', 'payload' => ['code' => '123456'], 'segments' => 1, 'cost_irr' => '0', 'charge_source' => 'OPERATIONAL', 'status' => 'QUEUED', 'idempotency_key' => 'otp:stale']);
+        SmsMessage::query()->where('idempotency_key', 'otp:stale')->update(['updated_at' => now()->subMinutes(11)]);
+        $before = $this->sent();
+
+        $this->artisan('talata:sms-reconcile')->assertSuccessful();
+
+        $this->assertSame('UNKNOWN', $stuck->fresh()->status);           // ambiguous: looked up later, never resent blindly
+        $this->assertSame('CANCELLED', SmsMessage::query()->where('idempotency_key', 'otp:stale')->value('status')); // expired code not sent
+        $this->assertSame($before, $this->sent());
+    }
 }

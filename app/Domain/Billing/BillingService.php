@@ -293,6 +293,14 @@ final class BillingService
         } catch (\Throwable $e) {
             TechLog::error('affiliate', 'commission not recorded', ['order' => $order->public_ref, 'error' => mb_substr($e->getMessage(), 0, 300)]);
         }
+        if ($order->product === 'SMS_CREDIT') {
+            try {
+                // The review/invoice pages promise that invoice SMS waiting for credit go out once credit arrives.
+                DB::transaction(fn () => app(\App\Domain\Sms\SmsService::class)->releaseAwaitingCredit($tenant));
+            } catch (\Throwable $e) {
+                TechLog::error('sms', 'waiting invoice SMS not released after top-up', ['order' => $order->public_ref, 'error' => mb_substr($e->getMessage(), 0, 300)]);
+            }
+        }
     }
 
     private function activatePlan(Tenant $tenant, BillingOrder $order): void

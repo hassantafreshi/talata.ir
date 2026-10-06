@@ -18,6 +18,10 @@ export default function () {
   let version = boot.version;
   let rate = boot.rate_irr;
   let buyRate = boot.buy_rate_irr;
+  const acceptedRate = rate, acceptedBuyRate = buyRate;
+  const newRate = document.querySelector('[data-new-rate]');
+  const acceptedRateFa = document.querySelector('[data-rate]')?.textContent;
+  const LOCAL_TTL = 24 * 3600 * 1000;
   const host = document.querySelector('[data-rows]');
   const tpl = document.querySelector('[data-row-tpl]');
   const saveState = document.querySelector('[data-save-state]');
@@ -265,7 +269,8 @@ export default function () {
   async function save() {
     if (saving) { timer = setTimeout(save, 400); return false; }
     saving = true; dirty = false;
-    const payload = { version, rows: rows.map((r) => ({ ...r })), buyer: boot.buyer, use_latest_rate: useLatest };
+    // «نرخ جدید»: send the exact rate the merchant saw; the server applies it only if it is still the current one.
+    const payload = { version, rows: rows.map((r) => ({ ...r })), buyer: boot.buyer, use_latest_rate: useLatest, ...(useLatest ? { latest_rate_irr: rate } : {}) };
     const res = await put(`/api/invoices/drafts/${boot.id}`, payload);
     saving = false;
     if (res.ok) {
@@ -277,7 +282,19 @@ export default function () {
       return true;
     }
     dirty = true;
-    try { localStorage.setItem(localKey, JSON.stringify({ base_version: version, rows: payload.rows, buyer: payload.buyer, at: Date.now() })); } catch {}
+    if (res.code === 'RATE_CHANGED') {
+      // The market moved again since the notice was shown: go back to the accepted rate and show the new value.
+      useLatest = false; rate = acceptedRate; buyRate = acceptedBuyRate;
+      boot.latest_irr = res.data.latest?.value_irr; boot.latest_fa = res.data.latest?.value_toman_fa;
+      document.querySelector('[data-rate]').textContent = acceptedRateFa;
+      if (boot.latest_irr) { newRate.classList.remove('hidden'); newRate.querySelector('[data-new-rate-value]').textContent = boot.latest_fa; }
+      render();
+      toast(res.message, { kind: 'error', timeout: 9000 });
+      timer = setTimeout(save, 300);
+      return false;
+    }
+    // Device copy: rows only (no buyer name/mobile), dropped after LOCAL_TTL and at logout.
+    try { localStorage.setItem(localKey, JSON.stringify({ base_version: version, rows: payload.rows, at: Date.now() })); } catch {}
     if (res.code === 'DRAFT_CONFLICT') { stopped = true; saveState.textContent = 'این پیش‌نویس در جای دیگری تغییر کرد.'; toast(res.message, { kind: 'error', timeout: 15000, action: { label: 'بارگذاری دوباره', onClick: () => location.reload() } }); return false; }
     if (res.status === 401 || res.status === 419) {
       // Session ended: retrying cannot help. The edits are on this device and come back after signing in.
@@ -311,8 +328,9 @@ export default function () {
   // A copy left on this device by a save that never reached the server (offline, closed tab) is offered back.
   try {
     const local = JSON.parse(localStorage.getItem(localKey) || 'null');
-    if (local && local.base_version === version && Array.isArray(local.rows)) {
-      toast('تغییرات ذخیره‌نشده‌ای روی همین دستگاه پیدا شد.', { timeout: 30000, action: { label: 'بازگرداندن', onClick: () => { rows = local.rows; if (local.buyer) boot.buyer = local.buyer; render(); changed(); } } });
+    const fresh = local && Number(local.at) > Date.now() - LOCAL_TTL;
+    if (fresh && local.base_version === version && Array.isArray(local.rows)) {
+      toast('تغییرات ذخیره‌نشده‌ای روی همین دستگاه پیدا شد.', { timeout: 30000, action: { label: 'بازگرداندن', onClick: () => { rows = local.rows; render(); changed(); } } });
     } else if (local) {
       localStorage.removeItem(localKey);
     }
@@ -325,7 +343,6 @@ export default function () {
   });
 
   // New market rate notice (never applied silently).
-  const newRate = document.querySelector('[data-new-rate]');
   if (boot.rate_mode === 'MARKET' && boot.latest_irr && boot.latest_irr !== rate) {
     newRate.classList.remove('hidden');
     newRate.querySelector('[data-new-rate-value]').textContent = boot.latest_fa;

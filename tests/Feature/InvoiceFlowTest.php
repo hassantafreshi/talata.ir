@@ -175,4 +175,48 @@ class InvoiceFlowTest extends TestCase
         $this->assertStringContainsString($fresh, $month->json('html'));
         $this->assertStringNotContainsString($old, $month->json('html'));
     }
+
+    public function test_an_issue_key_replays_only_for_its_own_draft(): void
+    {
+        $user = $this->merchant();
+        [$a, $va] = $this->draft($user);
+        [$b, $vb] = $this->draft($user);
+        $this->issue($user, $a, $va, 'ISSUE_ONLY', 'shared-key-0001')->assertCreated();
+        $this->issue($user, $a, $va, 'ISSUE_ONLY', 'shared-key-0001')->assertOk();          // same draft: replay
+        $this->issue($user, $b, $vb, 'ISSUE_ONLY', 'shared-key-0001')->assertStatus(409)->assertJsonPath('code', 'IDEMPOTENCY_KEY_REUSED');
+        $this->assertSame('draft', Invoice::where('public_id', $b)->value('status'));
+    }
+
+    private function newerQuote(string $irr): void
+    {
+        \App\Models\MarketQuote::query()->create([
+            'asset' => 'GOLD_18_SELL', 'value' => $irr, 'unit' => 'IRR_PER_GRAM', 'source' => 'test', 'is_demo' => true,
+            'quote_time' => now(), 'fetched_at' => now()->addSecond(),
+        ]);
+    }
+
+    public function test_a_newer_rate_is_applied_only_when_it_is_the_one_the_merchant_saw(): void
+    {
+        $user = $this->merchant();
+        [$id, $v] = $this->draft($user);
+        $accepted = Invoice::where('public_id', $id)->value('accepted_rate_irr');
+        $seen = (string) ((int) $accepted + 100000);
+        $this->newerQuote($seen);
+        $this->newerQuote((string) ((int) $seen + 50000));           // the market moved again after the notice
+
+        $this->api('PUT', "/api/invoices/drafts/{$id}", ['version' => $v, 'rows' => [$this->goldRow()], 'buyer' => [], 'use_latest_rate' => true, 'latest_rate_irr' => $seen])
+            ->assertStatus(409)->assertJsonPath('code', 'RATE_CHANGED')->assertJsonPath('latest.value_irr', (string) ((int) $seen + 50000));
+        $this->assertSame((string) $accepted, (string) Invoice::where('public_id', $id)->value('accepted_rate_irr'));
+
+        $current = (string) ((int) $seen + 50000);
+        $saved = $this->api('PUT', "/api/invoices/drafts/{$id}", ['version' => $v, 'rows' => [$this->goldRow()], 'buyer' => [], 'use_latest_rate' => true, 'latest_rate_irr' => $current])->assertOk();
+        $this->assertSame($current, (string) Invoice::where('public_id', $id)->value('accepted_rate_irr'));
+
+        // After issue, later market moves never touch the issued invoice.
+        $this->issue($user, $id, $saved->json('version'))->assertCreated();
+        $snapshotRate = Invoice::where('public_id', $id)->value('snapshot')['rate'] ?? null;
+        $this->newerQuote((string) ((int) $current + 999999));
+        $this->assertSame($current, (string) Invoice::where('public_id', $id)->value('accepted_rate_irr'));
+        $this->assertSame($snapshotRate, Invoice::where('public_id', $id)->value('snapshot')['rate'] ?? null);
+    }
 }

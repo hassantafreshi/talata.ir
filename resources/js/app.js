@@ -26,6 +26,17 @@ function confirmLinks() {
   });
 }
 
+// Leaving the account: remove draft copies kept on this device (shared phones in a shop).
+function clearDeviceCopiesOnLogout() {
+  document.addEventListener('submit', (e) => {
+    if (!/\/logout(\?|$)/.test(e.target.getAttribute('action') || '')) return;
+    try {
+      Object.keys(localStorage).filter((k) => k.startsWith('draft:')).forEach((k) => localStorage.removeItem(k));
+      Object.keys(sessionStorage).filter((k) => k.startsWith('review-buyer:')).forEach((k) => sessionStorage.removeItem(k));
+    } catch {}
+  });
+}
+
 function flash() {
   document.querySelectorAll('[data-flash]').forEach((el) => toast(el.dataset.flash, { kind: el.dataset.kind || 'info' }));
 }
@@ -33,6 +44,7 @@ function flash() {
 document.addEventListener('DOMContentLoaded', async () => {
   offlineBanner();
   confirmLinks();
+  clearDeviceCopiesOnLogout();
   // Date picker code loads only on pages that have a date field.
   if (document.querySelector('[data-jdp]')) import('./lib/datepicker.js').then((m) => m.initDatePickers());
   // The post-login fingerprint offer loads only on the page that actually shows the card.

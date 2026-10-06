@@ -71,10 +71,11 @@ class InvoiceDraftController extends BaseController
             'buyer.name' => ['nullable', 'string', 'max:120'],
             'buyer.mobile' => ['nullable', 'string', 'max:20'],
             'use_latest_rate' => ['nullable', 'boolean'],
+            'latest_rate_irr' => ['nullable', 'string', 'max:30'],
         ]);
         $this->assertDraft($invoice);
 
-        return response()->json($this->invoices->saveDraft($invoice, (int) $data['version'], $data['rows'], $data['buyer'] ?? [], (bool) ($data['use_latest_rate'] ?? false), $this->tenant()));
+        return response()->json($this->invoices->saveDraft($invoice, (int) $data['version'], $data['rows'], $data['buyer'] ?? [], (bool) ($data['use_latest_rate'] ?? false), $this->tenant(), $data['latest_rate_irr'] ?? null));
     }
 
     public function destroy(Invoice $invoice)

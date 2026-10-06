@@ -92,6 +92,7 @@ return [
 
     'sms' => [
         'max_sends_per_invoice' => 3,
+        'awaiting_credit_max_days' => 7,      // invoice SMS waiting for credit are sent when credit arrives within this window
         'resend_min_minutes' => 10,
         'per_recipient_per_tenant_daily' => 3,
         'per_recipient_global_free_daily' => 2,

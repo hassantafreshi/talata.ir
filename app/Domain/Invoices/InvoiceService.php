@@ -94,7 +94,11 @@ final class InvoiceService
     }
 
     /** Autosave with optimistic versioning. Returns the priced state. */
-    public function saveDraft(Invoice $invoice, int $version, array $rows, array $buyer, bool $useLatestRate, Tenant $tenant): array
+    /**
+     * $useLatestRate + $seenRateIrr: the merchant tapped «استفاده از نرخ جدید» on the value they saw. It is
+     * applied only if it is still the current, non-stale market value; otherwise RATE_CHANGED and nothing moves.
+     */
+    public function saveDraft(Invoice $invoice, int $version, array $rows, array $buyer, bool $useLatestRate, Tenant $tenant, ?string $seenRateIrr = null): array
     {
         if (! $invoice->isDraft()) {
             throw new DomainError('NOT_DRAFT', 'این فاکتور صادر شده و قابل ویرایش نیست.', 409);
@@ -103,13 +107,21 @@ final class InvoiceService
             throw new DomainError('TOO_MANY_ROWS', 'تعداد ردیف‌ها بیش از حد مجاز است.', 422);
         }
 
-        return DB::transaction(function () use ($invoice, $version, $rows, $buyer, $useLatestRate, $tenant) {
+        return DB::transaction(function () use ($invoice, $version, $rows, $buyer, $useLatestRate, $tenant, $seenRateIrr) {
             $invoice = Invoice::query()->whereKey($invoice->id)->lockForUpdate()->firstOrFail();
             if ($invoice->version !== $version) {
                 throw new DomainError('DRAFT_CONFLICT', 'این پیش‌نویس در جای دیگری تغییر کرد. صفحه را دوباره باز کنید.', 409, ['version' => $invoice->version]);
             }
             if ($useLatestRate && $invoice->rate_mode !== 'NONE') {
                 $latest = $this->quotes->latest('GOLD_18_SELL');
+                $latestValue = $latest ? (string) BigDecimal::of($latest->value)->toScale(0, RoundingMode::HalfUp) : null;
+                if (! $latest || $this->quotes->freshness($latest) === 'ERROR' || $seenRateIrr !== $latestValue) {
+                    throw new DomainError('RATE_CHANGED', 'نرخ دوباره تغییر کرد. نرخ قبلی فاکتور حفظ شد؛ اگر می‌خواهید، نرخ تازه را دوباره انتخاب کنید.', 409, [
+                        'latest' => $latest && $this->quotes->freshness($latest) !== 'ERROR'
+                            ? ['value_irr' => $latestValue, 'value_toman_fa' => Money::toman($latestValue), 'fetched_at_fa' => Jalali::time($latest->fetched_at, $tenant->timezone)]
+                            : null,
+                    ]);
+                }
                 if ($latest) {
                     $invoice->rate_mode = 'MARKET';
                     $invoice->accepted_rate_irr = (string) BigDecimal::of($latest->value)->toScale(0, RoundingMode::HalfUp);
@@ -214,6 +226,12 @@ final class InvoiceService
 
         $existing = Invoice::query()->where('issue_key', $key)->first();
         if ($existing) {
+            // A replay is only a replay for the same draft (the draft row becomes the invoice). The same key on
+            // another draft must not answer "issued" with someone else's invoice.
+            if ($existing->id !== $draft->id) {
+                throw new DomainError('IDEMPOTENCY_KEY_REUSED', 'این درخواست قبلاً برای فاکتور دیگری استفاده شده است. صفحه را دوباره باز کنید.', 409);
+            }
+
             return ['invoice' => $existing, 'replayed' => true];
         }
 

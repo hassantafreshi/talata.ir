@@ -4,6 +4,7 @@ namespace App\Domain\Sms;
 
 use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
+use App\Domain\Invoices\Numbering;
 use App\Domain\Plans\Entitlements;
 use App\Jobs\SendSms;
 use App\Models\Customer;
@@ -15,6 +16,7 @@ use App\Models\Tenant;
 use App\Support\Digits;
 use App\Support\Money;
 use Brick\Math\BigInteger;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -74,11 +76,20 @@ final class SmsService
         return SmsTemplate::DEFAULT;
     }
 
-    public function previewFor(Invoice $invoice, Tenant $tenant, string $link = 'zarlio.ir/i/••••'): array
+    /** Same length as a real share link (32-byte token = 43 base64url chars), so the review counts real segments. */
+    public static function linkPlaceholder(): string
     {
+        return config('talata.public_url').'/i/'.str_repeat('•', 43);
+    }
+
+    public function previewFor(Invoice $invoice, Tenant $tenant, ?string $link = null): array
+    {
+        $link ??= self::linkPlaceholder();
+        // A draft has no number yet: preview with the number it would get now (same shape and length).
+        $number = $invoice->number ?? (Numbering::preview(Numbering::settings(), CarbonImmutable::now(), $tenant->timezone)[0] ?? null);
         $body = SmsTemplate::render($this->templateFor($tenant), [
             'shop_name' => $invoice->snapshot['shop']['name'] ?? $tenant->profile?->name ?? '',
-            'invoice_number' => $invoice->number ? Digits::invoiceNumber($invoice->number) : '—',
+            'invoice_number' => $number ? Digits::invoiceNumber($number) : '—',
             // Gold received can exceed the sale: then the balance is owed to the customer.
             'amount' => str_starts_with((string) $invoice->payable_irr, '-')
                 ? Money::toman(ltrim((string) $invoice->payable_irr, '-')).' تومان به نفع شما'
@@ -137,6 +148,11 @@ final class SmsService
                 }
                 if (in_array($last->status, ['QUEUED', 'SENDING', 'SENT', 'DELIVERED'], true)) {
                     throw new DomainError('SMS_ALREADY_SENT', 'پیامک این فاکتور ارسال شده یا در صف است؛ ارسال دوباره فقط پس از ناموفق‌شدن ممکن است.', 409);
+                }
+                // Outcome not known yet: a resend could reach the customer twice. Reconciliation settles it
+                // (delivered, or failed and refunded within about 30 minutes); then a resend is allowed.
+                if ($last->status === 'UNKNOWN') {
+                    throw new DomainError('SMS_STATUS_UNKNOWN', 'وضعیت پیامک قبلی هنوز روشن نیست. تا روشن شدن آن (حداکثر حدود ۳۰ دقیقه) ارسال دوباره ممکن نیست تا پیامک تکراری نرود.', 409);
                 }
                 if ($last->status !== 'AWAITING_CREDIT' && $last->created_at->gt(now()->subMinutes($cfg['resend_min_minutes']))) {
                     throw new DomainError('SMS_RESEND_COOLDOWN', 'ارسال دوباره تا '.Digits::toPersian((string) $cfg['resend_min_minutes']).' دقیقه پس از تلاش قبلی ممکن نیست.', 429);
@@ -289,6 +305,41 @@ final class SmsService
                 $this->credit->release($message);
             }
             $message->save();
+        });
+    }
+
+    /**
+     * Credit arrived (top-up or admin adjustment): queue the shop's invoice SMS that were waiting for credit,
+     * oldest first, until the credit runs out. Only for invoices that are still issued and messages from the
+     * last `awaiting_credit_max_days`; a voided invoice's waiting message is cancelled, never announced.
+     */
+    public function releaseAwaitingCredit(Tenant $tenant): int
+    {
+        return DB::transaction(function () use ($tenant) {
+            Tenant::query()->whereKey($tenant->id)->lockForUpdate()->first();
+            $waiting = SmsMessage::query()->forTenant($tenant->id)->where('purpose', 'INVOICE')->where('status', 'AWAITING_CREDIT')
+                ->where('created_at', '>=', now()->subDays((int) config('talata.sms.awaiting_credit_max_days', 7)))
+                ->orderBy('id')->lockForUpdate()->get();
+            $perSegment = $this->entitlements->smsPerSegmentIrr($tenant);
+            $queued = 0;
+            foreach ($waiting as $m) {
+                if (! Invoice::withoutGlobalScope('tenant')->where('tenant_id', $tenant->id)->whereKey($m->invoice_id)->where('status', 'issued')->exists()) {
+                    $m->update(['status' => 'CANCELLED', 'last_error' => 'invoice no longer issued']);
+
+                    continue;
+                }
+                $cost = (string) BigInteger::of($perSegment)->multipliedBy($m->segments);
+                $m->forceFill(['charge_source' => 'CREDIT', 'cost_irr' => $cost, 'status' => 'QUEUED'])->save();
+                if (! $this->credit->reserve($tenant->id, $cost, $m)) {
+                    $m->update(['status' => 'AWAITING_CREDIT', 'cost_irr' => '0', 'charge_source' => 'NONE']);
+                    break;
+                }
+                Audit::record('sms.queued_after_credit', null, ['message' => $m->public_id, 'segments' => $m->segments], $tenant->id, 'system');
+                SendSms::dispatch($m->id)->afterCommit();
+                $queued++;
+            }
+
+            return $queued;
         });
     }
 }
