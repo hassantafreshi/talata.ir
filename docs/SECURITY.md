@@ -157,12 +157,12 @@
 
 ## ۴. صفحات عمومی
 - توکن بررسی و توکن اشتراک ۲۵۶ بیتی، جستجو با SHA-256، نسخه خام فقط رمزنگاری‌شده با `APP_KEY` (برای چاپ دوباره همان QR).
-- `/v/{token}` بدون نام/موبایل خریدار و صادرکننده؛ `/i/{token}` موبایل ماسک‌شده؛ `no-store`، `noindex`، محدودیت ۳۰ درخواست در دقیقه.
+- `/v/{token}` بدون نام/موبایل خریدار و صادرکننده (این داده‌ها اصلاً به view داده نمی‌شوند)؛ `/i/{token}` موبایل ماسک‌شده؛ `no-store`، `noindex`، `Referrer-Policy: no-referrer` (هم سربرگ و هم meta)، محدودیت ۳۰ درخواست در دقیقه؛ لینک مشتری قابل لغو و با انقضای اختیاری (`TALATA_SHARE_TTL_DAYS`)؛ QR با حاشیه خالی ۴ ماژولی (`PublicPagesTest`، `QrTest`).
 
 ## ۵. وب
 CSP سخت با nonce (بدون inline script/style attribute)، `X-Frame-Options: DENY`، nosniff، Referrer-Policy، Permissions-Policy، COOP/CORP، HSTS روی HTTPS؛ CSRF برای همه درخواست‌ها جز callback بانک؛ نشست رمزنگاری‌شده و بازسازی پس از ورود؛ لوگو با بازسازی تصویر (حذف EXIF/محتوای پنهان) و سرو با `default-src 'none'`؛ خروجی Blade escape و `innerHTML` در JS فقط با HTML سرور یا `escapeHtml`.
 
 ## ۶. باقی‌مانده و تصمیم‌های مالک
-- انتخاب ارائه‌دهنده پیامک و PSP واقعی (adapterها آماده‌اند).
-- `form-action` در CSP هنگام انتخاب PSP با فرم POST باید دامنه درگاه را اضافه کند.
-- تست نفوذ مستقل و بررسی حقوقی/مالیاتی انجام نشده است.
+- کاوه‌نگار و زرین‌پال انتخاب و پیاده شده‌اند؛ اتصال زنده پس از دریافت کلید/خط و کد پذیرنده انجام می‌شود (`talata:preflight --live`).
+- `form-action` در CSP دامنه درگاه‌های ثبت‌شده را خودکار اضافه می‌کند (`SecurityHeaders::pspFormHosts`).
+- تست نفوذ مستقل و بررسی حقوقی/مالیاتی انجام نشده است؛ آماده‌سازی تست نفوذ: `docs/PENTEST_READINESS.md`.

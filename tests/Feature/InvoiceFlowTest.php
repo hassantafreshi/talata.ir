@@ -4,7 +4,10 @@ namespace Tests\Feature;
 
 use App\Domain\Invoices\InvoiceService;
 use App\Domain\Market\QuoteService;
+use App\Models\Customer;
+use App\Models\InstallmentAgreement;
 use App\Models\Invoice;
+use App\Models\MarketQuote;
 use App\Models\SmsMessage;
 use Tests\TestCase;
 
@@ -145,8 +148,8 @@ class InvoiceFlowTest extends TestCase
 
         $this->inTenant($user, function () use ($withPlan) {
             $invoice = Invoice::where('public_id', $withPlan)->firstOrFail();
-            $customer = \App\Models\Customer::create(['name' => 'خریدار قسطی']);
-            \App\Models\InstallmentAgreement::create([
+            $customer = Customer::create(['name' => 'خریدار قسطی']);
+            InstallmentAgreement::create([
                 'customer_id' => $customer->id, 'invoice_id' => $invoice->id, 'principal_irr' => '1000000',
                 'count' => 3, 'frequency' => 'monthly', 'status' => 'active',
             ]);
@@ -189,7 +192,7 @@ class InvoiceFlowTest extends TestCase
 
     private function newerQuote(string $irr): void
     {
-        \App\Models\MarketQuote::query()->create([
+        MarketQuote::query()->create([
             'asset' => 'GOLD_18_SELL', 'value' => $irr, 'unit' => 'IRR_PER_GRAM', 'source' => 'test', 'is_demo' => true,
             'quote_time' => now(), 'fetched_at' => now()->addSecond(),
         ]);

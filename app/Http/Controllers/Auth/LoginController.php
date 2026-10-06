@@ -11,6 +11,7 @@ use App\Domain\Identity\ProofOfWork;
 use App\Domain\Identity\TrustedDevice;
 use App\Http\Controllers\Controller;
 use App\Models\Membership;
+use App\Models\Passkey;
 use App\Models\SmsMessage;
 use App\Support\Mobile;
 use Illuminate\Http\JsonResponse;
@@ -130,7 +131,7 @@ class LoginController extends Controller
         $then = $request->session()->pull('login.then');
         // After an SMS login, offer fingerprint login once — unless they already have a passkey or are
         // already on their way to set one up. The device-support check and "don't ask again" live client-side.
-        if ($then !== 'passkey' && ! \App\Models\Passkey::query()->where('owner_type', 'user')->where('owner_id', $result['user']->id)->exists()) {
+        if ($then !== 'passkey' && ! Passkey::query()->where('owner_type', 'user')->where('owner_id', $result['user']->id)->exists()) {
             $request->session()->flash('offer_passkey', true);
         }
         $next = match (true) {

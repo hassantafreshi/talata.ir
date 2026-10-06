@@ -89,6 +89,14 @@ final class Jalali
         return [$start->utc(), self::startOf($ny, $nm, $tz)->utc(), $jy, $jm];
     }
 
+    /** [start, end) of the Jalali year containing $at, in UTC. */
+    public static function yearBounds(DateTimeInterface $at, string $tz): array
+    {
+        $jy = self::year($at, $tz);
+
+        return [self::startOf($jy, 1, $tz)->utc(), self::startOf($jy + 1, 1, $tz)->utc()];
+    }
+
     private static function startOf(int $jy, int $jm, string $tz): CarbonImmutable
     {
         [$gy, $gm, $gd] = self::toGregorian($jy, $jm, 1);

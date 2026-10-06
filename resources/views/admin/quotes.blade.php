@@ -31,7 +31,7 @@
                         <tr><td class="muted">هنوز دریافتی ثبت نشده است.</td></tr>
                     @endforelse
                 </tbody></table>
-                <p class="xs muted">ارائه‌دهنده: <span class="mono">{{ $driver }}</span> · فاصله دریافت {{ fa($config['interval_seconds']) }} ثانیه (ثابت) · «قدیمی» پس از {{ fa($config['stale_after_minutes']) }} دقیقه@if($lastError) · آخرین خطا: {{ jdate(\Carbon\CarbonImmutable::parse($lastError), true) }}@endif</p>
+                <p class="xs muted">ارائه‌دهنده: <span class="mono">{{ $driver }}</span> · فاصله دریافت {{ fa($config['interval_seconds']) }} ثانیه (ثابت) · «قدیمی» پس از {{ fa($config['stale_after_seconds']) }} ثانیه@if($lastError) · آخرین خطا: {{ jdate(\Carbon\CarbonImmutable::parse($lastError), true) }}@endif</p>
             </section>
         </section>
 

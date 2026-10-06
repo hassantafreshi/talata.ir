@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Domain\Identity\WebAuthn\Cbor;
 use App\Domain\Identity\WebAuthn\WebAuthnException;
 use App\Models\AuditEvent;
+use App\Models\Membership;
 use App\Models\Passkey;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -210,7 +211,7 @@ class PasskeyTest extends TestCase
 
         auth()->logout();
         $this->flushSession();
-        \App\Models\Membership::query()->where('user_id', $user->id)->update(['status' => 'removed']);
+        Membership::query()->where('user_id', $user->id)->update(['status' => 'removed']);
         $this->login($device)->assertStatus(422)->assertJsonPath('code', 'PASSKEY_FAILED');
         $this->assertGuest();
     }

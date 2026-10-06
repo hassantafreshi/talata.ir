@@ -5,6 +5,7 @@ namespace App\Http\Controllers\App;
 use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Models\Membership;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Support\Digits;
 use App\Support\Mobile;
@@ -52,7 +53,7 @@ class UsersController extends BaseController
         // Check-then-create under the tenant row lock: two invites at once must not both pass the member cap
         // or both invite the same number.
         return DB::transaction(function () use ($tenantId, $mobile, $data) {
-            \App\Models\Tenant::query()->whereKey($tenantId)->lockForUpdate()->first();
+            Tenant::query()->whereKey($tenantId)->lockForUpdate()->first();
 
             return $this->createInvite($tenantId, $mobile, $data);
         });

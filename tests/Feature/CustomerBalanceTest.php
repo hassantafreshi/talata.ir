@@ -2,9 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Market\QuoteService;
 use App\Models\Customer;
 use App\Models\InstallmentAgreement;
 use App\Models\InstallmentLine;
+use App\Models\InstallmentPayment;
+use App\Support\Jalali;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -66,7 +69,7 @@ class CustomerBalanceTest extends TestCase
     public function test_old_debt_stays_payable_after_a_downgrade_and_an_agreement_can_be_cancelled_before_voiding(): void
     {
         $user = $this->merchant('professional');
-        $irr = app(\App\Domain\Market\QuoteService::class)->latestDto('Asia/Tehran')['value_irr'];
+        $irr = app(QuoteService::class)->latestDto('Asia/Tehran')['value_irr'];
         $d = $this->actingAs($user)->api('POST', '/api/invoices/drafts', ['mode' => 'MARKET', 'value_irr' => $irr])->assertCreated();
         $s = $this->api('PUT', '/api/invoices/drafts/'.$d->json('draft_id'), ['version' => $d->json('version'), 'rows' => [[
             'row_uid' => 'r1', 'item_type' => 'GOLD', 'name' => 'النگو', 'net_weight_g' => '3', 'purity_ppt' => '750', 'wage_percent' => '5', 'profit_percent' => '5',
@@ -75,14 +78,14 @@ class CustomerBalanceTest extends TestCase
             'buyer' => ['name' => 'خریدار قسطی', 'mobile' => '09351119999'], 'save_customer' => true])->assertCreated();
         $customer = $this->inTenant($user, fn () => Customer::where('mobile', '09351119999')->firstOrFail());
         $this->api('POST', "/api/customers/{$customer->public_id}/agreements", [
-            'invoice_id' => $d->json('draft_id'), 'count' => 3, 'frequency' => 'monthly', 'first_due' => \App\Support\Jalali::date(now()->addMonth(), 'Asia/Tehran'),
+            'invoice_id' => $d->json('draft_id'), 'count' => 3, 'frequency' => 'monthly', 'first_due' => Jalali::date(now()->addMonth(), 'Asia/Tehran'),
         ])->assertCreated();
         $agreement = $this->inTenant($user, fn () => InstallmentAgreement::firstOrFail());
 
         // Downgrade: no new agreements, but the existing debt is still visible and payable.
         $this->setPlan($this->tenantOf($user), 'free');
         $this->get("/customers/{$customer->public_id}")->assertOk()->assertSee('ثبت دریافت')->assertSee('لغو قرارداد')->assertDontSee('+ قرارداد اقساط');
-        $this->api('POST', "/api/agreements/{$agreement->public_id}/payments", ['amount_toman' => '100000', 'method' => 'cash', 'paid_on' => \App\Support\Jalali::date(now(), 'Asia/Tehran'), 'idempotency_key' => 'pay-after-downgrade'])->assertOk();
+        $this->api('POST', "/api/agreements/{$agreement->public_id}/payments", ['amount_toman' => '100000', 'method' => 'cash', 'paid_on' => Jalali::date(now(), 'Asia/Tehran'), 'idempotency_key' => 'pay-after-downgrade'])->assertOk();
 
         // Voiding needs the agreement settled or cancelled first; cancelling keeps the payment on record.
         $this->api('POST', '/api/invoices/'.$d->json('draft_id').'/void', ['reason' => 'WRONG_WEIGHT'])->assertStatus(409)->assertJsonPath('code', 'HAS_INSTALLMENTS');
@@ -90,7 +93,7 @@ class CustomerBalanceTest extends TestCase
         $this->api('POST', "/api/agreements/{$agreement->public_id}/cancel", ['reason' => 'فاکتور باطل می‌شود'])->assertOk();
         $this->api('POST', "/api/agreements/{$agreement->public_id}/cancel", ['reason' => 'دوباره'])->assertStatus(409);
         $this->api('POST', '/api/invoices/'.$d->json('draft_id').'/void', ['reason' => 'WRONG_WEIGHT'])->assertOk();
-        $this->assertSame(1, $this->inTenant($user, fn () => \App\Models\InstallmentPayment::count()));
+        $this->assertSame(1, $this->inTenant($user, fn () => InstallmentPayment::count()));
         $this->assertDatabaseHas('audit_events', ['event' => 'installment.agreement_cancelled']);
     }
 }

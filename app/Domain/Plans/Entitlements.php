@@ -137,7 +137,22 @@ final class Entitlements
         }
     }
 
-    /** Free invoice SMS left in the rolling 365-day window (failed sends give the allowance back). */
+    /**
+     * Start of the current free-SMS year (docs/PLANS_AND_QUOTAS.md): by default the shop's registration
+     * anniversary (a year = 365 days from sign-up, renewing each year); or the current Jalali year.
+     */
+    public function freeSmsYearStart(Tenant $tenant): \Carbon\CarbonImmutable
+    {
+        if (config('talata.sms.free_yearly_window') === 'jalali_year') {
+            return Jalali::yearBounds(now(), $tenant->timezone)[0];
+        }
+        $start = \Carbon\CarbonImmutable::parse($tenant->created_at);
+        $years = intdiv(max(0, (int) $start->diffInDays(now())), 365);
+
+        return $start->addDays(365 * $years);
+    }
+
+    /** Free invoice SMS left in the current free-SMS year (failed sends give the allowance back). */
     public function freeSmsRemaining(Tenant $tenant): int
     {
         $limit = (int) ($this->plan($tenant)['quotas']['free_sms_per_year'] ?? 0);
@@ -145,7 +160,7 @@ final class Entitlements
             return 0;
         }
         $used = SmsMessage::query()->forTenant($tenant->id)->where('charge_source', 'FREE_YEARLY')
-            ->whereNotIn('status', ['FAILED', 'CANCELLED'])->where('created_at', '>=', now()->subDays(365))->count();
+            ->whereNotIn('status', ['FAILED', 'CANCELLED'])->where('created_at', '>=', $this->freeSmsYearStart($tenant))->count();
 
         return max(0, $limit - $used);
     }

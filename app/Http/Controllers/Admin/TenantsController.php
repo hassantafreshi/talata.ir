@@ -12,6 +12,7 @@ use App\Domain\Plans\CommercialConfig;
 use App\Domain\Plans\Entitlements;
 use App\Domain\Settings\SettingsBackups;
 use App\Domain\Sms\SmsCredit;
+use App\Domain\Sms\SmsService;
 use App\Models\AuditEvent;
 use App\Models\BillingOrder;
 use App\Models\FeatureOverride;
@@ -166,7 +167,7 @@ class TenantsController extends AdminController
         });
 
         if ($data['direction'] !== 'deduct') {
-            app(\App\Domain\Sms\SmsService::class)->releaseAwaitingCredit($tenant);
+            app(SmsService::class)->releaseAwaitingCredit($tenant);
         }
 
         return response()->json($result + ['message_fa' => 'اعتبار ثبت شد. موجودی: '.Money::toman($result['balance_irr']).' تومان.'], 201);

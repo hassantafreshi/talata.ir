@@ -6,6 +6,7 @@ use App\Domain\DomainError;
 use App\Domain\Identity\LoginService;
 use App\Domain\Identity\OtpService;
 use App\Domain\Identity\ProofOfWork;
+use App\Domain\Plans\Entitlements;
 use App\Domain\Sms\SmsGateway;
 use App\Models\Membership;
 use App\Models\SmsMessage;
@@ -13,6 +14,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Support\Digits;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class OtpLifecycleTest extends TestCase
@@ -98,12 +100,12 @@ class OtpLifecycleTest extends TestCase
         // Free SMS for the year used up and no credit: invoice SMS are blocked for this shop…
         foreach (range(1, 5) as $i) {
             DB::table('sms_messages')->insert([
-                'public_id' => strtolower((string) \Illuminate\Support\Str::ulid()), 'tenant_id' => $tenant->id, 'purpose' => 'INVOICE',
+                'public_id' => strtolower((string) Str::ulid()), 'tenant_id' => $tenant->id, 'purpose' => 'INVOICE',
                 'recipient' => '09351234567', 'body' => 'x', 'payload' => '{}', 'segments' => 1, 'cost_irr' => '0',
                 'charge_source' => 'FREE_YEARLY', 'status' => 'SENT', 'idempotency_key' => 'free-'.$i, 'created_at' => now(), 'updated_at' => now(),
             ]);
         }
-        $this->assertSame(0, app(\App\Domain\Plans\Entitlements::class)->summary($tenant)['free_sms_remaining']);
+        $this->assertSame(0, app(Entitlements::class)->summary($tenant)['free_sms_remaining']);
 
         // …but the owner's login code is operational and never charged to the shop.
         $otp = app(OtpService::class);

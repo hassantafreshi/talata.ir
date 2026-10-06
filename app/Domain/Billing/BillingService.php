@@ -8,6 +8,7 @@ use App\Domain\DomainError;
 use App\Domain\Plans\CommercialConfig;
 use App\Domain\Plans\Entitlements;
 use App\Domain\Sms\SmsCredit;
+use App\Domain\Sms\SmsService;
 use App\Models\BillingOrder;
 use App\Models\PaymentAttempt;
 use App\Models\StaffUser;
@@ -296,7 +297,7 @@ final class BillingService
         if ($order->product === 'SMS_CREDIT') {
             try {
                 // The review/invoice pages promise that invoice SMS waiting for credit go out once credit arrives.
-                DB::transaction(fn () => app(\App\Domain\Sms\SmsService::class)->releaseAwaitingCredit($tenant));
+                DB::transaction(fn () => app(SmsService::class)->releaseAwaitingCredit($tenant));
             } catch (\Throwable $e) {
                 TechLog::error('sms', 'waiting invoice SMS not released after top-up', ['order' => $order->public_ref, 'error' => mb_substr($e->getMessage(), 0, 300)]);
             }

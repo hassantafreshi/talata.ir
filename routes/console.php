@@ -8,6 +8,7 @@ use App\Domain\Market\QuoteService;
 use App\Domain\Sms\SmsCredit;
 use App\Domain\Sms\SmsGateway;
 use App\Domain\Sms\SmsService;
+use App\Jobs\SendSms;
 use App\Models\SmsMessage;
 use App\Models\StaffUser;
 use App\Support\Mobile;
@@ -59,7 +60,7 @@ Artisan::command('talata:sms-reconcile', function (SmsGateway $gateway, SmsServi
     //    A login code that old has expired anyway: cancel it instead of sending a useless SMS.
     SmsMessage::query()->where('status', 'QUEUED')->where('purpose', 'OTP')->where('updated_at', '<', now()->subMinutes(10))->update(['status' => 'CANCELLED', 'last_error' => 'expired before sending', 'updated_at' => now()]);
     SmsMessage::query()->where('status', 'QUEUED')->where('purpose', '!=', 'OTP')->where('updated_at', '<', now()->subMinutes(10))->limit(200)->pluck('id')
-        ->each(fn ($id) => \App\Jobs\SendSms::dispatch($id));
+        ->each(fn ($id) => SendSms::dispatch($id));
     SmsMessage::query()->where('status', 'SENDING')->where('updated_at', '<', now()->subMinutes(10))->limit(200)->get()
         ->each(fn (SmsMessage $m) => $sms->applyOutcome($m, 'UNKNOWN', null, 'worker stopped while sending'));
     $this->info("reconciled {$n}");

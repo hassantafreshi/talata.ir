@@ -7,6 +7,7 @@ use App\Domain\Sms\Gateways\KavenegarSmsGateway;
 use App\Domain\Sms\SmsGateway;
 use App\Models\StaffUser;
 use App\Support\ScheduleMonitor;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Throwable;
@@ -143,7 +144,7 @@ class Preflight extends Command
     private function schedulerHeartbeat(): void
     {
         $last = ScheduleMonitor::last('payments-reconcile')['at'];
-        $fresh = $last && now()->diffInSeconds(\Carbon\Carbon::parse($last)) <= 300;
+        $fresh = $last && now()->diffInSeconds(Carbon::parse($last)) <= 300;
         $this->check($fresh ? 'ok' : 'fail', 'Scheduler (live)', $last ? "payments-reconcile last ran {$last}" : 'never ran: add the cron entry «* * * * * php artisan schedule:run»');
     }
 

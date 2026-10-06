@@ -94,11 +94,11 @@ class PagesTest extends TestCase
         $free = $this->merchant();
         $this->actingAs($free)->post('/api/settings/logo', ['logo' => UploadedFile::fake()->image('l.png', 300, 300)], ['Accept' => 'application/json'])->assertOk();
         $this->get('/settings/business')->assertOk()->assertSee('روی فاکتور چاپ نمی‌شود');
-        $irr = app(\App\Domain\Market\QuoteService::class)->latestDto('Asia/Tehran')['value_irr'];
+        $irr = app(QuoteService::class)->latestDto('Asia/Tehran')['value_irr'];
         $d = $this->api('POST', '/api/invoices/drafts', ['mode' => 'MARKET', 'value_irr' => $irr])->assertCreated();
         $sv = $this->api('PUT', '/api/invoices/drafts/'.$d->json('draft_id'), ['version' => $d->json('version'), 'rows' => [['row_uid' => 'r1', 'item_type' => 'GOLD', 'name' => 'انگشتر', 'net_weight_g' => '1', 'purity_ppt' => '750', 'wage_percent' => '0', 'profit_percent' => '0']], 'buyer' => []])->assertOk();
         $this->api('POST', '/api/invoices/drafts/'.$d->json('draft_id').'/issue', ['mode' => 'ISSUE_ONLY', 'version' => $sv->json('version'), 'idempotency_key' => 'k-logo-free-1'])->assertCreated();
-        $this->assertNull(\App\Models\Invoice::withoutGlobalScope('tenant')->where('public_id', $d->json('draft_id'))->value('snapshot')['shop']['logo'] ?? null);
+        $this->assertNull(Invoice::withoutGlobalScope('tenant')->where('public_id', $d->json('draft_id'))->value('snapshot')['shop']['logo'] ?? null);
 
         $user = $this->merchant('basic');
         $this->actingAs($user);

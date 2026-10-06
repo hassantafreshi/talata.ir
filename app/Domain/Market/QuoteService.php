@@ -105,7 +105,7 @@ final class QuoteService
             return 'ERROR';
         }
 
-        return $quote->fetched_at->lt(now()->subMinutes(config('talata.quotes.stale_after_minutes'))) ? 'STALE' : 'FRESH';
+        return $quote->fetched_at->lt(now()->subSeconds((int) config('talata.quotes.stale_after_seconds', 240))) ? 'STALE' : 'FRESH';
     }
 
     public function latestDto(string $tz): array

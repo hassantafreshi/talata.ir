@@ -286,7 +286,7 @@ class SmsAbuseTest extends TestCase
         $s = $this->api('PUT', '/api/invoices/drafts/'.$d->json('draft_id'), ['version' => $d->json('version'), 'rows' => [[
             'row_uid' => 'r1', 'item_type' => 'GOLD', 'name' => 'النگو', 'net_weight_g' => '1', 'purity_ppt' => '750', 'wage_percent' => '0', 'profit_percent' => '0',
         ]], 'buyer' => ['mobile' => '09350000031']])->assertOk();
-        $preview = $this->inTenant($user, fn ($t) => app(SmsService::class)->previewFor(\App\Models\Invoice::where('public_id', $d->json('draft_id'))->first(), $t));
+        $preview = $this->inTenant($user, fn ($t) => app(SmsService::class)->previewFor(Invoice::where('public_id', $d->json('draft_id'))->first(), $t));
         $this->api('POST', '/api/invoices/drafts/'.$d->json('draft_id').'/issue', [
             'mode' => 'ISSUE_AND_SMS', 'version' => $s->json('version'), 'idempotency_key' => 'k-'.bin2hex(random_bytes(8)), 'buyer' => ['mobile' => '09350000031'],
         ])->assertCreated();

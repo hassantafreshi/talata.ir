@@ -1,0 +1,35 @@
+# Assumptions register — زرلیو / Zarlio
+
+Every number below is an **assumption or a configurable policy**, not a discovered business fact (CLAUDE.md). The «تأیید مالک» column says whether the owner has confirmed it. Values the owner did not confirm are working defaults and can change without code changes (config/env, or the admin price editor).
+
+| # | موضوع | مقدار فعلی | کلید پیکربندی | منبع | تأیید مالک |
+| --- | --- | --- | --- | --- | --- |
+| 1 | دوره سهمیه ماهانه (فاکتور، مشتری جدید، لینک) | ماه **شمسی** تقویمی در منطقه زمانی فروشگاه (Asia/Tehran) | `Entitlements::quota()` + `tenants.timezone` | PLANS_AND_QUOTAS.md | بله (ماه تقویمی)؛ شمسی بودن: فرض فنی |
+| 2 | سقف‌های رایگان | ۵۰ فاکتور، ۵۰ مشتری جدید، ۱۰ لینک در ماه | نسخه قیمت (`pricing_versions`) | PLANS_AND_QUOTAS.md | بله (۵۰/۵۰)؛ ۱۰ لینک: فرض |
+| 3 | پیامک رایگان سالانه | ۵ پیامک؛ «سال» = ۳۶۵ روز از ثبت‌نام فروشگاه و هر سال تازه می‌شود (یا سال شمسی) | `talata.sms.free_yearly_window` (`registration_year` \| `jalali_year`) | PLANS_AND_QUOTAS.md §پیامک | تعداد: بله؛ پنجره: فرض (دو گزینه مستند) |
+| 4 | بها هر بخش پیامک | رایگان ۸۵۰ / پایه ۵۰۰ / حرفه‌ای ۳۵۰ تومان | نسخه قیمت (ویرایشگر قیمت مدیر) | PLANS_AND_QUOTAS.md | بله |
+| 5 | شمارش بخش پیامک | یونیکد ۷۰ / ۶۷؛ GSM ۱۶۰ / ۱۵۳ | `talata.sms.unicode_*`, `gsm_*` | استاندارد پیامک | فنی |
+| 6 | پیامک رایگان فقط تا ۲ بخش | پیامک ۳ بخشی از اعتبار کم می‌شود | `SmsService::queueInvoiceSms` | PLANS_AND_QUOTAS.md §۳ | فرض |
+| 7 | اعتبار پیامک رایگانِ پلن رایگان | آخر ماه منقضی می‌شود | `sms_credit_lots.expires_at` | PLANS_AND_QUOTAS.md | بله |
+| 8 | مالیات بر ارزش افزوده خرید پلن/اعتبار | ۱۰٪ جدا نمایش داده می‌شود | `vat_rate_percent` در نسخه قیمت | CLAUDE.md | بله (قابل تنظیم) |
+| 9 | فاصله دریافت مرکزی نرخ | ۱۸۰ ثانیه | `talata.quotes.interval_seconds` | master prompt §8 | بله |
+| 10 | آستانه «قدیمی» بودن نرخ | ۲۴۰ ثانیه (یک دوره ۱۸۰ + ۶۰ ثانیه تأخیر شبکه)؛ «خطا» وقتی آخرین دریافت ناموفق است و نرخ از ۴ دقیقه قدیمی‌تر است | `talata.quotes.stale_after_seconds` (`TALATA_QUOTE_STALE_AFTER_SECONDS`) | master prompt §8 | فرض فنی |
+| 11 | سیاست تخفیف | تخفیف فقط روی اجرت و سود (اجزای مشمول مالیات)، تقسیم متناسب، گرد کردن HALF_UP در هر جزء | `GoldIrV1`، بردارهای `calculation-vectors.json` | master prompt «Discount policy» | فرض مستند |
+| 12 | قاعده مالیات فاکتور | نمونه؛ تا تأیید کارشناس مالیاتی با برچسب «نمونه» چاپ می‌شود | `tax_rules.is_sample` | IMPLEMENTATION_GUIDE | **در انتظار کارشناس** |
+| 13 | کد ورود | ۶ رقم، ۱۲۰ ثانیه اعتبار، ۹۰ ثانیه فاصله ارسال دوباره، ۵ تلاش و سپس ۱۵ دقیقه قفل | `talata.otp.*` | SECURITY.md | فنی |
+| 14 | سقف‌های ضد سوءاستفاده پیامک فاکتور | ۳ ارسال برای هر فاکتور؛ ۱۰ دقیقه بین ارسال‌ها؛ ۳ پیامک در روز به هر گیرنده از هر فروشگاه؛ ۶۰ در ساعت برای هر فروشگاه؛ ۲ پیامک رایگان در روز | `talata.sms.*` | SECURITY.md | فنی |
+| 15 | ساعت سکوت یادآوری قسط | ۲۱ تا ۹ صبح | `talata.sms.reminder_quiet_hours` | فرض | فرض |
+| 16 | پیامک‌های منتظر اعتبار | با رسیدن اعتبار ظرف ۷ روز خودکار ارسال می‌شوند (فقط برای فاکتور هنوز معتبر) | `talata.sms.awaiting_credit_max_days` | INVOICE_DELIVERY_AND_VERIFICATION.md | فرض |
+| 17 | مهلت سفارش پرداخت / استعلام | ۲۰ دقیقه انقضا؛ استعلام پرداخت نامعلوم تا ۲۴ ساعت | `talata.payments.order_expiry_minutes`, `reconcile_max_hours` | PAYMENTS_AND_SMS_CREDIT.md | فرض |
+| 18 | انقضای لینک مشتری (/i/…) | هرگز (پیش‌فرض)؛ لینک تأیید QR (/v/…) هرگز منقضی نمی‌شود | `talata.public.share_ttl_days` (`TALATA_SHARE_TTL_DAYS`) | INVOICE_DELIVERY_AND_VERIFICATION.md | فرض |
+| 19 | افزودن کلید عبور | فقط تا ۱۵ دقیقه پس از ورود | `talata.webauthn.recent_auth_minutes` | SECURITY.md | فنی |
+| 20 | تغییر شماره ورود | تأیید شماره فعلی ۱۰ دقیقه و برای حداکثر ۳ شماره جدید معتبر است | `SecurityController::VERIFIED_FOR_SECONDS`, `MAX_TARGETS` | SECURITY.md | فنی |
+| 21 | ماندگاری نسخه محلی پیش‌نویس روی دستگاه | ۲۴ ساعت، بدون اطلاعات خریدار، پاک در خروج | `items.js` (`LOCAL_TTL`) | master prompt (ذخیره محلی حداقلی) | فنی |
+| 22 | بودجه سرعت و حجم | جدول‌های PERFORMANCE_BUDGET.md | `npm run perf:bundle`، `npm run perf:measure` | PERFORMANCE_BUDGET.md | بله (هدف)؛ اندازه‌گیری میدانی در انتظار |
+
+## اختلاف‌هایی که برطرف شد (2026-10-11)
+- آستانه قدیمی بودن نرخ در پیکربندی ۸ دقیقه بود ولی سند ۲۴۰ ثانیه می‌گفت؛ پیکربندی به ۲۴۰ ثانیه برگشت (`FreshnessAndWindowsTest`).
+- پنجره پیامک رایگان سالانه در کد «۳۶۵ روز چرخان» بود، که در سند نیامده است؛ اکنون «سال از ثبت‌نام» (پیش‌فرض) یا «سال شمسی» است، طبق سند (`FreshnessAndWindowsTest`).
+
+## تعویق آگاهانه
+- **نرخ اختصاصی هر فروشگاه** (`tenant_rate_overrides` در IMPLEMENTATION_GUIDE) پیاده نشده است. فعلاً هر فاکتور می‌تواند با «نرخ دستی» و دلیل شروع شود؛ مدیر سامانه هم می‌تواند هنگام قطعی سرویس «نرخ اعلامی» بگذارد. یک نرخ پیش‌فرض دائمی برای هر فروشگاه به تصمیم مالک واگذار است.

@@ -36,9 +36,9 @@ class BillingController extends BaseController
             'balanceFa' => Money::toman($credit->balance($tenant->id)), 'canBuy' => $this->membership()->can('billing.manage'),
             'mock' => $gateway->isMock(), 'expiring' => $credit->expiringBalance($tenant->id), 'tz' => $tenant->timezone,
             // A payment that went to the bank but has no final result yet: point at its result page instead of inviting a second payment.
-            'pendingOrder' => $pending = \App\Models\BillingOrder::query()->where('tenant_id', $tenant->id)->whereNotIn('status', \App\Models\BillingOrder::FINAL)
+            'pendingOrder' => $pending = BillingOrder::query()->where('tenant_id', $tenant->id)->whereNotIn('status', BillingOrder::FINAL)
                 ->whereHas('attempts')->where('created_at', '>', now()->subDay())->latest('id')->first(),
-            'pendingUrl' => $pending ? route('pay.result', [$pending->public_id, 's' => app(\App\Domain\Billing\BillingService::class)->resultSignature($pending)]) : null,
+            'pendingUrl' => $pending ? route('pay.result', [$pending->public_id, 's' => app(BillingService::class)->resultSignature($pending)]) : null,
             // Prefill: ?code= from a referral link, the link cookie, or the shop's existing referral.
             'prefillCode' => AffiliateService::normalizeCode(request()->query('code') ?? request()->cookie('talata_ref'))
                 ?? AffiliateReferral::query()->where('tenant_id', $tenant->id)->with('affiliate')->first()?->affiliate?->code,

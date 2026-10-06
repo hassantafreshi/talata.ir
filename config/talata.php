@@ -107,12 +107,15 @@ return [
         'unicode_multi' => 67,
         'gsm_single' => 160,
         'gsm_multi' => 153,
-        'free_yearly_window' => 'rolling_365_days',
+        // Yearly free-SMS window (docs/PLANS_AND_QUOTAS.md: «۳۶۵ روز از اولین ثبت‌نام tenant یا سال تقویمی»):
+        // registration_year (default) | jalali_year. docs/ASSUMPTIONS.md
+        'free_yearly_window' => env('TALATA_FREE_SMS_WINDOW', 'registration_year'),
     ],
 
     'quotes' => [
         'interval_seconds' => 180,
-        'stale_after_minutes' => 8,
+        // Technical assumption (master prompt §8): one 180 s refresh plus 60 s transport grace. docs/ASSUMPTIONS.md
+        'stale_after_seconds' => (int) env('TALATA_QUOTE_STALE_AFTER_SECONDS', 240),
         'client_poll_seconds' => 180,
     ],
 

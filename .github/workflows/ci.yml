@@ -1,0 +1,81 @@
+# Release gate for every push and pull request (docs/PHASE_1_CHECKLIST.md "Release evidence").
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: talata
+          POSTGRES_PASSWORD: talata
+          POSTGRES_DB: talata_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U talata"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USERNAME: talata
+      DB_PASSWORD: talata
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql, gd, intl, bcmath
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: App key
+        run: cp .env.example .env && php artisan key:generate
+
+      - name: Code style (Pint)
+        run: vendor/bin/pint --test
+
+      - name: Build front end
+        run: npm run build
+
+      - name: Bundle budgets (docs/PERFORMANCE_BUDGET.md)
+        run: npm run perf:bundle && npm run --silent perf:bundle -- --json > bundle-report.json
+
+      - name: JS tests
+        run: npm run test:js
+
+      - name: PHP tests (PostgreSQL)
+        run: php artisan test
+
+      - name: Dependency audit
+        run: composer audit --no-interaction && npm audit --omit=dev
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bundle-report
+          path: bundle-report.json
+          if-no-files-found: ignore
