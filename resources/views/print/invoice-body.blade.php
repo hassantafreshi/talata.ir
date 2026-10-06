@@ -18,8 +18,8 @@
         };
     };
     $nameBlock = $blocks->firstWhere('kind', 'shop_name') ?? ['align' => 'right'];
-    $colLabels = ['row_no' => 'ردیف', 'name' => 'شرح کالا', 'description' => 'توضیح', 'weight_g' => 'وزن (گرم)', 'purity' => 'عیار', 'unit_rate' => 'نرخ هر گرم', 'wage' => 'اجرت', 'profit' => 'سود', 'vat' => 'مالیات', 'amount' => 'مبلغ (تومان)'];
-    $numeric = ['row_no', 'weight_g', 'unit_rate', 'wage', 'profit', 'vat', 'amount'];
+    $colLabels = ['row_no' => 'ردیف', 'name' => 'شرح کالا', 'description' => 'توضیح', 'weight_g' => 'وزن (گرم)', 'purity' => 'عیار', 'weight_750' => 'وزن ۷۵۰', 'unit_rate' => 'نرخ هر گرم', 'wage' => 'اجرت', 'profit' => 'سود', 'vat' => 'مالیات', 'amount' => 'مبلغ (تومان)'];
+    $numeric = ['row_no', 'weight_g', 'weight_750', 'unit_rate', 'wage', 'profit', 'vat', 'amount'];
     $cols = $v['columns'];
     $t = $L['typography'] ?? [];
     $classes = 'inv t-'.($t['text_size'] ?? 'normal').' d-'.($t['density'] ?? 'comfortable').' a-'.($t['accent'] ?? 'ink').(($t['dividers'] ?? true) ? '' : ' no-div');
@@ -64,18 +64,20 @@
     </div>
 
     <div class="table-scroll">
-        <table>
+        <table class="{{ count($cols) >= 9 ? 'cols-many' : '' }}">
             <thead><tr>@foreach ($cols as $c)<th class="{{ in_array($c, $numeric, true) ? 'n' : '' }}" scope="col">{{ $colLabels[$c] }}</th>@endforeach</tr></thead>
             <tbody>
                 @foreach ($v['rows'] as $r)
-                    <tr>
+                    <tr class="{{ ($r['direction'] ?? 'OUT') === 'IN' ? 'row-in' : '' }}">
                         @foreach ($cols as $c)
                             @switch($c)
                                 @case('row_no')<td class="n">{{ $r['no'] }}</td>@break
-                                @case('name')<td>{{ $r['name'] }}@if(! in_array('description', $cols, true) && $r['description'])<span class="desc">{{ $r['description'] }}</span>@endif</td>@break
+                                @case('name')<td>@if(($r['direction'] ?? 'OUT') === 'IN')<span class="in-tag">دریافتی</span> @endif{{ $r['name'] }}@if(! in_array('description', $cols, true) && $r['description'])<span class="desc">{{ $r['description'] }}</span>@endif
+                                    @if(! empty($r['deduction_percent']) || ! empty($r['assay_ref']))<span class="desc">@if(! empty($r['deduction_percent']))کسر ذوب/ناخالصی {{ $r['deduction_percent'] }} ({{ $r['deduction_fa'] }} تومان)@endif @if(! empty($r['assay_ref'])) · برگه عیارسنجی {{ $r['assay_ref'] }}@endif</span>@endif</td>@break
                                 @case('description')<td>{{ $r['description'] ?: '—' }}</td>@break
-                                @case('weight_g')<td class="n">{{ $r['type'] === 'GOLD' ? $r['weight'] : '—' }}</td>@break
-                                @case('purity')<td>{{ $r['purity'] }}</td>@break
+                                @case('weight_g')<td class="n">{{ in_array($r['type'], ['GOLD', 'GOLD_IN'], true) ? $r['weight'] : '—' }}</td>@break
+                                @case('purity')<td>{{ ($v['has_gold_in'] ?? false) ? ($r['purity_short'] ?? $r['purity']) : $r['purity'] }}</td>@break
+                                @case('weight_750')<td class="n">{{ $r['weight_750'] ?? '—' }}</td>@break
                                 @case('unit_rate')<td class="n">{{ $r['unit_rate'] }}</td>@break
                                 @case('wage')<td class="n">{{ $r['wage'] }}</td>@break
                                 @case('profit')<td class="n">{{ $r['profit'] }}</td>@break
@@ -89,10 +91,28 @@
         </table>
     </div>
 
+    @if ($v['has_gold_in'] ?? false)
+        {{-- Tahesab-style split: gold ledger (750-equivalent grams) and money ledger (toman). --}}
+        <section class="inv-split" aria-label="تفکیک طلایی و مبلغ">
+            <dl aria-label="تفکیک طلایی">
+                <div class="h"><dt>تفکیک طلایی</dt><dd>گرم (معادل ۷۵۰)</dd></div>
+                <div><dt>طلای فروخته‌شده</dt><dd>{{ $v['w750']['out'] }}</dd></div>
+                <div><dt>طلای دریافتی از مشتری</dt><dd>−{{ $v['w750']['in'] }}</dd></div>
+                <div class="t"><dt>{{ $v['w750']['net_label'] }}</dt><dd>{{ $v['w750']['net'] }}</dd></div>
+            </dl>
+            <dl aria-label="تفکیک ریالی">
+                <div class="h"><dt>تفکیک مبلغ</dt><dd>تومان</dd></div>
+                <div><dt>جمع فروش</dt><dd>{{ $v['sales_fa'] }}</dd></div>
+                <div><dt>ارزش طلای دریافتی</dt><dd>−{{ $v['gold_in_fa'] }}</dd></div>
+                @if ($v['gold_in_has_deduction'])<div class="sub"><dt>(کسر ذوب/ناخالصی اعمال‌شده)</dt><dd>{{ $v['gold_in_deduction_fa'] }}</dd></div>@endif
+                <div class="t"><dt>{{ $v['payable_label'] }}</dt><dd>{{ $v['payable_fa'] }}</dd></div>
+            </dl>
+        </section>
+    @endif
     <section class="inv-sum">
         <div class="inv-notes">
             @if ($L['summary']['public_note']['visible'] ?? false)<p>{{ $L['summary']['public_note']['text'] }}</p>@endif
-            <p>مبالغ به تومان است. @if($v['has_gold'])مالیات بر ارزش افزوده فقط روی اجرت و سود محاسبه شده است.@endif @if($v['tax_sample'])<br>نرخ مالیات نمونه است و تأیید مشاور مالیاتی لازم است.@endif</p>
+            <p>مبالغ به تومان است. @if($v['has_gold'])مالیات بر ارزش افزوده فقط روی اجرت و سود محاسبه شده است.@endif @if($v['has_gold_in'] ?? false)<br>ردیف‌های «دریافتی» طلایی است که مشتری به‌جای پول داده و از مبلغ فاکتور کسر شده است؛ وزن ۷۵۰ یعنی وزن معادل طلای ۱۸ عیار.@endif @if($v['tax_sample'])<br>نرخ مالیات نمونه است و تأیید مشاور مالیاتی لازم است.@endif</p>
             @if ($v['issuer'])<p>صادرکننده: {{ $v['issuer'] }}</p>@endif
         </div>
         <div>
@@ -108,7 +128,7 @@
                     @if ($v['has_misc'])<div><dt>اقلام متفرقه</dt><dd>{{ $v['misc_total_fa'] }}</dd></div>@endif
                 </dl>
             @endif
-            <div class="payable"><span>قابل پرداخت</span><span class="num">{{ $v['payable_fa'] }} تومان</span></div>
+            <div class="payable {{ ($v['customer_credit'] ?? false) ? 'credit' : '' }}"><span>{{ $v['payable_label'] ?? 'قابل پرداخت' }}</span><span class="num">{{ $v['payable_fa'] }} تومان</span></div>
         </div>
     </section>
 

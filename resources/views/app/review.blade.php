@@ -19,6 +19,13 @@
         <ul class="list">
             @foreach ($rows as $row)
                 @php $s = $byUid[$row->row_uid] ?? null; @endphp
+                @if ($row->item_type === 'GOLD_IN')
+                    @php $a = $row->item_attributes ?? []; $c = $s['computed'] ?? []; @endphp
+                    <li class="list-item"><span class="body"><strong><span class="badge info">دریافتی</span> {{ $row->name ?: (\App\Domain\Invoices\InvoicePresenter::GOLD_IN_KINDS[$a['kind'] ?? 'OLD_GOLD'] ?? 'طلای دریافتی').' از مشتری' }}</strong>
+                        <span class="sub">{{ \App\Domain\Invoices\InvoicePresenter::weight($row->net_weight_g) }} گرم · عیار {{ fa((string) \Brick\Math\BigDecimal::of($row->purity_ppt)->strippedOfTrailingZeros()) }} · معادل {{ \App\Domain\Invoices\InvoicePresenter::weight($c['weight_750'] ?? null) }} گرم ۷۵۰ · {{ \App\Domain\Invoices\InvoicePresenter::GOLD_IN_BASES[$a['rate_basis'] ?? 'BUY'] ?? '' }} @if(isset($c['rate_irr_per_g']))({{ toman($c['rate_irr_per_g']) }})@endif @if(($c['D'] ?? '0') !== '0')· کسر {{ toman($c['D']) }}@endif</span></span>
+                        <span class="num strong nowrap">@if($s['total_irr'] ?? null)−{{ $s['total_fa'] }}@else—@endif</span></li>
+                    @continue
+                @endif
                 <li class="list-item"><span class="body"><strong>{{ $row->name ?: ($row->item_type === 'GOLD' ? 'طلا' : 'متفرقه') }}</strong>
                     <span class="sub">@if($row->item_type === 'GOLD'){{ \App\Domain\Invoices\InvoicePresenter::weight($row->net_weight_g) }} گرم · {{ \App\Domain\Invoices\InvoicePresenter::purityLabel($row->purity_ppt) }} · اجرت {{ \App\Domain\Invoices\InvoicePresenter::percent($row->wage_percent) }} · سود {{ \App\Domain\Invoices\InvoicePresenter::percent($row->profit_percent) }}@else متفرقه@endif</span></span>
                     <span class="num strong nowrap">{{ $s['total_fa'] ?? '—' }}</span></li>
@@ -33,7 +40,15 @@
             @endif
             @if ($state['totals']['misc_irr'] !== '0')<div><dt>اقلام متفرقه</dt><dd class="num">{{ $state['totals']['misc_fa'] }}</dd></div>@endif
         </dl>
-        <div class="row-total"><span>مبلغ قابل پرداخت</span><strong class="num">{{ $state['totals']['payable_fa'] }} تومان</strong></div>
+        @if ($state['totals']['has_gold_in'])
+            <dl class="kv">
+                <div><dt>جمع فروش</dt><dd class="num">{{ $state['totals']['sales_fa'] }}</dd></div>
+                <div><dt>ارزش طلای دریافتی از مشتری</dt><dd class="num">−{{ $state['totals']['gold_in_fa'] }}</dd></div>
+                <div><dt>طلای فروخته‌شده / دریافتی (معادل ۷۵۰)</dt><dd class="num">{{ $state['totals']['weights']['out_750'] }} / {{ $state['totals']['weights']['in_750'] }} گرم</dd></div>
+            </dl>
+        @endif
+        <div class="row-total"><span>{{ $state['totals']['customer_credit'] ? 'مانده به نفع مشتری' : 'مبلغ قابل پرداخت' }}</span><strong class="num">{{ $state['totals']['payable_abs_fa'] }} تومان</strong></div>
+        @if ($state['totals']['customer_credit'])<p class="notice warn small">ارزش طلای دریافتی از جمع فروش بیشتر است. این مبلغ را باید به مشتری بپردازید.</p>@endif
         @if ($invoice->rate_mode !== 'NONE')
             <p class="xs muted">نرخ معامله: {{ toman($invoice->accepted_rate_irr) }} تومان/گرم ۱۸ عیار @if($invoice->rate_mode === 'MANUAL')(نرخ دستی)@endif · مبالغ به تومان · محاسبه نهایی سرور</p>
         @endif

@@ -30,6 +30,12 @@ use Illuminate\Support\Str;
 
 final class InvoiceService
 {
+    /** Stored row columns the calculator reads (also copied to a replacement draft). */
+    private const ROW_FIELDS = [
+        'row_uid', 'position', 'item_type', 'formula_version', 'name', 'description', 'net_weight_g', 'purity_ppt',
+        'wage_percent', 'profit_percent', 'discount_scope', 'discount_irr', 'manual_total_irr', 'item_attributes',
+    ];
+
     public function __construct(
         private readonly InvoiceCalculator $calculator,
         private readonly Entitlements $entitlements,
@@ -47,6 +53,7 @@ final class InvoiceService
 
         $mode = in_array($rate['mode'] ?? '', ['MARKET', 'MANUAL', 'NONE'], true) ? $rate['mode'] : 'MARKET';
         $value = null;
+        $buyValue = null;
         $fetchedAt = null;
         $reason = null;
         if ($mode === 'MARKET') {
@@ -62,6 +69,7 @@ final class InvoiceService
             }
             $value = $latestValue;
             $fetchedAt = $latest->fetched_at;
+            $buyValue = $this->latestBuyRate();
         } elseif ($mode === 'MANUAL') {
             $value = Money::parseTomanToIrr((string) ($rate['value_toman'] ?? ''));
             $reason = in_array($rate['reason'] ?? '', ['MARKET_UNAVAILABLE', 'CUSTOMER_AGREEMENT', 'PEER_RATE'], true) ? $rate['reason'] : null;
@@ -70,9 +78,9 @@ final class InvoiceService
             }
         }
 
-        return DB::transaction(function () use ($user, $mode, $value, $fetchedAt, $reason) {
+        return DB::transaction(function () use ($user, $mode, $value, $buyValue, $fetchedAt, $reason) {
             $invoice = Invoice::create([
-                'status' => 'draft', 'rate_mode' => $mode, 'accepted_rate_irr' => $value, 'rate_fetched_at' => $fetchedAt,
+                'status' => 'draft', 'rate_mode' => $mode, 'accepted_rate_irr' => $value, 'accepted_buy_rate_irr' => $buyValue, 'rate_fetched_at' => $fetchedAt,
                 'rate_manual_reason' => $reason, 'created_by' => $user->id, 'version' => 1,
             ]);
             InvoiceItem::create($this->calculator->normalizeRow(
@@ -105,6 +113,7 @@ final class InvoiceService
                     $invoice->accepted_rate_irr = (string) BigDecimal::of($latest->value)->toScale(0, RoundingMode::HalfUp);
                     $invoice->rate_fetched_at = $latest->fetched_at;
                     $invoice->rate_manual_reason = null;
+                    $invoice->accepted_buy_rate_irr = $this->latestBuyRate();
                 }
             }
             $normalized = [];
@@ -133,15 +142,13 @@ final class InvoiceService
 
     public function state(Invoice $invoice, Tenant $tenant, bool $buyerMobileInvalid = false): array
     {
-        $rows = $invoice->items()->get()->map(fn (InvoiceItem $i) => $i->only([
-            'row_uid', 'position', 'item_type', 'formula_version', 'name', 'description', 'net_weight_g', 'purity_ppt',
-            'wage_percent', 'profit_percent', 'discount_scope', 'discount_irr', 'manual_total_irr',
-        ]))->all();
-        $priced = $this->calculator->priceAll($rows, $invoice->accepted_rate_irr, $this->vatRate($tenant));
+        $rows = $invoice->items()->get()->map(fn (InvoiceItem $i) => $i->only(self::ROW_FIELDS))->all();
+        $priced = $this->calculator->priceAll($rows, $invoice->accepted_rate_irr, $this->vatRate($tenant), $invoice->accepted_buy_rate_irr);
 
         return [
             'version' => $invoice->version,
             'valid' => $priced['valid'],
+            'sale_required' => $priced['sale_required'],
             'rows' => array_map(fn ($r) => [
                 'row_uid' => $r['row_uid'], 'ok' => $r['result']['ok'], 'errors' => $r['result']['errors'],
                 'total_irr' => $r['result']['total'], 'total_fa' => $r['result']['total'] ? Money::toman($r['result']['total']) : null,
@@ -151,9 +158,27 @@ final class InvoiceService
                 'gold_irr' => $priced['gold_total'], 'misc_irr' => $priced['misc_total'], 'payable_irr' => $priced['payable'],
                 'gold_fa' => Money::toman($priced['gold_total']), 'misc_fa' => Money::toman($priced['misc_total']), 'payable_fa' => Money::toman($priced['payable']),
                 'components' => array_map(fn ($v) => Money::toman($v), array_diff_key($priced['gold'], ['weight' => 1])),
+                'sales_irr' => $priced['sales_total'], 'sales_fa' => Money::toman($priced['sales_total']),
+                'gold_in_irr' => $priced['gold_in_total'], 'gold_in_fa' => Money::toman($priced['gold_in_total']),
+                'has_gold_in' => collect($rows)->contains('item_type', 'GOLD_IN'),
+                // Negative payable = the shop owes the customer the difference («مانده به نفع مشتری»).
+                'customer_credit' => BigDecimal::of($priced['payable'])->isNegative(),
+                'payable_abs_fa' => Money::toman((string) BigDecimal::of($priced['payable'])->abs()),
+                'weights' => array_map(fn ($w) => InvoicePresenter::weight($w), $priced['weights']),
             ],
             'buyer_mobile_invalid' => $buyerMobileInvalid,
         ];
+    }
+
+    /** Market 18K buy rate («خرید از شما») used as the default value of gold received; null when unavailable. */
+    private function latestBuyRate(): ?string
+    {
+        $buy = $this->quotes->latest('GOLD_18_BUY');
+        if (! $buy || $this->quotes->freshness($buy) === 'ERROR') {
+            return null;
+        }
+
+        return (string) BigDecimal::of($buy->value)->toScale(0, RoundingMode::HalfUp);
     }
 
     private function vatRate(Tenant $tenant): string
@@ -219,10 +244,10 @@ final class InvoiceService
             $rows = $invoice->items()->get();
             $rule = $this->taxRules->for('GOLD_SERVICES', now());
             $vat = (string) BigDecimal::of($rule->rate_percent)->strippedOfTrailingZeros();
-            $priced = $this->calculator->priceAll($rows->map->only([
-                'row_uid', 'position', 'item_type', 'formula_version', 'name', 'description', 'net_weight_g', 'purity_ppt',
-                'wage_percent', 'profit_percent', 'discount_scope', 'discount_irr', 'manual_total_irr',
-            ])->all(), $invoice->accepted_rate_irr, $vat);
+            $priced = $this->calculator->priceAll($rows->map->only(self::ROW_FIELDS)->all(), $invoice->accepted_rate_irr, $vat, $invoice->accepted_buy_rate_irr);
+            if ($priced['sale_required']) {
+                throw new DomainError('ROWS_SALE_REQUIRED', 'فاکتور فروش دست‌کم یک ردیف فروش (طلا یا متفرقه) لازم دارد. طلای دریافتی به‌تنهایی فاکتور فروش نیست.', 422);
+            }
             if (! $priced['valid']) {
                 throw new DomainError('ROWS_INVALID', 'بعضی ردیف‌ها کامل یا درست نیستند. آن‌ها را اصلاح کنید.', 422);
             }
@@ -254,6 +279,10 @@ final class InvoiceService
                 'status' => 'issued', 'number' => sprintf('%d-%04d', $year, $seq), 'jalali_year' => $year, 'seq' => $seq,
                 'buyer_name' => $buyerName, 'buyer_mobile' => $buyerMobile, 'customer_id' => $customerId,
                 'gold_total_irr' => $priced['gold_total'], 'misc_total_irr' => $priced['misc_total'], 'payable_irr' => $priced['payable'],
+                // Denormalized report columns (dashboard); the snapshot below stays the legal record.
+                'sales_total_irr' => $priced['sales_total'], 'gold_in_total_irr' => $priced['gold_in_total'],
+                'wage_irr' => $priced['gold']['W'], 'profit_irr' => $priced['gold']['P'], 'vat_irr' => $priced['gold']['V'],
+                'gold_out_weight_750' => $priced['weights']['out_750'], 'gold_in_weight_750' => $priced['weights']['in_750'],
                 'verify_token' => $vt = Tokens::make(), 'verify_token_hash' => Tokens::hash($vt), 'issue_mode' => $mode, 'issue_key' => $key, 'issued_at' => now(), 'issued_by' => $user->id,
             ]);
             $invoice->snapshot = $this->snapshot($invoice, $tenant, $user, $priced, $rule);
@@ -300,13 +329,16 @@ final class InvoiceService
             ],
             'buyer' => ['name' => $invoice->buyer_name, 'mobile' => $invoice->buyer_mobile],
             'rate' => [
-                'mode' => $invoice->rate_mode, 'value_irr' => $invoice->accepted_rate_irr,
+                'mode' => $invoice->rate_mode, 'value_irr' => $invoice->accepted_rate_irr, 'buy_value_irr' => $invoice->accepted_buy_rate_irr,
                 'fetched_at' => $invoice->rate_fetched_at?->toIso8601String(), 'manual_reason' => $invoice->rate_manual_reason,
             ],
             'tax' => ['category' => 'GOLD_SERVICES', 'rule_id' => $rule->id, 'version' => $rule->version, 'rate_percent' => (string) $rule->rate_percent, 'is_sample' => (bool) $rule->is_sample],
             'rounding_policy' => 'IRR_LINE_HALF_UP_V1',
             'rows' => array_map(fn ($r) => array_diff_key($r, ['result' => 1]) + ['computed' => $r['result']['computed'], 'total_irr' => $r['result']['total']], $priced['rows']),
-            'totals' => ['gold_irr' => $priced['gold_total'], 'misc_irr' => $priced['misc_total'], 'payable_irr' => $priced['payable'], 'gold_components' => $priced['gold']],
+            'totals' => [
+                'gold_irr' => $priced['gold_total'], 'misc_irr' => $priced['misc_total'], 'payable_irr' => $priced['payable'], 'gold_components' => $priced['gold'],
+                'sales_irr' => $priced['sales_total'], 'gold_in_irr' => $priced['gold_in_total'], 'gold_in' => $priced['gold_in'], 'weights' => $priced['weights'],
+            ],
             'layout' => $layout,
             'branding' => ['show_talata_mark' => ! $this->entitlements->can($tenant, 'invoice.hide_provider_brand')],
             'pricing_version' => $this->config->version(),
@@ -382,13 +414,13 @@ final class InvoiceService
                 return $existing;
             }
             $draft = Invoice::create([
-                'status' => 'draft', 'rate_mode' => $original->rate_mode, 'accepted_rate_irr' => $original->accepted_rate_irr,
+                'status' => 'draft', 'rate_mode' => $original->rate_mode, 'accepted_rate_irr' => $original->accepted_rate_irr, 'accepted_buy_rate_irr' => $original->accepted_buy_rate_irr,
                 'rate_fetched_at' => $original->rate_fetched_at, 'rate_manual_reason' => $original->rate_manual_reason,
                 'buyer_name' => $original->buyer_name, 'buyer_mobile' => $original->buyer_mobile, 'customer_id' => $original->customer_id,
                 'replaces_invoice_id' => $original->id, 'created_by' => $user->id,
             ]);
             foreach ($original->items()->get() as $item) {
-                InvoiceItem::create($item->only(['row_uid', 'position', 'item_type', 'formula_version', 'name', 'description', 'net_weight_g', 'purity_ppt', 'wage_percent', 'profit_percent', 'discount_scope', 'discount_irr', 'manual_total_irr']) + ['invoice_id' => $draft->id]);
+                InvoiceItem::create($item->only(self::ROW_FIELDS) + ['invoice_id' => $draft->id]);
             }
             Audit::record('invoice.replacement_started', $original, ['draft' => $draft->public_id]);
 

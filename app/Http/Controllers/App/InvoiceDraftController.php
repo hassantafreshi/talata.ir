@@ -10,6 +10,7 @@ use App\Domain\Tax\TaxRules;
 use App\Models\Invoice;
 use App\Support\Mobile;
 use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
 use Illuminate\Http\Request;
 
 class InvoiceDraftController extends BaseController
@@ -54,6 +55,8 @@ class InvoiceDraftController extends BaseController
             'rows' => $invoice->items()->get(),
             'state' => $this->invoices->state($invoice, $tenant),
             'latest' => $quotes->latestDto($tenant->timezone),
+            // Market buy rate («خرید از شما»): the default value of gold received from the customer.
+            'latestBuyIrr' => ($buy = $quotes->latest('GOLD_18_BUY')) && $quotes->freshness($buy) !== 'ERROR' ? (string) BigDecimal::of($buy->value)->toScale(0, RoundingMode::HalfUp) : null,
             'vat' => (string) BigDecimal::of($tax->for('GOLD_SERVICES', now())->rate_percent)->strippedOfTrailingZeros(),
         ]);
     }

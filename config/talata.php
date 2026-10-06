@@ -101,6 +101,9 @@ return [
         'max_weight_g' => '100000',
         'max_amount_irr' => '1000000000000000',
         'max_percent' => '1000',
+        // GOLD_IN rows (gold received from the customer): highest melting/impurity deduction allowed.
+        // Assumption, configurable: docs/GOLD_RECEIVED_AND_DASHBOARD.md §7.
+        'max_gold_in_deduction_percent' => '50',
         'issue_per_minute' => 30,
         'draft_save_per_minute' => 120,
     ],

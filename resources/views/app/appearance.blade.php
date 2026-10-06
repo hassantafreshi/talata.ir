@@ -1,6 +1,6 @@
 @php
     $blockLabels = ['shop_name' => 'نام فروشگاه', 'address' => 'نشانی', 'contact_primary' => 'تلفن اصلی', 'contact_mobile_extra' => 'موبایل (کنار تلفن ثابت)', 'website' => 'وب‌سایت', 'social' => 'شبکه‌های اجتماعی', 'license_union' => 'شماره پروانه کسب', 'license_online' => 'نماد اعتماد'];
-    $colLabels = ['row_no' => 'ردیف', 'name' => 'شرح کالا', 'description' => 'توضیح', 'weight_g' => 'وزن', 'purity' => 'عیار', 'unit_rate' => 'نرخ هر گرم', 'wage' => 'اجرت', 'profit' => 'سود', 'vat' => 'مالیات', 'amount' => 'مبلغ'];
+    $colLabels = ['row_no' => 'ردیف', 'name' => 'شرح کالا', 'description' => 'توضیح', 'weight_g' => 'وزن', 'purity' => 'عیار', 'weight_750' => 'وزن ۷۵۰', 'unit_rate' => 'نرخ هر گرم', 'wage' => 'اجرت', 'profit' => 'سود', 'vat' => 'مالیات', 'amount' => 'مبلغ'];
     $boot = ['settings' => $settings, 'version' => $version, 'can' => $canCustomize, 'required' => \App\Domain\Invoices\LayoutSettings::REQUIRED_BLOCKS, 'blockLabels' => $blockLabels, 'colLabels' => $colLabels, 'canLogo' => $canLogo, 'hasLogo' => (bool) $profile?->logo_path];
 @endphp
 <x-layouts.app title="ظاهر فاکتور" page="appearance" :back="route('settings')">

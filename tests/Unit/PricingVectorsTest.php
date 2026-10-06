@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Domain\Pricing\GoldInV1;
 use App\Domain\Pricing\GoldIrV1;
 use App\Domain\Pricing\ManualLineV1;
 use App\Domain\Pricing\PricingError;
@@ -91,6 +92,54 @@ class PricingVectorsTest extends TestCase
         }
         // T always equals the sum of posted components.
         $this->assertSame($result['T'], bcadd_safe(bcadd_safe($result['M'], $result['B']), $result['V']));
+    }
+
+    public static function goldInVectors(): array
+    {
+        $json = json_decode(file_get_contents(__DIR__.'/../../docs/design/contracts/calculation-vectors.json'), true);
+        $out = [];
+        foreach ($json['gold_in_vectors']['vectors'] as $vector) {
+            $out[$vector['id']] = [$vector, $json['gold_in_vectors']['vectors'], $json['vectors']];
+        }
+
+        return $out;
+    }
+
+    #[DataProvider('goldInVectors')]
+    public function test_gold_in_vector(array $vector, array $all, array $saleVectors): void
+    {
+        $in = $vector['input'];
+        $expected = $vector['expected'];
+        $policy = new GoldInV1;
+
+        if (isset($in['sale_ref'])) {
+            $sales = (new GoldIrV1)->price(collect($saleVectors)->firstWhere('id', $in['sale_ref'])['input'])['T'];
+            $goldIn = '0';
+            foreach ($in['gold_in_refs'] as $ref) {
+                $goldIn = bcadd_safe($goldIn, $policy->price(collect($all)->firstWhere('id', $ref)['input'])['T']);
+            }
+            $this->assertSame($expected['sales_total'], $sales);
+            $this->assertSame($expected['gold_in_total'], $goldIn);
+            $this->assertSame($expected['payable'], (string) BigInteger::of($sales)->minus($goldIn));
+
+            return;
+        }
+        if (isset($expected['error'])) {
+            try {
+                $policy->price($in);
+                $this->fail('Expected '.$expected['error']);
+            } catch (PricingError $e) {
+                $this->assertSame($expected['error'], $e->codeName);
+                $this->assertSame($expected['field'], $e->field);
+            }
+
+            return;
+        }
+        $result = $policy->price($in);
+        foreach ($expected as $key => $value) {
+            $this->assertSame($value, $result[$key], $vector['id'].' '.$key);
+        }
+        $this->assertSame($result['G'], bcadd_safe($result['T'], $result['D']));
     }
 
     public function test_two_gold_rows_different_purities(): void

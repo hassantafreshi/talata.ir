@@ -3,7 +3,7 @@
 namespace App\Domain\Pricing;
 
 /**
- * Registry of row pricing policies by item type. Phase 1 enables GOLD and MISC;
+ * Registry of row pricing policies by item type. Phase 1 enables GOLD, MISC and GOLD_IN;
  * v2 registers SILVER_IR_V1 / COIN_IR_V1 / MELTED_GOLD_IR_V1 here (docs/ROADMAP_V2_BUSINESS_TYPES.md §3).
  */
 final class PolicyRegistry
@@ -20,6 +20,8 @@ final class PolicyRegistry
         $registry = new self;
         $registry->register('GOLD', new GoldIrV1($limits), 'GOLD_SERVICES');
         $registry->register('MISC', new ManualLineV1($limits), null);
+        // Gold received from the customer: credited against the sale, no tax category (no VAT on metal bought).
+        $registry->register('GOLD_IN', new GoldInV1($limits), null);
 
         return $registry;
     }

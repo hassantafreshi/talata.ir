@@ -2,10 +2,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { priceGold, priceManual, PricingError } from '../../resources/js/lib/pricing.js';
+import { priceGold, priceGoldIn, priceManual, PricingError } from '../../resources/js/lib/pricing.js';
 import { toLatin, parseTomanToIrr, toman } from '../../resources/js/lib/digits.js';
 
-const { vectors } = JSON.parse(readFileSync(new URL('../../docs/design/contracts/calculation-vectors.json', import.meta.url)));
+const { vectors, gold_in_vectors: goldIn } = JSON.parse(readFileSync(new URL('../../docs/design/contracts/calculation-vectors.json', import.meta.url)));
 
 for (const v of vectors) {
   test(`vector ${v.id}`, () => {
@@ -34,6 +34,27 @@ for (const v of vectors) {
       assert.equal(res[k], val, `${v.id} ${k}`);
     }
     assert.equal(res.T, (BigInt(res.M) + BigInt(res.B) + BigInt(res.V)).toString());
+  });
+}
+
+for (const v of goldIn.vectors) {
+  test(`gold_in vector ${v.id}`, () => {
+    const { input: i, expected: e } = v;
+    if (i.sale_ref) {
+      const sales = BigInt(priceGold(vectors.find((x) => x.id === i.sale_ref).input).T);
+      const received = i.gold_in_refs.reduce((sum, ref) => sum + BigInt(priceGoldIn(goldIn.vectors.find((x) => x.id === ref).input).T), 0n);
+      assert.equal(sales.toString(), e.sales_total);
+      assert.equal(received.toString(), e.gold_in_total);
+      assert.equal((sales - received).toString(), e.payable);
+      return;
+    }
+    if (e.error) {
+      assert.throws(() => priceGoldIn(i), (err) => err instanceof PricingError && err.code === e.error && err.field === e.field);
+      return;
+    }
+    const res = priceGoldIn(i);
+    for (const [k, val] of Object.entries(e)) assert.equal(res[k], val, `${v.id} ${k}`);
+    assert.equal(res.G, (BigInt(res.T) + BigInt(res.D)).toString());
   });
 }
 

@@ -105,3 +105,26 @@ export function priceManual(input, limits = {}) {
   if (v > BigInt(limits.max_amount_irr ?? '1000000000000000')) throw new PricingError('OUT_OF_RANGE', 'manual_total_irr');
   return { formula_version: 'MANUAL_LINE_V1', price_basis: 'ROW_TOTAL', T: v.toString() };
 }
+
+// GOLD_IN_V1: gold received from the customer, credited against the sale. Mirrors app/Domain/Pricing/GoldInV1.php.
+// weight_750 = w × purity / 750; G = round(weight_750 × rate); T = round(G_exact × (100 − d) / 100); D = G − T. No VAT.
+export function priceGoldIn(input, limits = {}) {
+  const weight = dec(input.net_weight_g, 'net_weight_g', { positive: true, max: limits.max_weight_g ?? '100000', maxScale: 6 });
+  const purity = dec(input.purity_ppt, 'purity_ppt', { positive: true, max: '1000', maxScale: 3 });
+  const rate = dec(input.rate_irr_per_g, 'rate_irr_per_g', { positive: true, max: limits.max_amount_irr ?? '1000000000000000', maxScale: 0 });
+  const deduction = dec(input.deduction_percent ?? '0', 'deduction_percent', { positive: false, max: String(limits.max_gold_in_deduction_percent ?? '50'), maxScale: 4 });
+
+  const w750 = weight.mul(purity).div(new Rat(750n));
+  const gross = w750.mul(rate);
+  const G = gross.roundHalfUp();
+  const T = gross.mul(new Rat(100n).add(new Rat(-deduction.n, deduction.d))).div(new Rat(100n)).roundHalfUp();
+  const scaled = (w750.n * 1000n * 2n + w750.d) / (2n * w750.d); // HALF_UP to 0.001
+  const w = scaled.toString().padStart(4, '0');
+  return {
+    formula_version: 'GOLD_IN_V1', rounding_policy: 'IRR_LINE_HALF_UP_V1', direction: 'IN',
+    weight_750: `${w.slice(0, -3)}.${w.slice(-3)}`,
+    rate_irr_per_g: rate.n.toString(),
+    deduction_percent: deduction.toFixed(4) || '0',
+    G: G.toString(), D: (G - T).toString(), T: T.toString(),
+  };
+}

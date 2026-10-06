@@ -68,7 +68,10 @@ final class SmsService
         $body = SmsTemplate::render($this->templateFor($tenant), [
             'shop_name' => $invoice->snapshot['shop']['name'] ?? $tenant->profile?->name ?? '',
             'invoice_number' => Digits::toPersian($invoice->number ?? '—'),
-            'amount' => Money::toman($invoice->payable_irr).' تومان',
+            // Gold received can exceed the sale: then the balance is owed to the customer.
+            'amount' => str_starts_with((string) $invoice->payable_irr, '-')
+                ? Money::toman(ltrim((string) $invoice->payable_irr, '-')).' تومان به نفع شما'
+                : Money::toman($invoice->payable_irr).' تومان',
             'invoice_link' => $link,
         ]);
         $segments = Segments::count($body);

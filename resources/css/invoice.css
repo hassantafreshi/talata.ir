@@ -36,11 +36,27 @@
 .inv th { font-weight: 700; background: #F0EDE6; font-size: .9em; }
 .inv td.n, .inv th.n { text-align: left; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .inv td .desc { display: block; font-size: .85em; color: #333; }
+/* Many columns (e.g. Tahesab-style with gold received): tighter cells so A4 width is never exceeded. */
+.inv table.cols-many { font-size: .8em; }
+.inv table.cols-many th, .inv table.cols-many td { padding: 3pt 3pt; }
+.inv table.cols-many th { white-space: normal; }
 .inv-sum { display: grid; grid-template-columns: 1fr 82mm; gap: 6mm; margin-top: 4mm; align-items: start; }
 .inv-sum dl { margin: 0; }
 .inv-sum dl div { display: flex; justify-content: space-between; padding: 2pt 0; border-bottom: .5pt solid #bbb; }
 .inv-sum dt { font-weight: 400; } .inv-sum dd { margin: 0; font-variant-numeric: tabular-nums; }
 .inv-sum .payable { border: 1.5pt solid #000; padding: 3mm; display: flex; justify-content: space-between; font-weight: 800; font-size: 1.2em; margin-top: 2mm; white-space: nowrap; gap: 4mm; }
+.inv-sum .payable.credit { border-style: double; border-width: 3pt; }
+/* Gold received from the customer (GOLD_IN): marked rows + gold/money split (Tahesab-style), full width under the table. */
+.inv tr.row-in td { background: #F6F6F6; }
+.inv .in-tag { display: inline-block; border: .75pt solid #000; border-radius: 2pt; padding: 0 3pt; font-size: .8em; font-weight: 700; margin-inline-end: 2pt; }
+.inv-split { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin-top: 4mm; }
+.inv-split dl { margin: 0; border: 1pt solid #000; padding: 2mm 3mm; }
+.inv-split dl div { display: flex; justify-content: space-between; gap: 4mm; padding: 2pt 0; border-bottom: .5pt solid #bbb; }
+.inv-split dd { margin: 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.inv-split dl div.h { border-bottom: 1pt solid #000; font-weight: 700; }
+.inv-split dl div.h dd { font-weight: 400; font-size: .85em; }
+.inv-split dl div.t { font-weight: 800; border-bottom: 0; }
+.inv-split dl div.sub { font-size: .85em; color: #333; }
 .inv-notes { font-size: .85em; }
 .inv-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; margin-top: 10mm; font-size: .9em; }
 .inv-sign div { border-top: .75pt solid #000; padding-top: 2mm; text-align: center; min-height: 14mm; }
@@ -51,6 +67,7 @@
 .inv .sample-stamp { position: absolute; top: 4mm; left: 50%; transform: translateX(-50%); background: #FBF0D9; color: #8A5A00; font-size: 9pt; padding: 1mm 4mm; border-radius: 99px; }
 
 @media (max-width: 820px) {
+  .inv-split { grid-template-columns: 1fr; }
   .print-page { background: #fff; }
   .inv { width: 100%; min-height: 0; padding: 16px 12px; font-size: 10pt; }
   .inv-head { grid-template-columns: 1fr 30mm; }

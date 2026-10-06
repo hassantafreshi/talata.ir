@@ -187,5 +187,145 @@
         "displayed_price_per_g": "10000000"
       }
     }
-  ]
+  ],
+  "gold_in_vectors": {
+    "$comment": "GOLD_IN_V1 (gold received from the customer instead of money). weight_750 = w×purity/750 HALF_UP to 0.001; G = round(w×purity/750×rate); T = round(exact gross × (100−d)/100); D = G−T; no VAT. Rate is IRR per gram of 18K (750). Credited against the sale: payable = sales − ΣT. Checked by tests/Unit/PricingVectorsTest.php and tests/js/pricing.test.mjs.",
+    "formula_version": "GOLD_IN_V1",
+    "vectors": [
+      {
+        "id": "in_old_gold_18k",
+        "input": {
+          "net_weight_g": "2",
+          "purity_ppt": "750",
+          "rate_irr_per_g": "100000000",
+          "deduction_percent": "0"
+        },
+        "expected": {
+          "weight_750": "2.000",
+          "G": "200000000",
+          "D": "0",
+          "T": "200000000"
+        }
+      },
+      {
+        "id": "in_coin_900",
+        "input": {
+          "net_weight_g": "8.13",
+          "purity_ppt": "900",
+          "rate_irr_per_g": "100000000",
+          "deduction_percent": "0"
+        },
+        "expected": {
+          "weight_750": "9.756",
+          "G": "975600000",
+          "D": "0",
+          "T": "975600000"
+        },
+        "note": "Emami coin as in the reference invoice: 8.13 g at 900 = 9.756 g of 750."
+      },
+      {
+        "id": "in_melted_deduction",
+        "input": {
+          "net_weight_g": "10.5",
+          "purity_ppt": "705.5",
+          "rate_irr_per_g": "98765432",
+          "deduction_percent": "1.5"
+        },
+        "expected": {
+          "weight_750": "9.877",
+          "G": "975506172",
+          "D": "14632593",
+          "T": "960873579"
+        },
+        "note": "Melted gold with an assay purity and a 1.5% melting/impurity deduction."
+      },
+      {
+        "id": "in_half_up",
+        "input": {
+          "net_weight_g": "0.001",
+          "purity_ppt": "750",
+          "rate_irr_per_g": "500",
+          "deduction_percent": "0"
+        },
+        "expected": {
+          "weight_750": "0.001",
+          "G": "1",
+          "D": "0",
+          "T": "1"
+        },
+        "note": "0.5 IRR rounds up."
+      },
+      {
+        "id": "in_fractional_deduction",
+        "input": {
+          "net_weight_g": "3.333333",
+          "purity_ppt": "750",
+          "rate_irr_per_g": "1",
+          "deduction_percent": "33.3333"
+        },
+        "expected": {
+          "weight_750": "3.333",
+          "G": "3",
+          "D": "1",
+          "T": "2"
+        }
+      },
+      {
+        "id": "in_error_deduction_range",
+        "input": {
+          "net_weight_g": "1",
+          "purity_ppt": "750",
+          "rate_irr_per_g": "100",
+          "deduction_percent": "60"
+        },
+        "expected": {
+          "error": "OUT_OF_RANGE",
+          "field": "deduction_percent"
+        }
+      },
+      {
+        "id": "in_error_purity_zero",
+        "input": {
+          "net_weight_g": "1",
+          "purity_ppt": "0",
+          "rate_irr_per_g": "100",
+          "deduction_percent": "0"
+        },
+        "expected": {
+          "error": "MUST_BE_POSITIVE",
+          "field": "purity_ppt"
+        }
+      },
+      {
+        "id": "in_invoice_sale_minus_gold_in",
+        "input": {
+          "sale_ref": "base",
+          "gold_in_refs": [
+            "in_old_gold_18k"
+          ]
+        },
+        "expected": {
+          "sales_total": "215620000",
+          "gold_in_total": "200000000",
+          "payable": "15620000"
+        },
+        "note": "Sale row of vector 'base' (21,562,000 toman) paid partly with 2 g of 18K old gold."
+      },
+      {
+        "id": "in_invoice_customer_credit",
+        "input": {
+          "sale_ref": "base",
+          "gold_in_refs": [
+            "in_coin_900"
+          ]
+        },
+        "expected": {
+          "sales_total": "215620000",
+          "gold_in_total": "975600000",
+          "payable": "-759980000"
+        },
+        "note": "Gold received exceeds the sale: negative payable = balance owed to the customer («مانده به نفع مشتری»)."
+      }
+    ]
+  }
 }

@@ -24,7 +24,7 @@ class InstallmentController extends BaseController
         if (! $this->ent()->can($tenant, 'installments.manage')) {
             return redirect()->route('customers.show', $customer)->with('error', 'اقساط و یادآوری پیامکی در پلن حرفه‌ای است. ثبت مشتری و فاکتور آزاد است.');
         }
-        $invoices = Invoice::query()->where('customer_id', $customer->id)->where('status', 'issued')
+        $invoices = Invoice::query()->where('customer_id', $customer->id)->where('status', 'issued')->where('payable_irr', '>', 0)
             ->whereNotExists(fn ($q) => $q->from('installment_agreements')->whereColumn('installment_agreements.invoice_id', 'invoices.id')->where('installment_agreements.status', 'active'))
             ->orderByDesc('issued_at')->limit(20)->get();
         $today = now()->setTimezone($tenant->timezone);

@@ -2,6 +2,7 @@
     <section class="hero center stack-sm" aria-live="polite">
         <span class="badge ok">صادر شد</span>
         <h2>فاکتور شماره <span class="num ltr">{{ $v['number'] }}</span></h2>
+        @if ($v['customer_credit'] ?? false)<p class="meta">مانده به نفع مشتری</p>@endif
         <div><span class="price">{{ $v['payable_fa'] }}</span> <span class="unit">تومان</span></div>
         @if ($v['buyer_name'])<p class="meta">مشتری: {{ $v['buyer_name'] }}</p>@endif
     </section>

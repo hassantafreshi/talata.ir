@@ -15,7 +15,7 @@ final class LayoutSettings
 
     public const BLOCK_KINDS = ['shop_name', 'address', 'contact_primary', 'contact_mobile_extra', 'website', 'social', 'license_union', 'license_online'];
 
-    public const COLUMNS = ['row_no', 'name', 'description', 'weight_g', 'purity', 'unit_rate', 'wage', 'profit', 'vat', 'amount'];
+    public const COLUMNS = ['row_no', 'name', 'description', 'weight_g', 'purity', 'weight_750', 'unit_rate', 'wage', 'profit', 'vat', 'amount'];
 
     public static function preset(string $id): array
     {
@@ -100,11 +100,13 @@ final class LayoutSettings
     }
 
     /** @return list<string> columns to render for a given invoice */
-    public static function columnsFor(array $settings, bool $hasGold): array
+    public static function columnsFor(array $settings, bool $hasGold, bool $hasGoldIn = false): array
     {
         $cols = $settings['items_table']['columns'];
-        if ($hasGold) {
-            foreach (['weight_g', 'purity'] as $c) {
+        // Gold received from the customer is only readable with weight, purity, 750-equivalent weight and rate (Tahesab-style).
+        $forced = $hasGoldIn ? ['weight_g', 'purity', 'weight_750', 'unit_rate'] : ($hasGold ? ['weight_g', 'purity'] : []);
+        if ($forced) {
+            foreach ($forced as $c) {
                 if (! in_array($c, $cols, true)) {
                     $cols[] = $c;
                 }

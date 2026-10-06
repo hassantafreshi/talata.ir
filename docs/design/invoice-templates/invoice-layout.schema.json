@@ -78,6 +78,7 @@
               "name",
               "description",
               "weight_g",
+              "weight_750",
               "purity",
               "unit_rate",
               "wage",
@@ -86,7 +87,7 @@
               "amount"
             ]
           },
-          "description": "Column order. name and amount are mandatory; weight_g and purity are mandatory whenever the invoice contains a GOLD row (renderer re-adds them if omitted). description, unit_rate, wage, profit and vat are optional. Changing columns never changes any amount."
+          "description": "Column order. name and amount are mandatory; weight_g and purity are mandatory whenever the invoice contains a GOLD row; weight_g, purity, weight_750 and unit_rate are mandatory whenever it contains a GOLD_IN row (gold received from the customer) (renderer re-adds them if omitted). description, unit_rate, wage, profit and vat are optional. Changing columns never changes any amount."
         }
       }
     },

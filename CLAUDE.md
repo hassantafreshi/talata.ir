@@ -14,7 +14,8 @@ For future implementation requests, read:
 8. `docs/design/README.md` and `docs/design/UI_APPROVED_DECISIONS.md` for the Stage A proposal status, owner-stated UI requirements and which design decisions are actually approved (brand spelling: طلاتا / Talata).
 9. `docs/design/UI_BUILD_SPEC.md`, `docs/design/tokens/`, `docs/design/invoice-templates/` and `docs/design/contracts/` for the UI build contract, design tokens, invoice layout schema/presets and frontend adapter/calculation contracts (proposed; palette 1 and logo concept 1 are working defaults, not approvals).
 10. `docs/AFFILIATE_PROGRAM.md` for the affiliate program (codes, referral links, commissions, affiliate and admin panels).
-11. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
+11. `docs/GOLD_RECEIVED_AND_DASHBOARD.md` for gold received from the customer instead of money (GOLD_IN rows, GOLD_IN_V1, 750-equivalent weights, Tahesab-style print) and the sales dashboard.
+12. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
 
 ## Durable constraints
 

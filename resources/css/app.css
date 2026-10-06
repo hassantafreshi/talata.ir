@@ -340,3 +340,13 @@ table.t tr.lvl-warning td { background: #FFFBF1; }
 @media (min-width: 0) { .narrow { max-width: 520px; } }
 .filters .field { display: flex; flex-direction: column; gap: 4px; } .filters .check { align-self: center; }
 .hero .input-wrap { background: #fff; } .hero .input-wrap input { color: var(--t-ink); }
+
+/* Composer: gold received from the customer (GOLD_IN). */
+.seg-3 label { padding: 0 6px; font-size: 14px; }
+.choice { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 12px; border: 1px solid var(--t-line); border-radius: var(--t-r-md, 12px); background: var(--t-surface); cursor: pointer; }
+.choice input { width: 20px; height: 20px; accent-color: var(--t-chrome); flex: none; }
+.choice:has(input:checked) { border-color: var(--t-chrome); box-shadow: inset 0 0 0 1px var(--t-chrome); }
+.choice strong { margin-inline-start: 4px; }
+.err-text { color: var(--t-error-fg); }
+.row-card.is-in { background: var(--t-gold-wash, #FBF6E8); }
+.row-card.is-in [data-row-total] { color: var(--t-gold-deep, #8A5A00); }

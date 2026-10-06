@@ -13,7 +13,7 @@ class Invoice extends Model
     use BelongsToTenant, HasPublicId;
 
     protected $fillable = [
-        'status', 'direction', 'version', 'rate_mode', 'accepted_rate_irr', 'rate_fetched_at', 'rate_manual_reason',
+        'status', 'direction', 'version', 'rate_mode', 'accepted_rate_irr', 'accepted_buy_rate_irr', 'rate_fetched_at', 'rate_manual_reason',
         'buyer_name', 'buyer_mobile', 'customer_id', 'replaces_invoice_id', 'created_by',
     ];
 
@@ -23,7 +23,9 @@ class Invoice extends Model
     {
         return [
             'snapshot' => 'array', 'verify_token' => 'encrypted', 'rate_fetched_at' => 'datetime', 'issued_at' => 'datetime', 'voided_at' => 'datetime',
-            'accepted_rate_irr' => 'string', 'gold_total_irr' => 'string', 'misc_total_irr' => 'string', 'payable_irr' => 'string',
+            'accepted_rate_irr' => 'string', 'accepted_buy_rate_irr' => 'string', 'gold_total_irr' => 'string', 'misc_total_irr' => 'string', 'payable_irr' => 'string',
+            'sales_total_irr' => 'string', 'gold_in_total_irr' => 'string', 'wage_irr' => 'string', 'profit_irr' => 'string', 'vat_irr' => 'string',
+            'gold_out_weight_750' => 'string', 'gold_in_weight_750' => 'string',
         ];
     }
 

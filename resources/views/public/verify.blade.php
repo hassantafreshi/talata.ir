@@ -19,7 +19,7 @@
         <dl class="kv">
             <div><dt>شماره فاکتور</dt><dd class="num ltr">{{ $v['number'] }}</dd></div>
             <div><dt>تاریخ صدور</dt><dd class="num">{{ $v['issued_fa'] }}</dd></div>
-            <div><dt>مبلغ قابل پرداخت</dt><dd class="num strong">{{ $v['payable_fa'] }} تومان</dd></div>
+            <div><dt>{{ ($v['customer_credit'] ?? false) ? 'مانده به نفع مشتری' : 'مبلغ قابل پرداخت' }}</dt><dd class="num strong">{{ $v['payable_fa'] }} تومان</dd></div>
         </dl>
     </section>
 

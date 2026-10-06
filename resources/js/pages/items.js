@@ -1,19 +1,23 @@
 import { put, del } from '../lib/http.js';
 import { toast } from '../lib/ui.js';
 import { toLatin, toman, toPersian, parseTomanToIrr } from '../lib/digits.js';
-import { priceGold, priceManual, PricingError } from '../lib/pricing.js';
+import { priceGold, priceGoldIn, priceManual, PricingError } from '../lib/pricing.js';
 
 const ERR = {
   REQUIRED: 'این مورد را وارد کنید.', INVALID_NUMBER: 'عدد درست نیست.', MUST_BE_POSITIVE: 'باید بیشتر از صفر باشد.',
   OUT_OF_RANGE: 'عدد بیش از حد مجاز است.', DISCOUNT_EXCEEDS_ELIGIBLE: 'برای ادامه، مبلغ تخفیف را کمتر از مجموع اجرت و سود وارد کنید.',
+  NO_BUY_RATE: 'نرخ خرید بازار در دسترس نیست. «نرخ دستی» را انتخاب و وارد کنید.',
 };
-const FIELD = { net_weight_g: 'net_weight_g', purity_ppt: 'purity_ppt', wage_percent: 'wage_percent', profit_percent: 'profit_percent', discount: 'discount_toman', manual_total_irr: 'manual_total_toman', price18_irr_per_g: 'net_weight_g' };
+// Gold received from the customer: per-kind defaults (coins are usually 900).
+const KIND_NAME = { OLD_GOLD: 'طلای کهنه', COIN: 'سکه', MELTED: 'طلای آب‌شده', OTHER: 'طلای دریافتی' };
+const FIELD = { rate_irr_per_g: 'rate_toman', deduction_percent: 'deduction_percent', net_weight_g: 'net_weight_g', purity_ppt: 'purity_ppt', wage_percent: 'wage_percent', profit_percent: 'profit_percent', discount: 'discount_toman', manual_total_irr: 'manual_total_toman', price18_irr_per_g: 'net_weight_g' };
 const uid = () => (Date.now().toString(36) + Math.random().toString(36).slice(2, 12)).slice(0, 20);
 
 export default function () {
   const boot = JSON.parse(document.getElementById('boot').textContent);
   let version = boot.version;
   let rate = boot.rate_irr;
+  let buyRate = boot.buy_rate_irr;
   const host = document.querySelector('[data-rows]');
   const tpl = document.querySelector('[data-row-tpl]');
   const saveState = document.querySelector('[data-save-state]');
@@ -23,8 +27,13 @@ export default function () {
   let rows = boot.rows.length ? boot.rows : [newRow(boot.rate_mode === 'NONE' ? 'MISC' : 'GOLD')];
   let timer = null, saving = false, dirty = false, useLatest = false;
 
+  function defaultBasis() { return buyRate ? 'BUY' : rate ? 'SELL' : 'MANUAL'; }
+
   function newRow(type) {
-    return { row_uid: uid(), item_type: type, name: type === 'GOLD' ? 'طلای ۱۸ عیار' : '', description: '', net_weight_g: '', purity_ppt: '750', wage_percent: '0', profit_percent: '0', discount_toman: '', discount_scope: 'TAXABLE_COMPONENTS', manual_total_toman: '' };
+    return {
+      row_uid: uid(), item_type: type, name: type === 'GOLD' ? 'طلای ۱۸ عیار' : '', description: '', net_weight_g: '', purity_ppt: '750', wage_percent: '0', profit_percent: '0', discount_toman: '', discount_scope: 'TAXABLE_COMPONENTS', manual_total_toman: '',
+      kind: 'OLD_GOLD', rate_basis: defaultBasis(), rate_toman: '', deduction_percent: '0', assay_ref: '',
+    };
   }
 
   function render() {
@@ -40,19 +49,32 @@ export default function () {
     el.querySelector('[data-row-no]').textContent = toPersian(i + 1);
     const radios = el.querySelectorAll('[data-f="item_type"]');
     radios.forEach((r) => { r.name = `type-${row.row_uid}`; r.checked = r.value === row.item_type; if (boot.rate_mode === 'NONE' && r.value === 'GOLD') r.closest('label').hidden = true; });
-    el.querySelector('[data-gold]').hidden = row.item_type !== 'GOLD';
-    el.querySelector('[data-misc]').hidden = row.item_type !== 'MISC';
-    const scope = row.item_type === 'GOLD' ? el.querySelector('[data-gold]') : el.querySelector('[data-misc]');
+    const isIn = row.item_type === 'GOLD_IN';
+    el.classList.toggle('is-in', isIn);
+    el.querySelectorAll('[data-sec]').forEach((sec) => { sec.hidden = !sec.dataset.sec.split(',').includes(row.item_type); });
+    el.querySelectorAll('[data-only]').forEach((c) => { c.hidden = c.dataset.only !== row.item_type; });
+    if (isIn) {
+      el.querySelector('[data-row-total-label]').textContent = 'از مبلغ فاکتور کم می‌شود';
+      el.querySelector('[data-weight-hint]').textContent = 'وزن ترازو؛ برای سکه وزن خود سکه.';
+      el.querySelector('[data-sec="GOLD,GOLD_IN"] [data-f="name"]').placeholder = KIND_NAME[row.kind] || 'طلای دریافتی';
+      el.querySelector('[data-basis-opt="BUY"]').hidden = !buyRate && row.rate_basis !== 'BUY';
+      el.querySelector('[data-basis-opt="SELL"]').hidden = !rate && row.rate_basis !== 'SELL';
+      el.querySelector('[data-buy-rate]').textContent = buyRate ? `${toman(buyRate)} تومان` : '(در دسترس نیست)';
+      el.querySelector('[data-sell-rate]').textContent = rate ? `${toman(rate)} تومان` : '';
+      el.querySelector('[data-rate-manual]').hidden = row.rate_basis !== 'MANUAL';
+      el.querySelector('[data-assay]').hidden = row.kind !== 'MELTED' && !row.assay_ref;
+    }
+    el.querySelectorAll('input[type="radio"][data-f="kind"], input[type="radio"][data-f="rate_basis"]').forEach((r) => { r.name = `${r.dataset.f}-${row.row_uid}`; r.checked = r.value === row[r.dataset.f]; });
     el.querySelectorAll('input[data-f]').forEach((inp) => {
       const f = inp.dataset.f;
-      if (f === 'item_type') return;
-      if (f === 'name' && !scope.contains(inp)) { inp.disabled = true; return; }
+      if (f === 'item_type' || inp.type === 'radio') return;
+      if (inp.closest('[data-sec]')?.hidden) { inp.disabled = true; return; }
       inp.value = row[f] ?? '';
       inp.id = `${f}-${row.row_uid}`;
       const label = inp.closest('.field')?.querySelector('label');
       if (label) label.htmlFor = inp.id;
     });
-    const preset = ['750', '875', '1000'].includes(String(row.purity_ppt));
+    const preset = (isIn ? ['750', '900', '875', '1000'] : ['750', '875', '1000']).includes(String(row.purity_ppt));
     el.querySelectorAll('[data-p]').forEach((c) => c.setAttribute('aria-pressed', String(preset ? c.dataset.p === String(row.purity_ppt) : c.dataset.p === 'custom')));
     el.querySelector('[data-purity-custom]').classList.toggle('hidden', preset);
     return el;
@@ -62,17 +84,30 @@ export default function () {
 
   host.addEventListener('input', (e) => {
     const f = e.target.dataset.f;
-    if (!f || f === 'item_type') return;
+    if (!f || e.target.type === 'radio') return;
     rowOf(e.target)[f] = e.target.value;
     e.target.closest('.field')?.classList.remove('invalid');
     changed();
   });
   host.addEventListener('change', (e) => {
-    if (e.target.dataset.f !== 'item_type') return;
+    const f = e.target.dataset.f;
+    if (f === 'kind' || f === 'rate_basis') {
+      const row = rowOf(e.target);
+      row[f] = e.target.value;
+      if (f === 'kind' && e.target.value === 'COIN' && row.purity_ppt === '750') row.purity_ppt = '900';
+      if (f === 'kind' && e.target.value !== 'COIN' && row.purity_ppt === '900') row.purity_ppt = '750';
+      render(); changed();
+      if (f === 'rate_basis' && row.rate_basis === 'MANUAL') host.querySelector(`[data-uid="${row.row_uid}"] [data-f="rate_toman"]`)?.focus();
+      return;
+    }
+    if (f !== 'item_type') return;
     const row = rowOf(e.target);
+    const prev = row.item_type;
     row.item_type = e.target.value;
-    if (row.item_type === 'MISC' && row.name === 'طلای ۱۸ عیار') row.name = '';
-    if (row.item_type === 'GOLD' && !row.name) row.name = 'طلای ۱۸ عیار';
+    Object.entries(newRow(row.item_type)).forEach(([k, v]) => { if (row[k] === undefined) row[k] = v; });
+    if (row.item_type !== 'GOLD' && row.name === 'طلای ۱۸ عیار') row.name = '';
+    if (row.item_type === 'GOLD' && !row.name && prev !== 'GOLD_IN') row.name = 'طلای ۱۸ عیار';
+    if (row.item_type !== 'GOLD_IN' && row.purity_ppt === '900') row.purity_ppt = '750';
     render(); changed();
   });
   host.addEventListener('click', (e) => {
@@ -100,11 +135,17 @@ export default function () {
     render(); changed();
     const last = host.lastElementChild;
     last.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    last.querySelector(rows.at(-1).item_type === 'GOLD' ? '[data-f="net_weight_g"]' : '[data-misc] [data-f="name"]')?.focus();
+    last.querySelector(rows.at(-1).item_type === 'MISC' ? '[data-sec="MISC"] [data-f="name"]' : '[data-f="net_weight_g"]')?.focus();
   });
 
   function localPrice(row) {
     const w = toLatin(row.net_weight_g);
+    if (row.item_type === 'GOLD_IN') {
+      const basis = row.rate_basis || 'BUY';
+      const r = basis === 'BUY' ? buyRate : basis === 'SELL' ? rate : (row.rate_toman ? (parseTomanToIrr(row.rate_toman) ?? 'x') : null);
+      if (!r) throw new PricingError(basis === 'BUY' ? 'NO_BUY_RATE' : 'REQUIRED', 'rate_irr_per_g');
+      return priceGoldIn({ net_weight_g: w, purity_ppt: toLatin(row.purity_ppt), rate_irr_per_g: r, deduction_percent: toLatin(row.deduction_percent) || '0' }, boot.limits);
+    }
     if (row.item_type === 'GOLD') {
       const discountIrr = row.discount_toman ? parseTomanToIrr(row.discount_toman, true) : null;
       return priceGold({ net_weight_g: w, purity_ppt: toLatin(row.purity_ppt), price18_irr_per_g: rate, wage_percent: toLatin(row.wage_percent) || '0', profit_percent: toLatin(row.profit_percent) || '0', discount: discountIrr && discountIrr !== '0' ? { scope: row.discount_scope || 'TAXABLE_COMPONENTS', amount_irr: discountIrr } : null, vat_rate_percent: boot.vat }, boot.limits);
@@ -114,7 +155,9 @@ export default function () {
   }
 
   function preview(serverRows = null) {
-    let total = 0n, valid = rows.length > 0;
+    let total = 0n, received = 0n, valid = rows.length > 0;
+    const hasSale = rows.some((r) => r.item_type === 'GOLD' || r.item_type === 'MISC');
+    const hasIn = rows.some((r) => r.item_type === 'GOLD_IN');
     rows.forEach((row) => {
       const card = host.querySelector(`[data-row][data-uid="${row.row_uid}"]`);
       if (!card) return;
@@ -124,6 +167,13 @@ export default function () {
       card.querySelectorAll('.field.invalid').forEach((f) => f.classList.remove('invalid'));
       try {
         const r = localPrice(row);
+        if (row.item_type === 'GOLD_IN') {
+          received += BigInt(r.T);
+          totalEl.textContent = `−${toman(r.T)} تومان`;
+          bd.textContent = `معادل ${toPersian(r.weight_750.replace(/\.?0+$/, ''))} گرم طلای ۱۸ عیار (۷۵۰)` + (r.D !== '0' ? ` · کسر ${toman(r.D)} تومان` : '');
+          eff.textContent = '';
+          return;
+        }
         total += BigInt(r.T);
         totalEl.textContent = `${toman(r.T)} تومان`;
         if (row.item_type === 'GOLD') {
@@ -134,17 +184,25 @@ export default function () {
         valid = false;
         totalEl.textContent = '—';
         bd.textContent = '';
-        const shown = (row.item_type === 'GOLD' ? (row.net_weight_g !== '') : (row.manual_total_toman !== '' || row.name !== '')) || serverRows;
+        const shown = (row.item_type === 'MISC' ? (row.manual_total_toman !== '' || row.name !== '') : (row.net_weight_g !== '')) || serverRows;
         if (e instanceof PricingError && shown) {
           const field = FIELD[e.field] || e.field;
-          const scope = row.item_type === 'GOLD' ? card.querySelector('[data-gold]') : card.querySelector('[data-misc]');
-          const inp = scope.querySelector(`[data-f="${field}"]`) || card.querySelector(`[data-f="${field}"]`);
+          const inp = [...card.querySelectorAll(`[data-f="${field}"]`)].find((x) => !x.closest('[data-sec]')?.hidden);
           const fieldEl = inp?.closest('.field');
           if (fieldEl) { fieldEl.classList.add('invalid'); fieldEl.querySelector('.err').textContent = ERR[e.code] || 'مقدار درست نیست.'; }
         }
       }
     });
-    payableEl.textContent = valid ? `${toman(total.toString())} تومان` : '—';
+    // payable = sales − gold received; negative = balance owed to the customer.
+    const payable = total - received;
+    const credit = payable < 0n;
+    valid = valid && hasSale;
+    document.querySelector('[data-split]').classList.toggle('hidden', !hasIn);
+    document.querySelector('[data-sales]').textContent = toman(total.toString());
+    document.querySelector('[data-gold-in]').textContent = `−${toman(received.toString())}`;
+    document.querySelector('[data-payable-label]').textContent = !hasIn ? 'جمع فاکتور' : credit ? 'مانده به نفع مشتری' : 'قابل پرداخت';
+    document.querySelector('[data-sale-required]').classList.toggle('hidden', hasSale || !rows.length);
+    payableEl.textContent = valid ? `${toman((credit ? -payable : payable).toString())} تومان` : '—';
     reviewBtn.setAttribute('aria-disabled', String(!valid));
   }
 
@@ -198,6 +256,8 @@ export default function () {
   }
   document.querySelector('[data-use-new-rate]')?.addEventListener('click', () => {
     rate = boot.latest_irr; useLatest = true;
+    if (boot.latest_buy_irr) buyRate = boot.latest_buy_irr;
+    render();
     document.querySelector('[data-rate]').textContent = boot.latest_fa;
     newRate.classList.add('hidden');
     changed();

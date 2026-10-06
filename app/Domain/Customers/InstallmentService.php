@@ -84,6 +84,10 @@ final class InstallmentService
                 $errors['invoice_id'] = ['فاکتور قطعی پیدا نشد.'];
             }
             $total = $invoice?->payable_irr;
+            if ($invoice && BigInteger::of($total)->isLessThanOrEqualTo(0)) {
+                // The customer paid with gold (GOLD_IN) at least the whole sale: nothing left to split.
+                $errors['invoice_id'] = ['این فاکتور مانده‌ای برای اقساط ندارد.'];
+            }
         } else {
             $total = Money::parseTomanToIrr((string) ($input['principal_toman'] ?? ''));
             if (! $total) {
