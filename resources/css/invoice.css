@@ -16,7 +16,7 @@
 .inv .ltr { direction: ltr; unicode-bidi: isolate; }
 
 /* Header: RTL grid → column 1 is physical right (shop), column 2 is physical left (QR, fixed). */
-.inv-head { display: grid; grid-template-columns: 1fr 34mm; gap: 6mm; align-items: start; border-bottom: 1.5pt solid #000; padding-bottom: 4mm; }
+.inv-head { display: grid; grid-template-columns: minmax(0, 1fr) 34mm; gap: 6mm; align-items: start; border-bottom: 1.5pt solid #000; padding-bottom: 4mm; }
 .inv-head .blocks { display: flex; flex-direction: column; gap: 2pt; }
 .inv-head .shop-name { font-size: 1.55em; font-weight: 800; line-height: 1.25; }
 .inv-head .meta-line { display: flex; gap: 6mm; flex-wrap: wrap; margin-top: 3mm; font-size: .95em; }
@@ -66,11 +66,15 @@
 .inv .void-stamp { position: absolute; top: 90mm; left: 50%; transform: translateX(-50%) rotate(-18deg); border: 3pt solid #B3261E; color: #B3261E; font-size: 34pt; font-weight: 900; padding: 2mm 10mm; opacity: .85; }
 .inv .sample-stamp { position: absolute; top: 4mm; left: 50%; transform: translateX(-50%); background: #FBF0D9; color: #8A5A00; font-size: 9pt; padding: 1mm 4mm; border-radius: 99px; }
 
-@media (max-width: 820px) {
+/* Phone/tablet reflow is for SCREENS only: A4 content (186 mm ≈ 703 CSS px) is narrower than 820 px, so
+   without `screen` the phone layout used to leak into printed and PDF invoices. */
+@media screen and (max-width: 820px) {
   .inv-split { grid-template-columns: 1fr; }
   .print-page { background: #fff; }
   .inv { width: 100%; min-height: 0; padding: 16px 12px; font-size: 10pt; }
-  .inv-head { grid-template-columns: 1fr 30mm; }
+  .inv-head { grid-template-columns: minmax(0, 1fr) 30mm; }
+  .qr-box { width: 30mm; }
+  .qr-box svg { width: 27mm; height: 27mm; }
   .inv-sum { grid-template-columns: 1fr; }
   .inv .table-scroll { overflow-x: auto; }
 }

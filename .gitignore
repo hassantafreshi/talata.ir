@@ -28,3 +28,4 @@ Thumbs.db
 
 # Performance runs: saved sign-in session (secret) and traces
 /storage/perf/
+/storage/e2e/
