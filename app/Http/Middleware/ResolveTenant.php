@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Domain\DomainError;
 use App\Models\Membership;
 use App\Tenancy\TenantContext;
 use Closure;
@@ -29,7 +30,8 @@ class ResolveTenant
             return redirect()->route('login');
         }
         if (! $membership->tenant->isActive()) {
-            abort(403, 'این فروشگاه موقتاً غیرفعال است. با پشتیبانی زرلیو تماس بگیرید.');
+            // JSON for AJAX, the error page with this message for pages (DomainError renderer).
+            throw new DomainError('TENANT_SUSPENDED', 'این فروشگاه موقتاً غیرفعال است. با پشتیبانی زرلیو تماس بگیرید. فاکتورهای صادرشده همچنان برای مشتریان قابل بررسی‌اند.', 403);
         }
         $request->session()->put('tenant_id', $membership->tenant_id);
         $this->context->set($membership->tenant, $membership);

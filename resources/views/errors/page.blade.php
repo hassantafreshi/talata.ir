@@ -24,7 +24,9 @@
     <section class="hero stack-sm">
         <span class="badge {{ $status >= 500 ? 'err' : 'warn' }}">{{ fa($status) }}</span>
         <h2>{{ $titles[$status] ?? 'خطا' }}</h2>
-        <p class="meta">{{ $message ?? ($defaults[$status] ?? $defaults[500]) }}</p>
+        {{-- A Persian message given to abort() is shown; framework (English) messages never are. --}}
+        @php($given = isset($exception) && preg_match('/\p{Arabic}/u', (string) $exception->getMessage()) ? $exception->getMessage() : null)
+        <p class="meta">{{ $message ?? $given ?? ($defaults[$status] ?? $defaults[500]) }}</p>
     </section>
     <a class="btn btn-gold block" href="{{ url('/') }}">بازگشت به صفحه اصلی</a>
 </main>

@@ -19,10 +19,10 @@ php artisan queue:work --queue=otp,default   # صف otp جدا و با اولو�
 php artisan schedule:work                    # مظنه هر ۱۸۰ ثانیه، بررسی پرداخت، انقضای اعتبار، یادآوری اقساط
 ```
 
-مدیر سامانه (کنسول `/admin`: داشبورد، لاگ فعالیت هر کاربر و هر سرویس، لاگ فنی):
+مدیر سامانه — کنسول `/admin` (نسخه ۱): داشبورد با هشدارها و کارهای امروز، فروشگاه‌ها (فیلتر، CSV، فعال‌سازی دستی پلن، اعتبار پیامک ±، قابلیت ویژه، تعلیق)، پرداخت‌ها (استعلام بانک، تأیید دستی، علامت ناموفق، خروجی مالی ماهانه)، پیامک، نرخ و مظنه (نرخ اضطراری)، قیمت‌ها، قواعد مالیات، همکاری در فروش، اتصال‌ها، کارکنان و نقش‌ها، سوابق، لاگ فنی، سلامت سیستم. نقش‌ها: مدیر سامانه، مالی، عملیات فنی، پشتیبانی ([`docs/handoff/04_SCREENS_ADMIN.md`](docs/handoff/04_SCREENS_ADMIN.md)):
 
 ```bash
-php artisan talata:staff 09120000000 "نام مدیر" --role=admin   # یا --role=support (بدون لاگ فنی)؛ --deactivate برای غیرفعال‌کردن
+php artisan talata:staff 09120000000 "نام مدیر" --role=admin   # بقیه کارکنان از /admin/staff؛ --deactivate برای غیرفعال‌کردن
 ```
 
 پیامک با **کاوه‌نگار**: `TALATA_SMS_DRIVER=kavenegar`، `KAVENEGAR_API_KEY`، `KAVENEGAR_SENDER` و برای کد ورود یک الگوی Verify Lookup با `%token` در پنل کاوه‌نگار بسازید و نامش را در `KAVENEGAR_OTP_TEMPLATE` بگذارید. ورود با اثر انگشت به HTTPS و دامنه ثابت نیاز دارد (`TALATA_WEBAUTHN_RP_ID=zarlio.ir`).
@@ -36,7 +36,7 @@ php artisan test        # دامنه، جریان فاکتور، ضدسوءاس�
 npm run test:js         # برابری محاسبه مرورگر و سرور با vectors مشترک
 ```
 
-پیش از production:
+پیش از production: راهنمای کامل در [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) (nginx، supervisor، cron، پشتیبان، زرین‌پال، کاوه‌نگار) و دروازه انتشار `php artisan talata:preflight` (هر تنظیم ناامن = خروج با خطا). خلاصه:
 - `APP_ENV=production`، `APP_DEBUG=false`، HTTPS و `TALATA_PUBLIC_URL` دامنه نهایی.
 - **از `APP_KEY` نسخه پشتیبان بگیرید**: توکن خام QR فاکتورها با آن رمز شده است. برای چرخش کلید از `APP_PREVIOUS_KEYS` استفاده کنید؛ وگرنه چاپ دوباره QR فاکتورهای قدیمی ممکن نیست (بررسی اصالت چاپ‌های قبلی کار می‌کند).
 - آداپتر پیامک و درگاه واقعی را پس از انتخاب مالک اضافه کنید؛ درگاه آزمایشی در production رد می‌شود مگر `TALATA_ALLOW_MOCK_PAYMENTS_IN_PRODUCTION=true`.

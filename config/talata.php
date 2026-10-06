@@ -15,6 +15,10 @@ return [
     'timezone' => env('TALATA_TIMEZONE', 'Asia/Tehran'),
     'public_url' => rtrim(env('TALATA_PUBLIC_URL', env('APP_URL', 'http://localhost')), '/'),
 
+    // Reverse proxies whose X-Forwarded-* headers are trusted (comma list or *). Read through config so it
+    // still applies after `php artisan config:cache` (env() returns null then).
+    'trusted_proxies' => env('TRUSTED_PROXIES', '127.0.0.1'),
+
     'drivers' => [
         'sms' => env('TALATA_SMS_DRIVER', 'log'),          // kavenegar | log | fake
         'quotes' => env('TALATA_QUOTE_DRIVER', 'demo'),    // demo

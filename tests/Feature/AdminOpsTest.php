@@ -128,7 +128,8 @@ class AdminOpsTest extends TestCase
         $admin = $this->staff();
         $this->postJson("/admin/api/tenants/{$tenant->id}/suspend", ['reason' => 'گزارش سوءاستفاده'])->assertOk();
         $this->assertSame('suspended', $tenant->fresh()->status);
-        $this->actingAs($merchant)->get('/invoices/new')->assertForbidden();
+        $this->actingAs($merchant)->get('/invoices/new')->assertForbidden()->assertSee('این فروشگاه موقتاً غیرفعال است');
+        $this->api('GET', '/api/quotes/latest')->assertForbidden()->assertJsonPath('code', 'TENANT_SUSPENDED');
 
         $this->asStaff($admin);
         $this->postJson("/admin/api/tenants/{$tenant->id}/suspend", ['reason' => 'دوباره'])->assertStatus(409);

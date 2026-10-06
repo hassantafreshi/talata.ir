@@ -15,6 +15,7 @@ use App\Domain\Sms\Gateways\LogSmsGateway;
 use App\Domain\Sms\SmsGateway;
 use App\Support\TechLog;
 use App\Tenancy\TenantContext;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\URL;
@@ -69,8 +70,14 @@ class AppServiceProvider extends ServiceProvider
             TechLog::error('queue', 'job failed: '.$e->job->resolveName(), ['queue' => $e->job->getQueue(), 'error' => mb_substr($e->exception->getMessage(), 0, 300)]);
         });
         RouteLimits::register();
+        // Overrides the bootstrap default with the cached config value (env() is empty after config:cache).
+        TrustProxies::at(config('talata.trusted_proxies'));
         if ($this->app->isProduction()) {
             URL::forceScheme('https');
+            // Cookies only over HTTPS unless explicitly configured (talata:preflight fails on false).
+            if (config('session.secure') === null) {
+                config(['session.secure' => true]);
+            }
         }
         View::composer('*', function ($view) {
             $view->with('tenantContext', app(TenantContext::class));
