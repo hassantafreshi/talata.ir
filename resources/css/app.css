@@ -407,3 +407,8 @@ table.t tr.lvl-warning td { background: #FFFBF1; }
 .pricing-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
 @media (min-width: 1000px) { .pricing-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .list-item.warn-row { background: var(--t-warn-bg, #FBF0D9); }
+
+/* Invoice numbering presets */
+.numbering-presets { grid-template-columns: 1fr; }
+@media (min-width: 700px) { .numbering-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.numbering-presets .tile { gap: 4px; padding: 12px 14px; }

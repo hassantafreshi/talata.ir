@@ -61,7 +61,7 @@ final class InvoicePresenter
         $hasGoldIn = collect($s['rows'])->contains('item_type', 'GOLD_IN');
 
         return [
-            'number' => Digits::toPersian($s['number']),
+            'number' => Digits::invoiceNumber($s['number']),
             'status' => $invoice->status,
             'issued_fa' => Jalali::date($issued, $tz, true),
             'voided_fa' => $invoice->voided_at ? Jalali::date($invoice->voided_at, $tz) : null,

@@ -11,5 +11,5 @@ class InvoiceCounter extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['jalali_year', 'last_seq'];
+    protected $fillable = ['jalali_year', 'last_seq', 'series', 'period_key'];
 }

@@ -12,7 +12,6 @@ use App\Domain\Tax\TaxRules;
 use App\Models\Customer;
 use App\Models\InstallmentAgreement;
 use App\Models\Invoice;
-use App\Models\InvoiceCounter;
 use App\Models\InvoiceItem;
 use App\Models\InvoiceLayout;
 use App\Models\InvoiceShare;
@@ -25,6 +24,7 @@ use App\Support\Money;
 use App\Support\Tokens;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -263,12 +263,8 @@ final class InvoiceService
                 $customerId = $customer?->id;
             }
 
-            $year = Jalali::year(now(), $tenant->timezone);
-            $counter = InvoiceCounter::query()->where('jalali_year', $year)->lockForUpdate()->first()
-                ?? InvoiceCounter::create(['jalali_year' => $year, 'last_seq' => 0]);
-            $counter->last_seq++;
-            $counter->save();
-            $seq = $counter->last_seq;
+            // Number from the shop's numbering settings (docs/INVOICE_NUMBERING.md), allocated under the tenant lock.
+            $num = Numbering::allocate(CarbonImmutable::now(), $tenant->timezone);
 
             foreach ($priced['rows'] as $r) {
                 InvoiceItem::query()->where('invoice_id', $invoice->id)->where('row_uid', $r['row_uid'])
@@ -276,7 +272,7 @@ final class InvoiceService
             }
 
             $invoice->forceFill([
-                'status' => 'issued', 'number' => sprintf('%d-%04d', $year, $seq), 'jalali_year' => $year, 'seq' => $seq,
+                'status' => 'issued', 'number' => $num['number'], 'jalali_year' => $num['jalali_year'], 'seq' => $num['seq'],
                 'buyer_name' => $buyerName, 'buyer_mobile' => $buyerMobile, 'customer_id' => $customerId,
                 'gold_total_irr' => $priced['gold_total'], 'misc_total_irr' => $priced['misc_total'], 'payable_irr' => $priced['payable'],
                 // Denormalized report columns (dashboard); the snapshot below stays the legal record.

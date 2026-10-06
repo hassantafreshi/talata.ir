@@ -50,6 +50,7 @@ Evidence: `php artisan test` (91 tests on PostgreSQL), `npm run test:js`, Playwr
 - [x] Passkey (fingerprint/face/device-lock) sign-in for merchants and staff; SMS login stays as recovery.
 - [x] Team: members have full access by default; per-permission restriction only on Basic/Pro (`team.permissions_edit`).
 - [x] Activity log per user/shop/service and technical log per service, visible only in the admin console `/admin` (staff guard, OTP/passkey, idle timeout, roles).
+- [x] Configurable invoice numbering (docs/INVOICE_NUMBERING.md): presets, prefix, year/month parts, yearly/monthly/never reset, start number, unique per shop, never reused, LRM-safe display.
 - [x] Admin price editor (docs/ADMIN_PRICING.md): Basic/Pro monthly+yearly and per-plan SMS segment price publish a new pricing version (never in place), >50% typo guard, restore, audit; paid/pending orders keep their amounts.
 - [x] Screen-level team permissions (docs/TEAM_PERMISSIONS.md): chosen when adding a member, presets, dependencies, filtered menu, /home redirect, seller sees own invoices only.
 - [x] Sales dashboard (docs/GOLD_RECEIVED_AND_DASHBOARD.md §8–§12): sales, wage, profit, gold received (toman or 750-grams) and VAT; today/week/Jalali month/3 months/year/custom with simple SVG bar chart; Free = sales, wage, gold received for day/week/month (owner decision, capability dashboard.view), reports.financial unlocks the rest; reports.view team permission.

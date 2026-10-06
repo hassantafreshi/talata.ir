@@ -44,3 +44,11 @@ if (! function_exists('jymd')) {
         return sprintf('%04d/%02d/%02d', $jy, $jm, $jd);
     }
 }
+
+if (! function_exists('invno')) {
+    /** Invoice number for display (Persian digits, safe with a letter prefix). */
+    function invno(?string $number): string
+    {
+        return Digits::invoiceNumber($number);
+    }
+}

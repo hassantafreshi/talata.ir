@@ -12,7 +12,7 @@
             </fieldset>
             <div class="field" data-src="invoice"><label for="a-inv">فاکتور</label>
                 <div class="input-wrap"><select id="a-inv" name="invoice_id">
-                    @foreach ($invoices as $inv)<option value="{{ $inv->public_id }}" data-remind="{{ $customer->mobile && ! $customer->sms_opt_out && $inv->buyer_mobile === $customer->mobile ? 1 : 0 }}">فاکتور {{ "\u{2066}".fa($inv->number)."\u{2069}" }} · {{ toman($inv->payable_irr) }} تومان · {{ jdate($inv->issued_at) }}</option>@endforeach
+                    @foreach ($invoices as $inv)<option value="{{ $inv->public_id }}" data-remind="{{ $customer->mobile && ! $customer->sms_opt_out && $inv->buyer_mobile === $customer->mobile ? 1 : 0 }}">فاکتور {{ "\u{2066}".invno($inv->number)."\u{2069}" }} · {{ toman($inv->payable_irr) }} تومان · {{ jdate($inv->issued_at) }}</option>@endforeach
                 </select></div><div class="err"></div></div>
             <div class="field hidden" data-src="manual"><label for="a-principal">مبلغ کل</label><div class="input-wrap ltr-input"><input id="a-principal" name="principal_toman" inputmode="numeric" data-digits><span class="unit">تومان</span></div><div class="err"></div></div>
             <div class="field"><label for="a-down">پیش‌پرداخت (اختیاری)</label><div class="input-wrap ltr-input"><input id="a-down" name="down_payment_toman" inputmode="numeric" data-digits placeholder="۰"><span class="unit">تومان</span></div><div class="err"></div></div>

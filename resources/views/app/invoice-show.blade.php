@@ -5,7 +5,7 @@
     </div>
     @if ($invoice->status === 'void')
         <div class="notice err">این فاکتور در {{ $v['voided_fa'] }} باطل شد. دلیل: {{ $v['void_reason_fa'] }}. صفحه بررسی اصالت هم «باطل شده» نشان می‌دهد.
-            @if ($replacement)<a href="{{ route($replacement->isDraft() ? 'invoices.items' : 'invoices.show', $replacement) }}">فاکتور جایگزین {{ $replacement->number ? fa($replacement->number) : '(پیش‌نویس)' }}</a>@endif
+            @if ($replacement)<a href="{{ route($replacement->isDraft() ? 'invoices.items' : 'invoices.show', $replacement) }}">فاکتور جایگزین {{ $replacement->number ? invno($replacement->number) : '(پیش‌نویس)' }}</a>@endif
         </div>
     @endif
 

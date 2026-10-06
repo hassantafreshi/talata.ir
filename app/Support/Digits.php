@@ -35,4 +35,17 @@ final class Digits
 
         return ($negative ? '−' : '').self::toPersian($grouped);
     }
+
+    /**
+     * Invoice number for display: Persian digits, and a left-to-right mark after a letter prefix (e.g. «ط»),
+     * so «ط-05-0012» never shows reversed (digits after an Arabic letter otherwise take RTL order).
+     */
+    public static function invoiceNumber(?string $number): string
+    {
+        if ($number === null || $number === '') {
+            return '';
+        }
+
+        return self::toPersian(preg_replace('/(\p{L}+)(?=[^\p{L}]|$)/u', "$1\u{200E}", $number));
+    }
 }

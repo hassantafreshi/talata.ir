@@ -3,7 +3,7 @@
     <li>
         <a class="list-item" href="{{ $inv->status === 'draft' ? route('invoices.items', $inv) : route('invoices.show', $inv) }}">
             <span class="body">
-                <strong>@if($inv->status === 'draft')پیش‌نویس@else فاکتور <span class="num ltr">{{ fa($inv->number) }}</span>@endif
+                <strong>@if($inv->status === 'draft')پیش‌نویس@else فاکتور <span class="num ltr">{{ invno($inv->number) }}</span>@endif
                     @if($inv->buyer_name) · {{ $inv->buyer_name }}@endif</strong>
                 <span class="sub">{{ $inv->status === 'draft' ? 'ذخیره '.jtime($inv->updated_at) : jdate($inv->issued_at) }} · {{ fa($inv->items_count) }} ردیف
                     @if($sms) · پیامک: {{ \App\Http\Controllers\App\InvoiceController::SMS_STATUS_FA[$sms->status][0] }}@endif</span>

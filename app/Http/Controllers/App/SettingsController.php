@@ -5,18 +5,24 @@ namespace App\Http\Controllers\App;
 use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Domain\Invoices\LayoutSettings;
+use App\Domain\Invoices\Numbering;
 use App\Domain\Invoices\Qr;
 use App\Domain\Sms\SmsCredit;
 use App\Domain\Sms\SmsTemplate;
 use App\Models\Affiliate;
+use App\Models\Invoice;
 use App\Models\InvoiceLayout;
 use App\Models\Membership;
 use App\Models\Passkey;
 use App\Models\ShopProfile;
 use App\Models\SmsSetting;
+use App\Models\Tenant;
+use App\Models\TenantSetting;
 use App\Support\Digits;
+use App\Support\Jalali;
 use App\Support\Mobile;
 use App\Support\Money;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -219,5 +225,62 @@ class SettingsController extends BaseController
         Audit::record('sms.template_updated', null);
 
         return response()->json(['ok' => true]);
+    }
+
+    /** Invoice numbering (docs/INVOICE_NUMBERING.md): presets + simple custom options with a live preview. */
+    public function numbering()
+    {
+        $tenant = $this->tenant();
+        $now = CarbonImmutable::now();
+        $current = Numbering::settings();
+        $local = $now->setTimezone($tenant->timezone);
+        [$jy, $jm] = Jalali::fromGregorian($local->year, $local->month, $local->day);
+        $next = [];
+        foreach (Numbering::RESETS as $reset) {
+            $next[$reset] = Numbering::nextSeq(['reset' => $reset] + $current, $now, $tenant->timezone);
+        }
+        $presets = [];
+        foreach (Numbering::PRESETS as $key => $p) {
+            $presets[$key] = $p + ['example' => Numbering::format($p['settings'], $now, $tenant->timezone, $next[$p['settings']['reset']])];
+        }
+
+        return view('app.numbering', [
+            'current' => $current, 'presets' => $presets, 'jy' => $jy, 'jm' => $jm, 'next' => $next,
+            'preview' => Numbering::preview($current, $now, $tenant->timezone),
+            'version' => TenantSetting::query()->where('key', Numbering::KEY)->value('version') ?? 0,
+            'issuedCount' => Invoice::query()->whereNotNull('number')->count(),
+        ]);
+    }
+
+    public function saveNumbering(Request $request)
+    {
+        $data = $request->validate([
+            'settings' => ['required', 'array'], 'next' => ['nullable', 'string', 'max:12'], 'version' => ['required', 'integer'],
+        ]);
+        $settings = Numbering::sanitize($data['settings']);
+        $next = trim(Digits::toLatin((string) ($data['next'] ?? '')));
+        if ($next !== '' && ! preg_match('/^\d{1,8}$/', $next)) {
+            throw new DomainError('VALIDATION', 'شماره بعدی درست نیست.', 422, ['errors' => ['next' => ['فقط عدد، حداکثر ۸ رقم.']]]);
+        }
+        $tenant = $this->tenant();
+        $result = DB::transaction(function () use ($tenant, $settings, $next, $data) {
+            // Same lock as issuing, so a number can never be allocated while the scheme changes.
+            Tenant::query()->whereKey($tenant->id)->lockForUpdate()->first();
+            $row = TenantSetting::query()->where('key', Numbering::KEY)->lockForUpdate()->first();
+            if (($row?->version ?? 0) !== (int) $data['version']) {
+                throw new DomainError('SETTINGS_CONFLICT', 'تنظیمات در جای دیگری تغییر کرد. صفحه را دوباره باز کنید.', 409);
+            }
+            $before = $row?->value;
+            $row ??= new TenantSetting(['key' => Numbering::KEY, 'version' => 0]);
+            $row->fill(['value' => $settings, 'version' => $row->version + 1, 'updated_by' => auth()->id()])->save();
+            if ($next !== '') {
+                Numbering::setNext($settings, (int) $next, CarbonImmutable::now(), $tenant->timezone);
+            }
+            Audit::record('settings.numbering_changed', $row, ['before' => $before, 'after' => $settings, 'next' => $next ?: null]);
+
+            return $row;
+        });
+
+        return response()->json(['ok' => true, 'version' => $result->version, 'preview' => Numbering::preview($settings, CarbonImmutable::now(), $tenant->timezone)]);
     }
 }

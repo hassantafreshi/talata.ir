@@ -27,7 +27,7 @@
             @endphp
             <article class="band stack-sm" data-agreement="{{ $a->public_id }}">
                 <div class="between">
-                    <strong>@if($a->invoice)فاکتور <span class="num ltr">{{ fa($a->invoice->number) }}</span>@else بدون فاکتور@endif · {{ fa($a->count) }} قسط {{ $a->frequency === 'weekly' ? 'هفتگی' : 'ماهانه' }}</strong>
+                    <strong>@if($a->invoice)فاکتور <span class="num ltr">{{ invno($a->invoice->number) }}</span>@else بدون فاکتور@endif · {{ fa($a->count) }} قسط {{ $a->frequency === 'weekly' ? 'هفتگی' : 'ماهانه' }}</strong>
                     @switch($a->status)
                         @case('completed')<span class="badge ok">تسویه شد</span>@break
                         @case('cancelled')<span class="badge off">لغو شد</span>@break
@@ -75,7 +75,7 @@
         <h2 id="inv-h">فاکتورها</h2>
         <ul class="list">
             @forelse ($invoices as $inv)
-                <li><a class="list-item" href="{{ route('invoices.show', $inv) }}"><span class="body"><strong>فاکتور <span class="num ltr">{{ fa($inv->number) }}</span></strong><span class="sub">{{ jdate($inv->issued_at) }}</span></span><span class="num">{{ toman($inv->payable_irr) }}</span>@if($inv->status === 'void')<span class="badge err">باطل</span>@endif</a></li>
+                <li><a class="list-item" href="{{ route('invoices.show', $inv) }}"><span class="body"><strong>فاکتور <span class="num ltr">{{ invno($inv->number) }}</span></strong><span class="sub">{{ jdate($inv->issued_at) }}</span></span><span class="num">{{ toman($inv->payable_irr) }}</span>@if($inv->status === 'void')<span class="badge err">باطل</span>@endif</a></li>
             @empty
                 <li class="empty">فاکتوری برای این مشتری ثبت نشده است.</li>
             @endforelse

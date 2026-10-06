@@ -74,6 +74,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::get('/settings/business', [SettingsController::class, 'business'])->middleware('perm:settings.manage')->name('settings.business');
     Route::get('/settings/appearance', [SettingsController::class, 'appearance'])->middleware('perm:settings.manage')->name('settings.appearance');
+    Route::get('/settings/numbering', [SettingsController::class, 'numbering'])->middleware('perm:settings.manage')->name('settings.numbering');
     Route::get('/settings/sms-template', [SettingsController::class, 'smsTemplate'])->middleware('perm:settings.manage')->name('settings.sms_template');
     Route::get('/settings/users', [UsersController::class, 'index'])->middleware('perm:__owner')->name('settings.users');
     Route::get('/settings/plan', [BillingController::class, 'plans'])->name('settings.plan');
@@ -127,6 +128,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
             Route::delete('/settings/logo', [SettingsController::class, 'deleteLogo'])->name('api.settings.logo.delete');
             Route::put('/settings/appearance', [SettingsController::class, 'saveAppearance'])->middleware('throttle:30,1')->name('api.settings.appearance');
             Route::post('/settings/appearance/preview', [SettingsController::class, 'previewAppearance'])->middleware('throttle:60,1')->name('api.settings.appearance.preview');
+            Route::put('/settings/numbering', [SettingsController::class, 'saveNumbering'])->middleware('throttle:20,1')->name('api.settings.numbering');
             Route::put('/settings/sms-template', [SettingsController::class, 'saveSmsTemplate'])->middleware('throttle:20,1')->name('api.settings.sms_template');
         });
         Route::middleware('perm:billing.manage')->group(function () {
