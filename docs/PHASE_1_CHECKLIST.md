@@ -35,7 +35,7 @@ Status (2026-10-06): merchant web app and service admin console v1 implemented i
 
 ## Implementation progress (2026-10-06)
 
-Evidence: `php artisan test` (149 tests on PostgreSQL), `npm run test:js`, Playwright mobile journey with screenshots in `docs/screenshots/app/`. Security controls and fixed findings: `docs/SECURITY.md`. Frontend decision: `docs/adr/0001-blade-ajax-frontend.md`.
+Evidence: `php artisan test` (162 tests / 1710 assertions on PostgreSQL), `npm run test:js`, Playwright mobile journey with screenshots in `docs/screenshots/app/`. Security controls and fixed findings: `docs/SECURITY.md`. Frontend decision: `docs/adr/0001-blade-ajax-frontend.md`.
 
 - [x] Mobile OTP login with proof-of-work, layered limits, global budget, lockout (Passkey not yet).
 - [x] Tenancy fail-closed scope, ULID public ids, per-route permissions, member removal kills sessions.
@@ -62,7 +62,11 @@ Evidence: `php artisan test` (149 tests on PostgreSQL), `npm run test:js`, Playw
 - [x] Rest of the service admin console (manual tenant actions, SMS/payment operations, quotes, tax rules, staff, system health) — tests in `tests/Feature/AdminOpsTest.php`, screenshots 53–64.
 - [x] UI review pass (P1/P2 and cheap P3): composer keeps unsaved edits on the device and blocks review until saved, persistent unknown-issuance retry, QR panel + verify link, CSS-only public invoice/verify pages, inline load/order errors with retry, 44px touch targets and focus rings, Persian validation messages, error pages with a reference code, calculator «پاک‌کردن», remembered dashboard range, SMS packs default to 200k (or the plan minimum) with «≈ N پیامک» and an exact «پرداخت … تومان» button, yearly plans show the monthly equivalent and saving, confirmation sheet before the bank, banner for an unresolved earlier payment. Browser-checked at 360px (screenshots 65–69).
 - [ ] Field performance measurement on throttled networks. Lab only so far (Playwright throttling against the dev server without gzip — not production): login 1.4 s / calculator 1.5 s / public invoice 1.8 s on profile A, login 4.6 s / public invoice 5.5 s on profile B; gzip sizes app.js 4 KB, CSS 7.3 KB, fonts 78.9 KiB. Must be re-measured on the production host with retained traces.
-- [ ] Not built yet: login-number change (M-23), passkey offer right after first login, invoice-list filters «اقساطی»/«این ماه», customer balance filters, quota sheet that adapts to what triggered it.
+- [x] Login-number change (M-23): two OTP steps (current number, then new), atomic swap, other devices signed out, audited (`tests/Feature/MobileChangeTest.php`).
+- [x] Fingerprint-login offer once after an SMS sign-in, where the device supports it and it was not dismissed (`tests/Feature/PasskeyOfferTest.php`).
+- [x] Invoice-list filters «این ماه» and «اقساطی», combinable with the status chips, plan-gated (`tests/Feature/InvoiceFlowTest.php`).
+- [x] Customer list shows and filters by outstanding installment balance (همه / مانده قسط دارند / تسویه‌شده), Professional-only (`tests/Feature/CustomerBalanceTest.php`).
+- [x] Over-quota sheet adapts its title, reassurance and actions to the limit that was hit (`tests/js/quota-panel.test.mjs`).
 - [ ] Independent penetration test and owner approval of visual direction.
 
 ## M0 — Foundations
