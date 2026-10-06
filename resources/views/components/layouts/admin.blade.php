@@ -13,7 +13,7 @@
 </head>
 <body data-page="{{ $page }}" class="admin">
 <header class="topbar">
-    <a href="{{ route('admin.dashboard') }}" class="brand">@include('partials.logo')طلاتا <span class="badge warn">مدیریت سامانه</span></a>
+    <a href="{{ route('admin.dashboard') }}" class="brand">@include('partials.logo')زرلیو <span class="badge warn">مدیریت سامانه</span></a>
     <div class="grow"></div>
     @if ($staff)
         <nav class="topnav admin-nav" aria-label="منوی مدیریت">

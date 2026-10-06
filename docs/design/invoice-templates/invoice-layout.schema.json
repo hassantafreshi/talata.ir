@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://talata.ir/schemas/invoice-layout.v1.json",
-  "title": "Talata InvoiceLayout settings (schema_version 1)",
+  "title": "Zarlio InvoiceLayout settings (schema_version 1)",
   "description": "Allowlisted, versioned layout settings stored on InvoiceLayout and snapshotted at issuance. Everything not listed here is rejected server-side. Protected invariants (QR at physical upper-left, required blocks always visible, essential item/total data never hidden) are enforced by the renderer and by the conditional rules below. Status: proposed contract for Phase 1 implementation.",
   "type": "object",
   "additionalProperties": false,
@@ -50,7 +50,7 @@
       "properties": {
         "visible": {
           "type": "boolean",
-          "description": "Rendering also requires the invoice.shop_logo capability snapshot and an uploaded validated raster logo; otherwise the Talata mark is used on Free and nothing on Basic/Professional."
+          "description": "Rendering also requires the invoice.shop_logo capability snapshot and an uploaded validated raster logo; otherwise the Zarlio mark is used on Free and nothing on Basic/Professional."
         },
         "size": {
           "enum": [

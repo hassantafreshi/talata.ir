@@ -59,7 +59,7 @@ API: `GET /provider/api/sms/messages?…`, `POST …/{id}/inquire`, `PUT /provid
 
 ## A-07 Quotes and مظنه — `/provider/quotes`
 
-Asset status table (asset label + code, value, unit, change vs previous, freshness badge, source) for `GOLD_18_BUY`, `GOLD_18_SELL`, `GOLD_24`, `USD_IRR`, `XAU_USD`; last fetches log (time, result, duration, note); thresholds (fetch interval 180 s **read-only**, stale after N minutes, request timeout, alert after N consecutive failures); **emergency global rate** card (18K sell value, validity 30 min / 1 h / until cancelled, reason*; merchants see «نرخ اعلامی طلاتا (دستی)»; issued invoices unaffected; shops can still use their own manual rate).
+Asset status table (asset label + code, value, unit, change vs previous, freshness badge, source) for `GOLD_18_BUY`, `GOLD_18_SELL`, `GOLD_24`, `USD_IRR`, `XAU_USD`; last fetches log (time, result, duration, note); thresholds (fetch interval 180 s **read-only**, stale after N minutes, request timeout, alert after N consecutive failures); **emergency global rate** card (18K sell value, validity 30 min / 1 h / until cancelled, reason*; merchants see «نرخ اعلامی زرلیو (دستی)»; issued invoices unaffected; shops can still use their own manual rate).
 
 API: `GET /provider/api/quotes/status`, `PUT …/thresholds`, `POST …/emergency-rate`, `DELETE …/emergency-rate`.
 

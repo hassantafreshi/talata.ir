@@ -1,4 +1,4 @@
-# Talata — low-bandwidth performance contract
+# Zarlio — low-bandwidth performance contract
 
 Owner priority: fast loading on weak/unreliable internet in Iran. Status: implementation targets, not measured results. These are project budgets; they are not claims about all Iranian networks or guaranteed timings on every device.
 
@@ -62,4 +62,4 @@ Track LCP, interaction responsiveness and layout shifts in lab and, after releas
 - https://primevue.dev/laravel/
 - https://web.dev/articles/vitals
 
-Verify the API against the pinned implementation versions; the budgets/profile choices above are Talata-specific decisions.
+Verify the API against the pinned implementation versions; the budgets/profile choices above are Zarlio-specific decisions.

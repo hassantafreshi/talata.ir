@@ -16,6 +16,6 @@ final class TaxRules
             ->where(fn ($q) => $q->whereNull('effective_to')->orWhere('effective_to', '>', $at))
             ->orderByDesc('effective_from')->orderByDesc('version')->first();
 
-        return $rule ?? throw new DomainError('NO_TAX_RULE', 'قاعده مالیاتی معتبری برای این تاریخ تعریف نشده است. با پشتیبانی طلاتا تماس بگیرید.', 503);
+        return $rule ?? throw new DomainError('NO_TAX_RULE', 'قاعده مالیاتی معتبری برای این تاریخ تعریف نشده است. با پشتیبانی زرلیو تماس بگیرید.', 503);
     }
 }

@@ -51,7 +51,7 @@
 
     <section class="band stack-sm" id="passkeys" aria-labelledby="pk-h" data-passkeys>
         <h2 id="pk-h">ورود با اثر انگشت یا چهره</h2>
-        <p class="small muted">به‌جای کد پیامکی، با اثر انگشت، چهره یا قفل صفحه همین گوشی وارد شوید. اثر انگشت روی گوشی شما می‌ماند و به طلاتا فرستاده نمی‌شود؛ ورود با کد پیامکی هم همیشه فعال است.</p>
+        <p class="small muted">به‌جای کد پیامکی، با اثر انگشت، چهره یا قفل صفحه همین گوشی وارد شوید. اثر انگشت روی گوشی شما می‌ماند و به زرلیو فرستاده نمی‌شود؛ ورود با کد پیامکی هم همیشه فعال است.</p>
         <ul class="list" data-passkey-list>
             @foreach ($passkeys as $pk)
                 <li class="list-item" data-passkey="{{ $pk->id }}"><span class="body"><strong>{{ $pk->name }}</strong><span class="sub">فعال‌شده {{ jdate($pk->created_at) }}@if($pk->last_used_at) · آخرین ورود {{ jdate($pk->last_used_at, true) }}@endif</span></span>

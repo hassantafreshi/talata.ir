@@ -29,7 +29,7 @@ class ResolveTenant
             return redirect()->route('login');
         }
         if (! $membership->tenant->isActive()) {
-            abort(403, 'این فروشگاه موقتاً غیرفعال است. با پشتیبانی طلاتا تماس بگیرید.');
+            abort(403, 'این فروشگاه موقتاً غیرفعال است. با پشتیبانی زرلیو تماس بگیرید.');
         }
         $request->session()->put('tenant_id', $membership->tenant_id);
         $this->context->set($membership->tenant, $membership);

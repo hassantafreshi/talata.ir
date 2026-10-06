@@ -9,6 +9,6 @@ export default function () {
   const share = document.querySelector('[data-share]');
   if (!navigator.share) share.hidden = true;
   share.addEventListener('click', () => navigator.share({
-    title: 'طلاتا', text: `با کد ${boot.code} در طلاتا فاکتور طلا بسازید و روی خرید اول تخفیف بگیرید.`, url: boot.link,
+    title: 'زرلیو', text: `با کد ${boot.code} در زرلیو فاکتور طلا بسازید و روی خرید اول تخفیف بگیرید.`, url: boot.link,
   }).catch(() => {}));
 }

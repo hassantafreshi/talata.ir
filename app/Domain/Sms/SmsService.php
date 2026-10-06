@@ -35,7 +35,7 @@ final class SmsService
     /** Login OTP: operational budget, never tenant credit. Limits are enforced by OtpService before this. */
     public static function otpBody(string $code): string
     {
-        return "کد ورود طلاتا: {$code}\nاین کد را به کسی ندهید.";
+        return "کد ورود زرلیو: {$code}\nاین کد را به کسی ندهید.";
     }
 
     public function queueOtp(string $mobile, string $code, string $challengeId): SmsMessage
@@ -63,7 +63,7 @@ final class SmsService
         return SmsTemplate::DEFAULT;
     }
 
-    public function previewFor(Invoice $invoice, Tenant $tenant, string $link = 'talata.ir/i/••••'): array
+    public function previewFor(Invoice $invoice, Tenant $tenant, string $link = 'zarlio.ir/i/••••'): array
     {
         $body = SmsTemplate::render($this->templateFor($tenant), [
             'shop_name' => $invoice->snapshot['shop']['name'] ?? $tenant->profile?->name ?? '',

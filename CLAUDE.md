@@ -1,4 +1,4 @@
-# Talata project instructions
+# Zarlio project instructions
 
 This repository contains the planning documents and, since 2026-10-06, the Phase 1 merchant web app (Laravel 13 at the repo root, PostgreSQL, Blade + vanilla-JS AJAX; see README «اجرای وب‌اپ فروشنده», `docs/SECURITY.md`, `docs/adr/` and the progress section of `docs/PHASE_1_CHECKLIST.md`). Run `php artisan test` and `npm run test:js` before pushing; keep SMS-abuse controls covered by `tests/Feature/SmsAbuseTest.php` and `AuthAbuseTest.php`. Start any build from `docs/IMPLEMENTATION_GUIDE.md` (doc map, modules, APIs, jobs, build order, open decisions). For an external coding model (ChatGPT/Codex), use `docs/handoff/` (system prompt, ordered task cards, per-screen specs with all states including the v1 admin console, API examples, QA checklist) and the standalone screen references in `docs/design/reference-html/`.
 
@@ -11,7 +11,7 @@ For future implementation requests, read:
 5. `docs/INVOICE_DELIVERY_AND_VERIFICATION.md` for invoice QR verification, responsive invoice views and customer-mobile SMS at issuance.
 6. `docs/INVOICE_CUSTOMIZATION.md` for mandatory business profile, contact fallback, two preset invoices and novice-friendly layout editing on Basic AND Professional.
 7. `docs/PLANS_AND_QUOTAS.md` (owner plan prices, quotas and SMS credit: Free 50 invoices and 50 new customers per month, current-month history only, 5 free SMS per year; prepaid per-segment SMS credit 850/500/350 toman), `docs/MAZNEH_AND_CALCULATOR.md` (quote board and golden calculator) and `docs/PAYMENTS_AND_SMS_CREDIT.md` (online plan purchase and SMS top-up via a gateway adapter, bank-return result page, credit ledger) and `docs/ROADMAP_V2_BUSINESS_TYPES.md` (v2: silver/coin/melted-gold business types, multi-type on Professional, product-photo attachments; Phase 1 prepares the infrastructure).
-8. `docs/design/README.md` and `docs/design/UI_APPROVED_DECISIONS.md` for the Stage A proposal status, owner-stated UI requirements and which design decisions are actually approved (brand spelling: طلاتا / Talata).
+8. `docs/design/README.md` and `docs/design/UI_APPROVED_DECISIONS.md` for the Stage A proposal status, owner-stated UI requirements and which design decisions are actually approved (brand spelling: زرلیو / Zarlio).
 9. `docs/design/UI_BUILD_SPEC.md`, `docs/design/tokens/`, `docs/design/invoice-templates/` and `docs/design/contracts/` for the UI build contract, design tokens, invoice layout schema/presets and frontend adapter/calculation contracts (proposed; palette 1 and logo concept 1 are working defaults, not approvals).
 10. `docs/AFFILIATE_PROGRAM.md` for the affiliate program (codes, referral links, commissions, affiliate and admin panels).
 11. `docs/SETTINGS_BACKUPS.md` for settings backups (last 50 per shop, Basic/Pro, per-section restore by owner or admin).
@@ -22,6 +22,8 @@ For future implementation requests, read:
 16. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
 
 ## Durable constraints
+
+- Brand is **زرلیو / Zarlio** (zarlio.ir) since 2026-10-06 (renamed from طلاتا/Talata). Internal identifiers keep `talata` (`config('talata.*')`, `TALATA_*`, `talata_ref` cookie, DB and repo names); never rename them casually.
 
 - Laravel modular monolith; true tenant isolation from the first migration.
 - Persian-first, RTL, designed for very low digital literacy.

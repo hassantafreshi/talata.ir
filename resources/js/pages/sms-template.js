@@ -10,7 +10,7 @@ function segments(text) {
   const [single, multi] = ucs ? [70, 67] : [160, 153];
   return len <= single ? 1 : Math.ceil(len / multi);
 }
-const SAMPLE = { '{shop_name}': 'طلافروشی نمونه', '{invoice_number}': '۱۴۰۵-۰۰۱۲', '{amount}': '۲۱٬۵۶۲٬۰۰۰ تومان', '{invoice_link}': 'talata.ir/i/AbCdEfGhIjKlMnOpQrStUvWxYz0123456789abcdEFG' };
+const SAMPLE = { '{shop_name}': 'طلافروشی نمونه', '{invoice_number}': '۱۴۰۵-۰۰۱۲', '{amount}': '۲۱٬۵۶۲٬۰۰۰ تومان', '{invoice_link}': 'zarlio.ir/i/AbCdEfGhIjKlMnOpQrStUvWxYz0123456789abcdEFG' };
 
 export default function () {
   const boot = JSON.parse(document.getElementById('boot').textContent);

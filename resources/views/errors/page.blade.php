@@ -7,7 +7,7 @@
         419 => 'برای امنیت، نشست شما منقضی شد. صفحه را دوباره باز کنید.',
         429 => 'تعداد درخواست‌ها زیاد شد. کمی صبر کنید و دوباره امتحان کنید.',
         500 => 'مشکلی پیش آمد. دوباره امتحان کنید؛ اطلاعات شما حفظ شده است.',
-        503 => 'طلاتا در حال به‌روزرسانی است. چند دقیقه دیگر دوباره امتحان کنید.',
+        503 => 'زرلیو در حال به‌روزرسانی است. چند دقیقه دیگر دوباره امتحان کنید.',
     ];
 @endphp
 <!doctype html>
@@ -16,7 +16,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>{{ $titles[$status] ?? 'خطا' }} · طلاتا</title>
+<title>{{ $titles[$status] ?? 'خطا' }} · زرلیو</title>
 @if (file_exists(public_path('build/manifest.json')))@vite(['resources/css/app.css'])@endif
 </head>
 <body>

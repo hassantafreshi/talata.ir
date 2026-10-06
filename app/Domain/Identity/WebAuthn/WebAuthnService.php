@@ -120,7 +120,7 @@ final class WebAuthnService
 
         return [
             'challenge' => $this->challenge('register', ['owner_type' => $ownerType, 'owner_id' => $owner->getKey()]),
-            'rp' => ['id' => $this->rpId(), 'name' => 'طلاتا'],
+            'rp' => ['id' => $this->rpId(), 'name' => 'زرلیو'],
             'user' => ['id' => $handle, 'name' => (string) $owner->mobile, 'displayName' => $displayName],
             'pubKeyCredParams' => [['type' => 'public-key', 'alg' => CoseKey::ES256], ['type' => 'public-key', 'alg' => CoseKey::RS256]],
             'timeout' => 120000,

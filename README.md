@@ -1,4 +1,4 @@
-# Talata.ir — طلاتا
+# Zarlio.ir — زرلیو
 
 مستندات شروع ساخت سرویس SaaS ماژولار طلافروشی، با Laravel و تجربه کاربری فارسی برای صاحبان فروشگاه کم‌تجربه در استفاده از نرم‌افزار.
 
@@ -25,7 +25,7 @@ php artisan schedule:work                    # مظنه هر ۱۸۰ ثانیه،
 php artisan talata:staff 09120000000 "نام مدیر" --role=admin   # یا --role=support (بدون لاگ فنی)؛ --deactivate برای غیرفعال‌کردن
 ```
 
-پیامک با **کاوه‌نگار**: `TALATA_SMS_DRIVER=kavenegar`، `KAVENEGAR_API_KEY`، `KAVENEGAR_SENDER` و برای کد ورود یک الگوی Verify Lookup با `%token` در پنل کاوه‌نگار بسازید و نامش را در `KAVENEGAR_OTP_TEMPLATE` بگذارید. ورود با اثر انگشت به HTTPS و دامنه ثابت نیاز دارد (`TALATA_WEBAUTHN_RP_ID=talata.ir`).
+پیامک با **کاوه‌نگار**: `TALATA_SMS_DRIVER=kavenegar`، `KAVENEGAR_API_KEY`، `KAVENEGAR_SENDER` و برای کد ورود یک الگوی Verify Lookup با `%token` در پنل کاوه‌نگار بسازید و نامش را در `KAVENEGAR_OTP_TEMPLATE` بگذارید. ورود با اثر انگشت به HTTPS و دامنه ثابت نیاز دارد (`TALATA_WEBAUTHN_RP_ID=zarlio.ir`).
 
 در حالت توسعه پیامک‌ها در `storage/logs/laravel.log` نوشته می‌شوند (`TALATA_SMS_DRIVER=log`)، مظنه نمونه و برچسب‌دار است (`TALATA_QUOTE_DRIVER=demo`) و پرداخت آزمایشی است (`TALATA_PAYMENT_DRIVER=mock`).
 

@@ -210,7 +210,7 @@ class SettingsController extends BaseController
         $profile = $tenant->profile;
         $sample = SamplePreview::invoice($profile, $settings, $this->ent()->can($tenant, 'invoice.shop_logo'), ! $this->ent()->can($tenant, 'invoice.hide_provider_brand'), $tenant->public_id);
 
-        return response()->json(['html' => view('print.invoice-body', ['v' => $sample, 'qr' => Qr::svg(config('talata.public_url').'/v/sample'), 'verifyShort' => 'talata.ir/v/…', 'sample' => true])->render(), 'settings' => $settings]);
+        return response()->json(['html' => view('print.invoice-body', ['v' => $sample, 'qr' => Qr::svg(config('talata.public_url').'/v/sample'), 'verifyShort' => 'zarlio.ir/v/…', 'sample' => true])->render(), 'settings' => $settings]);
     }
 
     public function smsTemplate()

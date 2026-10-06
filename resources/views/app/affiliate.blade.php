@@ -5,7 +5,7 @@
 <x-layouts.app title="همکاری در فروش" page="affiliate" :back="route('settings')">
     @php $bootData = ['link' => $a->link(), 'code' => $a->code]; @endphp
     <script type="application/json" id="boot">@json($bootData)</script>
-    @if (! $a->isActive())<div class="notice warn">همکاری شما موقتاً متوقف است؛ فروش‌های جدید کمیسیون نمی‌گیرند. با پشتیبانی طلاتا تماس بگیرید.</div>@endif
+    @if (! $a->isActive())<div class="notice warn">همکاری شما موقتاً متوقف است؛ فروش‌های جدید کمیسیون نمی‌گیرند. با پشتیبانی زرلیو تماس بگیرید.</div>@endif
 
     <section class="hero stack-sm" aria-labelledby="code-h">
         <span class="label" id="code-h">کد تخفیف شما برای مشتریان</span>

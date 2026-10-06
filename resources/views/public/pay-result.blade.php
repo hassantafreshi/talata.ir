@@ -44,6 +44,6 @@
             @if ($ok)<a class="btn btn-line block" href="{{ route('settings.receipt', $o) }}">رسید پرداخت</a>@elseif($failed)<a class="btn btn-line block" href="{{ $o->product === 'PLAN' ? route('settings.plan') : route('settings.sms') }}">تلاش دوباره</a>@endif
         </div>
     @else
-        <a class="btn btn-gold block" href="{{ route('login') }}">ورود به طلاتا برای جزئیات</a>
+        <a class="btn btn-gold block" href="{{ route('login') }}">ورود به زرلیو برای جزئیات</a>
     @endif
 </x-layouts.public>

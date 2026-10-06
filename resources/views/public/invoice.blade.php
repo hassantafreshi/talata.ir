@@ -18,5 +18,5 @@
         <a class="btn btn-gold block" href="{{ route('public.invoice.print', $token) }}" rel="noopener">نسخه چاپی / PDF</a>
         <a class="btn btn-line block" href="{{ $verifyUrl }}" rel="noopener">بررسی این فاکتور</a>
     </div>
-    @if ($v['show_talata_mark'])<p class="xs muted center">صادرشده با طلاتا</p>@endif
+    @if ($v['show_talata_mark'])<p class="xs muted center">صادرشده با زرلیو</p>@endif
 </x-layouts.public>

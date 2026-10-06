@@ -140,5 +140,5 @@
     @if ($footer->isNotEmpty())
         <footer class="inv-foot">@foreach ($footer as $f)<div class="al-{{ $f['align'] }}">{!! $f['html'] !!}</div>@endforeach</footer>
     @endif
-    @if ($v['show_talata_mark'])<div class="mark">صادرشده با طلاتا · talata.ir</div>@endif
+    @if ($v['show_talata_mark'])<div class="mark">صادرشده با زرلیو · zarlio.ir</div>@endif
 </article>

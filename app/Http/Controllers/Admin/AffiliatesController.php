@@ -45,7 +45,7 @@ class AffiliatesController extends Controller
         $user = $mobile ? User::query()->where('mobile', $mobile)->first() : null;
         // Only someone who already has a shop panel (an active membership) can become an affiliate.
         if (! $user || ! Membership::query()->where('user_id', $user->id)->where('status', 'active')->exists()) {
-            throw new DomainError('VALIDATION', 'این شماره پنل فعال در طلاتا ندارد.', 422, ['errors' => ['mobile' => ['این شماره پنل فعال در طلاتا ندارد. اول باید ثبت‌نام کند.']]]);
+            throw new DomainError('VALIDATION', 'این شماره پنل فعال در زرلیو ندارد.', 422, ['errors' => ['mobile' => ['این شماره پنل فعال در زرلیو ندارد. اول باید ثبت‌نام کند.']]]);
         }
         $affiliate = $this->affiliates->enroll($user, $data, Auth::guard('staff')->id());
 

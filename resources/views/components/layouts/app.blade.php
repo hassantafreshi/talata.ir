@@ -34,9 +34,9 @@
     @if($back)
         <a href="{{ $back }}" class="icon-btn mobile-only" aria-label="بازگشت"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
     @endif
-    <a href="{{ route('home') }}" class="brand desktop-only">@include('partials.logo')طلاتا</a>
+    <a href="{{ route('home') }}" class="brand desktop-only">@include('partials.logo')زرلیو</a>
     <div class="grow">
-        <h1 class="mobile-only">{{ $title ?? 'طلاتا' }}</h1>
+        <h1 class="mobile-only">{{ $title ?? 'زرلیو' }}</h1>
         <div class="sub desktop-only">{{ $shopName }}</div>
     </div>
     @if($badge)<span class="badge dark mobile-only">{{ $badge }}</span>@endif

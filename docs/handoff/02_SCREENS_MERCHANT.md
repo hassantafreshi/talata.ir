@@ -18,7 +18,7 @@ Conventions for every screen:
 | Boards | `Login`, `DesktopLogin` (card 1) |
 | Access | logged-out only; logged-in users redirect to `/invoices/new` |
 
-**Layout (top→bottom):** dark header with logo + «طلاتا» and tagline «فاکتور طلا؛ ساده، سریع، قابل بررسی»; step chip «مرحله ۱ از ۲ · شماره موبایل»; title «شماره موبایل خود را وارد کنید»; one large `tel` input (`inputmode="numeric"`, `autocomplete="tel"`, LTR digits, accepts Persian/Arabic/Latin digits, `09…`, `+98…`, `0098…`); helper text «کد تأیید به همین شماره پیامک می‌شود. اگر بار اول است، همین کد شما را ثبت‌نام هم می‌کند؛ رمز یا ایمیل لازم نیست.»; primary button «دریافت کد پیامکی»; secondary link «قبلاً ورود سریع را فعال کرده‌اید؟ ورود با اثر انگشت یا قفل گوشی» (only if WebAuthn is supported); footnote and support link.
+**Layout (top→bottom):** dark header with logo + «زرلیو» and tagline «فاکتور طلا؛ ساده، سریع، قابل بررسی»; step chip «مرحله ۱ از ۲ · شماره موبایل»; title «شماره موبایل خود را وارد کنید»; one large `tel` input (`inputmode="numeric"`, `autocomplete="tel"`, LTR digits, accepts Persian/Arabic/Latin digits, `09…`, `+98…`, `0098…`); helper text «کد تأیید به همین شماره پیامک می‌شود. اگر بار اول است، همین کد شما را ثبت‌نام هم می‌کند؛ رمز یا ایمیل لازم نیست.»; primary button «دریافت کد پیامکی»; secondary link «قبلاً ورود سریع را فعال کرده‌اید؟ ورود با اثر انگشت یا قفل گوشی» (only if WebAuthn is supported); footnote and support link.
 
 **Data:** `POST /api/auth/otp/request {mobile}` → `{challenge_id, resend_after_seconds, masked_mobile}`.
 
@@ -48,7 +48,7 @@ Conventions for every screen:
 | Route | `/login/passkey-offer` (shown once after first successful login on a device) |
 | Boards | `Passkey`, `DesktopLogin` (card 3) |
 
-**Layout:** title «دفعه بعد سریع‌تر وارد شوید؟»; body about fingerprint/face/device lock; two reassurance bands («اثر انگشت یا چهره شما هیچ‌وقت به طلاتا فرستاده نمی‌شود…», «پیامک همیشه راه بازیابی می‌ماند…»); primary «فعال‌سازی با اثر انگشت یا قفل گوشی»; secondary «فعلاً نه، ادامه با پیامک».
+**Layout:** title «دفعه بعد سریع‌تر وارد شوید؟»; body about fingerprint/face/device lock; two reassurance bands («اثر انگشت یا چهره شما هیچ‌وقت به زرلیو فرستاده نمی‌شود…», «پیامک همیشه راه بازیابی می‌ماند…»); primary «فعال‌سازی با اثر انگشت یا قفل گوشی»; secondary «فعلاً نه، ادامه با پیامک».
 
 **Data:** `POST /api/auth/passkey/register/options` → WebAuthn options; `POST …/verify`.
 

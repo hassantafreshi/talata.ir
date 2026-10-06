@@ -1,7 +1,7 @@
 <?php
 
 /*
-| Talata application configuration.
+| Zarlio application configuration.
 | Commercial values (prices, quotas, SMS prices) live in the versioned
 | `pricing_versions` table (seeded from database/seeders/data/plans-pricing.json),
 | never in this file or in domain code. This file only holds operational
@@ -20,7 +20,7 @@ return [
 
     'sms_dev_driver_allowed_in_production' => (bool) env('TALATA_ALLOW_DEV_SMS_IN_PRODUCTION', false),
 
-    // Passkeys (fingerprint / face / device lock). RP ID = registrable domain, e.g. talata.ir.
+    // Passkeys (fingerprint / face / device lock). RP ID = registrable domain, e.g. zarlio.ir.
     'webauthn' => [
         'rp_id' => env('TALATA_WEBAUTHN_RP_ID'),          // default: host of APP_URL
         'origins' => env('TALATA_WEBAUTHN_ORIGINS'),      // comma list; default: APP_URL origin

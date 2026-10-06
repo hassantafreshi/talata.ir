@@ -13,7 +13,7 @@
     @if ($mock)<span class="sample-stamp">پرداخت آزمایشی — بدون جابه‌جایی پول</span>@endif
     <header class="inv-head receipt-head">
         <div class="blocks">
-            <div class="shop-name">رسید پرداخت طلاتا</div>
+            <div class="shop-name">رسید پرداخت زرلیو</div>
             <div>خریدار: {{ $shop?->name ?: '—' }}</div>
             <div>شماره سفارش: <span class="num ltr">{{ $order->public_ref }}</span></div>
             <div>تاریخ پرداخت: <span class="num">{{ jdate($order->paid_at, true) }}</span></div>
@@ -31,7 +31,7 @@
         @if ($attempt?->ref_id)<div><dt>کد پیگیری بانک</dt><dd class="ltr">{{ $attempt->ref_id }}</dd></div>@endif
         @if ($attempt?->card_mask)<div><dt>کارت</dt><dd class="ltr">{{ $attempt->card_mask }}</dd></div>@endif
     </dl>
-    <p class="inv-notes">این رسید تأیید پرداخت در طلاتا است و جایگزین فاکتور رسمی مالیاتی نیست.</p>
+    <p class="inv-notes">این رسید تأیید پرداخت در زرلیو است و جایگزین فاکتور رسمی مالیاتی نیست.</p>
 </article>
 </body>
 </html>

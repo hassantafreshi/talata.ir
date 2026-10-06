@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=1280">
 <title>فونت فارسی و toolkit پیشنهادی</title>
-<!-- طلاتا · مرجع ظاهری پیشنهادی (Stage A) · board: Type · 1280x760.
+<!-- زرلیو · مرجع ظاهری پیشنهادی (Stage A) · board: Type · 1280x760.
      این فایل مرجع چیدمان، متن و حالت است، نه کد تولید. داده‌ها نمونه‌اند. قرارداد ساخت: docs/handoff/ و docs/design/UI_BUILD_SPEC.md -->
 <style>
 @font-face{font-family:"Vazirmatn";font-style:normal;font-weight:100 900;font-display:swap;src:url(../proposed/fonts/Vazirmatn-arabic-subset.woff2) format("woff2");unicode-range:U+0600-06FF,U+0750-077F,U+0870-089F,U+08A0-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
@@ -58,7 +58,7 @@ th{font-weight:500;color:#5A5E66;font-size:12px}
         <thead><tr><th>مورد</th><th>پیشنهاد</th></tr></thead>
         <tbody>
           <tr><td>Stack</td><td>Laravel + Inertia + Vue 3 + TypeScript + Vite؛ یک toolkit اصلی، بدون Next.js جدا</td></tr>
-          <tr><td>چرا PrimeVue Unstyled</td><td>رفتار آماده و دسترس‌پذیر برای Select، Dialog، Toast، DataTable و فرم‌ها با import تک‌کامپوننت؛ RTL مستند؛ ظاهر کاملاً از توکن‌های طلاتا می‌آید نه theme آماده</td></tr>
+          <tr><td>چرا PrimeVue Unstyled</td><td>رفتار آماده و دسترس‌پذیر برای Select، Dialog، Toast، DataTable و فرم‌ها با import تک‌کامپوننت؛ RTL مستند؛ ظاهر کاملاً از توکن‌های زرلیو می‌آید نه theme آماده</td></tr>
           <tr><td>چه چیزهایی از آن نمی‌گیریم</td><td>Button، فیلد عددی با واحد، InvoiceRow، TotalSummary، نوار وضعیت نرخ: اختصاصی و سبک نوشته می‌شوند تا بسته ورود/نرخ کوچک بماند</td></tr>
           <tr><td>بودجه حجم (قرارداد)</td><td>ورود و نرخ/شروع ≤ <span class="num" dir="ltr">150 KiB</span> JS gzip و ≤ <span class="num" dir="ltr">300 KiB</span> کل؛ فرم فاکتور ≤ <span class="num" dir="ltr">220/400 KiB</span>؛ فاکتور عمومی سرور-رندر ≤ <span class="num" dir="ltr">20 KiB</span> JS</td></tr>
           <tr><td>شرط قفل‌شدن انتخاب</td><td>یک برش production (ورود + نرخ/شروع + فاکتور ترکیبی) ساخته و با پروفایل A/B اندازه‌گیری شود؛ رد بودجه = بازبینی با Reka UI (گزینه B) با همان معیار</td></tr>

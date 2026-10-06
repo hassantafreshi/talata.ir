@@ -18,7 +18,7 @@ Use only tokens from `docs/design/tokens/talata-tokens.css` (`--t-*`). Palette 1
 | --- | --- | --- |
 | `MerchantMobileShell` | merchant < 768 px | top app bar (title, back/close, context badge) · scroll content · sticky action bar (optional) · bottom tabs (M-11) with safe-area padding |
 | `MerchantDesktopShell` | merchant ≥ 1024 px | dark top bar (logo, shop, 6 nav items, plan/credit strip) · content max-width 1280 · settings pages add right sidebar |
-| `PublicShell` | `/i`, `/v`, `/pay/result` logged-out | no nav; shop or Talata header; footer; server-rendered |
+| `PublicShell` | `/i`, `/v`, `/pay/result` logged-out | no nav; shop or Zarlio header; footer; server-rendered |
 | `PrintLayout` | `/invoices/{id}/print` | A4 page box, print CSS, no app chrome |
 | `AdminShell` | `/provider/*` | dark right sidebar 232 px · header row (title, description, actions, env badge) · content |
 

@@ -1,5 +1,5 @@
 /**
- * Talata frontend adapter contracts (documentation-only, proposed).
+ * Zarlio frontend adapter contracts (documentation-only, proposed).
  *
  * The UI talks to these interfaces only. Two implementations exist per adapter:
  *   - `mock`: deterministic sample data, visibly labelled «نمونه», never claims a real issue/send.

@@ -80,7 +80,7 @@ Evidence: `php artisan test` (91 tests on PostgreSQL), `npm run test:js`, Playwr
 - [ ] Tenant invoice-SMS quota/trial depletion never prevents login OTP; identity-message abuse controls remain enforced.
 - [ ] Optional Passkey enrollment after recent verified mobile login, returning login, credential management/revocation and SMS recovery implemented.
 - [ ] Server verifies WebAuthn challenge/type/origin/RP/signature/ownership/user verification; expiry/replay/revoked-credential and tenant-authorization tests pass.
-- [ ] Skip/cancel/unsupported/lost-device flows work; biometrics are never collected by Talata; virtual-authenticator evidence is separate from real-device tests.
+- [ ] Skip/cancel/unsupported/lost-device flows work; biometrics are never collected by Zarlio; virtual-authenticator evidence is separate from real-device tests.
 - [ ] Permissions, feature flags and atomic quota primitives implemented.
 - [ ] Two demo tenants prove HTTP, relation, cache, job and file isolation.
 - [ ] Provider administration can manage plans/subscriptions/configuration with audit.
