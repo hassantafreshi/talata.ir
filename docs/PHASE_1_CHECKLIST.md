@@ -1,6 +1,6 @@
 # Phase 1 implementation and acceptance checklist
 
-Status: documentation prepared; application work has not started. Check boxes require evidence, not a plan or a mock screenshot.
+Status (2026-10-06): merchant web app implemented in this repository (Laravel 13 + PostgreSQL, Blade + AJAX); 53 PHP feature/unit tests (565 assertions) and 10 JS parity tests pass locally; visual direction still a proposal awaiting owner approval. Service admin console, Passkey and real SMS/PSP adapters are not built. Check boxes require evidence, not a plan or a mock screenshot.
 
 ## Planning state
 
@@ -20,18 +20,36 @@ Status: documentation prepared; application work has not started. Check boxes re
 - [x] Overall wireframe/visual proposal shown (`docs/design/`, Stage A package, 2026-10-05).
 - [ ] Colors/logo/font/toolkit explicitly approved by owner (see `docs/design/STAGE_A_REVIEW_REQUEST.md`).
 - [x] Owner plan prices, quotas and SMS credit, مظنه/calculator contract and v2 business-type roadmap documented (2026-10-05); reflected in the draft boards.
-- [ ] Quotas enforced server-side (Free: 50 invoices and 50 new customers per month, current-month history, 5 free SMS per year; Basic configurable caps; Professional unlimited) with friendly notices.
+- [x] Quotas enforced server-side (Free: 50 invoices and 50 new customers per month, current-month history, 5 free SMS per year; Basic configurable caps; Professional unlimited) with friendly notices.
 - [x] ChatGPT handoff package (`docs/handoff/`), standalone reference HTML for all 68 boards and v1 service-admin boards (12 screens) prepared (2026-10-05).
 - [ ] Service admin console v1 (`/provider/*`): staff passkey auth, roles, dashboard, tenants and manual actions, versioned pricing, payments, SMS, quotes, tax rules, integrations, audit, system health.
 - [x] Build package documented: implementation guide, payments/SMS credit contract, SMS purchase and bank-return boards (2026-10-05).
-- [ ] 10% VAT on plan and SMS-credit purchases: configurable rate snapshotted per order, base/VAT/payable shown separately, credit equals pre-VAT amount.
-- [ ] Billing module with MockGateway: plan purchase, SMS top-up, server-sourced result page, reconcile, receipts; real PSP after owner selection.
-- [ ] Prepaid SMS credit: toman balance, per-segment pricing by plan, reserve/refund via outbox, Free monthly expiry with audit.
-- [ ] مظنه board and ماشین‌حساب طلایی on the shared 180-second quote cadence and GOLD_IR_V1 preview, no quota use.
-- [ ] v2-ready infrastructure: business-type registry, pricing-policy registry, per-category tax rules, typed item attributes, sale/purchase direction, item asset table; Phase 1 behaviour unchanged.
+- [x] 10% VAT on plan and SMS-credit purchases: configurable rate snapshotted per order, base/VAT/payable shown separately, credit equals pre-VAT amount.
+- [x] Billing module with MockGateway: plan purchase, SMS top-up, server-sourced result page, reconcile, receipts; real PSP after owner selection.
+- [x] Prepaid SMS credit: toman balance, per-segment pricing by plan, reserve/refund via outbox, Free monthly expiry with audit.
+- [x] مظنه board and ماشین‌حساب طلایی on the shared 180-second quote cadence and GOLD_IR_V1 preview, no quota use.
+- [x] v2-ready infrastructure: business-type registry, pricing-policy registry, per-category tax rules, typed item attributes, sale/purchase direction, item asset table; Phase 1 behaviour unchanged.
 - [x] Design tokens, invoice layout schema v1 with Simple/Shop presets, sample snapshot, reference renders, adapter/calculation contracts and the UI build spec saved under `docs/design/` (proposed, 2026-10-05).
 - [ ] Approved design decisions recorded and detailed UI contract finalized.
-- [ ] Owner requests implementation work.
+- [x] Owner requests implementation work (2026-10-06: complete merchant web app, AJAX, hardened against intrusion and SMS abuse; Jalali date picker).
+
+## Implementation progress (2026-10-06)
+
+Evidence: `php artisan test` (53 tests on PostgreSQL), `npm run test:js`, Playwright mobile journey with screenshots in `docs/screenshots/app/`. Security controls and fixed findings: `docs/SECURITY.md`. Frontend decision: `docs/adr/0001-blade-ajax-frontend.md`.
+
+- [x] Mobile OTP login with proof-of-work, layered limits, global budget, lockout (Passkey not yet).
+- [x] Tenancy fail-closed scope, ULID public ids, per-route permissions, member removal kills sessions.
+- [x] Invoice composer (GOLD/MISC rows, autosave with versioning, local BigInt preview), review, idempotent issue with ISSUE_AND_SMS / ISSUE_ONLY, snapshot, numbering, void/replace.
+- [x] A4 print with upper-left QR, public `/v/{token}` (no buyer PII) and `/i/{token}`, tokens hashed + encrypted.
+- [x] SMS outbox, credit ledger, all abuse caps (see SECURITY.md), installment reminders max two per installment.
+- [x] Customers, Pro-only installments with Jalali schedule, payments with idempotency and overpayment guard.
+- [x] Settings: business profile (phishing-safe name), logo re-encode, appearance editor with live A4/mobile preview, SMS template, users.
+- [x] Plans + SMS credit purchase with VAT shown separately, MockGateway, bank-return page, receipt.
+- [x] Mobile-friendly Jalali date picker (year/month grids, swipe, quick chips, typed date).
+- [ ] Real SMS provider and PSP adapters (owner selection pending).
+- [ ] Service admin console `/provider/*`.
+- [ ] Field performance measurement on throttled networks (bundle sizes measured only at build time).
+- [ ] Independent penetration test and owner approval of visual direction.
 
 ## M0 — Foundations
 

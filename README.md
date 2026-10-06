@@ -1,6 +1,39 @@
-# Talata.ir — Phase 1 planning
+# Talata.ir — طلاتا
 
 مستندات شروع ساخت سرویس SaaS ماژولار طلافروشی، با Laravel و تجربه کاربری فارسی برای صاحبان فروشگاه کم‌تجربه در استفاده از نرم‌افزار.
+
+## اجرای وب‌اپ فروشنده (فاز ۱)
+
+وب‌اپ کامل فروشنده با Laravel 13 و PostgreSQL در همین مخزن است: ورود با کد پیامکی، فاکتور (اقلام طلا/متفرقه، مرور، صدور و ارسال پیامکی، چاپ A4 با QR بالا-چپ، لینک مشتری، ابطال/جایگزین)، مظنه، ماشین‌حساب طلایی، مشتریان و اقساط (تقویم شمسی)، تنظیمات کسب‌وکار/ظاهر فاکتور/متن پیامک/کاربران، خرید پلن و اعتبار پیامک با درگاه آزمایشی. معماری و امنیت: [`docs/SECURITY.md`](docs/SECURITY.md)، [`docs/adr/0001-blade-ajax-frontend.md`](docs/adr/0001-blade-ajax-frontend.md).
+
+پیش‌نیاز: PHP 8.3 با `pdo_pgsql`، `gd`، `intl`؛ PostgreSQL 16؛ Node 22.
+
+```bash
+composer install
+cp .env.example .env && php artisan key:generate
+# DB_* را در .env تنظیم کنید (pgsql)
+php artisan migrate --seed          # نسخه قیمت، قاعده مالیات نمونه، اولین مظنه نمونه
+npm ci && npm run build
+php artisan serve
+php artisan queue:work --queue=otp,default   # صف otp جدا و با اولویت؛ بدون آن کد ورود ارسال نمی‌شود
+php artisan schedule:work                    # مظنه هر ۱۸۰ ثانیه، بررسی پرداخت، انقضای اعتبار، یادآوری اقساط
+```
+
+در حالت توسعه پیامک‌ها در `storage/logs/laravel.log` نوشته می‌شوند (`TALATA_SMS_DRIVER=log`)، مظنه نمونه و برچسب‌دار است (`TALATA_QUOTE_DRIVER=demo`) و پرداخت آزمایشی است (`TALATA_PAYMENT_DRIVER=mock`).
+
+آزمون‌ها (روی پایگاه `talata_test` در PostgreSQL):
+
+```bash
+php artisan test        # دامنه، جریان فاکتور، ضدسوءاستفاده پیامک/OTP، جداسازی tenant، پرداخت، صفحات
+npm run test:js         # برابری محاسبه مرورگر و سرور با vectors مشترک
+```
+
+پیش از production:
+- `APP_ENV=production`، `APP_DEBUG=false`، HTTPS و `TALATA_PUBLIC_URL` دامنه نهایی.
+- **از `APP_KEY` نسخه پشتیبان بگیرید**: توکن خام QR فاکتورها با آن رمز شده است. برای چرخش کلید از `APP_PREVIOUS_KEYS` استفاده کنید؛ وگرنه چاپ دوباره QR فاکتورهای قدیمی ممکن نیست (بررسی اصالت چاپ‌های قبلی کار می‌کند).
+- آداپتر پیامک و درگاه واقعی را پس از انتخاب مالک اضافه کنید؛ درگاه آزمایشی در production رد می‌شود مگر `TALATA_ALLOW_MOCK_PAYMENTS_IN_PRODUCTION=true`.
+- `TALATA_OTP_DAILY_BUDGET` را با حجم واقعی تنظیم کنید و لاگ CRITICAL آن را پایش کنید.
+- worker صف با supervisor و cron برای `php artisan schedule:run` هر دقیقه.
 
 ## فایل‌های اصلی
 

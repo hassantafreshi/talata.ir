@@ -1,0 +1,124 @@
+{{-- A4 invoice document from the presenter DTO ($v). Layout comes from the invoice snapshot, never from current settings. --}}
+@php
+    $L = $v['layout'];
+    $shop = $v['shop'];
+    $blocks = collect($L['blocks'])->where('visible', true);
+    $socialLabels = ['instagram' => 'اینستاگرام', 'telegram' => 'تلگرام', 'whatsapp' => 'واتس‌اپ', 'other' => 'شبکه اجتماعی'];
+    $render = function (array $b) use ($shop, $socialLabels) {
+        return match ($b['kind']) {
+            'shop_name' => null,
+            'address' => $shop['address'] ? 'نشانی: '.e($shop['address']) : null,
+            'contact_primary' => 'تلفن: <span class="num ltr">'.e($shop['contact_primary']).'</span>',
+            'contact_mobile_extra' => ! empty($shop['landline']) ? 'موبایل: <span class="num ltr">'.e(fa($shop['mobile_display'])).'</span>' : null,
+            'website' => ! empty($shop['website']) ? 'وب‌سایت: <span class="ltr">'.e($shop['website']).'</span>' : null,
+            'social' => collect($shop['socials'] ?? [])->filter(fn ($s) => ! empty($s['handle']))->map(fn ($s) => e($socialLabels[$s['network']] ?? '').': <span class="ltr">'.e($s['handle']).'</span>')->implode(' · ') ?: null,
+            'license_union' => ! empty($shop['license_union']) ? 'شماره پروانه کسب: <span class="num">'.e(fa($shop['license_union'])).'</span>' : null,
+            'license_online' => ! empty($shop['license_online']) ? 'نماد اعتماد: <span class="num">'.e(fa($shop['license_online'])).'</span>' : null,
+            default => null,
+        };
+    };
+    $nameBlock = $blocks->firstWhere('kind', 'shop_name') ?? ['align' => 'right'];
+    $colLabels = ['row_no' => 'ردیف', 'name' => 'شرح کالا', 'description' => 'توضیح', 'weight_g' => 'وزن (گرم)', 'purity' => 'عیار', 'unit_rate' => 'نرخ هر گرم', 'wage' => 'اجرت', 'profit' => 'سود', 'vat' => 'مالیات', 'amount' => 'مبلغ (تومان)'];
+    $numeric = ['row_no', 'weight_g', 'unit_rate', 'wage', 'profit', 'vat', 'amount'];
+    $cols = $v['columns'];
+    $t = $L['typography'] ?? [];
+    $classes = 'inv t-'.($t['text_size'] ?? 'normal').' d-'.($t['density'] ?? 'comfortable').' a-'.($t['accent'] ?? 'ink').(($t['dividers'] ?? true) ? '' : ' no-div');
+    $isDraft = ($v['status'] ?? '') === 'draft';
+@endphp
+<article class="{{ $classes }}" aria-label="فاکتور فروش {{ $v['number'] }}">
+    @if (! empty($sample))<span class="sample-stamp">پیش‌نمایش با داده نمونه</span>@endif
+    @if (($v['status'] ?? '') === 'void')<div class="void-stamp" aria-hidden="true">باطل شد</div>@endif
+
+    <header class="inv-head">
+        <div class="blocks">
+            @if (($L['logo']['visible'] ?? false) && ! empty($shop['logo']))
+                <div class="logo-wrap al-{{ $nameBlock['align'] }}"><img class="logo s-{{ $L['logo']['size'] ?? 'medium' }}" src="{{ route('public.logo', [$shop['logo']['tenant'], $shop['logo']['version']]) }}" alt="لوگوی {{ $shop['name'] }}"></div>
+            @endif
+            <div class="shop-name accent al-{{ $nameBlock['align'] }}">{{ $shop['name'] }}</div>
+            @foreach ($blocks->where('area', 'header') as $b)
+                @php $html = $render($b); @endphp
+                @if ($html)<div class="al-{{ $b['align'] }}">{!! $html !!}</div>@endif
+            @endforeach
+            <div class="meta-line">
+                <span><strong>فاکتور فروش</strong> شماره <strong class="num ltr">{{ $v['number'] }}</strong></span>
+                <span>تاریخ: <span class="num">{{ $v['issued_fa'] }}</span></span>
+                @if (($v['status'] ?? '') === 'void')<span><strong>باطل‌شده</strong> در {{ $v['voided_fa'] }}</span>@endif
+            </div>
+        </div>
+        <div class="qr-box">
+            @if ($isDraft)
+                <div class="qr-draft">پیش‌نویس</div>
+            @else
+                <div class="t">بررسی اصالت فاکتور</div>
+                {!! $qr !!}
+                <div class="num ltr">{{ $v['number'] }}</div>
+                <div class="ltr">{{ $verifyShort }}</div>
+            @endif
+        </div>
+    </header>
+
+    <div class="inv-buyer">
+        <span>خریدار: <strong>{{ $v['buyer_name'] ?: '—' }}</strong></span>
+        @if ($v['buyer_mobile'])<span>موبایل: <span class="num ltr">{{ $v['buyer_mobile'] }}</span></span>@endif
+        @if ($v['rate_fa'])<span>نرخ هر گرم طلای ۱۸ عیار: <span class="num">{{ $v['rate_fa'] }}</span> تومان @if($v['rate_manual'])(نرخ دستی)@endif</span>@endif
+    </div>
+
+    <div class="table-scroll">
+        <table>
+            <thead><tr>@foreach ($cols as $c)<th class="{{ in_array($c, $numeric, true) ? 'n' : '' }}" scope="col">{{ $colLabels[$c] }}</th>@endforeach</tr></thead>
+            <tbody>
+                @foreach ($v['rows'] as $r)
+                    <tr>
+                        @foreach ($cols as $c)
+                            @switch($c)
+                                @case('row_no')<td class="n">{{ $r['no'] }}</td>@break
+                                @case('name')<td>{{ $r['name'] }}@if(! in_array('description', $cols, true) && $r['description'])<span class="desc">{{ $r['description'] }}</span>@endif</td>@break
+                                @case('description')<td>{{ $r['description'] ?: '—' }}</td>@break
+                                @case('weight_g')<td class="n">{{ $r['type'] === 'GOLD' ? $r['weight'] : '—' }}</td>@break
+                                @case('purity')<td>{{ $r['purity'] }}</td>@break
+                                @case('unit_rate')<td class="n">{{ $r['unit_rate'] }}</td>@break
+                                @case('wage')<td class="n">{{ $r['wage'] }}</td>@break
+                                @case('profit')<td class="n">{{ $r['profit'] }}</td>@break
+                                @case('vat')<td class="n">{{ $r['vat'] }}</td>@break
+                                @case('amount')<td class="n"><strong>{{ $r['amount'] }}</strong></td>@break
+                            @endswitch
+                        @endforeach
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <section class="inv-sum">
+        <div class="inv-notes">
+            @if ($L['summary']['public_note']['visible'] ?? false)<p>{{ $L['summary']['public_note']['text'] }}</p>@endif
+            <p>مبالغ به تومان است. @if($v['has_gold'])مالیات بر ارزش افزوده فقط روی اجرت و سود محاسبه شده است.@endif @if($v['tax_sample'])<br>نرخ مالیات نمونه است و تأیید مشاور مالیاتی لازم است.@endif</p>
+            @if ($v['issuer'])<p>صادرکننده: {{ $v['issuer'] }}</p>@endif
+        </div>
+        <div>
+            @if ($L['summary']['show_component_breakdown'] ?? true)
+                <dl>
+                    @if ($v['has_gold'])
+                        <div><dt>وزن کل طلا</dt><dd>{{ $v['weight_total'] }} گرم</dd></div>
+                        <div><dt>ارزش طلا</dt><dd>{{ $v['metal_fa'] }}</dd></div>
+                        <div><dt>اجرت</dt><dd>{{ $v['wage_fa'] }}</dd></div>
+                        <div><dt>سود</dt><dd>{{ $v['profit_fa'] }}</dd></div>
+                        <div><dt>مالیات ({{ $v['tax_rate_fa'] }}٪)</dt><dd>{{ $v['vat_fa'] }}</dd></div>
+                    @endif
+                    @if ($v['has_misc'])<div><dt>اقلام متفرقه</dt><dd>{{ $v['misc_total_fa'] }}</dd></div>@endif
+                </dl>
+            @endif
+            <div class="payable"><span>قابل پرداخت</span><span class="num">{{ $v['payable_fa'] }} تومان</span></div>
+        </div>
+    </section>
+
+    @if ($L['summary']['signature_box'] ?? true)
+        <div class="inv-sign"><div>مهر و امضای فروشنده</div><div>امضای خریدار</div></div>
+    @endif
+
+    @php $footer = $blocks->where('area', 'footer')->map(fn ($b) => ['align' => $b['align'], 'html' => $render($b)])->filter(fn ($x) => $x['html']); @endphp
+    @if ($footer->isNotEmpty())
+        <footer class="inv-foot">@foreach ($footer as $f)<div class="al-{{ $f['align'] }}">{!! $f['html'] !!}</div>@endforeach</footer>
+    @endif
+    @if ($v['show_talata_mark'])<div class="mark">صادرشده با طلاتا · talata.ir</div>@endif
+</article>

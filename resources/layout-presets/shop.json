@@ -1,0 +1,26 @@
+{
+  "$comment": "Preset «فروشگاهی» v1 — selectable on Basic and Professional. Header suited to a shop logo and name, tidy contact/address blocks, prominent summary, footer for website/social/licences. Validates against ../invoice-layout.schema.json. Reference render: ../reference/print-shop.html. Social blocks reference ShopProfile entry ids; the sample id below matches sample-data/invoice-sample.json.",
+  "schema_version": 1,
+  "template_id": "shop",
+  "template_version": 1,
+  "blocks": [
+    {"kind": "shop_name", "area": "header", "align": "right", "visible": true},
+    {"kind": "address", "area": "header", "align": "right", "visible": true},
+    {"kind": "contact_primary", "area": "header", "align": "right", "visible": true},
+    {"kind": "contact_mobile_extra", "area": "header", "align": "right", "visible": true},
+    {"kind": "website", "area": "footer", "align": "center", "visible": true},
+    {"kind": "social", "ref": "social_instagram_1", "area": "footer", "align": "center", "visible": true},
+    {"kind": "license_union", "area": "footer", "align": "center", "visible": true},
+    {"kind": "license_online", "area": "footer", "align": "center", "visible": true}
+  ],
+  "logo": {"visible": true, "size": "medium"},
+  "items_table": {"columns": ["row_no", "name", "description", "weight_g", "purity", "amount"]},
+  "summary": {
+    "show_component_breakdown": true,
+    "public_note": {"visible": true, "text": "از خرید شما سپاسگزاریم. تعویض فقط با همین فاکتور و تا ۷ روز."},
+    "signature_box": true
+  },
+  "typography": {"text_size": "normal", "density": "comfortable", "accent": "gold_deep", "section_spacing": "normal", "dividers": true},
+  "print": {"paper": "A4", "orientation": "portrait", "margins": "normal", "repeat_header": true, "repeat_footer": true},
+  "version": 0
+}

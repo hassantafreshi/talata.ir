@@ -1,0 +1,68 @@
+import { post, idempotencyKey } from '../lib/http.js';
+import { busy, toast } from '../lib/ui.js';
+import { toman } from '../lib/digits.js';
+
+// Display only: the server prices every order from its own pricing version.
+function vatOf(subIrr, ratePercent) {
+  const [w, f = ''] = String(ratePercent).split('.');
+  const scale = 10n ** BigInt(f.length);
+  const num = BigInt(subIrr) * BigInt(w + f);
+  const den = 100n * scale;
+  return (2n * num + den) / (2n * den); // HALF_UP, non-negative
+}
+
+// Some PSPs take a GET redirect, others a POST form with fields (e.g. a token).
+function goToGateway({ url, method, fields }) {
+  if ((method || 'GET').toUpperCase() === 'GET') { location.href = url; return; }
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = url;
+  for (const [name, value] of Object.entries(fields || {})) {
+    const input = document.createElement('input');
+    input.type = 'hidden'; input.name = name; input.value = String(value);
+    form.appendChild(input);
+  }
+  document.body.appendChild(form);
+  form.submit();
+}
+
+export default function () {
+  const boot = JSON.parse(document.getElementById('boot').textContent);
+  // One key per distinct choice on this page view: a double tap on «پرداخت» creates one order.
+  const keys = new Map();
+
+  async function order(payload, btn) {
+    busy(btn);
+    const sig = `${payload.product}|${payload.plan || payload.pack_amount_toman}|${payload.period || ''}`;
+    if (!keys.has(sig)) keys.set(sig, idempotencyKey('ord'));
+    const res = await post('/api/billing/orders', { ...payload, idempotency_key: keys.get(sig) });
+    if (res.ok) { goToGateway(res.data.redirect); return; }
+    busy(btn, false);
+    toast(res.message, { kind: 'error', timeout: 9000 });
+  }
+
+  // Plans page
+  document.querySelectorAll('[name="period"]').forEach((r) => r.addEventListener('change', () => {
+    document.querySelectorAll('[data-period]').forEach((el) => { el.hidden = el.dataset.period !== r.value; });
+  }));
+  document.querySelectorAll('[data-buy-plan]').forEach((btn) => btn.addEventListener('click', () => order({ product: 'PLAN', plan: btn.dataset.buyPlan, period: btn.dataset.periodBtn }, btn)));
+
+  // SMS credit page
+  const form = document.querySelector('[data-sms-form]');
+  if (!form) return;
+  const draw = () => {
+    const toma = BigInt(form.pack.value);
+    const sub = toma * 10n;
+    const vat = vatOf(sub, boot.vat);
+    form.querySelector('[data-sub]').textContent = `${toman(sub.toString())} تومان`;
+    form.querySelector('[data-vat]').textContent = `${toman(vat.toString())} تومان`;
+    form.querySelector('[data-total]').textContent = `${toman((sub + vat).toString())} تومان`;
+    form.querySelector('[data-count]').textContent = `${(toma / BigInt(boot.per_segment_toman)).toLocaleString('fa-IR')} پیامک یک‌بخشی`;
+  };
+  form.addEventListener('change', draw);
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    order({ product: 'SMS_CREDIT', pack_amount_toman: form.pack.value, return_to: boot.return ? { route: 'invoice', id: boot.return } : null }, form.querySelector('[type=submit]'));
+  });
+  draw();
+}

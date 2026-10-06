@@ -1,0 +1,129 @@
+<?php
+
+namespace App\Domain\Market;
+
+use App\Models\MarketQuote;
+use App\Support\Digits;
+use App\Support\Jalali;
+use App\Support\Money;
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Throwable;
+
+/**
+ * Central quote cache. One single-flight fetch every 180 s for all tenants; failed fetches
+ * never refresh fetched_at; the browser only reads from here.
+ */
+final class QuoteService
+{
+    public const ASSETS = ['GOLD_18_SELL', 'GOLD_18_BUY', 'GOLD_24', 'USD_IRR', 'XAU_USD'];
+
+    public function __construct(private readonly QuoteProvider $provider) {}
+
+    public function refresh(): bool
+    {
+        $lock = Cache::lock('talata.quotes.fetch', 60);
+        if (! $lock->get()) {
+            return false;
+        }
+        try {
+            $data = $this->provider->fetch();
+            foreach (self::ASSETS as $asset) {
+                if (! isset($data[$asset])) {
+                    continue;
+                }
+                $previous = MarketQuote::query()->where('asset', $asset)->latest('fetched_at')->first();
+                $value = BigDecimal::of($data[$asset]['value']);
+                $change = null;
+                if ($previous && ! BigDecimal::of($previous->value)->isZero()) {
+                    $change = (string) $value->minus($previous->value)->multipliedBy(100)->dividedBy($previous->value, 4, RoundingMode::HalfUp);
+                }
+                MarketQuote::create([
+                    'asset' => $asset, 'value' => (string) $value, 'unit' => $data[$asset]['unit'], 'change_vs_previous_pct' => $change,
+                    'source' => $this->provider->name(), 'is_demo' => $this->provider->isDemo(),
+                    'quote_time' => $data[$asset]['quote_time'], 'fetched_at' => now(),
+                ]);
+            }
+            Cache::put('talata.quotes.last_error', null);
+
+            return true;
+        } catch (Throwable $e) {
+            Cache::put('talata.quotes.last_error', now()->toIso8601String(), 3600);
+            Log::warning('quote fetch failed', ['error' => $e->getMessage()]);
+
+            return false;
+        } finally {
+            $lock->release();
+        }
+    }
+
+    public function latest(string $asset = 'GOLD_18_SELL'): ?MarketQuote
+    {
+        return MarketQuote::query()->where('asset', $asset)->latest('fetched_at')->first();
+    }
+
+    public function freshness(?MarketQuote $quote): string
+    {
+        if (! $quote) {
+            return 'ERROR';
+        }
+        if (Cache::get('talata.quotes.last_error') && $quote->fetched_at->lt(now()->subMinutes(4))) {
+            return 'ERROR';
+        }
+
+        return $quote->fetched_at->lt(now()->subMinutes(config('talata.quotes.stale_after_minutes'))) ? 'STALE' : 'FRESH';
+    }
+
+    public function latestDto(string $tz): array
+    {
+        $q = $this->latest();
+
+        return [
+            'asset' => 'GOLD_18_SELL',
+            'value_irr' => $q ? (string) BigDecimal::of($q->value)->toScale(0, RoundingMode::HalfUp) : null,
+            'value_toman_fa' => $q ? Money::toman((string) BigDecimal::of($q->value)->toScale(0, RoundingMode::HalfUp)) : null,
+            'fetched_at' => $q?->fetched_at?->toIso8601String(),
+            'fetched_at_fa' => $q ? Jalali::time($q->fetched_at, $tz) : null,
+            'freshness' => $this->freshness($q),
+            'source_fa' => $q?->source,
+            'is_demo' => (bool) $q?->is_demo,
+        ];
+    }
+
+    public function board(string $tz): array
+    {
+        $rows = [];
+        foreach (self::ASSETS as $asset) {
+            $q = $this->latest($asset);
+            $display = null;
+            if ($q) {
+                $display = $asset === 'XAU_USD'
+                    ? Digits::group((string) BigDecimal::of($q->value)->toScale(0, RoundingMode::HalfUp))
+                    : Money::toman((string) BigDecimal::of($q->value)->toScale(0, RoundingMode::HalfUp));
+            }
+            $rows[$asset] = [
+                'asset' => $asset,
+                'value' => $q ? (string) $q->value : null,
+                'display_fa' => $display,
+                'change_pct' => $q?->change_vs_previous_pct,
+                'change_fa' => $q && $q->change_vs_previous_pct !== null ? Digits::toPersian(rtrim(rtrim(number_format((float) abs((float) $q->change_vs_previous_pct), 2, '.', ''), '0'), '.')).'٪' : null,
+                'direction' => $q && $q->change_vs_previous_pct !== null ? ((float) $q->change_vs_previous_pct <=> 0) : 0,
+                'freshness' => $this->freshness($q),
+                'fetched_at_fa' => $q ? Jalali::time($q->fetched_at, $tz) : null,
+            ];
+        }
+        $sell = $this->latest('GOLD_18_SELL');
+        $buy = $this->latest('GOLD_18_BUY');
+
+        return [
+            'rows' => $rows,
+            'spread_fa' => $sell && $buy ? Money::toman((string) BigDecimal::of($sell->value)->minus($buy->value)->toScale(0, RoundingMode::HalfUp)) : null,
+            'fetched_at_fa' => $sell ? Jalali::time($sell->fetched_at, $tz) : null,
+            'freshness' => $this->freshness($sell),
+            'source_fa' => $sell?->source,
+            'is_demo' => (bool) $sell?->is_demo,
+        ];
+    }
+}

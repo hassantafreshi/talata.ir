@@ -1,0 +1,82 @@
+<?php
+
+namespace App\Http\Controllers\App;
+
+use App\Domain\Billing\BillingService;
+use App\Domain\Billing\PaymentGateway;
+use App\Domain\Plans\CommercialConfig;
+use App\Domain\Sms\SmsCredit;
+use App\Models\BillingOrder;
+use App\Support\Money;
+use Brick\Math\BigInteger;
+use Illuminate\Http\Request;
+
+class BillingController extends BaseController
+{
+    public function plans(CommercialConfig $config, SmsCredit $credit, PaymentGateway $gateway)
+    {
+        $tenant = $this->tenant();
+        $vat = $config->vatRatePercent();
+        $plans = [];
+        foreach ($config->planCodes() as $code) {
+            $p = $config->plan($code);
+            $prices = [];
+            foreach (['monthly', 'yearly'] as $period) {
+                $sub = (string) BigInteger::of((string) $p['price_toman'][$period])->multipliedBy(10);
+                $prices[$period] = ['subtotal' => $sub, 'vat' => Money::vat($sub, $vat), 'total' => (string) BigInteger::of($sub)->plus(Money::vat($sub, $vat))];
+            }
+            $plans[$code] = $p + ['code' => $code, 'prices' => $prices];
+        }
+
+        return view('app.plans', [
+            'plans' => $plans, 'summary' => $this->ent()->summary($tenant), 'vat' => $vat, 'sms' => $config->sms(),
+            'balanceFa' => Money::toman($credit->balance($tenant->id)), 'canBuy' => $this->membership()->can('billing.manage'),
+            'mock' => $gateway->isMock(), 'expiring' => $credit->expiringBalance($tenant->id), 'tz' => $tenant->timezone,
+        ]);
+    }
+
+    public function sms(Request $request, CommercialConfig $config, SmsCredit $credit, PaymentGateway $gateway)
+    {
+        $tenant = $this->tenant();
+        $plan = $this->ent()->planCode($tenant);
+        $sms = $config->sms();
+        $min = (string) $sms['min_purchase_toman'][$plan];
+        $packs = array_values(array_filter($sms['pack_amounts_toman'], fn ($p) => ! BigInteger::of($p)->isLessThan($min)));
+        if (! in_array($min, $packs, true)) {
+            array_unshift($packs, $min);
+        }
+        $perSegment = $this->ent()->smsPerSegmentIrr($tenant);
+        $orders = BillingOrder::query()->where('product', 'SMS_CREDIT')->latest('id')->limit(5)->get();
+
+        return view('app.sms-buy', [
+            'packs' => $packs, 'perSegmentIrr' => $perSegment, 'balanceIrr' => $credit->balance($tenant->id), 'plan' => $this->ent()->plan($tenant),
+            'carries' => (bool) $sms['carry_over'][$plan], 'vat' => $config->vatRatePercent(), 'minToman' => $min, 'mock' => $gateway->isMock(),
+            'free' => $this->ent()->freeSmsRemaining($tenant), 'freeYear' => (int) ($this->ent()->plan($tenant)['quotas']['free_sms_per_year'] ?? 0),
+            'returnId' => preg_match('/^[0-9a-z]{26}$/', (string) $request->query('return')) ? $request->query('return') : null,
+            'orders' => $orders, 'tz' => $tenant->timezone, 'canBuy' => $this->membership()->can('billing.manage'), 'sms' => $sms, 'planCode' => $plan,
+        ]);
+    }
+
+    public function createOrder(Request $request, BillingService $billing)
+    {
+        $data = $request->validate([
+            'product' => ['required', 'in:PLAN,SMS_CREDIT'], 'plan' => ['nullable', 'string', 'max:20'], 'period' => ['nullable', 'string', 'max:10'],
+            'pack_amount_toman' => ['nullable', 'string', 'max:20'], 'return_to' => ['nullable', 'array'], 'idempotency_key' => ['required', 'string', 'max:64'],
+        ]);
+        $result = $billing->createOrder($this->tenant(), $request->user(), $data);
+
+        return response()->json(['order_id' => $result['order']->public_id, 'redirect' => $result['redirect']], 201);
+    }
+
+    public function order(BillingOrder $order)
+    {
+        return response()->json(['status' => $order->status]);
+    }
+
+    public function receipt(BillingOrder $order, PaymentGateway $gateway)
+    {
+        abort_unless(in_array($order->status, ['FULFILLED', 'PAID'], true), 404);
+
+        return view('print.receipt', ['order' => $order, 'attempt' => $order->attempts()->latest('id')->first(), 'tz' => $this->tenant()->timezone, 'shop' => $this->tenant()->profile, 'mock' => $gateway->isMock()]);
+    }
+}

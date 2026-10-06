@@ -1,0 +1,76 @@
+import { get, post } from '../lib/http.js';
+import { busy, sheet, toast, escapeHtml } from '../lib/ui.js';
+import { parseTomanToIrr, toman } from '../lib/digits.js';
+import { showQuota } from '../lib/quota.js';
+
+export default function () {
+  const hero = document.querySelector('[data-quote]');
+  let quote = JSON.parse(hero.dataset.quote);
+  const priceEl = hero.querySelector('[data-price]');
+  const timeEl = hero.querySelector('[data-time]');
+  const badge = hero.querySelector('[data-freshness-badge]');
+  const errNote = hero.querySelector('[data-error-note]');
+  const startBtn = hero.querySelector('[data-start]');
+  const poll = Number(hero.dataset.poll || 180) * 1000;
+
+  const renderQuote = (q) => {
+    quote = q;
+    priceEl.textContent = q.value_toman_fa ?? '—';
+    timeEl.textContent = q.fetched_at_fa ?? '—';
+    const map = { FRESH: ['ok', 'به‌روز'], STALE: ['warn', 'قدیمی'], ERROR: ['err', 'خطا'] };
+    const [kind, label] = navigator.onLine ? (map[q.freshness] || ['off', '—']) : ['off', 'آفلاین'];
+    badge.className = `badge ${kind}`; badge.textContent = label;
+    errNote.classList.toggle('hidden', q.freshness !== 'ERROR');
+    if (startBtn) startBtn.disabled = !q.value_irr || !navigator.onLine;
+  };
+
+  const refresh = async () => {
+    if (document.hidden || !navigator.onLine) return;
+    const res = await get('/api/quotes/latest');
+    if (res.ok) renderQuote(res.data);
+  };
+  setInterval(refresh, poll);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+  window.addEventListener('online', refresh);
+  window.addEventListener('offline', () => renderQuote(quote));
+
+  async function start(payload, btn) {
+    busy(btn);
+    const res = await post('/api/invoices/drafts', payload);
+    busy(btn, false);
+    if (res.ok) { location.href = res.data.next; return; }
+    if (res.code === 'RATE_CHANGED') { changedSheet(res.data.latest); return; }
+    if (res.code?.startsWith('QUOTA_') || res.code?.startsWith('CAPABILITY_')) { showQuota(res); return; }
+    toast(res.message, { kind: 'error' });
+  }
+
+  function changedSheet(latest) {
+    const { sheet: el, close } = sheet(`
+      <h2>نرخ تازه رسید؛ با کدام عدد ادامه دهیم؟</h2>
+      <div class="grid-2">
+        <div class="band"><span class="small muted">عددی که دیدید · ${escapeHtml(quote.fetched_at_fa)}</span><strong class="num">${escapeHtml(quote.value_toman_fa)}</strong></div>
+        <div class="band em"><span class="small muted">نرخ تازه · ${escapeHtml(latest.fetched_at_fa)}</span><strong class="num">${escapeHtml(latest.value_toman_fa)}</strong></div>
+      </div>
+      <p class="hint">نرخ پذیرفته‌شده برای این معامله ثابت می‌ماند تا خودتان «استفاده از نرخ جدید» را بزنید.</p>
+      <button class="btn btn-gold block" type="button" data-accept>ادامه با نرخ تازه (${escapeHtml(latest.value_toman_fa)})</button>
+      <button class="btn btn-line block" type="button" data-close>برگشت و دوباره نگاه کنم</button>`, { label: 'نرخ تازه' });
+    el.querySelector('[data-accept]').addEventListener('click', (e) => {
+      renderQuote({ ...quote, value_irr: latest.value_irr, value_toman_fa: latest.value_toman_fa, fetched_at_fa: latest.fetched_at_fa });
+      start({ mode: 'MARKET', value_irr: latest.value_irr }, e.currentTarget).then(close);
+    });
+  }
+
+  startBtn?.addEventListener('click', () => start({ mode: 'MARKET', value_irr: quote.value_irr }, startBtn));
+  document.querySelector('[data-misc-only]')?.addEventListener('click', (e) => start({ mode: 'NONE' }, e.currentTarget));
+  document.querySelector('[data-manual]')?.addEventListener('click', () => {
+    const tpl = document.querySelector('[data-manual-tpl]');
+    const { sheet: el } = sheet(tpl.innerHTML, { label: 'نرخ دستی' });
+    const form = el.querySelector('[data-manual-form]');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const irr = parseTomanToIrr(form.value_toman.value);
+      if (!irr) { form.value_toman.closest('.field').classList.add('invalid'); form.querySelector('.err').textContent = 'نرخ را درست وارد کنید.'; return; }
+      start({ mode: 'MANUAL', value_toman: form.value_toman.value, reason: form.reason.value }, form.querySelector('[type=submit]'));
+    });
+  });
+}

@@ -1,0 +1,137 @@
+<?php
+
+namespace App\Http\Controllers\App;
+
+use App\Domain\DomainError;
+use App\Domain\Invoices\InvoiceService;
+use App\Domain\Market\QuoteService;
+use App\Domain\Sms\SmsService;
+use App\Domain\Tax\TaxRules;
+use App\Models\Invoice;
+use App\Support\Mobile;
+use Brick\Math\BigDecimal;
+use Illuminate\Http\Request;
+
+class InvoiceDraftController extends BaseController
+{
+    public function __construct(private readonly InvoiceService $invoices) {}
+
+    public function start(QuoteService $quotes)
+    {
+        $tenant = $this->tenant();
+        $draft = Invoice::query()->where('status', 'draft')->where('created_by', auth()->id())->latest('updated_at')->withCount('items')->first();
+
+        return view('app.rate', [
+            'quote' => $quotes->latestDto($tenant->timezone),
+            'board' => $quotes->board($tenant->timezone),
+            'draft' => $draft,
+            'quota' => $this->ent()->quota($tenant, 'invoices_per_month'),
+            'canIssue' => $this->membership()->can('invoice.issue'),
+            'pollSeconds' => config('talata.quotes.client_poll_seconds'),
+        ]);
+    }
+
+    public function create(Request $request)
+    {
+        $data = $request->validate([
+            'mode' => ['required', 'in:MARKET,MANUAL,NONE'],
+            'value_irr' => ['nullable', 'string', 'max:24'],
+            'value_toman' => ['nullable', 'string', 'max:30'],
+            'reason' => ['nullable', 'string', 'max:30'],
+        ]);
+        $invoice = $this->invoices->createDraft($this->tenant(), $request->user(), $data);
+
+        return response()->json(['draft_id' => $invoice->public_id, 'version' => $invoice->version, 'next' => route('invoices.items', $invoice)], 201);
+    }
+
+    public function items(Invoice $invoice, QuoteService $quotes, TaxRules $tax)
+    {
+        $this->assertDraft($invoice);
+        $tenant = $this->tenant();
+
+        return view('app.items', [
+            'invoice' => $invoice,
+            'rows' => $invoice->items()->get(),
+            'state' => $this->invoices->state($invoice, $tenant),
+            'latest' => $quotes->latestDto($tenant->timezone),
+            'vat' => (string) BigDecimal::of($tax->for('GOLD_SERVICES', now())->rate_percent)->strippedOfTrailingZeros(),
+        ]);
+    }
+
+    public function save(Request $request, Invoice $invoice)
+    {
+        $data = $request->validate([
+            'version' => ['required', 'integer'],
+            'rows' => ['present', 'array', 'max:'.config('talata.invoices.max_rows')],
+            'rows.*' => ['array'],
+            'buyer' => ['nullable', 'array'],
+            'buyer.name' => ['nullable', 'string', 'max:120'],
+            'buyer.mobile' => ['nullable', 'string', 'max:20'],
+            'use_latest_rate' => ['nullable', 'boolean'],
+        ]);
+        $this->assertDraft($invoice);
+
+        return response()->json($this->invoices->saveDraft($invoice, (int) $data['version'], $data['rows'], $data['buyer'] ?? [], (bool) ($data['use_latest_rate'] ?? false), $this->tenant()));
+    }
+
+    public function destroy(Invoice $invoice)
+    {
+        $this->assertDraft($invoice);
+        $invoice->delete();
+
+        return response()->json(['ok' => true, 'next' => route('invoices.new')]);
+    }
+
+    public function review(Invoice $invoice, SmsService $sms)
+    {
+        $this->assertDraft($invoice);
+        $tenant = $this->tenant();
+        $state = $this->invoices->state($invoice, $tenant);
+        if (! $state['valid']) {
+            return redirect()->route('invoices.items', $invoice)->with('error', 'بعضی ردیف‌ها کامل یا درست نیستند. آن‌ها را اصلاح کنید.');
+        }
+        $preview = $sms->previewFor($invoice->forceFill(['payable_irr' => $state['totals']['payable_irr']]), $tenant);
+        $links = $this->ent()->quota($tenant, 'links_per_month');
+
+        return view('app.review', [
+            'invoice' => $invoice,
+            'rows' => $invoice->items()->get(),
+            'state' => $state,
+            'sms' => $preview,
+            'links' => $links,
+            'customersQuota' => $this->ent()->quota($tenant, 'new_customers_per_month'),
+            'canSms' => $this->ent()->can($tenant, 'invoice.sms_share'),
+            'profileComplete' => (bool) $tenant->profile?->isComplete(),
+            'buyerMobile' => $invoice->buyer_mobile ? Mobile::display($invoice->buyer_mobile) : '',
+        ]);
+    }
+
+    public function issue(Request $request, Invoice $invoice)
+    {
+        $data = $request->validate([
+            'mode' => ['required', 'in:ISSUE_ONLY,ISSUE_AND_SMS'],
+            'version' => ['required', 'integer'],
+            'idempotency_key' => ['required', 'string', 'max:64'],
+            'buyer' => ['nullable', 'array'],
+            'buyer.name' => ['nullable', 'string', 'max:120'],
+            'buyer.mobile' => ['nullable', 'string', 'max:20'],
+            'save_customer' => ['nullable', 'boolean'],
+        ]);
+        $result = $this->invoices->issue($invoice, $this->tenant(), $request->user(), $data);
+        $issued = $result['invoice'];
+        $sms = $result['sms'] ?? null;
+
+        return response()->json([
+            'status' => 'ISSUED', 'invoice_id' => $issued->public_id, 'number' => $issued->number, 'replayed' => $result['replayed'],
+            'sms' => $sms instanceof DomainError ? ['status' => 'NOT_SENT', 'message_fa' => $sms->messageFa] : ($sms ? ['status' => $sms->status] : null),
+            'next' => route('invoices.issued', $issued),
+        ], $result['replayed'] ? 200 : 201);
+    }
+
+    private function assertDraft(Invoice $invoice): void
+    {
+        if (! $invoice->isDraft()) {
+            abort(redirect()->route('invoices.show', $invoice));
+        }
+    }
+}

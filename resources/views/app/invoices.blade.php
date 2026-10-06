@@ -1,0 +1,26 @@
+<x-layouts.app title="فاکتورها" page="invoices">
+    @if ($quota['limit'] !== null)
+        <div class="band stack-sm">
+            <div class="between small"><span>فاکتورهای این ماه</span><span class="num">{{ fa($quota['used']) }} از {{ fa($quota['limit']) }}</span></div>
+            <progress class="meter" max="{{ $quota['limit'] }}" value="{{ min($quota['used'], $quota['limit']) }}" aria-label="مصرف سهمیه فاکتور"></progress>
+            <div class="xs muted">سهمیه از {{ $quota['resets_at_fa'] }} دوباره پر می‌شود.</div>
+        </div>
+    @endif
+    @if ($historyRestricted)
+        <div class="notice info">در پلن رایگان فقط فاکتورهای ماه جاری نمایش داده می‌شود. فاکتورهای قبلی حذف نشده‌اند. <a href="{{ route('settings.plan') }}">مشاهده همه با ارتقا</a></div>
+    @endif
+
+    <form class="stack-sm" data-filter role="search" action="{{ route('invoices.index') }}">
+        <div class="field"><label for="q" class="sr-only">جستجو</label><div class="input-wrap"><input id="q" name="q" type="search" value="{{ $search }}" placeholder="جستجو: شماره، نام یا موبایل مشتری" autocomplete="off"></div></div>
+        <div class="seg" role="radiogroup" aria-label="وضعیت">
+            @foreach (['all' => 'همه', 'issued' => 'قطعی', 'draft' => 'پیش‌نویس', 'void' => 'باطل'] as $k => $label)
+                <label><input type="radio" name="filter" value="{{ $k }}" @checked($filter === $k)>{{ $label }}</label>
+            @endforeach
+        </div>
+        <noscript><button class="btn btn-line">اعمال</button></noscript>
+    </form>
+    <p class="xs muted" data-count role="status">{{ fa($page->total()) }} مورد</p>
+    <ul class="list" data-list aria-live="polite">
+        @include('app.partials.invoice-rows')
+    </ul>
+</x-layouts.app>

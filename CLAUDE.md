@@ -1,6 +1,6 @@
 # Talata project instructions
 
-This repository currently contains planning documents. The owner requested prompts, not an application implementation in this documentation change. Start any build from `docs/IMPLEMENTATION_GUIDE.md` (doc map, modules, APIs, jobs, build order, open decisions). For an external coding model (ChatGPT/Codex), use `docs/handoff/` (system prompt, ordered task cards, per-screen specs with all states including the v1 admin console, API examples, QA checklist) and the standalone screen references in `docs/design/reference-html/`.
+This repository contains the planning documents and, since 2026-10-06, the Phase 1 merchant web app (Laravel 13 at the repo root, PostgreSQL, Blade + vanilla-JS AJAX; see README «اجرای وب‌اپ فروشنده», `docs/SECURITY.md`, `docs/adr/` and the progress section of `docs/PHASE_1_CHECKLIST.md`). Run `php artisan test` and `npm run test:js` before pushing; keep SMS-abuse controls covered by `tests/Feature/SmsAbuseTest.php` and `AuthAbuseTest.php`. Start any build from `docs/IMPLEMENTATION_GUIDE.md` (doc map, modules, APIs, jobs, build order, open decisions). For an external coding model (ChatGPT/Codex), use `docs/handoff/` (system prompt, ordered task cards, per-screen specs with all states including the v1 admin console, API examples, QA checklist) and the standalone screen references in `docs/design/reference-html/`.
 
 For future implementation requests, read:
 

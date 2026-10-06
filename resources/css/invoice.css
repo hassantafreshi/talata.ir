@@ -1,0 +1,83 @@
+/* A4 invoice document (print, merchant preview, layout editor). Self-contained; no app shell. */
+@font-face { font-family: Vazirmatn; font-weight: 100 900; font-display: swap; src: url(/fonts/Vazirmatn-arabic-subset.woff2) format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFC, U+200C-200E; }
+@font-face { font-family: Vazirmatn; font-weight: 100 900; font-display: swap; src: url(/fonts/Vazirmatn-latin-subset.woff2) format("woff2"); unicode-range: U+0000-00FF; }
+
+.print-page { margin: 0; background: #E6E2D8; font-family: Vazirmatn, Tahoma, sans-serif; color: #000; }
+.print-tools { display: flex; gap: 8px; justify-content: center; padding: 12px; flex-wrap: wrap; }
+.print-tools button, .print-tools a { font: inherit; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 0; background: #121417; color: #E0B44C; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+.print-tools a { background: #fff; color: #15171A; border: 1px solid #C9C3B6; }
+
+.inv { box-sizing: border-box; width: 210mm; max-width: 100%; min-height: 297mm; margin: 0 auto 24px; background: #fff; padding: 14mm 14mm 12mm; font-size: 11pt; line-height: 1.55; direction: rtl; position: relative; font-family: Vazirmatn, Tahoma, sans-serif; color: #000; }
+.inv * { box-sizing: border-box; }
+.inv.t-small { font-size: 10pt; } .inv.t-large { font-size: 12.5pt; }
+.inv.d-compact td, .inv.d-compact th { padding: 3pt 5pt; }
+.inv .accent { color: #000; } .inv.a-gold_deep .accent { color: #8A5A00; } .inv.a-gold_deep th { background: #FBF6E8; }
+.inv .num { font-variant-numeric: tabular-nums; }
+.inv .ltr { direction: ltr; unicode-bidi: isolate; }
+
+/* Header: RTL grid → column 1 is physical right (shop), column 2 is physical left (QR, fixed). */
+.inv-head { display: grid; grid-template-columns: 1fr 34mm; gap: 6mm; align-items: start; border-bottom: 1.5pt solid #000; padding-bottom: 4mm; }
+.inv-head .blocks { display: flex; flex-direction: column; gap: 2pt; }
+.inv-head .shop-name { font-size: 1.55em; font-weight: 800; line-height: 1.25; }
+.inv-head .meta-line { display: flex; gap: 6mm; flex-wrap: wrap; margin-top: 3mm; font-size: .95em; }
+.inv .al-right { text-align: right; } .inv .al-center { text-align: center; } .inv .al-left { text-align: left; }
+.inv .logo { max-height: 18mm; max-width: 40mm; object-fit: contain; display: block; }
+.inv .logo.s-small { max-height: 12mm; } .inv .logo.s-large { max-height: 24mm; }
+.inv .logo-wrap.al-center .logo { margin: 0 auto; } .inv .logo-wrap.al-left .logo { margin-right: auto; }
+.qr-box { width: 34mm; text-align: center; font-size: 7.5pt; line-height: 1.35; direction: rtl; }
+.qr-box svg { width: 30mm; height: 30mm; display: block; margin: 0 auto 1mm; background: #fff; }
+.qr-box svg path, .qr-box svg rect { fill: #000; }
+.qr-box .t { font-weight: 700; font-size: 8pt; }
+.qr-draft { width: 30mm; height: 30mm; border: 1pt dashed #000; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-weight: 700; }
+
+.inv-buyer { display: flex; gap: 8mm; flex-wrap: wrap; padding: 3mm 0; font-size: .95em; }
+.inv table { border-collapse: collapse; width: 100%; margin-top: 2mm; }
+.inv th, .inv td { padding: 5pt 6pt; border: 1px solid #000; text-align: right; vertical-align: top; }
+.inv th { font-weight: 700; background: #F0EDE6; font-size: .9em; }
+.inv td.n, .inv th.n { text-align: left; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.inv td .desc { display: block; font-size: .85em; color: #333; }
+.inv-sum { display: grid; grid-template-columns: 1fr 82mm; gap: 6mm; margin-top: 4mm; align-items: start; }
+.inv-sum dl { margin: 0; }
+.inv-sum dl div { display: flex; justify-content: space-between; padding: 2pt 0; border-bottom: .5pt solid #bbb; }
+.inv-sum dt { font-weight: 400; } .inv-sum dd { margin: 0; font-variant-numeric: tabular-nums; }
+.inv-sum .payable { border: 1.5pt solid #000; padding: 3mm; display: flex; justify-content: space-between; font-weight: 800; font-size: 1.2em; margin-top: 2mm; white-space: nowrap; gap: 4mm; }
+.inv-notes { font-size: .85em; }
+.inv-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; margin-top: 10mm; font-size: .9em; }
+.inv-sign div { border-top: .75pt solid #000; padding-top: 2mm; text-align: center; min-height: 14mm; }
+.inv-foot { margin-top: 8mm; padding-top: 3mm; border-top: .75pt solid #000; font-size: .85em; display: flex; flex-direction: column; gap: 2pt; }
+.inv.no-div .inv-head, .inv.no-div .inv-foot { border-color: transparent; }
+.inv .mark { font-size: 7.5pt; color: #555; text-align: center; margin-top: 4mm; }
+.inv .void-stamp { position: absolute; top: 90mm; left: 50%; transform: translateX(-50%) rotate(-18deg); border: 3pt solid #B3261E; color: #B3261E; font-size: 34pt; font-weight: 900; padding: 2mm 10mm; opacity: .85; }
+.inv .sample-stamp { position: absolute; top: 4mm; left: 50%; transform: translateX(-50%); background: #FBF0D9; color: #8A5A00; font-size: 9pt; padding: 1mm 4mm; border-radius: 99px; }
+
+@media (max-width: 820px) {
+  .print-page { background: #fff; }
+  .inv { width: 100%; min-height: 0; padding: 16px 12px; font-size: 10pt; }
+  .inv-head { grid-template-columns: 1fr 30mm; }
+  .inv-sum { grid-template-columns: 1fr; }
+  .inv .table-scroll { overflow-x: auto; }
+}
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  .print-page { background: #fff; }
+  .print-tools { display: none !important; }
+  .inv { margin: 0; width: 210mm; min-height: 0; box-shadow: none; }
+  .inv thead { display: table-header-group; }
+  .inv tr { page-break-inside: avoid; break-inside: avoid; }
+  .inv-head { break-inside: avoid; }
+}
+
+/* Layout editor preview frames */
+.inv-frame { background: #E6E2D8; border-radius: 14px; padding: 10px; overflow: hidden; container-type: inline-size; }
+.inv-frame.print .inv { transform-origin: top right; margin: 0; box-shadow: 0 6px 18px -10px rgba(0,0,0,.4); }
+.inv-frame.mobile { max-width: 400px; margin: 0 auto; }
+@container (max-width: 520px) {
+  .inv-frame.mobile .inv { width: 100%; min-height: 0; padding: 16px 12px; font-size: 10pt; }
+  .inv-frame.mobile .inv-head { grid-template-columns: 1fr 30mm; }
+  .inv-frame.mobile .inv-sum { grid-template-columns: 1fr; }
+  .inv-frame.mobile .table-scroll { overflow-x: auto; }
+}
+.inv.receipt { min-height: 0; }
+.receipt-head { grid-template-columns: 1fr; }
+.receipt-meta { display: block; }
+.receipt-meta div { display: flex; justify-content: space-between; padding: 2pt 0; }
