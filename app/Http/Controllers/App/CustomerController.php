@@ -4,6 +4,7 @@ namespace App\Http\Controllers\App;
 
 use App\Domain\Customers\CustomerService;
 use App\Models\Customer;
+use App\Models\InstallmentLine;
 use App\Models\Invoice;
 use App\Support\Digits;
 use App\Support\Jalali;
@@ -16,11 +17,34 @@ class CustomerController extends BaseController
 
     private function query(Request $request)
     {
+        $tenant = $this->tenant();
         $q = Customer::query()->withCount('invoices')->orderBy('name');
+        // «مانده حساب» here is the outstanding installment amount (the only running balance in Phase 1):
+        // the unpaid part of this customer's active agreements. Shown on the row and used by the filter.
+        $q->addSelect(['outstanding_irr' => InstallmentLine::query()
+            ->selectRaw('COALESCE(SUM(installment_lines.amount_irr - installment_lines.paid_irr), 0)')
+            ->join('installment_agreements as a', 'a.id', '=', 'installment_lines.agreement_id')
+            ->whereColumn('a.customer_id', 'customers.id')
+            ->where('a.tenant_id', $tenant->id)
+            ->where('a.status', 'active')]);
+
         if ($s = trim((string) $request->query('q', ''))) {
             $digits = preg_replace('/\D/', '', Digits::toLatin($s));
             $q->where(fn ($w) => $w->where('name', 'ilike', '%'.addcslashes($s, '%_\\').'%')->when($digits !== '', fn ($w) => $w->orWhere('mobile', 'like', '%'.$digits.'%')));
         }
+
+        // Balance filter (installments are Professional-only, so the balance is always 0 on other plans).
+        $owing = fn () => InstallmentLine::query()->select('installment_lines.id')
+            ->join('installment_agreements as a', 'a.id', '=', 'installment_lines.agreement_id')
+            ->whereColumn('a.customer_id', 'customers.id')->where('a.tenant_id', $tenant->id)
+            ->where('a.status', 'active')->whereColumn('installment_lines.amount_irr', '>', 'installment_lines.paid_irr');
+        match ($request->query('bal')) {
+            'owing' => $q->whereExists($owing()),
+            'settled' => $q->whereExists(fn ($e) => $e->from('installment_agreements as a')->select('a.id')
+                ->whereColumn('a.customer_id', 'customers.id')->where('a.tenant_id', $tenant->id))
+                ->whereNotExists($owing()),
+            default => null,
+        };
 
         return $q;
     }
@@ -32,6 +56,7 @@ class CustomerController extends BaseController
         return view('app.customers', [
             'page' => $this->query($request)->paginate(25)->withQueryString(),
             'search' => $request->query('q', ''),
+            'bal' => in_array($request->query('bal'), ['owing', 'settled'], true) ? $request->query('bal') : 'all',
             'quota' => $this->ent()->quota($tenant, 'new_customers_per_month'),
             'canInstallments' => $this->ent()->can($tenant, 'installments.manage'),
             'canManage' => $this->membership()->can('customers.manage'),

@@ -13,14 +13,27 @@
         <form class="grow" role="search" action="{{ route('customers.index') }}">
             <label for="cq" class="sr-only">جستجو</label>
             <div class="input-wrap"><input id="cq" name="q" type="search" value="{{ $search }}" placeholder="جستجو: نام یا موبایل" autocomplete="off"></div>
+            @if ($canInstallments && $bal !== 'all')<input type="hidden" name="bal" value="{{ $bal }}">@endif
         </form>
         @if ($canManage)<button type="button" class="btn btn-gold" data-add>+ مشتری</button>@endif
     </div>
+    @if ($canInstallments)
+        <div class="seg" role="group" aria-label="مانده حساب">
+            @foreach (['all' => 'همه', 'owing' => 'مانده قسط دارند', 'settled' => 'تسویه‌شده'] as $k => $label)
+                <a href="{{ route('customers.index', array_filter(['q' => $search, 'bal' => $k === 'all' ? null : $k])) }}" @if($bal === $k) aria-current="page" @endif>{{ $label }}</a>
+            @endforeach
+        </div>
+        <p class="xs muted">مانده قسط = بخش پرداخت‌نشدهٔ قراردادهای اقساطی فعال مشتری.</p>
+    @endif
     <p class="xs muted">{{ fa($page->total()) }} مشتری</p>
 
     <ul class="list">
         @forelse ($page as $c)
-            <li><a class="list-item" href="{{ route('customers.show', $c) }}"><span class="body"><strong>{{ $c->name }}</strong><span class="sub num ltr">{{ $c->mobile ? \App\Support\Mobile::display($c->mobile) : '—' }}</span></span><span class="small muted">{{ fa($c->invoices_count) }} فاکتور</span></a></li>
+            <li><a class="list-item" href="{{ route('customers.show', $c) }}"><span class="body"><strong>{{ $c->name }}</strong><span class="sub num ltr">{{ $c->mobile ? \App\Support\Mobile::display($c->mobile) : '—' }}</span></span>
+                <span class="stack-sm center">
+                    @if ($canInstallments && (int) $c->outstanding_irr > 0)<span class="num strong nowrap">{{ toman((string) $c->outstanding_irr) }} <span class="unit">تومان</span></span><span class="xs muted">مانده قسط</span>@endif
+                    <span class="small muted">{{ fa($c->invoices_count) }} فاکتور</span>
+                </span></a></li>
         @empty
             <li class="empty">{{ $total ? 'مشتری با این مشخصات پیدا نشد.' : 'هنوز مشتری ثبت نشده. هنگام صدور فاکتور هم می‌توانید مشتری را ذخیره کنید.' }}</li>
         @endforelse
