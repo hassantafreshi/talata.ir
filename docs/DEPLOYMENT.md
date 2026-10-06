@@ -95,6 +95,15 @@ php artisan up
 ## ۴. nginx (نمونه)
 
 ```nginx
+# (http context) Token URLs never reach access logs in full: the public invoice/verification token and the
+# payment-result id are replaced before logging (anyone holding a log copy could otherwise open the invoice).
+map $request_uri $zarlio_log_uri {
+    ~^/(?<seg>i|v)/[^/?]+   /$seg/[token];
+    ~^/pay/result/          /pay/result/[order];
+    default                 $request_uri;
+}
+log_format zarlio '$remote_addr - [$time_local] "$request_method $zarlio_log_uri" $status $body_bytes_sent "$http_user_agent"';
+
 server {
     listen 80;
     server_name zarlio.ir www.zarlio.ir;
@@ -109,7 +118,8 @@ server {
     ssl_certificate_key /etc/ssl/zarlio/privkey.pem;
     client_max_body_size 2m;              # لوگو حداکثر ۱ مگابایت
     server_tokens off;
-    gzip on; gzip_types text/css application/javascript image/svg+xml application/json;
+    access_log /var/log/nginx/zarlio.access.log zarlio;
+    gzip on; gzip_types text/css application/javascript image/svg+xml application/json application/manifest+json;
 
     location /build/ { access_log off; add_header Cache-Control "public, max-age=31536000, immutable"; try_files $uri =404; }
     location /fonts/ { access_log off; add_header Cache-Control "public, max-age=31536000, immutable"; try_files $uri =404; }

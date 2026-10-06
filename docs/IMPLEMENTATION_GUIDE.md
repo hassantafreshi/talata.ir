@@ -31,6 +31,27 @@
 
 ## ۲. Stack و ساختار مخزن
 
+> **همان‌گونه که ساخته شد (2026-10-11).** بخش‌های ۲ و ۳ پایین طرح پیش از ساخت است و برای سابقه مانده است. نقشه واقعی:
+>
+> - **Stack:** Laravel 13 + PHP 8.3، PostgreSQL 16، Blade + ماژول‌های vanilla JS برای هر صفحه (ADR 0001؛ بدون Vue/Inertia/کتابخانه UI)، Vite، PHPUnit، Playwright فقط برای اسکریپت‌های سنجش/E2E. صف و کش در پایگاه داده (Redis اختیاری).
+> - **کد دامنه:** `app/Domain/*`:
+>
+> | ماژول | کد | جدول‌های اصلی |
+> | --- | --- | --- |
+> | Tenancy / Saas | `app/Tenancy`, `app/Domain/Tenancy`, `app/Domain/Plans` | `tenants`, `memberships`, `shop_profiles`, `subscriptions`, `feature_overrides`, `pricing_versions`, `tenant_business_types` |
+> | Identity | `app/Domain/Identity` | `users`, `otp_challenges`, `passkeys` |
+> | Billing | `app/Domain/Billing` | `billing_orders`, `payment_attempts` |
+> | Market | `app/Domain/Market` | `market_quotes`, `emergency_rates` |
+> | Pricing / Tax | `app/Domain/Pricing`, `app/Domain/Tax` | `tax_rules` |
+> | Invoices / Public | `app/Domain/Invoices`, `Http/Controllers/Public` | `invoices`, `invoice_items`, `invoice_layouts`, `invoice_counters`, `invoice_shares`, `invoice_item_assets` |
+> | Customers / Installments | `app/Domain/Customers` | `customers`, `installment_agreements`, `installment_lines`, `installment_payments` |
+> | Sms | `app/Domain/Sms` | `sms_messages`, `sms_settings`, `sms_credit_lots`, `sms_credit_entries` |
+> | Audit / Ops | `app/Domain/Audit`, `app/Support` | `audit_events`, `system_logs` |
+> | Admin (provider) | `app/Domain/Admin`, `Http/Controllers/Admin` | `staff_users`, `admin_actions` |
+> | Affiliate, Reports, Settings | `app/Domain/{Affiliate,Reports,Settings}` | `affiliates*`, `settings_backups`, `tenant_settings` |
+>
+> - **نمودار کامل جدول‌ها:** `docs/ERD.md` (تولیدشده با `php artisan talata:erd`). **راهبرد جداسازی tenant:** `docs/adr/0003-tenant-isolation.md` (کلید خارجی تک‌ستونی + scope بسته؛ «کلید مرکب» طرح اولیه کنار گذاشته شد). **فرض‌ها:** `docs/ASSUMPTIONS.md`.
+
 - Laravel (نسخه پایدار پشتیبانی‌شده هنگام شروع، قفل‌شده)، PHP سازگار، PostgreSQL، Redis برای صف/کش/rate limit، Pest/PHPUnit، Playwright.
 - فرانت پیشنهادی: Vue 3 + TypeScript + Inertia + Vite با chunk به ازای مسیر (`UI_BUILD_SPEC.md` §۲)؛ toolkit تا انتخاب مالک نصب نمی‌شود. صفحات عمومی (`/i`, `/v`, `/pay/result` در حالت بدون ورود) server-rendered و سبک.
 - ساختار ماژول‌ها (پیشنهادی، طبق پرامپ اصلی §۴):
