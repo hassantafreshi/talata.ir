@@ -3,8 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Domain\Billing\PaymentGateways;
+use App\Domain\Sms\Gateways\KavenegarSmsGateway;
+use App\Domain\Sms\SmsGateway;
 use App\Models\StaffUser;
+use App\Support\ScheduleMonitor;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
 use Throwable;
 
 /**
@@ -13,7 +17,9 @@ use Throwable;
  */
 class Preflight extends Command
 {
-    protected $signature = 'talata:preflight {--allow-warnings : exit 0 even when non-blocking warnings exist}';
+    protected $signature = 'talata:preflight
+        {--allow-warnings : exit 0 even when non-blocking warnings exist}
+        {--live : also contact providers without side effects (Kavenegar account/info, ZarinPal reachability) and check the scheduler heartbeat}';
 
     protected $description = 'Check production settings before go-live (blocking errors exit with code 1)';
 
@@ -48,7 +54,11 @@ class Preflight extends Command
             $gateway = $gateways->default();
             $this->check($gateway->isMock() ? 'fail' : 'ok', 'TALATA_PAYMENT_DRIVER', $gateway->code().($gateway->isMock() ? ' is the mock gateway' : ''));
             if ($gateway->code() === 'zarinpal') {
-                $this->check(config('talata.payments.zarinpal.sandbox') ? 'fail' : 'ok', 'TALATA_ZARINPAL_SANDBOX', config('talata.payments.zarinpal.sandbox') ? 'sandbox in production' : 'live');
+                $this->check(config('talata.payments.zarinpal.sandbox') ? ($prod ? 'fail' : 'warn') : 'ok', 'TALATA_ZARINPAL_SANDBOX', config('talata.payments.zarinpal.sandbox') ? 'sandbox' : 'live');
+                $this->check('ok', 'ZarinPal callback URL', route('pay.callback', 'zarinpal').' (its domain must match the one registered in the ZarinPal panel)');
+                if ($this->option('live')) {
+                    $this->zarinpalReachable();
+                }
             }
         } catch (Throwable $e) {
             $this->check('fail', 'TALATA_PAYMENT_DRIVER', mb_substr($e->getMessage(), 0, 160));
@@ -58,6 +68,11 @@ class Preflight extends Command
         if ($sms === 'kavenegar') {
             $this->check(config('services.kavenegar.api_key') ? 'ok' : 'fail', 'KAVENEGAR_API_KEY', config('services.kavenegar.api_key') ? 'set' : 'missing');
             $this->check(config('services.kavenegar.otp_template') ? 'ok' : 'warn', 'KAVENEGAR_OTP_TEMPLATE', config('services.kavenegar.otp_template') ? 'set' : 'unset: login codes use sms/send');
+            $this->check(config('services.kavenegar.otp_template_mobile_change') ? 'ok' : 'warn', 'KAVENEGAR_OTP_TEMPLATE_MOBILE_CHANGE', config('services.kavenegar.otp_template_mobile_change') ? 'set' : 'unset: number-change codes use sms/send with Zarlio wording');
+            $this->check(config('services.kavenegar.sender') ? 'ok' : 'warn', 'KAVENEGAR_SENDER', config('services.kavenegar.sender') ? 'set' : 'unset: invoice SMS use the account default line');
+            if ($this->option('live') && config('services.kavenegar.api_key')) {
+                $this->kavenegarKey();
+            }
         }
         $quotes = (string) config('talata.drivers.quotes');
         $this->check($quotes === 'demo' ? 'warn' : 'ok', 'TALATA_QUOTE_DRIVER', $quotes === 'demo' ? 'demo numbers (labelled «نمونه») until a real provider is connected' : $quotes);
@@ -83,12 +98,53 @@ class Preflight extends Command
         $this->check(is_file(public_path('build/manifest.json')) ? 'ok' : 'fail', 'Front-end build', is_file(public_path('build/manifest.json')) ? 'public/build present' : 'run npm ci && npm run build');
         $this->check(! is_file(public_path('hot')) ? 'ok' : 'fail', 'Vite dev server', is_file(public_path('hot')) ? 'public/hot exists: remove it' : 'not in use');
 
+        if ($this->option('live')) {
+            $this->schedulerHeartbeat();
+        }
+
         $this->table(['', 'Check', 'Detail'], array_map(fn ($r) => [['ok' => 'ok', 'warn' => 'warn', 'fail' => 'FAIL'][$r[0]], $r[1], $r[2]], $this->rows));
         $fails = count(array_filter($this->rows, fn ($r) => $r[0] === 'fail'));
         $warns = count(array_filter($this->rows, fn ($r) => $r[0] === 'warn'));
         $this->line("{$fails} blocking, {$warns} warning(s).");
 
         return $fails > 0 || ($warns > 0 && ! $this->option('allow-warnings')) ? self::FAILURE : self::SUCCESS;
+    }
+
+    /** account/info.json: validates the key and shows the credit; sends no SMS. */
+    private function kavenegarKey(): void
+    {
+        try {
+            $gateway = app(SmsGateway::class);
+            if (! $gateway instanceof KavenegarSmsGateway) {
+                return;
+            }
+            $info = $gateway->accountInfo();
+            $this->check($info['ok'] ? 'ok' : 'fail', 'Kavenegar (live)', $info['ok']
+                ? 'key valid; credit '.number_format((int) $info['credit_irr']).' rial'
+                : 'key rejected or unreachable: '.$info['error']);
+        } catch (Throwable $e) {
+            $this->check('fail', 'Kavenegar (live)', mb_substr($e->getMessage(), 0, 160));
+        }
+    }
+
+    /** Only reachability (any HTTP answer). A payment request would create a real authority, so none is made. */
+    private function zarinpalReachable(): void
+    {
+        $host = config('talata.payments.zarinpal.sandbox') ? 'https://sandbox.zarinpal.com/' : 'https://payment.zarinpal.com/';
+        try {
+            $status = Http::connectTimeout(5)->timeout(10)->get($host)->status();
+            $this->check('ok', 'ZarinPal (live)', "{$host} reachable (HTTP {$status})");
+        } catch (Throwable $e) {
+            $this->check('fail', 'ZarinPal (live)', "{$host} unreachable from this server: ".mb_substr($e->getMessage(), 0, 120));
+        }
+    }
+
+    /** Payments/SMS reconciliation and the quote feed depend on the scheduler (cron every minute). */
+    private function schedulerHeartbeat(): void
+    {
+        $last = ScheduleMonitor::last('payments-reconcile')['at'];
+        $fresh = $last && now()->diffInSeconds(\Carbon\Carbon::parse($last)) <= 300;
+        $this->check($fresh ? 'ok' : 'fail', 'Scheduler (live)', $last ? "payments-reconcile last ran {$last}" : 'never ran: add the cron entry «* * * * * php artisan schedule:run»');
     }
 
     private function check(string $level, string $name, string $detail): void

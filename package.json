@@ -5,7 +5,9 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "test:js": "node --test tests/js/*.test.mjs"
+        "test:js": "node --test tests/js/*.test.mjs",
+        "perf:bundle": "node scripts/perf/bundle-report.mjs",
+        "perf:measure": "node scripts/perf/measure.mjs"
     },
     "devDependencies": {
         "concurrently": "^10.0.3",

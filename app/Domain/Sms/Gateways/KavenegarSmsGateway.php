@@ -99,6 +99,25 @@ final class KavenegarSmsGateway implements SmsGateway
         return ['status' => self::ENTRY_STATUS[(int) $e['status']] ?? 'UNKNOWN', 'provider_id' => (string) $e['messageid']];
     }
 
+    /**
+     * Key check for `talata:preflight --live`: account/info.json sends no SMS and costs nothing. Returns the
+     * remaining credit (rial) when the key is valid.
+     *
+     * @return array{ok:bool,credit_irr:?int,expires:?int,error:?string}
+     */
+    public function accountInfo(): array
+    {
+        $r = $this->request('account/info.json', [], 'account-info');
+        $code = (int) ($r['json']['return']['status'] ?? 0);
+        if ($r['http_ok'] && $code === 200) {
+            $e = $r['json']['entries'] ?? [];
+
+            return ['ok' => true, 'credit_irr' => isset($e['remaincredit']) ? (int) $e['remaincredit'] : null, 'expires' => isset($e['expiredate']) ? (int) $e['expiredate'] : null, 'error' => null];
+        }
+
+        return ['ok' => false, 'credit_irr' => null, 'expires' => null, 'error' => $r['error'] ?? ('kavenegar '.$code.': '.mb_substr((string) ($r['json']['return']['message'] ?? ''), 0, 120))];
+    }
+
     private function call(string $path, array $params, string $op): array
     {
         $r = $this->request($path, $params, $op);

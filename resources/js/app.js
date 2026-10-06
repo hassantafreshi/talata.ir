@@ -1,5 +1,10 @@
 import '../css/app.css';
 import { toast } from './lib/ui.js';
+// Tiny helpers almost every page uses (~2.5 KiB gzip together) ride in the entry chunk: on an 800 ms RTT
+// link each separate chunk costs a round trip (docs/PERFORMANCE_BUDGET.md: login <= 8 requests).
+import './lib/http.js';
+import './lib/digits.js';
+import './lib/otp.js';
 
 // Lazy page modules: each page loads only its own code (weak-network budget).
 const pages = import.meta.glob('./pages/*.js');

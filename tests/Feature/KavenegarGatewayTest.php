@@ -64,6 +64,22 @@ class KavenegarGatewayTest extends TestCase
         Http::assertNotSent(fn (Request $req) => ($req['template'] ?? null) === 'talata-otp' && ($req['token'] ?? null) === '333444');
     }
 
+    public function test_account_info_checks_the_key_without_sending_anything(): void
+    {
+        Http::fakeSequence('api.kavenegar.com/*')
+            ->push(['return' => ['status' => 200, 'message' => 'تایید شد'], 'entries' => ['remaincredit' => 1250000, 'expiredate' => 1893456000, 'type' => 'master']])
+            ->push(['return' => ['status' => 401, 'message' => 'حساب کاربری غیرفعال شده است'], 'entries' => null], 401);
+        $info = $this->gateway()->accountInfo();
+        $this->assertTrue($info['ok']);
+        $this->assertSame(1250000, $info['credit_irr']);
+        Http::assertSent(fn (Request $req) => str_ends_with($req->url(), '/account/info.json'));
+        Http::assertNotSent(fn (Request $req) => str_contains($req->url(), '/sms/') || str_contains($req->url(), '/verify/'));
+
+        $bad = $this->gateway()->accountInfo();
+        $this->assertFalse($bad['ok']);
+        $this->assertStringNotContainsString(self::KEY, (string) $bad['error']);
+    }
+
     public function test_definite_errors_fail_and_ambiguous_errors_are_unknown(): void
     {
         Http::fakeSequence('api.kavenegar.com/*')

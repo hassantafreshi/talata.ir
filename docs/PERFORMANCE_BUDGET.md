@@ -55,6 +55,18 @@ Track LCP, interaction responsiveness and layout shifts in lab and, after releas
 - Regression gate in CI for compressed critical assets and route payload budgets, with a documented human-readable comparison. Runtime and field results recorded separately.
 - Known limitations and pending real Iran-network/device measurements are reported honestly; no speed certification based on this planning document.
 
+## Running the measurement (tooling in the repo)
+
+Status: tooling ready; production numbers not yet recorded.
+
+1. **Bundle gate (offline, every build):** `npm run build && npm run perf:bundle` follows each critical route's static import graph in `public/build/manifest.json` (plus modules its essential action loads), gzip-measures it and compares against the table above, CSS and font budgets. Exit code 1 on any excess; `--json` for CI artefacts.
+2. **Throttled journeys (production, from a measurement machine):**
+   - one-time: `npm i --no-save playwright && npx playwright install chromium`;
+   - save a signed-in session (asks for the SMS code in the terminal): `npm run perf:measure -- --base https://zarlio.ir --save-session --mobile 09xxxxxxxxx`;
+   - measure: `npm run perf:measure -- --base https://zarlio.ir --invoice-token <public invoice token> --verify-token <verify token>` (defaults: profiles A,B; 5 cold + 5 warm runs; targets login, rate, calculator, public_invoice, verify; add `--targets composer` for draft composer, which creates one draft per run on that shop).
+   - output: `storage/perf/<timestamp>/results.json` (median/worst cold and warm, first-load KiB, request count, asset encoding, budgets, pass/fail) and one Playwright trace per run; `storage/perf/` is git-ignored because it holds the saved session. Delete the session file after measuring.
+3. Record test location, device/network and date next to the results; these are lab (CDP-throttled) timings, not field data.
+
 ## Primary implementation references
 
 - https://inertiajs.com/code-splitting
