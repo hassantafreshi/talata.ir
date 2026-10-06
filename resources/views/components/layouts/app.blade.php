@@ -5,11 +5,12 @@
         ['invoices.index', 'فاکتورها', '<path d="M6 3h9l5 5v13H6z"/><path d="M9 12h7M9 16h7"/>', ['invoices.index', 'invoices.show']],
         ['mazneh', 'مظنه', '<path d="M3 17l5-6 4 4 5-7 4 5"/>', ['mazneh']],
         ['calculator', 'ماشین‌حساب', '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h3M13 12h3M8 16h3M13 16h3"/>', ['calculator']],
-        ['settings', 'بیشتر', '<path d="M4 7h16M4 12h16M4 17h16"/>', ['settings*', 'customers*']],
+        ['settings', 'بیشتر', '<path d="M4 7h16M4 12h16M4 17h16"/>', ['settings*', 'customers*', 'dashboard']],
     ];
     $desk = [
         ['invoices.new', 'فاکتور جدید', ['invoices.new', 'invoices.items', 'invoices.review', 'invoices.issued']],
         ['invoices.index', 'فاکتورها', ['invoices.index', 'invoices.show']],
+        ['dashboard', 'داشبورد', ['dashboard']],
         ['mazneh', 'مظنه', ['mazneh']],
         ['calculator', 'ماشین‌حساب', ['calculator']],
         ['customers.index', 'مشتریان و اقساط', ['customers*']],

@@ -118,3 +118,23 @@ POST /admin/api/affiliates
 POST /admin/api/affiliates/7/payouts   { "reference": "BANK-998877" }   → 200 { "ok": true, "amount_irr": "1264000" }
 POST /admin/api/affiliate-commissions/42/void   { "reason": "بازگشت وجه" }   → 200 { "ok": true }
 ```
+
+## داشبورد فروش
+
+```http
+GET /api/dashboard?range=month
+→ 200 {"range":"month","label_fa":"مهر ۱۴۰۵","invoices":22,"labels":["۱","۲",…],"titles":["۱۴۰۵/۰۷/۰۱",…],
+       "metrics":{"sales":{"irr":"22994604794","toman_fa":"۲٬۲۹۹٬۴۶۰٬۴۷۹","g":"189.590","g_fa":"۱۸۹.۵۹ گرم","series_toman":[…],"series_g":[…],"delta_pct":"12"},
+                  "wage":{…},"profit":{…},"gold_in":{…},"vat":{"irr":"…","toman_fa":"…","series_toman":[…]}},
+       "locked_metrics":[],"access":{"full":true,"ranges":[…],"metrics":[…]},"empty":false}
+GET /api/dashboard?range=custom&from=1405/01/01&to=1405/06/31   (Basic/Pro)
+GET /api/dashboard?range=year   (Free) → 403 {"code":"FEATURE_LOCKED"}
+```
+
+## ردیف طلای دریافتی در ذخیره پیش‌نویس
+
+```json
+{"item_type":"GOLD_IN","kind":"COIN","name":"سکه امامی","net_weight_g":"8.13","purity_ppt":"900",
+ "rate_basis":"BUY","deduction_percent":"0"}
+```
+`rate_basis`: `BUY` | `SELL` | `MANUAL` (+ `rate_toman`)؛ `kind=MELTED` می‌تواند `assay_ref` داشته باشد. پاسخ وضعیت: `totals.sales_irr`، `totals.gold_in_irr`، `totals.payable_irr` (ممکن است منفی باشد)، `totals.customer_credit`، `sale_required`.

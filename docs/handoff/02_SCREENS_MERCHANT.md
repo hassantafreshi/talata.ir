@@ -318,3 +318,30 @@ Other triggers (`plans-pricing.json#quota_notice_triggers`): links exhausted, hi
 **States:** paused (warning banner), no buyers yet (empty-row hint to share the link). Never show full buyer mobiles, shop names or purchase amounts.
 
 **Plans page addition:** «کد تخفیف یا کد معرف» field + «اعمال». It reprices every plan card (adds a «تخفیف» row and updates VAT and payable) through `POST /api/billing/discount`, is prefilled from the referral link or an existing referral, and shows errors at the field.
+
+## طلای دریافتی از مشتری (ردیف GOLD_IN) — `/invoices/{id}/items`
+
+- انتخاب نوع ردیف سه‌گزینه‌ای است: «فروش طلا | طلای دریافتی | متفرقه».
+- طلای دریافتی این فیلدها را دارد:
+  - تراشه نوع (کهنه، سکه = عیار ۹۰۰ خودکار، آب‌شده، دیگر)
+  - نام، وزن و عیار
+  - کارت‌های نرخ (خرید بازار، فروش/معاوضه، دستی)
+  - کسر ذوب (اختیاری)
+  - شماره برگه عیارسنجی (فقط آب‌شده)
+- مبلغ ردیف منفی نوشته می‌شود («از مبلغ فاکتور کم می‌شود»). نوار پایین «فروش · طلای دریافتی» و «قابل پرداخت» یا «مانده به نفع مشتری» را نشان می‌دهد.
+- حالت‌ها:
+  - فقط طلای دریافتی: هشدار و غیرفعال شدن «مرور».
+  - نرخ خرید ناموجود: خطای فیلد نرخ.
+  - کسر بیش از ۵۰٪: خطای فیلد.
+- چاپ: ستون «وزن ۷۵۰» و دو کادر «تفکیک طلایی / تفکیک مبلغ». مرجع کامل: `docs/GOLD_RECEIVED_AND_DASHBOARD.md` §۵.
+
+## داشبورد فروش — `/dashboard`
+
+- تراشه‌های بازه، سوییچ «تومان | گرم طلا»، کاشی‌های اعداد، یک نمودار ستونی ساده با تب شاخص و جدول جایگزین.
+- حالت‌ها:
+  - بارگذاری اول با اعداد سرور.
+  - خالی.
+  - بازه قفل (پلن رایگان) با لینک به پلن.
+  - خطای تاریخ بازه دلخواه.
+  - آفلاین (toast).
+- مرجع: `docs/GOLD_RECEIVED_AND_DASHBOARD.md` §۸–§۱۲.

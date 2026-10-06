@@ -35,3 +35,13 @@ Tick each item with evidence (test name, screenshot path, command output). Anyth
 - [x] Attribution: link at new signup, code after the first successful payment; never changes; self-referral, old or paid shops and paused codes rejected.
 - [x] Affiliate panel shows only masked buyer mobiles (first 3 + last 3) and income; non-affiliates get 404.
 - [x] Pending → payable after the hold days; payout with bank reference; void with reason; support role read-only.
+
+## طلای دریافتی و داشبورد
+
+- [ ] ردیف دریافتی سکه ۸٫۱۳ گرم عیار ۹۰۰ → وزن ۷۵۰ = ۹٫۷۵۶ و مبلغ منفی؛ چاپ A4 از عرض صفحه بیرون نمی‌زند.
+- [ ] فقط طلای دریافتی → «مرور» غیرفعال و صدور `ROWS_SALE_REQUIRED`.
+- [ ] دریافتی بیشتر از فروش → «مانده به نفع مشتری» در مرور، صفحه صادرشده، چاپ، تأیید و متن پیامک؛ اقساط برای آن فاکتور پیشنهاد نمی‌شود.
+- [ ] داشبورد رایگان: فقط فروش/اجرت/طلای دریافتی و امروز/هفته/ماه؛ سود و مالیات قفل؛ `range=year` → ۴۰۳.
+- [ ] داشبورد پایه/حرفه‌ای: پنج شاخص، سه ماه/سال/بازه دلخواه، مقایسه با دوره قبل؛ فاکتور باطل‌شده شمرده نمی‌شود.
+- [ ] فاکتور صادرشده ساعت ۰۰:۳۰ تهران در همان روز تهران شمرده می‌شود (نه روز قبل UTC).
+- [ ] صفحه داشبورد در عرض ۳۹۰ پیکسل اسکرول افقی ندارد؛ لمس ستون عدد را نشان می‌دهد؛ «نمایش جدول اعداد» کار می‌کند.

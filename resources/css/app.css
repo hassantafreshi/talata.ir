@@ -350,3 +350,46 @@ table.t tr.lvl-warning td { background: #FFFBF1; }
 .err-text { color: var(--t-error-fg); }
 .row-card.is-in { background: var(--t-gold-wash, #FBF6E8); }
 .row-card.is-in [data-row-total] { color: var(--t-gold-deep, #8A5A00); }
+
+/* Sales dashboard (docs/GOLD_RECEIVED_AND_DASHBOARD.md §10): mobile-first tiles + one simple bar chart. */
+.dash-ranges { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; width: 100%; max-width: 100%; min-width: 0; }
+[data-page="dashboard"] .main > * { min-width: 0; max-width: 100%; }
+.dash-ranges .chip { flex: none; min-height: 44px; }
+.chip-locked { color: var(--t-muted); gap: 4px; }
+.dash-bar { flex-wrap: wrap; gap: 8px; }
+.seg-sm label { min-height: 36px; font-size: 14px; padding: 0 12px; white-space: nowrap; }
+.seg-scroll { overflow-x: auto; scrollbar-width: none; max-width: 100%; min-width: 0; }
+.seg-scroll { position: relative; }
+.seg-scroll label { flex: none; white-space: nowrap; position: relative; }
+.dash-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.dash-tile { cursor: default; padding: 12px 14px; gap: 4px; text-decoration: none; color: var(--t-ink); }
+.dash-tile.m-sales { grid-column: 1 / -1; background: var(--t-chrome); color: var(--t-text-on-chrome, #F4F1EA); }
+.dash-tile.m-sales .t-big, .dash-tile.m-sales .t-big .num { color: var(--t-gold-bright); font-size: 28px; }
+.dash-tile.m-sales .t-big .unit { color: var(--t-text-on-chrome, #F4F1EA); font-size: 14px; }
+.dash-tile.m-sales .muted, .dash-tile.m-sales .t-small { color: var(--t-muted-on-chrome, #B8BCC4); }
+.dash-tile h2.t-label { font-size: 14px; font-weight: 600; margin: 0; }
+.dash-tile .t-big { margin: 0; font-size: 20px; font-weight: 800; line-height: 1.3; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.dash-tile .t-big .unit { font-size: 13px; font-weight: 500; }
+.dash-tile .t-small, .dash-tile .t-delta, .dash-tile .t-hint { margin: 0; }
+.dash-tile .t-small { font-size: 14px; color: var(--t-muted); }
+.dash-tile .t-delta.up { color: var(--t-ok-fg, #1E6B3A); } .dash-tile .t-delta.down { color: var(--t-error-fg); }
+.dash-tile.m-sales .t-delta.up { color: #8FD9A8; } .dash-tile.m-sales .t-delta.down { color: #F2A7A0; }
+.dash-tile.is-locked { background: var(--t-surface); box-shadow: inset 0 0 0 1px var(--t-hairline); }
+.dash-tile.is-locked .t-big { font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.dash-chart { margin: 0; }
+.dash-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.dash-chart .grid { stroke: var(--t-hairline); stroke-width: 1; }
+.dash-chart { min-height: 220px; }
+.dash-chart .axis { fill: var(--t-muted); font-size: 12px; font-family: inherit; }
+.dash-chart .bar { fill: var(--t-gold-action); cursor: pointer; }
+.dash-chart .bar:hover, .dash-chart .bar.on { fill: var(--t-chrome); }
+.dash-chart .bar:focus-visible { outline: none; stroke: var(--t-chrome); stroke-width: 2; }
+.dash-picked { min-height: 1.6em; margin: 0; }
+.dash-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dash-table th, .dash-table td { padding: 6px 8px; border-bottom: 1px solid var(--t-hairline); text-align: right; white-space: nowrap; }
+.dash-table td.n { text-align: left; font-variant-numeric: tabular-nums; }
+@media (min-width: 900px) {
+  .dash-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .dash-tile.m-sales { grid-column: span 2; grid-row: span 2; justify-content: center; }
+  .dash-tile.m-sales .t-big { font-size: 36px; }
+}

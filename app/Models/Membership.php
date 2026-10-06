@@ -12,6 +12,7 @@ class Membership extends Model
         'invoice.issue' => 'ساخت و صدور فاکتور',
         'invoice.void' => 'ابطال و فاکتور جایگزین',
         'customers.manage' => 'مشتریان و ثبت پرداخت',
+        'reports.view' => 'داشبورد و گزارش فروش',
         'settings.manage' => 'تنظیمات و ظاهر فاکتور',
         'billing.manage' => 'پلن و پرداخت',
     ];

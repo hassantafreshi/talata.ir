@@ -4,6 +4,7 @@ use App\Http\Controllers\App\AffiliateController;
 use App\Http\Controllers\App\BillingController;
 use App\Http\Controllers\App\CalculatorController;
 use App\Http\Controllers\App\CustomerController;
+use App\Http\Controllers\App\DashboardController;
 use App\Http\Controllers\App\InstallmentController;
 use App\Http\Controllers\App\InvoiceController;
 use App\Http\Controllers\App\InvoiceDraftController;
@@ -61,6 +62,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
     Route::get('/mazneh', MaznehController::class)->name('mazneh');
     Route::get('/calculator', CalculatorController::class)->name('calculator');
+    Route::get('/dashboard', [DashboardController::class, 'show'])->middleware('perm:reports.view')->name('dashboard');
 
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
@@ -88,6 +90,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::get('/quotes/latest', [QuoteController::class, 'latest'])->name('api.quotes.latest');
         Route::get('/quotes/board', [QuoteController::class, 'board'])->name('api.quotes.board');
         Route::get('/entitlements', [SettingsController::class, 'entitlements'])->name('api.entitlements');
+        Route::get('/dashboard', [DashboardController::class, 'data'])->middleware(['perm:reports.view', 'throttle:60,1'])->name('api.dashboard');
 
         Route::middleware('perm:invoice.issue')->group(function () {
             Route::post('/invoices/drafts', [InvoiceDraftController::class, 'create'])->middleware('throttle:drafts')->name('api.drafts.create');
