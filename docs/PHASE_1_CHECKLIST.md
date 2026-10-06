@@ -58,7 +58,7 @@ Evidence: `php artisan test` (91 tests on PostgreSQL), `npm run test:js`, Playwr
 - [x] Weight settlement and third template «حساب طلا و ریال (بد/بس)» (docs/GOLD_RECEIVED_AND_DASHBOARD.md §13): gold-for-gold sale and received rows, melted-gold sale with assay slip, per-row value + بد/بس for gold (750-g) and money, «مانده سند» row with date/time; shared vectors.
 - [x] Gold received from the customer (docs/GOLD_RECEIVED_AND_DASHBOARD.md): GOLD_IN rows (old gold, coin, melted + assay ref), GOLD_IN_V1 with buy/sell/manual rate and melting deduction, payable = sales − gold received (customer credit when negative), 750-weight column and gold/money split on print, shared PHP/JS vectors.
 - [x] Affiliate program (docs/AFFILIATE_PROGRAM.md): admin enrolment per mobile, code + referral link, buyer discount, % commission first-payment or lifetime, hold → payable → paid, masked affiliate panel.
-- [ ] Real PSP adapter (owner selection pending).
+- [x] Real PSP adapter: ZarinPal v4 (`ZarinpalGateway`) behind a PSP registry — switching PSP is one class + one config line; in-flight payments stay with their own gateway; payer-never-returned recovery; faked-HTTP tests. Live sandbox/production payment not yet performed (official docs host blocked from the build environment).
 - [ ] Rest of the service admin console (pricing versions, manual tenant actions, SMS/payment operations). Dashboard + logs are done at `/admin`.
 - [ ] Field performance measurement on throttled networks (bundle sizes measured only at build time).
 - [ ] Independent penetration test and owner approval of visual direction.

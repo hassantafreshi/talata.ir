@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Domain\Billing\Gateways\MockGateway;
 use App\Domain\Billing\PaymentGateway;
+use App\Domain\Billing\PaymentGateways;
 use App\Domain\Sms\SmsCredit;
 use App\Models\BillingOrder;
 use App\Models\PaymentAttempt;
@@ -115,7 +116,7 @@ class BillingTest extends TestCase
         $res = $this->order($user, ['product' => 'SMS_CREDIT', 'pack_amount_toman' => '400000'])->assertCreated();
         $authority = basename(parse_url($res->json('redirect.url'), PHP_URL_PATH));
         $real = app(PaymentGateway::class);
-        $this->app->instance(PaymentGateway::class, new class($real) implements PaymentGateway
+        app(PaymentGateways::class)->extend('mock', new class($real) implements PaymentGateway
         {
             public function __construct(private $real) {}
 
@@ -132,6 +133,16 @@ class BillingTest extends TestCase
             public function request(string $r, string $a, string $c, ?string $m): array
             {
                 return $this->real->request($r, $a, $c, $m);
+            }
+
+            public function redirectFor(string $authority): array
+            {
+                return $this->real->redirectFor($authority);
+            }
+
+            public function formActionHosts(): array
+            {
+                return [];
             }
 
             public function parseCallback(Request $r): array

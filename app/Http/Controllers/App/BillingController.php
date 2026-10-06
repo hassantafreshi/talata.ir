@@ -103,6 +103,9 @@ class BillingController extends BaseController
     {
         abort_unless(in_array($order->status, ['FULFILLED', 'PAID'], true), 404);
 
-        return view('print.receipt', ['order' => $order, 'attempt' => $order->attempts()->latest('id')->first(), 'tz' => $this->tenant()->timezone, 'shop' => $this->tenant()->profile, 'mock' => $gateway->isMock()]);
+        $attempt = $order->attempts()->latest('id')->first();
+
+        // «آزمایشی» depends on the gateway that took this payment, not on today's default.
+        return view('print.receipt', ['order' => $order, 'attempt' => $attempt, 'tz' => $this->tenant()->timezone, 'shop' => $this->tenant()->profile, 'mock' => ($attempt?->gateway ?? $gateway->code()) === 'mock']);
     }
 }

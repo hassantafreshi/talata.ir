@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
-use App\Domain\Billing\Gateways\MockGateway;
+use App\Domain\Billing\Gateways\ZarinpalGateway;
 use App\Domain\Billing\PaymentGateway;
+use App\Domain\Billing\PaymentGateways;
 use App\Domain\Market\DemoQuoteProvider;
 use App\Domain\Market\QuoteProvider;
 use App\Domain\Plans\CommercialConfig;
@@ -52,17 +53,13 @@ class AppServiceProvider extends ServiceProvider
             };
         });
 
-        $this->app->singleton(PaymentGateway::class, function () {
-            $driver = config('talata.drivers.payment');
-            if ($driver === 'mock') {
-                if ($this->app->isProduction() && ! config('talata.payments.mock_allowed_in_production')) {
-                    throw new RuntimeException('Mock payment gateway is disabled in production. Configure a real PSP adapter.');
-                }
-
-                return new MockGateway;
-            }
-            throw new RuntimeException('Unknown payment driver');
-        });
+        // PSP adapters: registry by code; new payments use TALATA_PAYMENT_DRIVER (docs/PAYMENTS_AND_SMS_CREDIT.md).
+        $this->app->singleton(PaymentGateways::class, fn () => new PaymentGateways(
+            config('talata.payments.gateways'), (string) config('talata.drivers.payment'),
+            $this->app->isProduction(), (bool) config('talata.payments.mock_allowed_in_production'),
+        ));
+        $this->app->bind(PaymentGateway::class, fn () => $this->app->make(PaymentGateways::class)->default());
+        $this->app->bind(ZarinpalGateway::class, fn () => new ZarinpalGateway(config('talata.payments.zarinpal')));
     }
 
     public function boot(): void

@@ -103,22 +103,76 @@ CREATED ──redirect──▶ AWAITING_PAYMENT ──callback──▶ VERIFYI
 5. OTP و پیامک‌های تأیید پرداخت از بودجه عملیاتی زرلیو؛ یادآوری اقساط حرفه‌ای از همین اعتبار.
 6. تغییر پلن: lotها مانده و انقضای خودشان را حفظ می‌کنند؛ قیمت بخش از پلن جدید (فرض در انتظار تأیید مالک، قابل تنظیم با `sms_credit.on_plan_change`).
 
-## ۷. adapter درگاه
+## ۷. adapter درگاه (PSP) — پیاده‌سازی‌شده: زرین‌پال + درگاه آزمایشی
+
+> کد: `app/Domain/Billing/PaymentGateway.php` (قرارداد)، `PaymentGateways.php` (رجیستری)، `Gateways/ZarinpalGateway.php`، `Gateways/MockGateway.php`. آزمون: `tests/Feature/ZarinpalGatewayTest.php` (HTTP جعلی)، `tests/Feature/BillingTest.php`.
 
 ```php
 interface PaymentGateway {
-    public function code(): string;                                   // 'mock', 'psp_x', …
-    public function request(PaymentRequest $r): RedirectInstruction;  // amount IRR, callback URL, order public_ref, mobile (optional)
-    public function parseCallback(Request $http): CallbackResult;     // authority, status, raw (redacted)
-    public function verify(string $authority, Money $amount): VerifyResult; // ok, ref_id, card_mask?, bank_code
-    public function inquire(string $authority): VerifyResult;         // for reconcile; may delegate to verify
+    public function code(): string;                       // 'zarinpal', 'mock' — روی هر PaymentAttempt ذخیره می‌شود
+    public function isMock(): bool;
+    public function request(string $orderRef, string $amountIrr, string $callbackUrl, ?string $mobile): array; // authority, redirect_url, method, fields — یا PaymentGatewayError
+    public function redirectFor(string $authority): array; // بازگشت دوباره به همان صفحه بانک (درخواست تکراری)
+    public function parseCallback(Request $r): array;     // authority, status (فقط نشانه؛ هرگز مبنای تأیید نیست), raw
+    public function verify(string $authority, string $amountIrr): array; // OK | FAILED | UNKNOWN با مبلغ ذخیره‌شده
+    public function formActionHosts(): array;              // فقط برای PSPهایی که POST می‌خواهند (CSP form-action)
 }
 ```
 
-- واحد مبلغ در adapter تبدیل می‌شود (برخی درگاه‌ها تومان می‌گیرند)؛ دامنه همیشه ریال.
-- کلیدها و merchant id رمزشده در پیکربندی provider؛ هرگز در لاگ.
-- `MockGateway` برای توسعه و تست با سناریوهای موفق، لغو، عدم تطابق مبلغ، timeout، callback تکراری؛ برچسب «حالت آزمایشی» روی صفحه نتیجه و رسید.
-- انتخاب PSP واقعی: در انتظار مالک؛ قبل از اتصال، مستندات رسمی همان درگاه خوانده و نگاشت `bank_code` → متن فارسی تکمیل شود. هیچ اتصال زنده‌ای بدون شواهد «انجام‌شده» گزارش نمی‌شود.
+### ۷.۱ تعویض درگاه با کمترین تغییر
+
+- رجیستری `config('talata.payments.gateways')` نگاشت «کد ← کلاس» است.
+- **افزودن درگاه جدید** (مثلاً سامان، ملت، آی‌دی‌پی، نکست‌پی) سه گام دارد:
+  1. یک کلاس که `PaymentGateway` را پیاده می‌کند.
+  2. یک خط در `gateways`.
+  3. یک متغیر محیطی `TALATA_PAYMENT_DRIVER=<کد>`.
+- **هیچ** تغییری در سفارش، تأیید، تحویل، reconcile، صفحه نتیجه یا UI لازم نیست.
+- پرداخت‌های **در جریان** همیشه با درگاهی تأیید و reconcile می‌شوند که آن‌ها را باز کرده است (`PaymentAttempt.gateway` و مسیر `/pay/callback/{code}`). پس تعویض درگاه وسط کار هیچ پرداختی را بی‌صاحب نمی‌کند (آزموده).
+- درگاه‌هایی که با فرم POST به بانک می‌روند، میزبان خود را از `formActionHosts()` اعلام می‌کنند. CSP فقط در صفحه‌های خرید پلن و پیامک همان میزبان‌ها را به `form-action` اضافه می‌کند.
+- درگاه آزمایشی در production رد می‌شود، مگر با `TALATA_ALLOW_MOCK_PAYMENTS_IN_PRODUCTION=true`.
+
+### ۷.۲ زرین‌پال (REST v4)
+
+| گام | فراخوانی |
+|---|---|
+| درخواست | `POST https://payment.zarinpal.com/pg/v4/payment/request.json` با `merchant_id`، `amount` (ریال، عدد صحیح)، `currency: "IRR"`، `description`، `callback_url = {APP}/pay/callback/zarinpal`، `metadata.order_id`؛ `metadata.mobile` فقط با `TALATA_ZARINPAL_SEND_MOBILE=true`. موفق: `data.code = 100` و `data.authority` |
+| انتقال | `GET https://payment.zarinpal.com/pg/StartPay/{authority}` |
+| بازگشت | `GET /pay/callback/zarinpal?Authority=…&Status=OK\|NOK`. شکل `Authority` بررسی می‌شود و `Status` فقط نشانه است |
+| تأیید | `POST https://payment.zarinpal.com/pg/v4/payment/verify.json` با `merchant_id`، `amount` (**مبلغ ذخیره‌شده سفارش**)، `authority`. `100` یعنی پرداخت‌شده و `101` یعنی قبلاً تأیید شده (هر دو موفق، idempotent). `ref_id` و `card_pan` ماسک‌شده ذخیره می‌شوند |
+| محیط آزمایشی | `TALATA_ZARINPAL_SANDBOX=true` ← `https://sandbox.zarinpal.com/pg/...` |
+
+**نگاشت نتیجه:**
+
+| پاسخ زرین‌پال | نتیجه سفارش |
+|---|---|
+| `100`/`101` | پرداخت‌شده و سپس تحویل (یک‌بار) |
+| `-50` (مبلغ متفاوت) | `FAILED` با `AMOUNT_MISMATCH` |
+| `-51` (ناموفق) و بقیه کدهای منفی | `FAILED` با همان کد و متن فارسی (`ZarinpalGateway::CODES_FA`) |
+| `-12`، `-52`، خطای شبکه، 5xx، پاسخ غیر JSON | `UNKNOWN`؛ سفارش `PENDING_VERIFICATION` می‌شود و reconcile با تأخیر افزایشی دوباره می‌پرسد |
+
+**پرداخت‌کننده‌ای که برنگشت:** اگر مشتری پرداخت کرد ولی مرورگر را بست و callback نیامد، reconcile پیش از «منقضی» کردن سفارش (تا `reconcile_max_hours`) از زرین‌پال `verify` می‌پرسد. اگر پرداخت شده بود، تحویل انجام می‌شود (آزموده).
+
+**مهلت‌ها و امنیت:**
+- اتصال ۵ ثانیه و کل درخواست ۱۵ ثانیه (قابل تنظیم با env).
+- شناسه پذیرنده (UUID ۳۶ نویسه‌ای) فقط در env است و در لاگ نمی‌آید. نبودن یا خراب بودن آن هنگام راه‌اندازی خطا می‌دهد.
+- اگر زرین‌پال درخواست را رد کند، سفارشی ساخته نمی‌شود: `503 GATEWAY_UNAVAILABLE` با متن «مبلغی کسر نشده است».
+
+**منبع و تأیید:** سایت و مستندات رسمی زرین‌پال (`zarinpal.com`، `docs.zarinpal.com`) از محیط توسعه این نسخه **در دسترس نبود** (سیاست شبکه). قرارداد از کتابخانه کلاینت متن‌باز زرین‌پال روی GitHub (`peymanr34/riviera-zarinpal`، نسخه V4) و دانش عمومی API استخراج شد. پیش از راه‌اندازی زنده این کارها لازم است:
+1. مستندات رسمی فعلی دوباره خوانده شود.
+2. یک پرداخت واقعی در sandbox و یک پرداخت کم‌مبلغ واقعی انجام شود.
+3. متن کدهای خطا با پنل زرین‌پال مقایسه شود.
+
+**اتصال زنده هنوز انجام نشده است.**
+
+**راه‌اندازی:**
+```
+TALATA_PAYMENT_DRIVER=zarinpal
+TALATA_ZARINPAL_MERCHANT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+TALATA_ZARINPAL_SANDBOX=false
+```
+- آدرس بازگشت در پنل زرین‌پال باید دامنه `APP_URL` باشد.
+- سرور باید به `payment.zarinpal.com` دسترسی خروجی داشته باشد.
+- زمان‌بند (`php artisan schedule:work` یا cron هر دقیقه) برای `talata:payments-reconcile` باید فعال باشد.
 
 ## ۸. API
 
@@ -171,7 +225,7 @@ interface PaymentGateway {
 
 ## ۱۲. تصمیم‌های باز برای مالک
 
-1. انتخاب درگاه پرداخت (PSP) و قرارداد آن.
+1. ~~انتخاب درگاه پرداخت~~ — زرین‌پال انتخاب شد (۱۴۰۵/۰۷). قرارداد پذیرندگی و merchant id با مالک است.
 2. سیاست باقی‌مانده پلن قبلی هنگام ارتقا (proration).
 3. رفتار مانده شارژ هنگام تغییر پلن و بسته‌های رایگان بالاتر از ۴۰۰ هزار.
 4. صدور فاکتور رسمی اشتراک زرلیو (با مالیات ۱۰٪) برای فروشگاه‌ها و الزامات سامانه مؤدیان طرف زرلیو.

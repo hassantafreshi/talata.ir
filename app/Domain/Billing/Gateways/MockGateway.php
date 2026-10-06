@@ -28,7 +28,17 @@ final class MockGateway implements PaymentGateway
         $authority = 'MOCK'.strtoupper(substr(Tokens::make(24), 0, 28));
         Cache::put('mockpay:'.$authority, ['amount_irr' => $amountIrr, 'ref' => $orderRef, 'decision' => null], 3600);
 
-        return ['authority' => $authority, 'redirect_url' => route('pay.mock', $authority), 'method' => 'GET', 'fields' => []];
+        return ['authority' => $authority] + $this->redirectFor($authority);
+    }
+
+    public function redirectFor(string $authority): array
+    {
+        return ['redirect_url' => route('pay.mock', $authority), 'method' => 'GET', 'fields' => []];
+    }
+
+    public function formActionHosts(): array
+    {
+        return [];
     }
 
     public function parseCallback(Request $request): array

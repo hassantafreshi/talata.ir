@@ -62,7 +62,7 @@ class PaymentReturnController extends Controller
         };
 
         return response()->view('public.pay-result', [
-            'o' => $o, 'attempt' => $attempt, 'access' => $access, 'mock' => $gateway->isMock(), 'sub' => $sub, 'tz' => $tz,
+            'o' => $o, 'attempt' => $attempt, 'access' => $access, 'mock' => ($attempt?->gateway ?? $gateway->code()) === 'mock', 'sub' => $sub, 'tz' => $tz,
             'balanceFa' => $access === 'full' ? Money::toman($credit->balance($o->tenant_id)) : null,
             'next' => $next, 'sig' => $billing->resultSignature($o),
             'paidFa' => $o->paid_at ? Jalali::date($o->paid_at, $tz, true) : null,

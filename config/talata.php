@@ -1,5 +1,8 @@
 <?php
 
+use App\Domain\Billing\Gateways\MockGateway;
+use App\Domain\Billing\Gateways\ZarinpalGateway;
+
 /*
 | Zarlio application configuration.
 | Commercial values (prices, quotas, SMS prices) live in the versioned
@@ -15,7 +18,7 @@ return [
     'drivers' => [
         'sms' => env('TALATA_SMS_DRIVER', 'log'),          // kavenegar | log | fake
         'quotes' => env('TALATA_QUOTE_DRIVER', 'demo'),    // demo
-        'payment' => env('TALATA_PAYMENT_DRIVER', 'mock'), // mock
+        'payment' => env('TALATA_PAYMENT_DRIVER', 'mock'), // zarinpal | mock (any code registered in payments.gateways)
     ],
 
     'sms_dev_driver_allowed_in_production' => (bool) env('TALATA_ALLOW_DEV_SMS_IN_PRODUCTION', false),
@@ -114,6 +117,21 @@ return [
         'orders_per_hour' => 10,
         'mock_allowed_in_production' => (bool) env('TALATA_ALLOW_MOCK_PAYMENTS_IN_PRODUCTION', false),
         'reconcile_max_hours' => 24,
+        // PSP adapter registry: code => class implementing App\Domain\Billing\PaymentGateway.
+        // Adding a PSP = one adapter class + one line here + TALATA_PAYMENT_DRIVER=<code>.
+        'gateways' => [
+            'zarinpal' => ZarinpalGateway::class,
+            'mock' => MockGateway::class,
+        ],
+        'zarinpal' => [
+            'merchant_id' => env('TALATA_ZARINPAL_MERCHANT_ID'),
+            'sandbox' => (bool) env('TALATA_ZARINPAL_SANDBOX', false),
+            'connect_timeout' => (int) env('TALATA_ZARINPAL_CONNECT_TIMEOUT', 5),
+            'timeout' => (int) env('TALATA_ZARINPAL_TIMEOUT', 15),
+            // Opt-in: send the payer's login mobile so ZarinPal can offer saved cards (data minimisation: off by default).
+            'send_mobile' => (bool) env('TALATA_ZARINPAL_SEND_MOBILE', false),
+            'description' => 'خرید از زرلیو',
+        ],
     ],
 
     'uploads' => [

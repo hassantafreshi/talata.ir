@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Domain\Billing\PaymentGateways;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Vite;
@@ -24,7 +25,7 @@ class SecurityHeaders
             "img-src 'self' data: blob:",
             "font-src 'self'",
             "connect-src 'self'".$devOrigin,
-            "form-action 'self'".($request->routeIs('pay.*') ? '' : ''),
+            "form-action 'self'".$this->pspFormHosts($request),
             "frame-ancestors 'none'",
             "base-uri 'none'",
             "object-src 'none'",
@@ -48,5 +49,21 @@ class SecurityHeaders
         $response->headers->remove('X-Powered-By');
 
         return $response;
+    }
+
+    /** Only the plan/SMS purchase pages may POST to a PSP, and only to the hosts the active adapter declares. */
+    private function pspFormHosts(Request $request): string
+    {
+        if (! $request->routeIs('settings.plan', 'settings.sms')) {
+            return '';
+        }
+        try {
+            $hosts = app(PaymentGateways::class)->default()->formActionHosts();
+        } catch (\Throwable) {
+            return '';
+        }
+        $hosts = array_filter($hosts, fn ($h) => preg_match('#^https://[a-z0-9.-]+(:\d+)?$#i', $h));
+
+        return $hosts ? ' '.implode(' ', $hosts) : '';
     }
 }

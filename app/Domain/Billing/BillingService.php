@@ -34,10 +34,10 @@ final class BillingService
         '-11' => 'پرداخت تأیید نشد',
         'AMOUNT_MISMATCH' => 'مبلغ تأییدشده بانک با سفارش یکسان نبود',
         'EXPIRED' => 'مهلت پرداخت تمام شد',
-    ];
+    ] + Gateways\ZarinpalGateway::CODES_FA;
 
     public function __construct(
-        private readonly PaymentGateway $gateway,
+        private readonly PaymentGateways $gateways,
         private readonly CommercialConfig $config,
         private readonly Entitlements $entitlements,
         private readonly SmsCredit $credit,
@@ -54,8 +54,15 @@ final class BillingService
         $existing = BillingOrder::query()->where('idempotency_key', $key)->first();
         if ($existing) {
             $attempt = $existing->attempts()->latest('id')->first();
+            $gw = $attempt ? $this->gateways->for($attempt->gateway) : null;
+            // Same request again (double tap / retry): back to the same bank page while it is still open.
+            if ($gw && $existing->status === 'AWAITING_PAYMENT' && now()->lt($existing->expires_at)) {
+                $r = $gw->redirectFor($attempt->authority);
 
-            return ['order' => $existing, 'redirect' => ['url' => $this->gateway->isMock() ? route('pay.mock', $attempt->authority) : route('pay.result', $existing), 'method' => 'GET', 'fields' => []]];
+                return ['order' => $existing, 'redirect' => ['url' => $r['redirect_url'], 'method' => $r['method'], 'fields' => $r['fields']]];
+            }
+
+            return ['order' => $existing, 'redirect' => ['url' => route('pay.result', [$existing->public_id, 's' => $this->resultSignature($existing)]), 'method' => 'GET', 'fields' => []]];
         }
 
         $product = $input['product'] ?? '';
@@ -109,9 +116,15 @@ final class BillingService
                 'vat_irr' => $vat, 'amount_irr' => $amount, 'price_snapshot' => $snapshot, 'return_to' => $returnTo,
                 'status' => 'AWAITING_PAYMENT', 'idempotency_key' => $key, 'expires_at' => now()->addMinutes(config('talata.payments.order_expiry_minutes')),
             ]);
-            $redirect = $this->gateway->request($billing->public_ref, $amount, route('pay.callback', $this->gateway->code()), $user->mobile);
+            $gateway = $this->gateways->default();
+            try {
+                $redirect = $gateway->request($billing->public_ref, $amount, route('pay.callback', $gateway->code()), $user->mobile);
+            } catch (PaymentGatewayError $e) {
+                // Nothing was charged; the transaction rolls the order back.
+                throw new DomainError('GATEWAY_UNAVAILABLE', 'درگاه پرداخت الان پاسخ نمی‌دهد. چند دقیقه بعد دوباره امتحان کنید؛ مبلغی کسر نشده است.', 503, ['psp_code' => $e->pspCode]);
+            }
             PaymentAttempt::create([
-                'order_id' => $billing->id, 'gateway' => $this->gateway->code(), 'authority' => $redirect['authority'],
+                'order_id' => $billing->id, 'gateway' => $gateway->code(), 'authority' => $redirect['authority'],
                 'amount_irr' => $amount, 'status' => 'AWAITING_PAYMENT',
             ]);
             Audit::record('billing.order_created', $billing, ['product' => $product, 'amount_irr' => $amount]);
@@ -139,10 +152,12 @@ final class BillingService
     /** Bank callback (no session). Returns the order for redirect. Idempotent. */
     public function handleCallback(string $gatewayCode, Request $request): ?BillingOrder
     {
-        if ($gatewayCode !== $this->gateway->code()) {
+        // The adapter that opened the payment answers for it, even after the default PSP changed.
+        $gateway = $this->gateways->for($gatewayCode);
+        if (! $gateway) {
             return null;
         }
-        $cb = $this->gateway->parseCallback($request);
+        $cb = $gateway->parseCallback($request);
         TechLog::info('payments', 'gateway callback', ['gateway' => $gatewayCode, 'status' => $cb['status'] ?? null, 'has_authority' => (bool) ($cb['authority'] ?? null), 'ip' => $request->ip()]);
         if (! $cb['authority']) {
             return null;
@@ -180,14 +195,28 @@ final class BillingService
     {
         $order->status = 'VERIFYING';
         $order->save();
+        $this->applyVerification($order, $attempt, $this->askGateway($order, $attempt));
+    }
+
+    /** Server-to-server verify with the stored amount through the adapter that opened the payment. Never throws. */
+    private function askGateway(BillingOrder $order, PaymentAttempt $attempt): array
+    {
         try {
-            $v = $this->gateway->verify($attempt->authority, $attempt->amount_irr);
+            $gateway = $this->gateways->for($attempt->gateway) ?? throw new \RuntimeException("gateway [{$attempt->gateway}] is not registered");
+
+            return $gateway->verify($attempt->authority, $attempt->amount_irr);
         } catch (\Throwable $e) {
             // Network/PSP error: never lose a possibly-paid order; reconcile retries with backoff.
             TechLog::error('payments', 'gateway verify error', ['gateway' => $attempt->gateway, 'order' => $order->public_ref, 'error' => mb_substr($e->getMessage(), 0, 300)]);
-            $v = ['status' => 'UNKNOWN', 'bank_code' => null];
+
+            return ['status' => 'UNKNOWN', 'bank_code' => null];
         }
-        $attempt->bank_code = $v['bank_code'];
+    }
+
+    /** Caller holds row locks on order and attempt. */
+    private function applyVerification(BillingOrder $order, PaymentAttempt $attempt, array $v): void
+    {
+        $attempt->bank_code = $v['bank_code'] ?? null;
         TechLog::info('payments', 'gateway verify', ['gateway' => $attempt->gateway, 'order' => $order->public_ref, 'status' => $v['status'], 'bank_code' => $v['bank_code'] ?? null]);
         if ($v['status'] === 'UNKNOWN') {
             $order->status = 'PENDING_VERIFICATION';
@@ -318,18 +347,30 @@ final class BillingService
                     $done['reconciled']++;
                 });
             });
-        BillingOrder::withoutGlobalScope('tenant')->where('status', 'AWAITING_PAYMENT')->where('expires_at', '<', now())->orderBy('id')->limit(500)->get()
+        BillingOrder::withoutGlobalScope('tenant')->where('status', 'AWAITING_PAYMENT')->where('expires_at', '<', now())->orderBy('id')->limit(100)->get()
             ->each(function (BillingOrder $o) use (&$done) {
-                // If the bank already called back, ask the gateway before giving up on the order.
-                $attempt = PaymentAttempt::query()->where('order_id', $o->id)->latest('id')->first();
-                if ($attempt && $attempt->callback_at) {
-                    $attempt->update(['status' => 'PENDING_VERIFICATION', 'next_reconcile_at' => now()]);
-                    $o->update(['status' => 'PENDING_VERIFICATION']);
+                DB::transaction(function () use ($o, &$done) {
+                    $order = BillingOrder::withoutGlobalScope('tenant')->whereKey($o->id)->lockForUpdate()->first();
+                    if ($order->status !== 'AWAITING_PAYMENT') {
+                        return;
+                    }
+                    $attempt = PaymentAttempt::query()->where('order_id', $order->id)->latest('id')->lockForUpdate()->first();
+                    // If the bank already called back, or the payer may have paid and closed the browser before
+                    // returning, ask the PSP before giving up on the order (verify is idempotent and amount-checked).
+                    if ($attempt && $order->expires_at->gt(now()->subHours(config('talata.payments.reconcile_max_hours')))) {
+                        $v = $this->askGateway($order, $attempt);
+                        if ($v['status'] === 'OK' || $v['status'] === 'UNKNOWN' || $attempt->callback_at) {
+                            $order->status = 'VERIFYING';
+                            $this->applyVerification($order, $attempt, $v);
+                            $done['reconciled']++;
 
-                    return;
-                }
-                $o->update(['status' => 'EXPIRED', 'failure_code' => 'EXPIRED', 'failure_message' => self::BANK_CODES_FA['EXPIRED']]);
-                $done['expired']++;
+                            return;
+                        }
+                        $attempt->update(['status' => 'FAILED', 'bank_code' => $v['bank_code'] ?? null]);
+                    }
+                    $order->update(['status' => 'EXPIRED', 'failure_code' => 'EXPIRED', 'failure_message' => self::BANK_CODES_FA['EXPIRED']]);
+                    $done['expired']++;
+                });
             });
 
         return $done;
