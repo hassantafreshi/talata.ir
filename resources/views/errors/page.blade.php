@@ -23,12 +23,20 @@
 <main class="main stack">
     <section class="hero stack-sm">
         <span class="badge {{ $status >= 500 ? 'err' : 'warn' }}">{{ fa($status) }}</span>
-        <h2>{{ $titles[$status] ?? 'خطا' }}</h2>
+        <h1 class="h2">{{ $titles[$status] ?? 'خطا' }}</h1>
         {{-- A Persian message given to abort() is shown; framework (English) messages never are. --}}
         @php($given = isset($exception) && preg_match('/\p{Arabic}/u', (string) $exception->getMessage()) ? $exception->getMessage() : null)
         <p class="meta">{{ $message ?? $given ?? ($defaults[$status] ?? $defaults[500]) }}</p>
+        {{-- The same id as the technical log entry: support finds the exact request from it. --}}
+        @php($ref = \Illuminate\Support\Facades\Context::get('request_id'))
+        @if ($ref && $status >= 500)<p class="xs">کد پیگیری برای پشتیبانی: <bdi class="mono" dir="ltr">{{ $ref }}</bdi></p>@endif
     </section>
-    <a class="btn btn-gold block" href="{{ url('/') }}">بازگشت به صفحه اصلی</a>
+    @if (in_array($status, [419, 429, 500, 502, 503, 504], true))
+        <a class="btn btn-gold block" href="{{ url()->current() }}">تلاش دوباره</a>
+        <a class="btn btn-line block" href="{{ url('/') }}">بازگشت به صفحه اصلی</a>
+    @else
+        <a class="btn btn-gold block" href="{{ url('/') }}">بازگشت به صفحه اصلی</a>
+    @endif
 </main>
 </body>
 </html>

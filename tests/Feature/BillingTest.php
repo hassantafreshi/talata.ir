@@ -64,6 +64,21 @@ class BillingTest extends TestCase
         $this->get('/settings/appearance')->assertOk()->assertDontSee('در پلن رایگان قالب ثابت');
     }
 
+    public function test_plans_page_points_at_an_unresolved_payment_before_a_second_one(): void
+    {
+        $user = $this->merchant();
+        $this->actingAs($user)->get('/settings/plan')->assertOk()->assertDontSee('هنوز قطعی نشده');
+        $res = $this->order($user, ['product' => 'PLAN', 'plan' => 'basic', 'period' => 'yearly'])->assertCreated();
+        $order = BillingOrder::withoutGlobalScope('tenant')->where('public_id', $res->json('order_id'))->first();
+        $page = $this->actingAs($user)->get('/settings/plan')->assertOk()->assertSee('هنوز قطعی نشده')->assertSee($order->public_ref)->assertSee('معادل ماهی');
+        // The link opens the server-side result page for that order.
+        preg_match('#href="([^"]*/pay/result/[^"]+)"#', $page->getContent(), $m);
+        $this->get(html_entity_decode($m[1]))->assertOk();
+        // Once final, the banner is gone.
+        $this->pay($res->json('redirect.url'), 'success');
+        $this->actingAs($user)->get('/settings/plan')->assertOk()->assertDontSee('هنوز قطعی نشده');
+    }
+
     public function test_plan_change_carries_remaining_time_by_value_not_day_for_day(): void
     {
         $user = $this->merchant();

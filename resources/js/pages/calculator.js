@@ -54,6 +54,15 @@ export default function () {
 
   form.addEventListener('input', compute);
   form.addEventListener('submit', (e) => e.preventDefault());
+  // «پاک‌کردن»: back to an empty piece at today's market rate (nothing is stored anywhere).
+  document.querySelector('[data-clear]')?.addEventListener('click', () => {
+    form.reset();
+    form.querySelectorAll('[data-p]').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.p === '750')));
+    form.querySelector('[data-purity-custom]').classList.add('hidden');
+    form.purity.value = '750';
+    compute();
+    form.weight.focus();
+  });
   form.querySelector('[data-purity]').addEventListener('click', (e) => {
     const chip = e.target.closest('[data-p]');
     if (!chip) return;

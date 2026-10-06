@@ -35,7 +35,7 @@ Status (2026-10-06): merchant web app and service admin console v1 implemented i
 
 ## Implementation progress (2026-10-06)
 
-Evidence: `php artisan test` (91 tests on PostgreSQL), `npm run test:js`, Playwright mobile journey with screenshots in `docs/screenshots/app/`. Security controls and fixed findings: `docs/SECURITY.md`. Frontend decision: `docs/adr/0001-blade-ajax-frontend.md`.
+Evidence: `php artisan test` (149 tests on PostgreSQL), `npm run test:js`, Playwright mobile journey with screenshots in `docs/screenshots/app/`. Security controls and fixed findings: `docs/SECURITY.md`. Frontend decision: `docs/adr/0001-blade-ajax-frontend.md`.
 
 - [x] Mobile OTP login with proof-of-work, layered limits, global budget, lockout (Passkey not yet).
 - [x] Tenancy fail-closed scope, ULID public ids, per-route permissions, member removal kills sessions.
@@ -60,7 +60,9 @@ Evidence: `php artisan test` (91 tests on PostgreSQL), `npm run test:js`, Playwr
 - [x] Affiliate program (docs/AFFILIATE_PROGRAM.md): admin enrolment per mobile, code + referral link, buyer discount, % commission first-payment or lifetime, hold → payable → paid, masked affiliate panel.
 - [x] Real PSP adapter: ZarinPal v4 (`ZarinpalGateway`) behind a PSP registry — switching PSP is one class + one config line; in-flight payments stay with their own gateway; payer-never-returned recovery; faked-HTTP tests. Live sandbox/production payment not yet performed (official docs host blocked from the build environment).
 - [x] Rest of the service admin console (manual tenant actions, SMS/payment operations, quotes, tax rules, staff, system health) — tests in `tests/Feature/AdminOpsTest.php`, screenshots 53–64.
-- [ ] Field performance measurement on throttled networks (bundle sizes measured only at build time).
+- [x] UI review pass (P1/P2 and cheap P3): composer keeps unsaved edits on the device and blocks review until saved, persistent unknown-issuance retry, QR panel + verify link, CSS-only public invoice/verify pages, inline load/order errors with retry, 44px touch targets and focus rings, Persian validation messages, error pages with a reference code, calculator «پاک‌کردن», remembered dashboard range, SMS packs default to 200k (or the plan minimum) with «≈ N پیامک» and an exact «پرداخت … تومان» button, yearly plans show the monthly equivalent and saving, confirmation sheet before the bank, banner for an unresolved earlier payment. Browser-checked at 360px (screenshots 65–69).
+- [ ] Field performance measurement on throttled networks. Lab only so far (Playwright throttling against the dev server without gzip — not production): login 1.4 s / calculator 1.5 s / public invoice 1.8 s on profile A, login 4.6 s / public invoice 5.5 s on profile B; gzip sizes app.js 4 KB, CSS 7.3 KB, fonts 78.9 KiB. Must be re-measured on the production host with retained traces.
+- [ ] Not built yet: login-number change (M-23), passkey offer right after first login, invoice-list filters «اقساطی»/«این ماه», customer balance filters, quota sheet that adapts to what triggered it.
 - [ ] Independent penetration test and owner approval of visual direction.
 
 ## M0 — Foundations

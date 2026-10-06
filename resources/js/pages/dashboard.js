@@ -145,4 +145,10 @@ export default function () {
   let resizeTimer;
   window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(draw, 150); });
   tiles(); draw();
+  // Reopen on the range used last time on this device (if this plan offers it).
+  try {
+    const last = localStorage.getItem('dash:range');
+    const b = last && last !== report.range && last !== 'custom' && document.querySelector(`button[data-range="${CSS.escape(last)}"]`);
+    if (b) b.click();
+  } catch {}
 }

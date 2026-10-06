@@ -1,6 +1,5 @@
 import '../css/app.css';
 import { toast } from './lib/ui.js';
-import { toLatin } from './lib/digits.js';
 
 // Lazy page modules: each page loads only its own code (weak-network budget).
 const pages = import.meta.glob('./pages/*.js');
@@ -12,14 +11,6 @@ function offlineBanner() {
   window.addEventListener('online', () => { sync(); toast('اتصال برقرار شد.'); });
   window.addEventListener('offline', sync);
   sync();
-}
-
-function digitNormalizer() {
-  // Inputs marked data-digits accept Persian/Arabic digits; normalize on blur for the server.
-  document.addEventListener('blur', (e) => {
-    const t = e.target;
-    if (t instanceof HTMLInputElement && t.hasAttribute('data-digits')) t.value = toLatin(t.value) ? t.value : t.value;
-  }, true);
 }
 
 function confirmLinks() {
@@ -36,7 +27,6 @@ function flash() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   offlineBanner();
-  digitNormalizer();
   confirmLinks();
   // Date picker code loads only on pages that have a date field.
   if (document.querySelector('[data-jdp]')) import('./lib/datepicker.js').then((m) => m.initDatePickers());

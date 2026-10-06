@@ -41,6 +41,10 @@
             @if ($canInvoice)
                 <button type="button" class="btn btn-gold block" data-to-invoice disabled data-busy-text="در حال ساخت پیش‌نویس…">ساخت فاکتور با همین اعداد</button>
             @endif
+            <div class="grid-2">
+                <button type="button" class="btn btn-line block" data-clear>پاک‌کردن</button>
+                @if ($tenantContext->membership()?->can('mazneh.view'))<a class="btn btn-line block" href="{{ route('mazneh') }}">مظنه کامل</a>@endif
+            </div>
         </section>
     </div>
 </x-layouts.app>

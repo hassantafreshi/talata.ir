@@ -1,5 +1,5 @@
 import { post, idempotencyKey } from '../lib/http.js';
-import { busy, toast } from '../lib/ui.js';
+import { busy, toast, sheet } from '../lib/ui.js';
 import { toman } from '../lib/digits.js';
 
 // Display only: the server prices every order from its own pricing version.
@@ -77,9 +77,25 @@ export default function () {
   dForm?.addEventListener('submit', (e) => { e.preventDefault(); applyCode(dForm.discount_code.value.trim()); });
   if (dForm && dForm.discount_code.value.trim()) applyCode(dForm.discount_code.value.trim(), true);
 
-  document.querySelectorAll('[data-buy-plan]').forEach((btn) => btn.addEventListener('click', () => order({
-    product: 'PLAN', plan: btn.dataset.buyPlan, period: btn.dataset.periodBtn, discount_code: appliedCode || null,
-  }, btn)));
+  // One calm confirmation before leaving for the bank: which plan, which period, the exact payable amount.
+  function confirmPlan(btn) {
+    const card = btn.closest('.plan-card');
+    const block = btn.closest('[data-period]');
+    const { sheet: el } = sheet(`
+      <h2 class="h3" data-t></h2>
+      <dl class="kv"><div><dt>دوره</dt><dd data-p></dd></div><div><dt><strong>قابل پرداخت</strong></dt><dd class="num"><strong data-a></strong> تومان</dd></div></dl>
+      <p class="small muted">با «رفتن به درگاه» صفحه بانک باز می‌شود. پس از پرداخت، خودکار به زرلیو برمی‌گردید و نتیجه را می‌بینید.</p>
+      <div class="stack-sm"><button type="button" class="btn btn-gold block" data-go data-busy-text="انتقال به درگاه…">رفتن به درگاه پرداخت</button>
+      <button type="button" class="btn btn-line block" data-close>انصراف</button></div>`, { label: 'تأیید خرید پلن' });
+    el.querySelector('[data-t]').textContent = `خرید پلن ${card.querySelector('h2').textContent.trim()}`;
+    el.querySelector('[data-p]').textContent = btn.dataset.periodBtn === 'yearly' ? 'سالانه (۱۲ ماه)' : 'ماهانه';
+    el.querySelector('[data-a]').textContent = block.querySelector('[data-f="total"]').textContent.trim();
+    const go = el.querySelector('[data-go]');
+    // On failure the sheet stays open with the reason under the button (order() adds it).
+    go.addEventListener('click', () => order({ product: 'PLAN', plan: btn.dataset.buyPlan, period: btn.dataset.periodBtn, discount_code: appliedCode || null }, go));
+    go.focus();
+  }
+  document.querySelectorAll('[data-buy-plan]').forEach((btn) => btn.addEventListener('click', () => confirmPlan(btn)));
 
   // SMS credit page
   const form = document.querySelector('[data-sms-form]');
@@ -92,6 +108,9 @@ export default function () {
     form.querySelector('[data-vat]').textContent = `${toman(vat.toString())} تومان`;
     form.querySelector('[data-total]').textContent = `${toman((sub + vat).toString())} تومان`;
     form.querySelector('[data-count]').textContent = `${(toma / BigInt(boot.per_segment_toman)).toLocaleString('fa-IR')} پیامک یک‌بخشی`;
+    // The button says exactly what will be charged, VAT included.
+    const pay = form.querySelector('[data-pay-label]');
+    if (pay && !pay.disabled) pay.textContent = `پرداخت ${toman((sub + vat).toString())} تومان`;
   };
   form.addEventListener('change', draw);
   form.addEventListener('submit', (e) => {

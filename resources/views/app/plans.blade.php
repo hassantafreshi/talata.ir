@@ -2,6 +2,12 @@
     @php($bootData = ['vat' => $vat])
     <script type="application/json" id="boot">@json($bootData)</script>
     @if ($mock)<div class="notice warn">حالت آزمایشی: درگاه پرداخت واقعی هنوز انتخاب نشده و پرداخت‌ها شبیه‌سازی می‌شوند.</div>@endif
+    @if ($pendingOrder)
+        <div class="notice warn between">
+            <span>نتیجه پرداخت قبلی شما (کد <span class="num ltr">{{ $pendingOrder->public_ref }}</span>) هنوز قطعی نشده است. پیش از پرداخت دوباره، وضعیت آن را ببینید.</span>
+            <a class="btn sm btn-dark" href="{{ $pendingUrl }}">دیدن وضعیت</a>
+        </div>
+    @endif
     <p class="small">پلن فعلی: <strong>{{ $summary['plan']['label_fa'] }}</strong>@if($summary['plan']['ends_at_fa']) · تا {{ $summary['plan']['ends_at_fa'] }}@endif</p>
     @if ($canBuy)
         <form method="post" class="band stack-sm" data-discount-form novalidate>
@@ -26,6 +32,11 @@
                     @foreach (['monthly', 'yearly'] as $period)
                         <div class="stack-sm" data-period="{{ $period }}" data-plan="{{ $code }}" @if($period === 'yearly') hidden @endif>
                             <div><strong class="price-sm num">{{ toman($p['prices'][$period]['subtotal']) }}</strong> <span class="small">تومان {{ $period === 'monthly' ? 'در ماه' : 'در سال' }}</span></div>
+                            @if ($period === 'yearly' && (int) $p['prices']['monthly']['subtotal'] > 0)
+                                @php($perMonth = intdiv((int) $p['prices']['yearly']['subtotal'], 12))
+                                @php($saving = (int) $p['prices']['monthly']['subtotal'] * 12 - (int) $p['prices']['yearly']['subtotal'])
+                                <p class="xs">معادل ماهی <span class="num">{{ toman((string) $perMonth) }}</span> تومان@if($saving > 0) · <strong>{{ toman((string) $saving) }} تومان</strong> کمتر از ۱۲ ماه پرداخت ماهانه@endif</p>
+                            @endif
                             <dl class="kv small">
                                 <div><dt>مبلغ پلن</dt><dd class="num" data-f="list">{{ toman($p['prices'][$period]['subtotal']) }}</dd></div>
                                 <div class="hidden" data-discount-row><dt>تخفیف</dt><dd class="num" data-f="discount"></dd></div>
