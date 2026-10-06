@@ -81,6 +81,13 @@
 @media print {
   /* Real page margins: with margin 0, page 2+ of a long invoice printed flush to the paper edge. */
   @page { size: A4 portrait; margin: 12mm 12mm 10mm; }
+  /* Layout editor «چاپ» settings, via named pages (no inline styles under the CSP). */
+  @page narrow { size: A4 portrait; margin: 6mm; }
+  @page land { size: A4 landscape; margin: 12mm 12mm 10mm; }
+  @page land-narrow { size: A4 landscape; margin: 6mm; }
+  .inv.pm-narrow { page: narrow; }
+  .inv.po-landscape { page: land; }
+  .inv.po-landscape.pm-narrow { page: land-narrow; }
   .print-page { background: #fff; }
   .print-tools { display: none !important; }
   .inv { margin: 0; width: auto; min-height: 0; box-shadow: none; padding: 0; }

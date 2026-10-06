@@ -22,7 +22,8 @@
     $numeric = ['row_no', 'weight_g', 'weight_750', 'unit_rate', 'wage', 'profit', 'vat', 'amount'];
     $cols = $v['columns'];
     $t = $L['typography'] ?? [];
-    $classes = 'inv t-'.($t['text_size'] ?? 'normal').' d-'.($t['density'] ?? 'comfortable').' a-'.($t['accent'] ?? 'ink').(($t['dividers'] ?? true) ? '' : ' no-div');
+    $classes = 'inv t-'.($t['text_size'] ?? 'normal').' d-'.($t['density'] ?? 'comfortable').' a-'.($t['accent'] ?? 'ink').(($t['dividers'] ?? true) ? '' : ' no-div')
+        .' pm-'.(($L['print']['margins'] ?? 'normal') === 'narrow' ? 'narrow' : 'normal').' po-'.(($L['print']['orientation'] ?? 'portrait') === 'landscape' ? 'landscape' : 'portrait');
     $isDraft = ($v['status'] ?? '') === 'draft';
 @endphp
 <article class="{{ $classes }}" aria-label="فاکتور فروش {{ $v['number'] }}">

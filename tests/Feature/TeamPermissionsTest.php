@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Domain\Identity\LoginService;
 use App\Domain\Market\QuoteService;
+use App\Models\Invoice;
 use App\Models\Membership;
 use App\Models\PricingVersion;
 use App\Models\Subscription;
@@ -148,5 +149,35 @@ class TeamPermissionsTest extends TestCase
         $this->actingAs($owner)->api('PUT', "/api/users/{$m->id}", ['permissions' => ['invoice.void']])->assertOk();
         $this->assertSame(['invoices.view', 'invoice.void'], $m->fresh()->permissions);
         $this->actingAs($seller)->get("/invoices/{$ownerInvoice}")->assertOk();
+    }
+
+    public function test_invoice_layout_order_and_print_settings_reach_the_printed_invoice_and_need_settings_rights(): void
+    {
+        $owner = $this->merchant('basic');
+        $this->actingAs($owner);
+        $page = $this->get('/settings/appearance')->assertOk();
+        preg_match('/<script type="application\/json" id="boot">(.*?)<\/script>/s', $page->getContent(), $m);
+        $boot = json_decode(html_entity_decode($m[1]), true);
+        $settings = $boot['settings'];
+        // Move «نشانی» to the top of the list and print on landscape paper with narrow margins.
+        $address = collect($settings['blocks'])->firstWhere('kind', 'address');
+        $settings['blocks'] = array_values(array_merge([$address], array_filter($settings['blocks'], fn ($b) => $b['kind'] !== 'address')));
+        $settings['print'] = ['orientation' => 'landscape', 'margins' => 'narrow'];
+        $this->api('PUT', '/api/settings/appearance', ['settings' => $settings, 'version' => $boot['version']])->assertOk();
+
+        $irr = app(QuoteService::class)->latestDto('Asia/Tehran')['value_irr'];
+        $d = $this->api('POST', '/api/invoices/drafts', ['mode' => 'MARKET', 'value_irr' => $irr])->assertCreated();
+        $sv = $this->api('PUT', '/api/invoices/drafts/'.$d->json('draft_id'), ['version' => $d->json('version'), 'rows' => [['row_uid' => 'r1', 'item_type' => 'GOLD', 'name' => 'انگشتر', 'net_weight_g' => '1', 'purity_ppt' => '750', 'wage_percent' => '0', 'profit_percent' => '0']], 'buyer' => []])->assertOk();
+        $this->api('POST', '/api/invoices/drafts/'.$d->json('draft_id').'/issue', ['mode' => 'ISSUE_ONLY', 'version' => $sv->json('version'), 'idempotency_key' => 'k-layout-order'])->assertCreated();
+        $html = $this->get('/invoices/'.$d->json('draft_id').'/print')->assertOk()->getContent();
+        $this->assertStringContainsString('pm-narrow', $html);
+        $this->assertStringContainsString('po-landscape', $html);
+        $layout = Invoice::where('public_id', $d->json('draft_id'))->value('snapshot')['layout'];
+        $this->assertSame('address', $layout['blocks'][0]['kind'], 'saved order is kept in the snapshot');
+
+        // A teammate restricted to selling cannot change the invoice layout.
+        $seller = $this->inviteAndAccept($owner, '09371110099', ['invoice.issue', 'invoices.view']);
+        $this->actingAs($seller)->api('PUT', '/api/settings/appearance', ['settings' => $settings, 'version' => $boot['version'] + 1])->assertForbidden();
+        $this->get('/settings/appearance')->assertForbidden();
     }
 }

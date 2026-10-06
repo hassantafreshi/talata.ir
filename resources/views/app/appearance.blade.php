@@ -22,7 +22,7 @@
             <fieldset class="band stack-sm" @disabled(! $canCustomize)>
                 <legend class="label">اطلاعات سربرگ و پاورقی</legend>
                 <div class="stack-sm" data-blocks></div>
-                <p class="xs muted">نام فروشگاه، تلفن و نشانی همیشه روی فاکتور می‌آیند. بارکد بررسی اصالت همیشه بالا سمت چپ است.</p>
+                <p class="xs muted">با ▲ و ▼ ترتیب اطلاعات را عوض کنید. نام فروشگاه، تلفن و نشانی همیشه روی فاکتور می‌آیند. بارکد بررسی اصالت همیشه بالا سمت چپ است.</p>
             </fieldset>
             <fieldset class="band stack-sm" @disabled(! $canCustomize || ! $canLogo)>
                 <legend class="label">لوگو</legend>
@@ -48,7 +48,18 @@
                 <div class="seg"><label><input type="radio" name="density" value="comfortable">جادار</label><label><input type="radio" name="density" value="compact">فشرده</label></div>
                 <div class="seg"><label><input type="radio" name="accent" value="ink">سیاه</label><label><input type="radio" name="accent" value="gold_deep">طلایی تیره</label></div>
             </fieldset>
+            <fieldset class="band stack-sm" @disabled(! $canCustomize)>
+                <legend class="label">چاپ</legend>
+                <div class="seg" role="radiogroup" aria-label="جهت کاغذ"><label><input type="radio" name="orientation" value="portrait">کاغذ ایستاده</label><label><input type="radio" name="orientation" value="landscape">کاغذ خوابیده</label></div>
+                <div class="seg" role="radiogroup" aria-label="حاشیه کاغذ"><label><input type="radio" name="margins" value="normal">حاشیه معمولی</label><label><input type="radio" name="margins" value="narrow">حاشیه کم</label></div>
+                <p class="xs muted">اگر چاپگر لبه‌های کاغذ را نمی‌گیرد، «حاشیه معمولی» را نگه دارید.</p>
+            </fieldset>
             @if ($canCustomize)
+                <div class="cluster">
+                    <button type="button" class="btn btn-line sm" data-undo disabled>برگرداندن آخرین تغییر</button>
+                    <button type="button" class="btn btn-line sm" data-cancel disabled>لغو تغییرات</button>
+                    <button type="button" class="btn btn-link sm" data-reset>بازگشت به پیش‌فرض قالب</button>
+                </div>
                 <div class="sticky-bar"><button class="btn btn-gold block" type="submit" data-busy-text="در حال ذخیره…">ذخیره ظاهر فاکتور</button>
                     <p class="xs muted center">فقط فاکتورهای بعدی با ظاهر جدید صادر می‌شوند.</p></div>
             @endif
