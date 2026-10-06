@@ -109,6 +109,11 @@ class LoginController extends Controller
             Cookie::queue(Cookie::forget('talata_ref'));
         }
         $then = $request->session()->pull('login.then');
+        // After an SMS login, offer fingerprint login once — unless they already have a passkey or are
+        // already on their way to set one up. The device-support check and "don't ask again" live client-side.
+        if ($then !== 'passkey' && ! \App\Models\Passkey::query()->where('owner_type', 'user')->where('owner_id', $result['user']->id)->exists()) {
+            $request->session()->flash('offer_passkey', true);
+        }
         $next = match (true) {
             $result['is_new_tenant'] => route('settings.business', ['welcome' => 1]),
             $then === 'passkey' => route('settings').'#passkeys',

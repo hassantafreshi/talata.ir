@@ -48,6 +48,19 @@
 </header>
 <div class="notice off offline-banner" data-offline-banner hidden role="status">اینترنت قطع است. محاسبه و پیش‌نویس کار می‌کند؛ صدور، پیامک و پرداخت پس از اتصال.</div>
 @include('partials.flash')
+@if (session()->pull('offer_passkey'))
+    {{-- Shown once after an SMS login on a device with no passkey yet; JS reveals it only where the device supports fingerprint/face and the person has not dismissed it before. --}}
+    <aside class="notice info passkey-offer hidden" data-passkey-offer hidden>
+        <div class="stack-sm">
+            <strong>ورود سریع‌تر با اثر انگشت؟</strong>
+            <p class="small">دفعه بعد به‌جای کد پیامکی، با اثر انگشت یا چهره همین گوشی وارد شوید. اثر انگشت روی گوشی شما می‌ماند و به زرلیو فرستاده نمی‌شود.</p>
+            <div class="cluster">
+                <button type="button" class="btn btn-gold sm" data-passkey-offer-add data-busy-text="منتظر اثر انگشت…">فعال‌کردن</button>
+                <button type="button" class="btn btn-link sm" data-passkey-offer-dismiss>الان نه</button>
+            </div>
+        </div>
+    </aside>
+@endif
 <main id="main" class="main">
     <h1 class="desktop-only">{{ $title ?? '' }}</h1>
     {{ $slot }}

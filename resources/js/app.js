@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   confirmLinks();
   // Date picker code loads only on pages that have a date field.
   if (document.querySelector('[data-jdp]')) import('./lib/datepicker.js').then((m) => m.initDatePickers());
+  // The post-login fingerprint offer loads only on the page that actually shows the card.
+  if (document.querySelector('[data-passkey-offer]')) import('./lib/passkey-offer.js').then((m) => m.default());
   flash();
   const page = document.body.dataset.page;
   const loader = page && pages[`./pages/${page}.js`];

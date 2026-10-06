@@ -501,3 +501,6 @@ html:has(body[data-page="items"]), html:has(body[data-page="review"]) { scroll-p
 /* Login-number change: two-step indicator in the sheet. */
 .steps { display: flex; gap: 12px; list-style: none; padding: 0; margin: 0 0 4px; color: var(--t-muted); }
 .steps li.on { color: var(--t-ink); font-weight: 600; }
+
+/* Post-login fingerprint offer card. */
+.passkey-offer { margin: 0 0 var(--t-sp-4); }
