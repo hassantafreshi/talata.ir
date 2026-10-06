@@ -43,10 +43,10 @@ class UsersController extends BaseController
         if (Membership::query()->where('tenant_id', $tenantId)->whereIn('status', ['active', 'invited'])->count() >= 10) {
             throw new DomainError('MEMBER_LIMIT', 'حداکثر ۱۰ کاربر برای هر فروشگاه.', 422);
         }
-        $user = User::query()->where('mobile', $mobile)->first();
+        // Always pending: the invited person must accept in their own Settings.
         $m = Membership::create([
-            'tenant_id' => $tenantId, 'user_id' => $user?->id, 'invited_mobile' => $mobile, 'role' => 'member',
-            'permissions' => $this->permissions($data['permissions'] ?? ['invoice.issue']), 'status' => $user ? 'active' : 'invited', 'invited_by' => auth()->id(),
+            'tenant_id' => $tenantId, 'user_id' => null, 'invited_mobile' => $mobile, 'role' => 'member',
+            'permissions' => $this->permissions($data['permissions'] ?? ['invoice.issue']), 'status' => 'invited', 'invited_by' => auth()->id(),
         ]);
         Audit::record('membership.invited', $m, ['mobile_tail' => substr($mobile, -4)]);
 
@@ -78,5 +78,44 @@ class UsersController extends BaseController
         Audit::record('membership.removed', $m);
 
         return response()->json(['ok' => true]);
+    }
+
+    /** Invites addressed to the logged-in user's mobile (any tenant). */
+    private function myInvite(int $membership): Membership
+    {
+        return Membership::query()->whereKey($membership)->where('status', 'invited')->whereNull('user_id')
+            ->where('invited_mobile', auth()->user()->mobile)->firstOrFail();
+    }
+
+    public function accept(Request $request, int $membership)
+    {
+        $m = $this->myInvite($membership);
+        if (Membership::query()->where('tenant_id', $m->tenant_id)->where('user_id', auth()->id())->where('status', 'active')->exists()) {
+            $m->update(['status' => 'removed']);
+
+            return response()->json(['ok' => true]);
+        }
+        $m->update(['user_id' => auth()->id(), 'status' => 'active']);
+        Audit::record('membership.accepted', $m, [], $m->tenant_id, 'user');
+        $request->session()->put('tenant_id', $m->tenant_id);
+
+        return response()->json(['ok' => true, 'next' => route('invoices.new')]);
+    }
+
+    public function decline(int $membership)
+    {
+        $m = $this->myInvite($membership);
+        $m->update(['status' => 'removed']);
+        Audit::record('membership.declined', $m, [], $m->tenant_id, 'user');
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function switchTenant(Request $request, int $membership)
+    {
+        $m = Membership::query()->whereKey($membership)->where('user_id', auth()->id())->where('status', 'active')->firstOrFail();
+        $request->session()->put('tenant_id', $m->tenant_id);
+
+        return response()->json(['ok' => true, 'next' => route('invoices.new')]);
     }
 }

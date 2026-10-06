@@ -127,6 +127,8 @@ return new class extends Migration
             $t->unsignedSmallInteger('count');
             $t->string('frequency', 10);                        // monthly | weekly
             $t->boolean('reminders_enabled')->default(true);
+            // Frozen at creation: reminders go only to the mobile the linked invoice was issued to.
+            $t->string('reminder_mobile', 11)->nullable();
             $t->string('status', 20)->default('active');        // active | completed | cancelled
             $t->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $t->timestamps();

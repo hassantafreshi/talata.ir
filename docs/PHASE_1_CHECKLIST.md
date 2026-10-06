@@ -1,6 +1,6 @@
 # Phase 1 implementation and acceptance checklist
 
-Status (2026-10-06): merchant web app implemented in this repository (Laravel 13 + PostgreSQL, Blade + AJAX); 53 PHP feature/unit tests (565 assertions) and 10 JS parity tests pass locally; visual direction still a proposal awaiting owner approval. Service admin console, Passkey and real SMS/PSP adapters are not built. Check boxes require evidence, not a plan or a mock screenshot.
+Status (2026-10-06): merchant web app implemented in this repository (Laravel 13 + PostgreSQL, Blade + AJAX); 55 PHP feature/unit tests (590 assertions) and 10 JS parity tests pass locally; visual direction still a proposal awaiting owner approval. Service admin console, Passkey and real SMS/PSP adapters are not built. Check boxes require evidence, not a plan or a mock screenshot.
 
 ## Planning state
 
@@ -35,7 +35,7 @@ Status (2026-10-06): merchant web app implemented in this repository (Laravel 13
 
 ## Implementation progress (2026-10-06)
 
-Evidence: `php artisan test` (53 tests on PostgreSQL), `npm run test:js`, Playwright mobile journey with screenshots in `docs/screenshots/app/`. Security controls and fixed findings: `docs/SECURITY.md`. Frontend decision: `docs/adr/0001-blade-ajax-frontend.md`.
+Evidence: `php artisan test` (55 tests on PostgreSQL), `npm run test:js`, Playwright mobile journey with screenshots in `docs/screenshots/app/`. Security controls and fixed findings: `docs/SECURITY.md`. Frontend decision: `docs/adr/0001-blade-ajax-frontend.md`.
 
 - [x] Mobile OTP login with proof-of-work, layered limits, global budget, lockout (Passkey not yet).
 - [x] Tenancy fail-closed scope, ULID public ids, per-route permissions, member removal kills sessions.

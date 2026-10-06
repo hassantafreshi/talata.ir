@@ -167,10 +167,12 @@ class SmsAbuseTest extends TestCase
     {
         $user = $this->merchant('basic');
         $this->actingAs($user);
-        $this->api('PUT', '/api/settings/sms-template', ['template' => 'تخفیف ویژه در www.spam.ir {invoice_link}'])->assertStatus(422)->assertJsonPath('code', 'TEMPLATE_FORBIDDEN_CONTENT');
-        $this->api('PUT', '/api/settings/sms-template', ['template' => 'تماس ۰۹۱۲ ۳۴۵ ۶۷ ۸۹ {invoice_link}'])->assertStatus(422);
-        $this->api('PUT', '/api/settings/sms-template', ['template' => 'بدون لینک فاکتور'])->assertStatus(422)->assertJsonPath('code', 'TEMPLATE_LINK_REQUIRED');
-        $this->api('PUT', '/api/settings/sms-template', ['template' => '{shop_name}: {customer_secret} {invoice_link}'])->assertStatus(422)->assertJsonPath('code', 'TEMPLATE_PLACEHOLDER');
+        $this->api('PUT', '/api/settings/sms-template', ['template' => 'تخفیف ویژه {invoice_number} در www.spam.ir {invoice_link}'])->assertStatus(422)->assertJsonPath('code', 'TEMPLATE_FORBIDDEN_CONTENT');
+        $this->api('PUT', '/api/settings/sms-template', ['template' => 'تماس ۰۹۱۲ ۳۴۵ ۶۷ ۸۹ {invoice_number} {invoice_link}'])->assertStatus(422);
+        $this->api('PUT', '/api/settings/sms-template', ['template' => 'بدون لینک فاکتور {invoice_number}'])->assertStatus(422)->assertJsonPath('code', 'TEMPLATE_LINK_REQUIRED');
+        $this->api('PUT', '/api/settings/sms-template', ['template' => '{shop_name}: {customer_secret} {invoice_number} {invoice_link}'])->assertStatus(422)->assertJsonPath('code', 'TEMPLATE_PLACEHOLDER');
+        $this->api('PUT', '/api/settings/sms-template', ['template' => '{shop_name}: حساب بانکی شما مسدود شد {invoice_number} {invoice_link}'])->assertStatus(422)->assertJsonPath('code', 'TEMPLATE_IMPERSONATION');
+        $this->api('PUT', '/api/settings/sms-template', ['template' => '{shop_name}: تخفیف ویژه {invoice_link}'])->assertStatus(422)->assertJsonPath('code', 'TEMPLATE_NUMBER_REQUIRED');
         $this->api('PUT', '/api/settings/sms-template', ['template' => '{shop_name}: فاکتور {invoice_number} — {invoice_link}'])->assertOk();
         $base = ['business_mobile' => '09121112233', 'address' => 'تهران'];
         $this->api('POST', '/api/settings/business', ['name' => 'طلا t.me/spam'] + $base)->assertStatus(422);
@@ -187,8 +189,19 @@ class SmsAbuseTest extends TestCase
         $user = $this->merchant('professional');
         $this->credit($user, 100000);
         $this->actingAs($user);
-        $cid = $this->api('POST', '/api/customers', ['name' => 'رضا', 'mobile' => '09351234500'])->assertCreated()->json('id');
-        $this->api('POST', "/api/customers/{$cid}/agreements", ['principal_toman' => '3000000', 'count' => 3, 'frequency' => 'weekly', 'first_due' => jymd(now()->addDays(2)), 'reminders' => true])->assertCreated();
+        // Reminders need an invoice issued to the customer's own mobile.
+        $rate = app(QuoteService::class)->latestDto('Asia/Tehran')['value_irr'];
+        $d = $this->api('POST', '/api/invoices/drafts', ['mode' => 'MARKET', 'value_irr' => $rate]);
+        $s = $this->api('PUT', '/api/invoices/drafts/'.$d->json('draft_id'), ['version' => $d->json('version'), 'rows' => [['row_uid' => 'r1', 'item_type' => 'GOLD', 'name' => 'النگو', 'net_weight_g' => '1', 'purity_ppt' => '750']], 'buyer' => ['name' => 'رضا', 'mobile' => '09351234500']]);
+        $this->api('POST', '/api/invoices/drafts/'.$d->json('draft_id').'/issue', ['mode' => 'ISSUE_ONLY', 'version' => $s->json('version'), 'idempotency_key' => 'k-rem-0001', 'buyer' => ['name' => 'رضا', 'mobile' => '09351234500'], 'save_customer' => true])->assertCreated();
+        $cid = Customer::withoutGlobalScope('tenant')->value('public_id');
+        $inv = $d->json('draft_id');
+        // Manual amount (no invoice) or a past first due date cannot carry SMS reminders.
+        $this->api('POST', "/api/customers/{$cid}/agreements", ['principal_toman' => '3000000', 'count' => 3, 'frequency' => 'weekly', 'first_due' => jymd(now()->addDays(2)), 'reminders' => true])->assertStatus(422)->assertJsonStructure(['errors' => ['reminders']]);
+        $this->api('POST', "/api/customers/{$cid}/agreements", ['invoice_id' => $inv, 'count' => 3, 'frequency' => 'weekly', 'first_due' => jymd(now()->subDays(20)), 'reminders' => true])->assertStatus(422)->assertJsonStructure(['errors' => ['first_due']]);
+        $this->api('POST', "/api/customers/{$cid}/agreements", ['invoice_id' => $inv, 'count' => 3, 'frequency' => 'weekly', 'first_due' => jymd(now()->addDays(2)), 'reminders' => true])->assertCreated();
+        // The customer's mobile is now locked, so reminders cannot be redirected to another number.
+        $this->api('PUT', "/api/customers/{$cid}", ['name' => 'رضا', 'mobile' => '09359999999'])->assertStatus(422)->assertJsonPath('code', 'MOBILE_LOCKED');
         $service = app(InstallmentService::class);
         $sms = app(SmsService::class);
         for ($day = 0; $day < 45; $day++) {

@@ -30,9 +30,15 @@ final class SmsTemplate
                 throw new DomainError('TEMPLATE_PLACEHOLDER', "عبارت {$placeholder} مجاز نیست.");
             }
         }
+        if (substr_count($template, '{invoice_number}') < 1) {
+            throw new DomainError('TEMPLATE_NUMBER_REQUIRED', 'متن باید شماره فاکتور {invoice_number} را داشته باشد تا پیامک فقط اطلاع‌رسانی همان فاکتور باشد.');
+        }
         $plain = str_replace(self::PLACEHOLDERS, '', $template);
         if (self::containsLinkOrPhone($plain)) {
             throw new DomainError('TEMPLATE_FORBIDDEN_CONTENT', 'در متن پیامک لینک یا شماره تلفن دیگری مجاز نیست.');
+        }
+        if (self::looksLikeImpersonation($plain)) {
+            throw new DomainError('TEMPLATE_IMPERSONATION', 'متن پیامک نباید شبیه پیام بانک، سامانه دولتی، جایزه یا کد تأیید باشد.');
         }
 
         return $template;

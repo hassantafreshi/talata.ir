@@ -50,7 +50,7 @@ class PagesTest extends TestCase
         $preview = $this->api('POST', "/api/customers/{$id}/agreements", ['principal_toman' => '10000000', 'down_payment_toman' => '1000000', 'count' => 3, 'frequency' => 'monthly', 'first_due' => $first, 'preview' => true])->assertOk();
         $this->assertTrue($preview->json('ok'));
         $this->assertCount(3, $preview->json('lines'));
-        $this->api('POST', "/api/customers/{$id}/agreements", ['principal_toman' => '10000000', 'down_payment_toman' => '1000000', 'count' => 3, 'frequency' => 'monthly', 'first_due' => $first, 'reminders' => true])->assertCreated();
+        $this->api('POST', "/api/customers/{$id}/agreements", ['principal_toman' => '10000000', 'down_payment_toman' => '1000000', 'count' => 3, 'frequency' => 'monthly', 'first_due' => $first])->assertCreated();
         $agreement = InstallmentAgreement::withoutGlobalScope('tenant')->first();
         $key = 'pay-'.bin2hex(random_bytes(6));
         $this->api('POST', "/api/agreements/{$agreement->public_id}/payments", ['amount_toman' => '3000000', 'method' => 'cash', 'paid_on' => jymd(), 'idempotency_key' => $key])->assertOk();

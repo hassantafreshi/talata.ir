@@ -195,6 +195,10 @@ final class SmsService
             if ($tenantDay >= ($cfg['tenant_daily_cap'][$planCode] ?? 0) || $tenantHour >= $cfg['tenant_hourly_cap'] || $recipientToday >= $cfg['per_recipient_per_tenant_daily']) {
                 return null; // retried on a later run; the key stays unused
             }
+            $recipientMonth = SmsMessage::query()->where('purpose', 'REMINDER')->where('recipient', $recipient)->where('created_at', '>=', now()->subDays(30))->where($attempted)->count();
+            if ($recipientMonth >= $cfg['reminders_per_recipient_monthly']) {
+                return null; // across all shops: a number cannot be flooded with reminders
+            }
             $segments = Segments::count($body);
             $cost = (string) BigInteger::of($this->entitlements->smsPerSegmentIrr($tenant))->multipliedBy($segments);
             $message = SmsMessage::create([

@@ -25,6 +25,12 @@ export default function () {
   function syncSource() {
     const src = form.source.value;
     form.querySelectorAll('[data-src]').forEach((el) => el.classList.toggle('hidden', el.dataset.src !== src));
+    // Reminders are allowed only for an invoice issued to this customer's mobile (server enforces too).
+    const option = form.invoice_id?.selectedOptions?.[0];
+    const eligible = src === 'invoice' && option?.dataset.remind === '1';
+    form.reminders.disabled = !eligible;
+    if (!eligible) form.reminders.checked = false;
+    document.querySelector('[data-remind-hint]').hidden = eligible;
   }
 
   async function preview() {
@@ -52,4 +58,5 @@ export default function () {
     if (res.errors) fieldErrors(form, res.errors); else toast(res.message, { kind: 'error', timeout: 8000 });
   });
   syncSource();
+  if (!form.reminders.disabled) form.reminders.checked = true;
 }

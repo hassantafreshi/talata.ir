@@ -39,6 +39,31 @@
         @endif
     </nav>
 
+    @if ($invites->isNotEmpty())
+        <section class="band stack-sm" aria-labelledby="inv-h">
+            <h2 id="inv-h">دعوت به فروشگاه</h2>
+            <p class="small muted">فقط دعوت فروشگاه‌هایی را بپذیرید که می‌شناسید. پس از پذیرش، هرچه در آن فروشگاه ثبت کنید متعلق به همان فروشگاه است.</p>
+            <ul class="list">
+                @foreach ($invites as $i)
+                    <li class="list-item"><span class="body"><strong>{{ $i->tenant->profile?->name ?: 'فروشگاه بدون نام' }}</strong></span>
+                        <button type="button" class="btn btn-gold sm" data-invite-accept="{{ $i->id }}">پذیرش</button>
+                        <button type="button" class="btn btn-link sm" data-invite-decline="{{ $i->id }}">رد</button></li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
+    @if ($shops->count() > 1)
+        <section class="band stack-sm" aria-labelledby="shops-h">
+            <h2 id="shops-h">فروشگاه‌های شما</h2>
+            <ul class="list">
+                @foreach ($shops as $s)
+                    <li class="list-item"><span class="body"><strong>{{ $s->tenant->profile?->name ?: 'فروشگاه بدون نام' }}</strong><span class="sub">{{ $s->isOwner() ? 'مالک' : 'همکار' }}</span></span>
+                        @if ($s->id === $membership->id)<span class="badge ok">فعلی</span>@else<button type="button" class="btn btn-line sm" data-switch="{{ $s->id }}">ورود به این فروشگاه</button>@endif</li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
+
     <section class="band stack-sm">
         <p class="small">وارد شده با <span class="num ltr">{{ \App\Support\Mobile::display($user->mobile) }}</span></p>
         <form method="post" action="{{ route('logout') }}">@csrf<button class="btn btn-line block" type="submit">خروج از حساب</button></form>

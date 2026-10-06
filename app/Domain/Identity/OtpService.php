@@ -6,6 +6,7 @@ use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Domain\Sms\SmsService;
 use App\Models\OtpChallenge;
+use App\Models\User;
 use App\Support\Digits;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -26,42 +27,46 @@ final class OtpService
     {
         $cfg = config('talata.otp');
 
-        if (Cache::get('otp:lock:'.$mobile)) {
-            throw new DomainError('OTP_LOCKED', 'به‌خاطر تلاش‌های ناموفق، ورود این شماره چند دقیقه قفل شد. کمی بعد دوباره امتحان کنید.', 429);
-        }
-
-        $last = OtpChallenge::query()->where('mobile', $mobile)->latest('created_at')->first();
-        if ($last && $last->created_at->gt(now()->subSeconds($cfg['resend_cooldown_seconds']))) {
-            $wait = $cfg['resend_cooldown_seconds'] - $last->created_at->diffInSeconds(now());
-
-            throw new DomainError('OTP_COOLDOWN', 'کد قبلی تازه فرستاده شده است. '.Digits::toPersian((string) max(1, (int) $wait)).' ثانیه دیگر دوباره امتحان کنید.', 429, ['retry_after_seconds' => (int) max(1, $wait)]);
-        }
-
-        $checks = [
-            ['otp:m:h:'.$mobile, $cfg['per_mobile_hour'], 3600],
-            ['otp:m:d:'.$mobile, $cfg['per_mobile_day'], 86400],
-            ['otp:ip:h:'.$ip, $cfg['per_ip_hour'], 3600],
-            ['otp:net:h:'.self::subnet($ip), $cfg['per_subnet_hour'], 3600],
-        ];
-        foreach ($checks as [$key, $max]) {
-            if (RateLimiter::tooManyAttempts($key, $max)) {
-                throw new DomainError('OTP_RATE_LIMITED', 'تعداد درخواست کد زیاد شد. '.Digits::toPersian((string) max(1, (int) ceil(RateLimiter::availableIn($key) / 60))).' دقیقه دیگر دوباره امتحان کنید.', 429);
-            }
-        }
-
-        $budgetKey = 'otp:budget:'.now()->format('Ymd');
-        Cache::add($budgetKey, 0, 90000);
-        if (Cache::increment($budgetKey) > $cfg['global_daily_budget']) {
-            Log::critical('OTP global daily budget exhausted', ['budget' => $cfg['global_daily_budget']]);
-
-            throw new DomainError('OTP_BUDGET', 'ارسال کد موقتاً ممکن نیست. چند دقیقه دیگر دوباره امتحان کنید.', 503);
-        }
-        foreach ($checks as [$key, , $decay]) {
-            RateLimiter::hit($key, $decay);
-        }
-
         $code = str_pad((string) random_int(0, 10 ** $cfg['length'] - 1), $cfg['length'], '0', STR_PAD_LEFT);
-        $challenge = DB::transaction(function () use ($mobile, $ip, $code, $cfg) {
+
+        // Serialize per mobile so parallel requests cannot all pass the cooldown, and count
+        // hit-first (atomic increment) so parallel requests cannot all pass the rate limits.
+        // Rejections are returned, not thrown, so the counted attempts are committed.
+        $result = DB::transaction(function () use ($mobile, $ip, $code, $cfg) {
+            DB::select('SELECT pg_advisory_xact_lock(hashtext(?))', ['otp:'.$mobile]);
+
+            if (Cache::get('otp:lock:'.$mobile)) {
+                return new DomainError('OTP_LOCKED', 'به‌خاطر تلاش‌های ناموفق، ورود این شماره چند دقیقه قفل شد. کمی بعد دوباره امتحان کنید.', 429);
+            }
+            $last = OtpChallenge::query()->where('mobile', $mobile)->latest('created_at')->first();
+            if ($last && $last->created_at->gt(now()->subSeconds($cfg['resend_cooldown_seconds']))) {
+                $wait = (int) max(1, $cfg['resend_cooldown_seconds'] - $last->created_at->diffInSeconds(now()));
+
+                return new DomainError('OTP_COOLDOWN', 'کد قبلی تازه فرستاده شده است. '.Digits::toPersian((string) $wait).' ثانیه دیگر دوباره امتحان کنید.', 429, ['retry_after_seconds' => $wait]);
+            }
+            $checks = [
+                ['otp:m:h:'.$mobile, $cfg['per_mobile_hour'], 3600],
+                ['otp:m:d:'.$mobile, $cfg['per_mobile_day'], 86400],
+                ['otp:ip:h:'.$ip, $cfg['per_ip_hour'], 3600],
+                ['otp:net:h:'.self::subnet($ip), $cfg['per_subnet_hour'], 3600],
+            ];
+            foreach ($checks as [$key, $max, $decay]) {
+                if (RateLimiter::hit($key, $decay) > $max) {
+                    return new DomainError('OTP_RATE_LIMITED', 'تعداد درخواست کد زیاد شد. '.Digits::toPersian((string) max(1, (int) ceil(RateLimiter::availableIn($key) / 60))).' دقیقه دیگر دوباره امتحان کنید.', 429);
+                }
+            }
+
+            // Existing users have their own reserved budget so a flood of new numbers cannot lock shops out.
+            $existing = User::query()->where('mobile', $mobile)->exists();
+            $budget = $existing ? $cfg['existing_users_daily_budget'] : $cfg['global_daily_budget'];
+            $budgetKey = 'otp:budget:'.($existing ? 'existing:' : 'new:').now()->format('Ymd');
+            Cache::add($budgetKey, 0, 90000);
+            if (Cache::increment($budgetKey) > $budget) {
+                Log::critical('OTP daily budget exhausted', ['pool' => $existing ? 'existing' : 'new', 'budget' => $budget]);
+
+                return new DomainError('OTP_BUDGET', 'ارسال کد موقتاً ممکن نیست. چند دقیقه دیگر دوباره امتحان کنید.', 503);
+            }
+
             OtpChallenge::query()->where('mobile', $mobile)->whereNull('consumed_at')->update(['consumed_at' => now()]);
             $c = OtpChallenge::create([
                 'mobile' => $mobile, 'code_hash' => 'pending', 'ip' => $ip,
@@ -72,6 +77,10 @@ final class OtpService
 
             return $c;
         });
+        if ($result instanceof DomainError) {
+            throw $result;
+        }
+        $challenge = $result;
 
         $this->sms->queueOtp($mobile, $code, $challenge->id);
         Audit::record('auth.otp_requested', null, ['mobile_tail' => substr($mobile, -4)], null, 'system');

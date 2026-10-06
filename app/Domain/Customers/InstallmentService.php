@@ -74,6 +74,8 @@ final class InstallmentService
         }
         if (! $first) {
             $errors['first_due'] = ['تاریخ اولین سررسید را انتخاب کنید.'];
+        } elseif ($first->lt(now()->setTimezone($tenant->timezone)->startOfDay())) {
+            $errors['first_due'] = ['سررسید اولین قسط نمی‌تواند در گذشته باشد.'];
         }
         $invoice = null;
         if (! empty($input['invoice_id'])) {
@@ -88,6 +90,13 @@ final class InstallmentService
                 $errors['principal_toman'] = ['مبلغ را وارد کنید.'];
             }
         }
+        // Anti-abuse: SMS reminders only for an issued invoice sent to this same customer mobile,
+        // so a merchant cannot schedule "debt" SMS to arbitrary numbers.
+        $wantsReminders = (bool) ($input['reminders'] ?? false);
+        $reminderMobile = $invoice && $customer->mobile && ! $customer->sms_opt_out && $invoice->buyer_mobile === $customer->mobile ? $customer->mobile : null;
+        if ($wantsReminders && ! $reminderMobile && ! isset($errors['invoice_id'])) {
+            $errors['reminders'] = ['یادآوری پیامکی فقط برای اقساط فاکتوری ممکن است که با موبایل همین مشتری صادر شده باشد.'];
+        }
         if ($errors) {
             throw new DomainError('VALIDATION', 'اطلاعات قرارداد کامل نیست.', 422, ['errors' => $errors]);
         }
@@ -96,14 +105,15 @@ final class InstallmentService
             throw new DomainError('PRINCIPAL_ZERO', 'پیش‌پرداخت نباید از کل مبلغ بیشتر یا مساوی باشد.', 422, ['errors' => ['down_payment_toman' => ['پیش‌پرداخت نباید از کل مبلغ بیشتر یا مساوی باشد.']]]);
         }
 
-        return DB::transaction(function () use ($tenant, $user, $customer, $invoice, $principal, $down, $count, $frequency, $first, $input) {
+        return DB::transaction(function () use ($tenant, $user, $customer, $invoice, $principal, $down, $count, $frequency, $first, $wantsReminders, $reminderMobile) {
             if ($invoice && InstallmentAgreement::query()->where('invoice_id', $invoice->id)->where('status', 'active')->lockForUpdate()->exists()) {
                 throw new DomainError('AGREEMENT_EXISTS', 'برای این فاکتور قرارداد اقساط فعال وجود دارد.', 409);
             }
             $agreement = InstallmentAgreement::create([
                 'customer_id' => $customer->id, 'invoice_id' => $invoice?->id, 'principal_irr' => (string) $principal,
                 'down_payment_irr' => $down, 'count' => $count, 'frequency' => $frequency,
-                'reminders_enabled' => (bool) ($input['reminders'] ?? true), 'status' => 'active', 'created_by' => $user->id,
+                'reminders_enabled' => $wantsReminders && $reminderMobile !== null, 'reminder_mobile' => $reminderMobile,
+                'status' => 'active', 'created_by' => $user->id,
             ]);
             foreach ($this->schedule((string) $principal, $count, $frequency, $first, $tenant->timezone) as $line) {
                 InstallmentLine::create(['agreement_id' => $agreement->id, 'number' => $line['number'], 'due_date' => $line['due']->toDateString(), 'amount_irr' => $line['amount'], 'paid_irr' => '0']);
@@ -219,7 +229,7 @@ final class InstallmentService
             }
             $context->runAs($tenant, function () use ($sms, $tenant, $line, $agreement, &$sent) {
                 $customer = Customer::query()->find($agreement->customer_id);
-                if (! $customer?->mobile || $customer->sms_opt_out) {
+                if (! $agreement->reminder_mobile || ! $customer || $customer->sms_opt_out) {
                     return;
                 }
                 $shop = $tenant->profile?->name ?: 'فروشگاه';
@@ -236,7 +246,7 @@ final class InstallmentService
                 if ($kind === null) {
                     return;
                 }
-                if ($sms->queueReminder($tenant, $line, $body, $customer->mobile, $kind)) {
+                if ($sms->queueReminder($tenant, $line, $body, $agreement->reminder_mobile, $kind)) {
                     $sent++;
                 }
             });

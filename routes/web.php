@@ -70,6 +70,10 @@ Route::middleware(['auth', 'tenant'])->group(function () {
 
     // JSON endpoints (AJAX, session + CSRF)
     Route::prefix('api')->group(function () {
+        // User-level (not tenant permission): own invites and shop switching.
+        Route::post('/invites/{membership}/accept', [UsersController::class, 'accept'])->whereNumber('membership')->name('api.invites.accept');
+        Route::post('/invites/{membership}/decline', [UsersController::class, 'decline'])->whereNumber('membership')->name('api.invites.decline');
+        Route::post('/memberships/{membership}/switch', [UsersController::class, 'switchTenant'])->whereNumber('membership')->name('api.memberships.switch');
         Route::get('/quotes/latest', [QuoteController::class, 'latest'])->name('api.quotes.latest');
         Route::get('/quotes/board', [QuoteController::class, 'board'])->name('api.quotes.board');
         Route::get('/entitlements', [SettingsController::class, 'entitlements'])->name('api.entitlements');

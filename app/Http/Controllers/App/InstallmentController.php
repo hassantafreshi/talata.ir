@@ -4,6 +4,7 @@ namespace App\Http\Controllers\App;
 
 use App\Domain\Audit\Audit;
 use App\Domain\Customers\InstallmentService;
+use App\Domain\DomainError;
 use App\Models\Customer;
 use App\Models\InstallmentAgreement;
 use App\Models\InstallmentPayment;
@@ -85,7 +86,11 @@ class InstallmentController extends BaseController
 
     public function toggleReminders(Request $request, InstallmentAgreement $agreement)
     {
-        $agreement->update(['reminders_enabled' => (bool) $request->boolean('enabled')]);
+        $enable = $request->boolean('enabled');
+        if ($enable && ! $agreement->reminder_mobile) {
+            throw new DomainError('REMINDERS_NOT_ALLOWED', 'یادآوری پیامکی فقط برای اقساط فاکتوری ممکن است که با موبایل همین مشتری صادر شده باشد.', 422);
+        }
+        $agreement->update(['reminders_enabled' => $enable]);
         Audit::record('installment.reminders_toggled', $agreement, ['enabled' => $agreement->reminders_enabled]);
 
         return response()->json(['ok' => true, 'enabled' => $agreement->reminders_enabled]);

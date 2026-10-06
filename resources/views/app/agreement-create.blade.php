@@ -12,7 +12,7 @@
             </fieldset>
             <div class="field" data-src="invoice"><label for="a-inv">فاکتور</label>
                 <div class="input-wrap"><select id="a-inv" name="invoice_id">
-                    @foreach ($invoices as $inv)<option value="{{ $inv->public_id }}">فاکتور {{ "\u{2066}".fa($inv->number)."\u{2069}" }} · {{ toman($inv->payable_irr) }} تومان · {{ jdate($inv->issued_at) }}</option>@endforeach
+                    @foreach ($invoices as $inv)<option value="{{ $inv->public_id }}" data-remind="{{ $customer->mobile && ! $customer->sms_opt_out && $inv->buyer_mobile === $customer->mobile ? 1 : 0 }}">فاکتور {{ "\u{2066}".fa($inv->number)."\u{2069}" }} · {{ toman($inv->payable_irr) }} تومان · {{ jdate($inv->issued_at) }}</option>@endforeach
                 </select></div><div class="err"></div></div>
             <div class="field hidden" data-src="manual"><label for="a-principal">مبلغ کل</label><div class="input-wrap ltr-input"><input id="a-principal" name="principal_toman" inputmode="numeric" data-digits><span class="unit">تومان</span></div><div class="err"></div></div>
             <div class="field"><label for="a-down">پیش‌پرداخت (اختیاری)</label><div class="input-wrap ltr-input"><input id="a-down" name="down_payment_toman" inputmode="numeric" data-digits placeholder="۰"><span class="unit">تومان</span></div><div class="err"></div></div>
@@ -28,8 +28,8 @@
                 <div class="input-wrap"><input type="hidden" name="first_due" value=""></div><div class="err"></div>
                 <p class="hint">اقساط ماهانه همان روز ماه شمسی تکرار می‌شوند (در ماه کوتاه‌تر، روز آخر ماه).</p>
             </div>
-            <label class="check"><input type="checkbox" name="reminders" value="1" @checked($customer->mobile && ! $customer->sms_opt_out) @disabled(! $customer->mobile || $customer->sms_opt_out)> یادآوری پیامکی: روز قبل از سررسید و یک بار اگر پرداخت دیر شد (ساعت ۹ تا ۲۱)</label>
-            @unless ($customer->mobile)<p class="xs muted">برای یادآوری، موبایل مشتری را ثبت کنید.</p>@endunless
+            <div class="field"><label class="check"><input type="checkbox" name="reminders" value="1" checked> یادآوری پیامکی: روز قبل از سررسید و یک بار اگر پرداخت دیر شد (ساعت ۹ تا ۲۱)</label><div class="err"></div>
+                <p class="xs muted" data-remind-hint>یادآوری پیامکی فقط برای اقساط فاکتوری ممکن است که با موبایل همین مشتری صادر شده باشد.</p></div>
         </section>
 
         <section class="band stack-sm" aria-live="polite">

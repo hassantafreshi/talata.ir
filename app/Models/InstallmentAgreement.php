@@ -12,7 +12,7 @@ class InstallmentAgreement extends Model
 {
     use BelongsToTenant, HasPublicId;
 
-    protected $fillable = ['customer_id', 'invoice_id', 'principal_irr', 'down_payment_irr', 'count', 'frequency', 'reminders_enabled', 'status', 'created_by'];
+    protected $fillable = ['customer_id', 'invoice_id', 'principal_irr', 'down_payment_irr', 'count', 'frequency', 'reminders_enabled', 'reminder_mobile', 'status', 'created_by'];
 
     protected function casts(): array
     {

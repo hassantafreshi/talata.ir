@@ -9,12 +9,14 @@ use App\Domain\Invoices\Qr;
 use App\Domain\Sms\SmsCredit;
 use App\Domain\Sms\SmsTemplate;
 use App\Models\InvoiceLayout;
+use App\Models\Membership;
 use App\Models\ShopProfile;
 use App\Models\SmsSetting;
 use App\Support\Digits;
 use App\Support\Mobile;
 use App\Support\Money;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends BaseController
@@ -31,6 +33,8 @@ class SettingsController extends BaseController
             'perSegmentFa' => Money::toman($ent->smsPerSegmentIrr($tenant)),
             'membership' => $this->membership(),
             'user' => auth()->user(),
+            'invites' => Membership::query()->with(['tenant.profile' => fn ($q) => $q->withoutGlobalScope('tenant')])->where('status', 'invited')->whereNull('user_id')->where('invited_mobile', auth()->user()->mobile)->get(),
+            'shops' => Membership::query()->with(['tenant.profile' => fn ($q) => $q->withoutGlobalScope('tenant')])->where('user_id', auth()->id())->where('status', 'active')->get(),
         ]);
     }
 
@@ -170,12 +174,16 @@ class SettingsController extends BaseController
     {
         $this->ent()->assertCan($this->tenant(), 'invoice.customize', 'ویرایش ظاهر فاکتور در پلن پایه و حرفه‌ای است.');
         $data = $request->validate(['settings' => ['required', 'array'], 'version' => ['required', 'integer']]);
-        $layout = InvoiceLayout::query()->lockForUpdate()->firstOrFail();
-        if ($layout->version !== (int) $data['version']) {
-            throw new DomainError('LAYOUT_CONFLICT', 'ظاهر فاکتور در جای دیگری تغییر کرد. صفحه را دوباره باز کنید.', 409);
-        }
-        $layout->update(['settings' => LayoutSettings::sanitize($data['settings']), 'version' => $layout->version + 1, 'updated_by' => auth()->id()]);
-        Audit::record('layout.updated', $layout, ['version' => $layout->version]);
+        $layout = DB::transaction(function () use ($data) {
+            $layout = InvoiceLayout::query()->lockForUpdate()->firstOrFail();
+            if ($layout->version !== (int) $data['version']) {
+                throw new DomainError('LAYOUT_CONFLICT', 'ظاهر فاکتور در جای دیگری تغییر کرد. صفحه را دوباره باز کنید.', 409);
+            }
+            $layout->update(['settings' => LayoutSettings::sanitize($data['settings']), 'version' => $layout->version + 1, 'updated_by' => auth()->id()]);
+            Audit::record('layout.updated', $layout, ['version' => $layout->version]);
+
+            return $layout;
+        });
 
         return response()->json(['ok' => true, 'version' => $layout->version]);
     }

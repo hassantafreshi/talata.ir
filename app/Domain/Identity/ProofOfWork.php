@@ -30,8 +30,13 @@ final class ProofOfWork
         if (! is_string($challenge) || ! is_string($nonce) || ! preg_match('/^[A-Za-z0-9]{32}$/', $challenge) || ! preg_match('/^\d{1,12}$/', $nonce)) {
             return false;
         }
-        $data = Cache::pull('pow:'.$challenge); // single use
-        if (! $data || $data['ip'] !== $ip) {
+        $data = Cache::get('pow:'.$challenge);
+        // Atomic single use: only the first request can claim the marker (parallel replays fail).
+        if (! $data || ! Cache::add('pow:used:'.$challenge, 1, config('talata.pow.ttl_seconds'))) {
+            return false;
+        }
+        Cache::forget('pow:'.$challenge);
+        if ($data['ip'] !== $ip) {
             return false;
         }
         if (now()->getTimestamp() - $data['at'] < config('talata.pow.min_form_seconds')) {

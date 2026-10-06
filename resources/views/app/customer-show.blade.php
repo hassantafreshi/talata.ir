@@ -62,7 +62,7 @@
                 @if ($a->status === 'active' && $canInstallments && $canManage)
                     <div class="cluster">
                         <button type="button" class="btn btn-dark sm" data-pay="{{ $a->public_id }}">ثبت دریافت</button>
-                        <label class="check small"><input type="checkbox" data-reminders="{{ $a->public_id }}" @checked($a->reminders_enabled) @disabled(! $customer->mobile || $customer->sms_opt_out)> یادآوری پیامکی سررسید</label>
+                        <label class="check small"><input type="checkbox" data-reminders="{{ $a->public_id }}" @checked($a->reminders_enabled) @disabled(! $a->reminder_mobile || $customer->sms_opt_out)> یادآوری پیامکی سررسید</label>
                     </div>
                 @endif
             </article>

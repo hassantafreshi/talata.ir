@@ -27,7 +27,8 @@ return [
         'per_mobile_day' => 8,
         'per_ip_hour' => 12,
         'per_subnet_hour' => 40,          // /24 for IPv4, /48 for IPv6
-        'global_daily_budget' => (int) env('TALATA_OTP_DAILY_BUDGET', 2000),
+        'global_daily_budget' => (int) env('TALATA_OTP_DAILY_BUDGET', 2000),            // new (unregistered) numbers
+        'existing_users_daily_budget' => (int) env('TALATA_OTP_EXISTING_DAILY_BUDGET', 3000), // reserved for registered users
         'verify_per_ip_minute' => 20,
         'lockout_minutes' => 15,
     ],
@@ -44,6 +45,7 @@ return [
         'resend_min_minutes' => 10,
         'per_recipient_per_tenant_daily' => 3,
         'per_recipient_global_free_daily' => 2,
+        'reminders_per_recipient_monthly' => 8,   // across all tenants
         'free_yearly_per_tenant_daily' => 2,
         'tenant_hourly_cap' => 60,
         'tenant_daily_cap' => ['free' => 10, 'basic' => 300, 'professional' => 1000],

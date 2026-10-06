@@ -2,7 +2,6 @@
 
 namespace App\Domain\Identity;
 
-use App\Domain\Audit\Audit;
 use App\Domain\Tenancy\TenantProvisioner;
 use App\Models\Membership;
 use App\Models\User;
@@ -20,12 +19,8 @@ final class LoginService
             $user = User::query()->where('mobile', $mobile)->lockForUpdate()->first() ?? User::create(['mobile' => $mobile]);
             $user->forceFill(['last_login_at' => now()])->save();
 
-            $invites = Membership::query()->where('invited_mobile', $mobile)->where('status', 'invited')->whereNull('user_id')->get();
-            foreach ($invites as $invite) {
-                $invite->update(['user_id' => $user->id, 'status' => 'active']);
-                Audit::record('membership.accepted', $invite, [], $invite->tenant_id);
-            }
-
+            // Invites are never auto-accepted (an attacker could pre-invite a victim's number and
+            // capture their data); the user accepts them explicitly in Settings.
             $hasActive = Membership::query()->where('user_id', $user->id)->where('status', 'active')->exists();
             $isNew = false;
             if (! $hasActive) {

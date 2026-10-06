@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Billing\Gateways\MockGateway;
+use App\Domain\Billing\PaymentGateway;
 use App\Domain\Sms\SmsCredit;
 use App\Models\BillingOrder;
 use App\Models\PaymentAttempt;
 use App\Models\Subscription;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class BillingTest extends TestCase
@@ -90,5 +93,59 @@ class BillingTest extends TestCase
         $this->actingAs($user)->api('POST', '/api/billing/orders', $payload);
         $this->api('POST', '/api/billing/orders', $payload);
         $this->assertSame(1, BillingOrder::withoutGlobalScope('tenant')->count());
+    }
+
+    public function test_forged_nok_callback_does_not_block_the_real_payment(): void
+    {
+        $user = $this->merchant();
+        $res = $this->order($user, ['product' => 'SMS_CREDIT', 'pack_amount_toman' => '400000'])->assertCreated();
+        $authority = basename(parse_url($res->json('redirect.url'), PHP_URL_PATH));
+        auth()->logout();
+        $this->get("/pay/callback/mock?Authority={$authority}&Status=NOK")->assertRedirect(); // attacker
+        MockGateway::decide($authority, 'success');           // user pays at the bank
+        $this->get("/pay/callback/mock?Authority={$authority}&Status=OK")->assertRedirect();
+        $order = BillingOrder::withoutGlobalScope('tenant')->where('public_id', $res->json('order_id'))->first();
+        $this->assertSame('FULFILLED', $order->status);
+        $this->assertSame('4000000', app(SmsCredit::class)->balance($order->tenant_id));
+    }
+
+    public function test_gateway_exception_keeps_order_for_reconcile(): void
+    {
+        $user = $this->merchant();
+        $res = $this->order($user, ['product' => 'SMS_CREDIT', 'pack_amount_toman' => '400000'])->assertCreated();
+        $authority = basename(parse_url($res->json('redirect.url'), PHP_URL_PATH));
+        $real = app(PaymentGateway::class);
+        $this->app->instance(PaymentGateway::class, new class($real) implements PaymentGateway
+        {
+            public function __construct(private $real) {}
+
+            public function code(): string
+            {
+                return $this->real->code();
+            }
+
+            public function isMock(): bool
+            {
+                return true;
+            }
+
+            public function request(string $r, string $a, string $c, ?string $m): array
+            {
+                return $this->real->request($r, $a, $c, $m);
+            }
+
+            public function parseCallback(Request $r): array
+            {
+                return $this->real->parseCallback($r);
+            }
+
+            public function verify(string $authority, string $amountIrr): array
+            {
+                throw new \RuntimeException('PSP timeout');
+            }
+        });
+        $this->get("/pay/callback/mock?Authority={$authority}&Status=OK")->assertRedirect();
+        $order = BillingOrder::withoutGlobalScope('tenant')->where('public_id', $res->json('order_id'))->first();
+        $this->assertSame('PENDING_VERIFICATION', $order->status);
     }
 }

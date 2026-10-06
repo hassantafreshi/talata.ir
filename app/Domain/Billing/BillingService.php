@@ -144,7 +144,11 @@ final class BillingService
         DB::transaction(function () use ($attempt, $cb) {
             $order = BillingOrder::withoutGlobalScope('tenant')->whereKey($attempt->order_id)->lockForUpdate()->first();
             $attempt = PaymentAttempt::query()->whereKey($attempt->id)->lockForUpdate()->first();
-            if ($order->isFinal() || in_array($order->status, ['PAID'], true)) {
+            // A non-OK callback is unauthenticated (anyone who saw the bank URL can send it), so a FAILED
+            // order stays reopenable by a later callback until it expires; the gateway verify decides.
+            $reopenable = $order->status === 'FAILED' && $order->failure_code !== 'AMOUNT_MISMATCH'
+                && $attempt->status !== 'PAID' && now()->lt($order->expires_at);
+            if (($order->isFinal() && ! $reopenable) || $order->status === 'PAID') {
                 return;
             }
             $attempt->callback_at = now();
@@ -165,7 +169,13 @@ final class BillingService
     {
         $order->status = 'VERIFYING';
         $order->save();
-        $v = $this->gateway->verify($attempt->authority, $attempt->amount_irr);
+        try {
+            $v = $this->gateway->verify($attempt->authority, $attempt->amount_irr);
+        } catch (\Throwable $e) {
+            // Network/PSP error: never lose a possibly-paid order; reconcile retries with backoff.
+            report($e);
+            $v = ['status' => 'UNKNOWN', 'bank_code' => null];
+        }
         $attempt->bank_code = $v['bank_code'];
         if ($v['status'] === 'UNKNOWN') {
             $order->status = 'PENDING_VERIFICATION';
@@ -195,7 +205,12 @@ final class BillingService
         $order->status = 'PAID';
         $order->paid_at = now();
         $order->save();
-        $this->fulfil($order);
+        try {
+            DB::transaction(fn () => $this->fulfil($order)); // savepoint: a failure keeps PAID
+        } catch (\Throwable $e) {
+            report($e);
+            $order->refresh(); // reconcile() fulfils PAID orders later
+        }
     }
 
     private function fail(BillingOrder $order, PaymentAttempt $attempt, string $code): void
@@ -276,8 +291,25 @@ final class BillingService
                     $done['reconciled']++;
                 });
             });
+        // Paid but not yet fulfilled (fulfilment failed earlier): finish it, idempotently.
+        BillingOrder::withoutGlobalScope('tenant')->where('status', 'PAID')->where('paid_at', '<', now()->subMinute())->orderBy('id')->limit(100)->get()
+            ->each(function (BillingOrder $o) use (&$done) {
+                DB::transaction(function () use ($o, &$done) {
+                    $order = BillingOrder::withoutGlobalScope('tenant')->whereKey($o->id)->lockForUpdate()->first();
+                    $this->fulfil($order);
+                    $done['reconciled']++;
+                });
+            });
         BillingOrder::withoutGlobalScope('tenant')->where('status', 'AWAITING_PAYMENT')->where('expires_at', '<', now())->orderBy('id')->limit(500)->get()
             ->each(function (BillingOrder $o) use (&$done) {
+                // If the bank already called back, ask the gateway before giving up on the order.
+                $attempt = PaymentAttempt::query()->where('order_id', $o->id)->latest('id')->first();
+                if ($attempt && $attempt->callback_at) {
+                    $attempt->update(['status' => 'PENDING_VERIFICATION', 'next_reconcile_at' => now()]);
+                    $o->update(['status' => 'PENDING_VERIFICATION']);
+
+                    return;
+                }
                 $o->update(['status' => 'EXPIRED', 'failure_code' => 'EXPIRED', 'failure_message' => self::BANK_CODES_FA['EXPIRED']]);
                 $done['expired']++;
             });

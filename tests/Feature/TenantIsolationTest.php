@@ -49,12 +49,21 @@ class TenantIsolationTest extends TestCase
         $owner = $this->merchant();
         $this->actingAs($owner)->api('POST', '/api/users/invite', ['mobile' => '09361112233', 'permissions' => ['invoice.issue']])->assertOk();
         $staff = app(LoginService::class)->completeLogin('09361112233')['user'];
-        $this->actingAs($staff)->get('/settings/users')->assertForbidden();
+        // Not auto-accepted: the staff member got their own shop and a pending invite.
+        $this->assertNotSame($this->tenantOf($owner)->id, $this->tenantOf($staff)->id);
+        $invite = Membership::query()->where('invited_mobile', '09361112233')->where('status', 'invited')->firstOrFail();
+        $this->actingAs($this->merchant())->api('POST', "/api/invites/{$invite->id}/accept")->assertNotFound();
+        $this->actingAs($staff)->get('/settings')->assertOk()->assertSee('دعوت به فروشگاه');
+        $this->api('POST', "/api/invites/{$invite->id}/accept")->assertOk();
+        $this->get('/settings/users')->assertForbidden();
         $this->get('/settings/business')->assertForbidden();
         $this->api('POST', '/api/billing/orders', ['product' => 'SMS_CREDIT', 'pack_amount_toman' => '400000', 'idempotency_key' => 'abcdefgh12'])->assertForbidden();
         $this->get('/invoices/new')->assertOk();
-        $m = Membership::query()->where('user_id', $staff->id)->first();
+        $ownerTenant = $this->tenantOf($owner)->id;
+        $m = Membership::query()->where('user_id', $staff->id)->where('tenant_id', $ownerTenant)->first();
         $this->actingAs($owner)->api('DELETE', "/api/users/{$m->id}")->assertOk();
-        $this->actingAs($staff)->get('/invoices/new')->assertRedirect('/login');
+        // Removed: falls back to their own shop; no active membership in the owner's shop remains.
+        $this->actingAs($staff)->get('/invoices/new')->assertOk();
+        $this->assertSame(0, Membership::query()->where('user_id', $staff->id)->where('tenant_id', $ownerTenant)->where('status', 'active')->count());
     }
 }
