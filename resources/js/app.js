@@ -37,6 +37,13 @@ function clearDeviceCopiesOnLogout() {
   });
 }
 
+// Installable app + offline page. The worker caches only hashed assets, fonts, icons and the static
+// offline page — never pages, API answers or invoice links (public/sw.js).
+function registerWorker() {
+  if (!('serviceWorker' in navigator) || !window.isSecureContext) return;
+  window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {}); });
+}
+
 function flash() {
   document.querySelectorAll('[data-flash]').forEach((el) => toast(el.dataset.flash, { kind: el.dataset.kind || 'info' }));
 }
@@ -45,6 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   offlineBanner();
   confirmLinks();
   clearDeviceCopiesOnLogout();
+  registerWorker();
   // Date picker code loads only on pages that have a date field.
   if (document.querySelector('[data-jdp]')) import('./lib/datepicker.js').then((m) => m.initDatePickers());
   // The post-login fingerprint offer loads only on the page that actually shows the card.

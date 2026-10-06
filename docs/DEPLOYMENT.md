@@ -113,6 +113,10 @@ server {
 
     location /build/ { access_log off; add_header Cache-Control "public, max-age=31536000, immutable"; try_files $uri =404; }
     location /fonts/ { access_log off; add_header Cache-Control "public, max-age=31536000, immutable"; try_files $uri =404; }
+    # PWA: the worker must be re-checked on every visit so updates reach installed phones.
+    location = /sw.js { add_header Cache-Control "no-cache"; try_files $uri =404; }
+    location = /manifest.webmanifest { default_type application/manifest+json; add_header Cache-Control "public, max-age=3600"; try_files $uri =404; }
+    location /icons/ { access_log off; add_header Cache-Control "public, max-age=604800"; try_files $uri =404; }
     location ~ /\.(?!well-known) { deny all; }
     location / { try_files $uri $uri/ /index.php?$query_string; }
     location ~ \.php$ {

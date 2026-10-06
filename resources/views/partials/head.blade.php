@@ -6,6 +6,8 @@
 <meta name="referrer" content="{{ $referrer ?? 'strict-origin-when-cross-origin' }}">
 <title>{{ isset($title) ? $title.' · ' : '' }}زرلیو</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="preload" href="/fonts/Vazirmatn-arabic-subset.woff2" as="font" type="font/woff2" crossorigin>
 @if (! empty($cssOnly))
 @vite(['resources/css/app.css'])
