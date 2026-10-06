@@ -1,5 +1,6 @@
 import { post } from '../lib/http.js';
-import { toast, busy } from '../lib/ui.js';
+import { toast, busy, sheet, fieldErrors } from '../lib/ui.js';
+import { toPersian } from '../lib/digits.js';
 import * as webauthn from '../lib/webauthn.js';
 
 export default function () {
@@ -18,6 +19,92 @@ export default function () {
   });
 
   passkeys();
+  mobileChange();
+}
+
+// Two-step login-number change, driven from a sheet. Each step talks to its own endpoint; the
+// server holds the real state, so a reload simply restarts the ceremony.
+function mobileChange() {
+  const start = document.querySelector('[data-mobile-change-start]');
+  const tpl = document.querySelector('[data-mch-tpl]');
+  if (!start || !tpl) return;
+
+  start.addEventListener('click', async () => {
+    busy(start);
+    const res = await post('/api/security/mobile/start');
+    busy(start, false);
+    if (!res.ok) { toast(res.message, { kind: 'error' }); return; }
+
+    const { sheet: el, close } = sheet(tpl.innerHTML, { label: 'تغییر شماره ورود' });
+    const forms = {
+      old: el.querySelector('[data-mch-form="old"]'),
+      ask: el.querySelector('[data-mch-form="ask-new"]'),
+      new: el.querySelector('[data-mch-form="new"]'),
+    };
+    const steps = el.querySelectorAll('[data-step]');
+    const show = (name, stepKey) => {
+      Object.values(forms).forEach((f) => { f.hidden = true; });
+      forms[name].hidden = false;
+      steps.forEach((s) => s.classList.toggle('on', s.dataset.step === stepKey));
+      forms[name].querySelector('input')?.focus();
+    };
+    const setMasked = (form, masked) => { const s = form.querySelector('[data-mch-masked]'); if (s) s.textContent = toPersian(masked); };
+
+    // Resend countdown for an OTP form. `sender()` returns the http result of re-requesting the code;
+    // on success the button re-arms itself with the fresh cooldown.
+    const arm = (form, after, sender) => {
+      const btn = form.querySelector('[data-mch-resend]');
+      if (!btn) return;
+      let left = after;
+      btn.hidden = false; btn.disabled = true;
+      const tick = () => { btn.textContent = left > 0 ? `ارسال دوباره کد (${toPersian(String(left))})` : 'ارسال دوباره کد'; btn.disabled = left > 0; };
+      tick();
+      const timer = setInterval(() => { left -= 1; if (left <= 0) clearInterval(timer); tick(); }, 1000);
+      btn.onclick = async () => {
+        clearInterval(timer); btn.hidden = true;
+        const r = await sender();
+        if (r.ok) { setMasked(form, r.data.masked); arm(form, r.data.resend_after_seconds, sender); } else toast(r.message, { kind: 'error' });
+      };
+    };
+
+    setMasked(forms.old, res.data.masked);
+    show('old', 'old');
+    arm(forms.old, res.data.resend_after_seconds, () => post('/api/security/mobile/start'));
+
+    forms.old.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      fieldErrors(forms.old, null);
+      const b = forms.old.querySelector('[type=submit]'); busy(b);
+      const r = await post('/api/security/mobile/verify-current', { code: forms.old.code.value.trim() });
+      busy(b, false);
+      if (r.ok) { show('ask', 'new'); return; }
+      if (r.errors) fieldErrors(forms.old, r.errors); else fieldErrors(forms.old, { code: r.message });
+    });
+
+    forms.ask.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      fieldErrors(forms.ask, null);
+      const b = forms.ask.querySelector('[type=submit]'); busy(b);
+      const sendNew = () => post('/api/security/mobile/request-new', { mobile: forms.ask.mobile.value.trim() });
+      const r = await sendNew();
+      busy(b, false);
+      if (!r.ok) { if (r.errors) fieldErrors(forms.ask, r.errors); else fieldErrors(forms.ask, { mobile: r.message }); return; }
+      setMasked(forms.new, r.data.masked);
+      show('new', 'new');
+      arm(forms.new, r.data.resend_after_seconds, sendNew);
+    });
+
+    forms.new.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      fieldErrors(forms.new, null);
+      const b = forms.new.querySelector('[type=submit]'); busy(b);
+      const r = await post('/api/security/mobile/confirm', { code: forms.new.code.value.trim() });
+      busy(b, false);
+      if (r.ok) { close(); toast('شماره ورود تغییر کرد و از دستگاه‌های دیگر خارج شدید.'); setTimeout(() => location.reload(), 900); return; }
+      if (r.code === 'MCH_FLOW') { close(); toast(r.message, { kind: 'error' }); return; }
+      if (r.errors) fieldErrors(forms.new, r.errors); else fieldErrors(forms.new, { code: r.message });
+    });
+  });
 }
 
 async function passkeys() {

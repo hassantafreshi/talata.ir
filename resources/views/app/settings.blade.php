@@ -62,6 +62,42 @@
         <p class="xs muted hidden" data-passkey-unsupported>این مرورگر یا دستگاه ورود با اثر انگشت را پشتیبانی نمی‌کند.</p>
     </section>
 
+    <section class="band stack-sm" aria-labelledby="mch-h" data-mobile-change>
+        <h2 id="mch-h">شماره ورود</h2>
+        <p class="small">شماره‌ای که با آن وارد می‌شوید: <strong class="num ltr">{{ \App\Support\Mobile::display($user->mobile) }}</strong></p>
+        <p class="xs muted">این شماره فقط برای ورود است و با شماره‌ی روی فاکتور (اطلاعات کسب‌وکار) فرق دارد. برای تغییر، اول شماره فعلی و سپس شماره جدید با کد پیامکی تأیید می‌شود و از همه‌ی دستگاه‌های دیگر خارج می‌شوید.</p>
+        <button type="button" class="btn btn-line block" data-mobile-change-start>تغییر شماره ورود</button>
+    </section>
+
+    <template data-mch-tpl>
+        <h2 class="h3" data-mch-title>تغییر شماره ورود</h2>
+        <ol class="steps xs" aria-hidden="true"><li data-step="old">۱. تأیید شماره فعلی</li><li data-step="new">۲. شماره جدید</li></ol>
+
+        <form data-mch-form="old" class="stack-sm" novalidate hidden>
+            <p class="small">کد پیامک‌شده به شماره فعلی (<span class="num ltr" data-mch-masked></span>) را وارد کنید.</p>
+            <div class="field"><label for="mch-old-code">کد تأیید</label>
+                <div class="input-wrap ltr-input"><input id="mch-old-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="num"></div><div class="err"></div></div>
+            <button class="btn btn-gold block" type="submit" data-busy-text="…">تأیید شماره فعلی</button>
+            <button type="button" class="btn btn-link sm" data-mch-resend hidden>ارسال دوباره کد</button>
+        </form>
+
+        <form data-mch-form="ask-new" class="stack-sm" novalidate hidden>
+            <div class="field"><label for="mch-new-mobile">شماره موبایل جدید</label>
+                <div class="input-wrap ltr-input"><input id="mch-new-mobile" name="mobile" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="۰۹…"></div><div class="err"></div></div>
+            <button class="btn btn-gold block" type="submit" data-busy-text="…">ارسال کد به شماره جدید</button>
+        </form>
+
+        <form data-mch-form="new" class="stack-sm" novalidate hidden>
+            <p class="small">کد پیامک‌شده به شماره جدید (<span class="num ltr" data-mch-masked></span>) را وارد کنید.</p>
+            <div class="field"><label for="mch-new-code">کد تأیید</label>
+                <div class="input-wrap ltr-input"><input id="mch-new-code" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="num"></div><div class="err"></div></div>
+            <button class="btn btn-gold block" type="submit" data-busy-text="…">ثبت شماره جدید</button>
+            <button type="button" class="btn btn-link sm" data-mch-resend hidden>ارسال دوباره کد</button>
+        </form>
+
+        <button type="button" class="btn btn-line block" data-close>انصراف</button>
+    </template>
+
     @if ($invites->isNotEmpty())
         <section class="band stack-sm" aria-labelledby="inv-h">
             <h2 id="inv-h">دعوت به فروشگاه</h2>

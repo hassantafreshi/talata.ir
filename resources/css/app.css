@@ -497,3 +497,7 @@ html:has(body[data-page="items"]), html:has(body[data-page="review"]) { scroll-p
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Login-number change: two-step indicator in the sheet. */
+.steps { display: flex; gap: 12px; list-style: none; padding: 0; margin: 0 0 4px; color: var(--t-muted); }
+.steps li.on { color: var(--t-ink); font-weight: 600; }

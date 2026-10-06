@@ -11,6 +11,7 @@ use App\Http\Controllers\App\InvoiceController;
 use App\Http\Controllers\App\InvoiceDraftController;
 use App\Http\Controllers\App\MaznehController;
 use App\Http\Controllers\App\PasskeyController;
+use App\Http\Controllers\App\SecurityController;
 use App\Http\Controllers\App\QuoteController;
 use App\Http\Controllers\App\SettingsController;
 use App\Http\Controllers\App\UsersController;
@@ -92,6 +93,13 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::post('/passkeys/options', [PasskeyController::class, 'options'])->middleware('throttle:20,1')->name('api.passkeys.options');
         Route::post('/passkeys', [PasskeyController::class, 'store'])->middleware('throttle:20,1')->name('api.passkeys.store');
         Route::delete('/passkeys/{passkey}', [PasskeyController::class, 'destroy'])->whereNumber('passkey')->name('api.passkeys.destroy');
+        // Login-number change (M-23): two OTP steps. Throttled hard — each step can send an SMS.
+        Route::middleware('throttle:10,10')->group(function () {
+            Route::post('/security/mobile/start', [SecurityController::class, 'startMobileChange'])->name('api.security.mobile.start');
+            Route::post('/security/mobile/verify-current', [SecurityController::class, 'verifyCurrentMobile'])->name('api.security.mobile.verify_current');
+            Route::post('/security/mobile/request-new', [SecurityController::class, 'requestNewMobile'])->name('api.security.mobile.request_new');
+            Route::post('/security/mobile/confirm', [SecurityController::class, 'confirmMobileChange'])->name('api.security.mobile.confirm');
+        });
         Route::post('/memberships/{membership}/switch', [UsersController::class, 'switchTenant'])->whereNumber('membership')->name('api.memberships.switch');
         Route::get('/quotes/latest', [QuoteController::class, 'latest'])->middleware('perm:mazneh.view|invoice.issue|calculator.use')->name('api.quotes.latest');
         Route::get('/quotes/board', [QuoteController::class, 'board'])->middleware('perm:mazneh.view')->name('api.quotes.board');
