@@ -1,5 +1,5 @@
 import { put, del } from '../lib/http.js';
-import { toast } from '../lib/ui.js';
+import { toast, markInvalid, clearInvalid } from '../lib/ui.js';
 import { toLatin, toman, toPersian, parseTomanToIrr } from '../lib/digits.js';
 import { priceGold, priceGoldIn, priceGoldInWeight, priceManual, weight750, PricingError } from '../lib/pricing.js';
 
@@ -85,11 +85,22 @@ export default function () {
 
   function rowOf(el) { return rows.find((r) => r.row_uid === el.closest('[data-row]').dataset.uid); }
 
+  // Rows are rebuilt when their type changes; keyboard and screen-reader users keep their place.
+  function renderKeepingFocus(target) {
+    const uid = target.closest('[data-row]')?.dataset.uid;
+    const f = target.dataset.f;
+    const value = target.value;
+    render();
+    const again = uid && host.querySelector(`[data-uid="${CSS.escape(uid)}"] [data-f="${CSS.escape(f)}"][value="${CSS.escape(value)}"]`);
+    again?.focus();
+  }
+
   host.addEventListener('input', (e) => {
     const f = e.target.dataset.f;
     if (!f || e.target.type === 'radio') return;
     rowOf(e.target)[f] = e.target.value;
-    e.target.closest('.field')?.classList.remove('invalid');
+    const fieldEl = e.target.closest('.field');
+    if (fieldEl) { fieldEl.classList.remove('invalid'); e.target.removeAttribute('aria-invalid'); }
     changed();
   });
   host.addEventListener('change', (e) => {
@@ -104,7 +115,7 @@ export default function () {
         if (!row.name || row.name === 'طلای ۱۸ عیار') row.name = 'طلای آب‌شده';
       }
       if (f === 'kind' && e.target.value === 'JEWELRY' && row.name === 'طلای آب‌شده') row.name = 'طلای ۱۸ عیار';
-      render(); changed();
+      renderKeepingFocus(e.target); changed();
       if (f === 'rate_basis' && row.rate_basis === 'MANUAL') host.querySelector(`[data-uid="${row.row_uid}"] [data-f="rate_toman"]`)?.focus();
       return;
     }
@@ -118,7 +129,7 @@ export default function () {
     if (row.item_type !== 'GOLD' && row.name === 'طلای ۱۸ عیار') row.name = '';
     if (row.item_type === 'GOLD' && !row.name && prev !== 'GOLD_IN') row.name = 'طلای ۱۸ عیار';
     if (row.item_type !== 'GOLD_IN' && row.purity_ppt === '900') row.purity_ppt = '750';
-    render(); changed();
+    renderKeepingFocus(e.target); changed();
   });
   host.addEventListener('click', (e) => {
     const chip = e.target.closest('[data-p]');
@@ -178,7 +189,7 @@ export default function () {
       const totalEl = card.querySelector('[data-row-total]');
       const bd = card.querySelector('[data-breakdown]');
       const eff = card.querySelector('[data-eff]');
-      card.querySelectorAll('.field.invalid').forEach((f) => f.classList.remove('invalid'));
+      clearInvalid(card);
       try {
         const r = localPrice(row);
         const mg = (s) => BigInt(s.replace('.', ''));
@@ -215,7 +226,7 @@ export default function () {
           const field = FIELD[e.field] || e.field;
           const inp = [...card.querySelectorAll(`[data-f="${field}"]`)].find((x) => !x.closest('[data-sec]')?.hidden);
           const fieldEl = inp?.closest('.field');
-          if (fieldEl) { fieldEl.classList.add('invalid'); fieldEl.querySelector('.err').textContent = ERR[e.code] || 'مقدار درست نیست.'; }
+          if (fieldEl) markInvalid(fieldEl, ERR[e.code] || 'مقدار درست نیست.');
         }
       }
     });
@@ -247,8 +258,12 @@ export default function () {
     timer = setTimeout(save, 800);
   }
 
+  // Unsaved edits stay «dirty» until the server has them: a failed save keeps them, keeps a copy on this device
+  // (offered back on the next visit) and «مرور فاکتور» never moves on without a successful save.
+  const localKey = `draft:${boot.id}`;
+  let stopped = false;
   async function save() {
-    if (saving) { timer = setTimeout(save, 400); return; }
+    if (saving) { timer = setTimeout(save, 400); return false; }
     saving = true; dirty = false;
     const payload = { version, rows: rows.map((r) => ({ ...r })), buyer: boot.buyer, use_latest_rate: useLatest };
     const res = await put(`/api/invoices/drafts/${boot.id}`, payload);
@@ -257,23 +272,51 @@ export default function () {
       version = res.data.version;
       if (useLatest) { useLatest = false; }
       saveState.textContent = `پیش‌نویس ذخیره شد · ${new Intl.DateTimeFormat('fa-IR', { hour: '2-digit', minute: '2-digit' }).format(new Date())}`;
-      try { localStorage.removeItem(`draft:${boot.id}`); } catch {}
+      try { localStorage.removeItem(localKey); } catch {}
       if (dirty) changed();
-      return;
+      return true;
     }
-    if (res.code === 'DRAFT_CONFLICT') { saveState.textContent = 'این پیش‌نویس در جای دیگری تغییر کرد.'; toast(res.message, { kind: 'error', action: { label: 'بارگذاری دوباره', onClick: () => location.reload() } }); return; }
-    try { localStorage.setItem(`draft:${boot.id}`, JSON.stringify(payload)); } catch {}
-    saveState.textContent = res.code === 'OFFLINE' ? 'آفلاین؛ روی همین دستگاه نگه داشته شد' : 'ذخیره نشد؛ دوباره تلاش می‌کنیم';
+    dirty = true;
+    try { localStorage.setItem(localKey, JSON.stringify({ base_version: version, rows: payload.rows, buyer: payload.buyer, at: Date.now() })); } catch {}
+    if (res.code === 'DRAFT_CONFLICT') { stopped = true; saveState.textContent = 'این پیش‌نویس در جای دیگری تغییر کرد.'; toast(res.message, { kind: 'error', timeout: 15000, action: { label: 'بارگذاری دوباره', onClick: () => location.reload() } }); return false; }
+    if (res.status === 401 || res.status === 419) {
+      // Session ended: retrying cannot help. The edits are on this device and come back after signing in.
+      stopped = true;
+      saveState.textContent = 'نشست شما تمام شد؛ تغییرات روی همین دستگاه نگه داشته شد.';
+      toast('برای ذخیره تغییرات دوباره وارد شوید.', { kind: 'error', timeout: 20000, action: { label: 'ورود دوباره', onClick: () => { location.href = '/login'; } } });
+      return false;
+    }
+    saveState.textContent = res.code === 'OFFLINE' ? 'آفلاین؛ تغییرات روی همین دستگاه نگه داشته شد و با برگشت اینترنت ذخیره می‌شود' : 'ذخیره نشد؛ دوباره تلاش می‌کنیم';
     timer = setTimeout(save, 5000);
+    return false;
+  }
+  window.addEventListener('online', () => { if (dirty && !saving && !stopped) { clearTimeout(timer); save(); } });
+
+  async function saveNow() {
+    while (saving) await new Promise((r) => setTimeout(r, 150));
+    return dirty ? save() : true;
   }
 
   reviewBtn.addEventListener('click', async (e) => {
     e.preventDefault();
     if (reviewBtn.getAttribute('aria-disabled') === 'true') { preview(true); toast('بعضی ردیف‌ها کامل یا درست نیستند.', { kind: 'error' }); host.querySelector('.field.invalid input')?.focus(); return; }
     clearTimeout(timer);
-    if (dirty || saving) await save();
+    if (!(await saveNow())) {
+      toast('تغییرات هنوز ذخیره نشده‌اند؛ اتصال را بررسی کنید و دوباره «مرور فاکتور» را بزنید.', { kind: 'error', timeout: 8000 });
+      return;
+    }
     location.href = boot.review_url;
   });
+
+  // A copy left on this device by a save that never reached the server (offline, closed tab) is offered back.
+  try {
+    const local = JSON.parse(localStorage.getItem(localKey) || 'null');
+    if (local && local.base_version === version && Array.isArray(local.rows)) {
+      toast('تغییرات ذخیره‌نشده‌ای روی همین دستگاه پیدا شد.', { timeout: 30000, action: { label: 'بازگرداندن', onClick: () => { rows = local.rows; if (local.buyer) boot.buyer = local.buyer; render(); changed(); } } });
+    } else if (local) {
+      localStorage.removeItem(localKey);
+    }
+  } catch {}
 
   document.querySelector('[data-delete-draft]').addEventListener('click', async () => {
     if (!confirm('این پیش‌نویس حذف شود؟')) return;

@@ -32,8 +32,13 @@ export default function () {
     const t = toast('در حال بارگذاری لوگو…', { timeout: 30000 });
     const res = await post('/api/settings/logo', fd, { timeout: 60000 });
     t.remove(); file.value = '';
-    if (res.ok) { img.src = res.data.url; img.classList.remove('hidden'); delBtn.classList.remove('hidden'); toast('لوگو ذخیره شد.'); return; }
-    if (res.code?.startsWith('CAPABILITY_')) showQuota(res); else toast(res.errors?.logo?.[0] ? `${res.message} ${res.errors.logo[0]}` : res.message, { kind: 'error', timeout: 8000 });
+    if (res.ok) { document.querySelector('[data-logo-error]')?.remove(); img.src = res.data.url; img.classList.remove('hidden'); delBtn.classList.remove('hidden'); toast('لوگو ذخیره شد.'); return; }
+    if (res.code?.startsWith('CAPABILITY_')) { showQuota(res); return; }
+    const text = res.errors?.logo?.[0] ? `${res.message} ${res.errors.logo[0]}` : res.message;
+    let note = document.querySelector('[data-logo-error]');
+    if (!note) { note = document.createElement('p'); note.className = 'notice err small'; note.dataset.logoError = ''; note.setAttribute('role', 'alert'); file.insertAdjacentElement('afterend', note); }
+    note.textContent = text;
+    toast(text, { kind: 'error', timeout: 8000 });
   });
   delBtn?.addEventListener('click', async () => {
     if (!confirm('لوگو حذف شود؟ فاکتورهای صادرشده تغییر نمی‌کنند.')) return;

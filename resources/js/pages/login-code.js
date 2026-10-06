@@ -1,6 +1,7 @@
 import { post } from '../lib/http.js';
 import { busy, toast } from '../lib/ui.js';
 import { toLatin, toPersian } from '../lib/digits.js';
+import { requestCode } from '../lib/otp.js';
 
 export default function () {
   const form = document.querySelector('[data-code-form]');
@@ -43,7 +44,22 @@ export default function () {
     else { resend.disabled = false; resend.textContent = 'ارسال دوباره کد'; }
   };
   tick(); setInterval(tick, 1000);
-  resend.addEventListener('click', () => { location.href = '/login'; toast('شماره را دوباره تأیید کنید.'); });
+  // Resend right here, to the same number (same proof-of-work and limits as the first request).
+  resend.addEventListener('click', async () => {
+    busy(resend);
+    const res = await requestCode(form.dataset.mobile || '');
+    busy(resend, false);
+    if (res.ok) {
+      resendAt = Date.now() + (res.data.resend_after_seconds || 90) * 1000;
+      tick();
+      boxes.forEach((b) => { b.value = ''; }); boxes[0].focus();
+      err.textContent = ''; form.querySelector('.field').classList.remove('invalid');
+      toast('کد تازه فرستاده شد. همان آخرین پیامک را وارد کنید.');
+      return;
+    }
+    toast(res.message, { kind: 'error', timeout: 8000 });
+    tick();
+  });
 
   if ('OTPCredential' in window) {
     navigator.credentials.get({ otp: { transport: ['sms'] } }).then((o) => { if (o?.code) { fill(o.code); submit(); } }).catch(() => {});

@@ -9,7 +9,7 @@
         <div class="notice info">در پلن رایگان قالب ثابت «ساده و خوانا» استفاده می‌شود. ویرایش ظاهر در پلن پایه و حرفه‌ای است. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></div>
     @endunless
     <div class="desk-2">
-        <form class="stack" data-layout novalidate>
+        <form method="post" class="stack" data-layout novalidate>
             <fieldset class="band stack-sm" @disabled(! $canCustomize)>
                 <legend class="label">قالب</legend>
                 <div class="seg" role="radiogroup">
@@ -58,7 +58,7 @@
                 <label><input type="radio" name="pv" value="print" checked>چاپ A4</label>
                 <label><input type="radio" name="pv" value="mobile">موبایل</label>
             </div>
-            <div class="inv-frame print" data-preview aria-live="polite"><p class="small muted">در حال ساخت پیش‌نمایش…</p></div>
+            <div class="inv-frame print" data-preview aria-label="پیش‌نمایش فاکتور"><p class="small muted">در حال ساخت پیش‌نمایش…</p></div>
         </section>
     </div>
 </x-layouts.app>

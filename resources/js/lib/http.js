@@ -25,7 +25,12 @@ export async function request(method, url, data = null, { timeout = 20000, heade
     else body = { html: await res.text() };
     if (!res.ok) {
       const message = body?.message_fa || (body?.errors ? Object.values(body.errors)[0]?.[0] : null) || defaultMessage(res.status);
-      if ((body?.code === 'REAUTH_REQUIRED' || body?.code === 'PASSKEY_SIGNIN_REQUIRED') && body.login) {
+      if (res.status === 401 || res.status === 419) {
+        // Session ended (idle timeout, signed out elsewhere): one clear way back, not «درخواست انجام نشد».
+        const admin = location.pathname.startsWith('/admin');
+        const to = res.status === 419 ? location.href : (body?.login || (admin ? '/admin/login' : '/login'));
+        import('./ui.js').then(({ toast }) => toast(message, { kind: 'error', timeout: 60000, action: { label: res.status === 419 ? 'بارگذاری دوباره' : 'ورود دوباره', onClick: () => { location.href = to; } } }));
+      } else if ((body?.code === 'REAUTH_REQUIRED' || body?.code === 'PASSKEY_SIGNIN_REQUIRED') && body.login) {
         // Admin step-up: offer a fresh sign-in and come back to this page.
         const back = encodeURIComponent(location.pathname);
         import('./ui.js').then(({ toast }) => toast(message, { kind: 'error', timeout: 15000, action: { label: 'ورود دوباره', onClick: () => { location.href = `${body.login}&back=${back}`; } } }));
@@ -43,6 +48,7 @@ export async function request(method, url, data = null, { timeout = 20000, heade
 
 function defaultMessage(status) {
   if (status === 419) return 'نشست شما منقضی شد. صفحه را دوباره باز کنید.';
+  if (status === 401) return 'نشست شما تمام شد. دوباره وارد شوید.';
   if (status === 429) return 'تعداد درخواست‌ها زیاد شد. کمی صبر کنید.';
   if (status === 403) return 'دسترسی این کار را ندارید.';
   if (status === 404) return 'پیدا نشد.';

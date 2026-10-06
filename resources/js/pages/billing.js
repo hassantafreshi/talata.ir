@@ -38,6 +38,11 @@ export default function () {
     const res = await post('/api/billing/orders', { ...payload, idempotency_key: keys.get(sig) });
     if (res.ok) { goToGateway(res.data.redirect); return; }
     busy(btn, false);
+    // Next to the button that was tapped, so it is still there after the toast fades (gateway down, limits…).
+    const host = btn.closest('form, .card, .band, section') || btn.parentElement;
+    let note = host.querySelector('[data-order-error]');
+    if (!note) { note = document.createElement('p'); note.className = 'notice err'; note.dataset.orderError = ''; note.setAttribute('role', 'alert'); btn.insertAdjacentElement('afterend', note); }
+    note.textContent = res.message;
     toast(res.message, { kind: 'error', timeout: 9000 });
   }
 

@@ -24,17 +24,19 @@ export default function () {
   }
   showSms(boot.sms);
 
-  // Poll delivery status with backoff until final; stop when the tab is hidden.
+  // Poll delivery status for up to two minutes after opening or sending (spec: every few seconds, then stop);
+  // never while the tab is hidden. Coming back to the tab checks again.
   let delay = 3000;
+  let until = Date.now() + 120000;
   async function poll() {
-    if (!boot.sms || boot.sms.final || document.hidden) return;
+    if (!boot.sms || boot.sms.final || document.hidden || Date.now() > until) return;
     const res = await get(boot.status_url);
     if (res.ok && res.data.sms) { boot.sms = res.data.sms; showSms(boot.sms); }
-    delay = Math.min(delay * 1.6, 60000);
+    delay = Math.min(delay * 1.4, 15000);
     if (!boot.sms.final) setTimeout(poll, delay);
   }
   setTimeout(poll, delay);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) { delay = 3000; poll(); } });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { delay = 3000; until = Date.now() + 120000; poll(); } });
 
   sendBtn?.addEventListener('click', async () => {
     busy(sendBtn, true);
@@ -44,7 +46,7 @@ export default function () {
       boot.sms = { status: res.data.status, label_fa: res.data.label_fa, kind: res.data.kind, final: false };
       showSms(boot.sms);
       if (res.data.status === 'AWAITING_CREDIT') toast('اعتبار کافی نیست؛ پس از خرید اعتبار ارسال می‌شود.', { kind: 'error' });
-      else { toast('پیامک در صف ارسال قرار گرفت.'); delay = 3000; setTimeout(poll, delay); }
+      else { toast('پیامک در صف ارسال قرار گرفت.'); delay = 3000; until = Date.now() + 120000; setTimeout(poll, delay); }
       return;
     }
     if (res.code?.startsWith('QUOTA_') || res.code?.startsWith('CAPABILITY_')) showQuota(res); else toast(res.message, { kind: 'error', timeout: 8000 });

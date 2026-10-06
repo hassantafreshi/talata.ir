@@ -16,7 +16,12 @@ export function customerSheet({ url, method = post, title = 'مشتری جدید
     const res = await method(url, { name: form.name.value.trim(), mobile: toLatin(form.mobile.value), note: form.note.value.trim() });
     busy(btn, false);
     if (res.ok) { close(); onSaved(res.data); return; }
-    if (res.code === 'DUPLICATE_CUSTOMER') { const u = res.data?.customer?.url; toast(res.message, { kind: 'error', action: u ? { label: 'باز کردن', onClick: () => { location.href = u; } } : null, timeout: 9000 }); return; }
+    if (res.code === 'DUPLICATE_CUSTOMER') {
+      const u = res.data?.customer?.url;
+      fieldErrors(form, { mobile: res.message }); // stays next to the field
+      toast(res.message, { kind: 'error', action: u ? { label: 'باز کردن', onClick: () => { location.href = u; } } : null, timeout: 9000 });
+      return;
+    }
     if (res.code?.startsWith('QUOTA_')) { close(); showQuota(res); return; }
     if (res.errors) fieldErrors(form, res.errors); else toast(res.message, { kind: 'error' });
   });

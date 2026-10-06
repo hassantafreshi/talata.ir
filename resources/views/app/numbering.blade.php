@@ -11,7 +11,7 @@
         <span class="small" data-following>بعدی‌ها: {{ $ltr($preview[1]) }} · {{ $ltr($preview[2]) }}</span>
     </section>
 
-    <form class="stack" data-numbering novalidate>
+    <form method="post" class="stack" data-numbering novalidate>
         <fieldset class="band stack-sm">
             <legend class="label">یک روش را انتخاب کنید</legend>
             <div class="tiles numbering-presets">

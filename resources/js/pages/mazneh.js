@@ -29,5 +29,6 @@ export default function () {
   setInterval(() => { if (!document.hidden) refresh(); }, 180000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
   window.addEventListener('offline', () => { badge.className = 'badge off'; badge.textContent = 'آفلاین'; });
+  window.addEventListener('online', () => refresh());
   document.querySelector('[data-refresh]').addEventListener('click', (e) => refresh(e.currentTarget));
 }

@@ -1,17 +1,10 @@
-import { get, post } from '../lib/http.js';
+import { post } from '../lib/http.js';
 import { busy, fieldErrors, toast } from '../lib/ui.js';
 import { toLatin } from '../lib/digits.js';
+import { requestCode } from '../lib/otp.js';
 
 // Weak-network budget (docs/PERFORMANCE_BUDGET.md: ≤8 requests for login): the proof-of-work solver and the
 // passkey helpers load on demand, in parallel with the request that needs them, not with the page.
-export async function requestCode(mobile, website = '') {
-  const [pow, { solve }] = await Promise.all([get('/api/auth/pow'), import('../lib/pow.js')]);
-  if (!pow.ok) return pow;
-  const nonce = await solve(pow.data.challenge, pow.data.bits);
-  const wait = 2100 - (Date.now() - pow.data.issued_at * 1000);
-  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-  return post('/api/auth/otp/request', { mobile: toLatin(mobile), pow_challenge: pow.data.challenge, pow_nonce: nonce, website });
-}
 
 export default function () {
   const form = document.querySelector('[data-login-form]');

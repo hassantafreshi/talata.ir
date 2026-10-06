@@ -48,7 +48,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const mod = await loader();
       mod.default?.(document.body);
     } catch (e) {
-      toast('بخشی از برنامه دریافت نشد. اینترنت را بررسی و صفحه را دوباره باز کنید.', { kind: 'error', action: { label: 'تلاش دوباره', onClick: () => location.reload() } });
+      // Stays until used: without its module the page's buttons do nothing.
+      toast('بخشی از برنامه دریافت نشد. اینترنت را بررسی و صفحه را دوباره باز کنید.', { kind: 'error', timeout: 3600000, action: { label: 'تلاش دوباره', onClick: () => location.reload() } });
     }
   }
 });

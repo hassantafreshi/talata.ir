@@ -9,6 +9,7 @@ use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\UseAdminSession;
 use App\Support\Digits;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
@@ -84,6 +85,14 @@ return Application::configure(basePath: dirname(__DIR__))
             $errors = array_map(fn (array $messages) => array_map(fn ($m) => Digits::toPersian((string) $m), $messages), $e->errors());
 
             return response()->json(['code' => 'VALIDATION', 'message_fa' => reset($errors)[0] ?? 'اطلاعات واردشده کامل یا درست نیست.', 'errors' => $errors], $e->status);
+        });
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if (! $request->expectsJson() && ! $request->is('api/*')) {
+                return null; // pages: the usual redirect to the login page
+            }
+
+            return response()->json(['code' => 'UNAUTHENTICATED', 'message_fa' => 'نشست شما تمام شد. دوباره وارد شوید.', 'login' => route('login')], 401);
         });
 
         $exceptions->render(function (TokenMismatchException $e, Request $request) {

@@ -1,8 +1,8 @@
-@props(['title' => null, 'page' => '', 'back' => null, 'badge' => null])
+@props(['title' => null, 'page' => '', 'back' => null, 'badge' => null, 'scripts' => true])
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-@include('partials.head')
+@include('partials.head', ['cssOnly' => ! $scripts])
 <meta name="robots" content="noindex, nofollow">
 </head>
 <body data-page="{{ $page ?? '' }}">

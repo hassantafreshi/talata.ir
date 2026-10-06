@@ -24,7 +24,7 @@
             @endforeach
         </div>
         @if (in_array('custom', $access['ranges'], true))
-            <form class="dash-custom band hidden" data-custom novalidate>
+            <form method="post" class="dash-custom band hidden" data-custom novalidate>
                 <div class="grid-2">
                     <div class="field" data-jdp data-quick="today"><span class="label">از تاریخ</span><div class="input-wrap"><input type="hidden" name="from"></div><div class="err"></div></div>
                     <div class="field" data-jdp data-quick="today"><span class="label">تا تاریخ</span><div class="input-wrap"><input type="hidden" name="to"></div><div class="err"></div></div>

@@ -1,4 +1,4 @@
-<x-layouts.public title="پرداخت پیدا نشد">
+<x-layouts.public :scripts="false" title="پرداخت پیدا نشد">
     <section class="hero stack-sm">
         <span class="badge err">پیدا نشد</span>
         <h2>اطلاعات این پرداخت پیدا نشد یا لینک معتبر نیست.</h2>

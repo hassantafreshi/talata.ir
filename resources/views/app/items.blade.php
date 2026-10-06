@@ -41,12 +41,12 @@
         <button type="button" class="btn btn-dark block" data-add-row>+ افزودن ردیف</button>
     </div>
 
-    <div class="stack" data-rows aria-live="polite"></div>
+    <div class="stack" data-rows></div>
 
     <div class="sticky-bar">
         <div class="xs between hidden" data-split><span>فروش <strong class="num" data-sales>—</strong></span><span>طلای دریافتی <strong class="num" data-gold-in>—</strong></span></div>
         <div class="xs between hidden" data-gold-balance><span>مانده طلایی (گرم ۷۵۰)</span><strong class="num" data-gold-balance-value>—</strong></div>
-        <div class="between"><span><span data-payable-label>جمع فاکتور</span> (<span data-row-count>۰</span> ردیف)</span><strong class="num" data-payable>—</strong></div>
+        <div class="between"><span><span data-payable-label>جمع فاکتور</span> (<span data-row-count>۰</span> ردیف)</span><strong class="num" data-payable aria-live="polite">—</strong></div>
         <div class="xs err-text hidden" data-sale-required role="alert">طلای دریافتی به‌تنهایی فاکتور فروش نیست؛ دست‌کم یک ردیف طلا یا متفرقه بفروشید.</div>
         <div class="xs muted center" data-preview-note>پیش‌نمایش محلی؛ محاسبه نهایی توسط سرور انجام می‌شود.</div>
         <a class="btn btn-gold block" href="{{ route('invoices.review', $invoice) }}" data-review>مرور فاکتور</a>

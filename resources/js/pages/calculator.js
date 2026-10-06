@@ -1,5 +1,5 @@
 import { post, put } from '../lib/http.js';
-import { busy, toast } from '../lib/ui.js';
+import { busy, toast, markInvalid, clearInvalid } from '../lib/ui.js';
 import { toLatin, toman, parseTomanToIrr } from '../lib/digits.js';
 import { priceGold, PricingError } from '../lib/pricing.js';
 import { showQuota } from '../lib/quota.js';
@@ -28,7 +28,7 @@ export default function () {
   }
 
   function compute() {
-    form.querySelectorAll('.field.invalid').forEach((f) => f.classList.remove('invalid'));
+    clearInvalid(form);
     const inp = input();
     try {
       const r = priceGold(inp, boot.limits);
@@ -48,7 +48,7 @@ export default function () {
       state.textContent = 'ورودی ناقص یا نادرست است.';
       const name = FIELD[e.field];
       const field = name && form.elements[name]?.closest('.field');
-      if (field) { field.classList.add('invalid'); field.querySelector('.err').textContent = ERR[e.code] || 'مقدار درست نیست.'; }
+      if (field) markInvalid(field, ERR[e.code] || 'مقدار درست نیست.');
     }
   }
 

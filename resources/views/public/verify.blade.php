@@ -1,13 +1,13 @@
-<x-layouts.public title="بررسی اصالت فاکتور">
+<x-layouts.public :scripts="false" title="بررسی اصالت فاکتور">
     @php($void = $v['status'] === 'void')
     <section class="hero stack-sm" aria-live="polite">
         @if ($void)
             <span class="badge err">باطل‌شده{{ $replaced ? ' و جایگزین‌شده' : '' }}</span>
-            <h2>این فاکتور در زرلیو ثبت شده بود اما در {{ $v['voided_fa'] }} باطل شده است.</h2>
+            <h1 class="h2">این فاکتور در زرلیو ثبت شده بود اما در {{ $v['voided_fa'] }} باطل شده است.</h1>
             @if ($replaced)<p class="meta">فروشنده فاکتور جایگزین صادر کرده است. برای نسخه جدید از فروشنده بپرسید.</p>@endif
         @else
             <span class="badge ok">قطعی و معتبر</span>
-            <h2>این فاکتور با شماره <span class="num ltr">{{ $v['number'] }}</span> در زرلیو ثبت شده است.</h2>
+            <h1 class="h2">این فاکتور با شماره <span class="num ltr">{{ $v['number'] }}</span> در زرلیو ثبت شده است.</h1>
         @endif
         <p class="meta">شماره، نام فروشگاه و مبلغ برگه کاغذی را با این صفحه مقایسه کنید.</p>
     </section>
@@ -23,24 +23,9 @@
         </dl>
     </section>
 
-    <section class="band stack-sm" aria-label="اقلام">
-        <h2>اقلام</h2>
-        <ul class="list">
-            @foreach ($v['rows'] as $r)
-                <li class="list-item"><span class="body"><strong>{{ $r['name'] }}</strong>
-                    <span class="sub">@if($r['type'] === 'GOLD'){{ $r['weight'] }} گرم · {{ $r['purity'] }}@else متفرقه@endif @if($r['description']) · {{ $r['description'] }}@endif</span></span>
-                    <span class="num nowrap">{{ $r['amount'] }}</span></li>
-            @endforeach
-        </ul>
-        @if ($v['has_gold'])
-            <dl class="kv small">
-                <div><dt>ارزش طلا</dt><dd class="num">{{ $v['metal_fa'] }}</dd></div>
-                <div><dt>اجرت</dt><dd class="num">{{ $v['wage_fa'] }}</dd></div>
-                <div><dt>سود</dt><dd class="num">{{ $v['profit_fa'] }}</dd></div>
-                <div><dt>مالیات</dt><dd class="num">{{ $v['vat_fa'] }}</dd></div>
-            </dl>
-        @endif
-    </section>
+    {{-- Same read model as the customer page: gold received, weight settlement and «مانده سند» shown as issued. --}}
+    <h2 class="sr-only">اقلام</h2>
+    @include('app.partials.invoice-summary')
 
     <p class="xs muted">این بررسی فقط تطبیق برگه با رکورد ثبت‌شده در زرلیو است؛ تضمین تحویل کالا، عیار آزمایشگاهی، دریافت پول یا ثبت در سامانه مؤدیان نیست. اطلاعات خریدار برای حفظ حریم خصوصی نمایش داده نمی‌شود.</p>
 </x-layouts.public>

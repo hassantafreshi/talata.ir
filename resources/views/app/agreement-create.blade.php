@@ -2,7 +2,7 @@
     @php($bootData = ['url' => route('api.agreements.store', $customer)])
     <script type="application/json" id="boot">@json($bootData)</script>
     <p class="small">مشتری: <strong>{{ $customer->name }}</strong></p>
-    <form class="stack" data-agreement-form novalidate>
+    <form method="post" class="stack" data-agreement-form novalidate>
         <section class="band stack-sm">
             <fieldset class="field"><legend class="label">مبلغ اقساط از کجا بیاید؟</legend>
                 <div class="seg" role="radiogroup">

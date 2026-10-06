@@ -7,7 +7,8 @@
     @if ($welcome || $return)
         <div class="notice info">پیش از اولین صدور، نام فروشگاه، موبایل کسب‌وکار و نشانی لازم است. این اطلاعات روی فاکتور و صفحه بررسی اصالت می‌آید.</div>
     @endif
-    <form class="stack" data-business novalidate>
+    <form class="stack" method="post" action="{{ route('api.settings.business') }}" data-business novalidate>
+        @csrf
         <section class="band stack-sm">
             <h2>الزامی</h2>
             <div class="field"><label for="b-name">نام فروشگاه</label><div class="input-wrap"><input id="b-name" name="name" maxlength="60" value="{{ $profile->name }}" required></div><div class="err"></div></div>

@@ -5,6 +5,10 @@
         'business_url' => route('settings.business', ['return' => $invoice->public_id]),
         'can_sms' => $canSms, 'profile_complete' => $profileComplete,
     ];
+    // SMS step facts (what will happen, decided before the merchant taps): link quota and credit.
+    $linksOut = $canSms && $links['limit'] !== null && $links['remaining'] === 0;
+    $creditShort = $canSms && $sms['free_remaining'] === 0 && \Brick\Math\BigInteger::of($sms['balance_irr'])->isLessThan($sms['cost_irr']);
+    $smsPrimary = $canSms && ! $linksOut && ! $creditShort;
     $byUid = collect($state['rows'])->keyBy('row_uid');
 @endphp
 <x-layouts.app title="مرور و صدور" page="review" :back="route('invoices.items', $invoice)" badge="پیش‌نویس">
@@ -60,7 +64,8 @@
         @endif
     </section>
 
-    <form class="stack" data-issue-form novalidate>
+    <form class="stack" method="post" action="{{ route('api.drafts.issue', $invoice) }}" data-issue-form novalidate>
+        @csrf
         <section class="band stack-sm" aria-labelledby="buyer-h">
             <h2 id="buyer-h">مشتری</h2>
             <div class="field"><label for="buyer-name">نام مشتری (اختیاری)</label><div class="input-wrap"><input id="buyer-name" name="buyer_name" maxlength="80" value="{{ $invoice->buyer_name }}" autocomplete="off"></div><div class="err"></div></div>
@@ -73,6 +78,7 @@
         @if ($canSms)
             <section class="band stack-sm" aria-labelledby="sms-h">
                 <h2 id="sms-h">پیش‌نمایش پیامک</h2>
+                <p class="small">پیامک به <bdi class="num ltr" dir="ltr" data-sms-to>{{ $buyerMobile ?: '—' }}</bdi></p>
                 <p class="white-box small" dir="rtl">{{ $sms['body'] }}</p>
                 <p class="xs muted">
                     {{ fa($sms['segments']) }} بخش ·
@@ -86,13 +92,23 @@
                 @if ($links['limit'] !== null)
                     <p class="xs muted">لینک‌های اشتراک این ماه: {{ fa($links['used']) }} از {{ fa($links['limit']) }}</p>
                 @endif
+                @if ($linksOut)
+                    <div class="notice warn">لینک‌های فاکتور این ماه تمام شده است؛ ارسال پیامکی ممکن نیست، اما «فقط صدور» و چاپ همیشه آزاد است. سهمیه از {{ $links['resets_at_fa'] }} دوباره پر می‌شود. <a href="{{ route('settings.plan') }}">ارتقای پلن</a></div>
+                @elseif ($creditShort)
+                    <div class="notice warn">اعتبار پیامک کافی نیست (هزینه {{ toman($sms['cost_irr']) }}، موجودی {{ toman($sms['balance_irr']) }} تومان). اگر «صدور و ارسال پیامکی» را بزنید، فاکتور صادر می‌شود و پیامک پس از خرید اعتبار خودکار ارسال می‌شود.</div>
+                @endif
+                <a class="small" href="{{ route('settings.sms', ['return' => $invoice->public_id]) }}">خرید پیامک بیشتر</a>
             </section>
         @endif
 
         <div class="sticky-bar stack-sm">
+            <div class="notice err hidden" data-issue-unknown role="alert">
+                <span data-issue-unknown-text></span>
+                <button class="btn sm btn-dark" type="button" data-issue-retry>بررسی دوباره</button>
+            </div>
             @if ($canSms)
-                <button class="btn btn-gold block lg" type="submit" value="ISSUE_AND_SMS" data-mode="ISSUE_AND_SMS" data-busy-text="در حال صدور…">صدور و ارسال پیامکی</button>
-                <button class="btn btn-line block" type="submit" value="ISSUE_ONLY" data-mode="ISSUE_ONLY" data-busy-text="در حال صدور…">فقط صدور</button>
+                <button class="btn {{ $smsPrimary ? 'btn-gold lg' : 'btn-line' }} block" type="submit" value="ISSUE_AND_SMS" data-mode="ISSUE_AND_SMS" data-busy-text="در حال صدور…" @disabled($linksOut)>صدور و ارسال پیامکی</button>
+                <button class="btn {{ $smsPrimary ? 'btn-line' : 'btn-gold lg' }} block" type="submit" value="ISSUE_ONLY" data-mode="ISSUE_ONLY" data-busy-text="در حال صدور…">فقط صدور (بدون پیامک)</button>
             @else
                 <button class="btn btn-gold block lg" type="submit" value="ISSUE_ONLY" data-mode="ISSUE_ONLY" data-busy-text="در حال صدور…">صدور فاکتور</button>
                 <p class="xs muted center">ارسال پیامکی در این پلن فعال نیست. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></p>

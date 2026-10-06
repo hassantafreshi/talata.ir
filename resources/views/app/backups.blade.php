@@ -4,7 +4,7 @@
     @unless ($enabled)
         <div class="notice info">پشتیبان‌گیری و بازگرداندن تنظیمات در پلن پایه و حرفه‌ای است. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></div>
     @else
-        <form class="band stack-sm" data-manual novalidate>
+        <form method="post" class="band stack-sm" data-manual novalidate>
             <div class="field"><label for="b-label">پشتیبان دستی (اختیاری: یک نام بنویسید)</label><div class="input-wrap"><input id="b-label" name="label" maxlength="80" placeholder="مثلاً قبل از تغییر قالب عید"></div><div class="err"></div></div>
             <button class="btn btn-dark block" type="submit" data-busy-text="در حال ذخیره…">پشتیبان‌گیری همین حالا</button>
         </form>
@@ -32,7 +32,7 @@
                             <div><dt>موبایل کسب‌وکار</dt><dd class="num ltr">{{ \App\Support\Mobile::display($p['profile']['business_mobile'] ?? null) ?: '—' }}</dd></div>
                             <div><dt>آدرس</dt><dd>{{ $p['profile']['address'] ?? '—' }}</dd></div>
                             <div><dt>لوگو</dt><dd>{{ ! empty($p['logo']) ? 'نسخه '.fa($p['logo']['version']) : 'بدون لوگو' }}</dd></div>
-                            <div><dt>قالب فاکتور</dt><dd>{{ ($p['layout']['template_id'] ?? 'simple_readable') === 'shop' ? 'فروشگاهی' : 'ساده و خوانا' }}</dd></div>
+                            <div><dt>قالب فاکتور</dt><dd>{{ ['shop' => 'فروشگاهی', 'ledger' => 'حساب طلا و ریال (بد/بس)'][$p['layout']['template_id'] ?? ''] ?? 'ساده و خوانا' }}</dd></div>
                             <div><dt>شماره‌گذاری</dt><dd class="num ltr">{{ invno(\App\Domain\Invoices\Numbering::format(\App\Domain\Invoices\Numbering::sanitize($p['numbering'] ?? [], false), now()->toImmutable(), config('talata.timezone'), 1)) }}</dd></div>
                             <div><dt>متن پیامک</dt><dd class="small">{{ $p['sms_template'] ?: 'متن پیش‌فرض' }}</dd></div>
                         </dl>
@@ -40,7 +40,7 @@
                     @if ($enabled && $diff)
                         <details class="restore">
                             <summary class="btn btn-line sm">بازگرداندن…</summary>
-                            <form class="stack-sm" data-restore-form novalidate>
+                            <form method="post" class="stack-sm" data-restore-form novalidate>
                                 <p class="small">کدام بخش‌ها به این نسخه برگردند؟</p>
                                 @foreach ($sections as $key => $label)
                                     <label class="choice"><input type="checkbox" name="sections[]" value="{{ $key }}" @checked(in_array($label, $diff, true))><span>{{ $label }}</span></label>

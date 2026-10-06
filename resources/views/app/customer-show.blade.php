@@ -84,7 +84,7 @@
 
     <template data-customer-tpl>
         <div class="between"><h2 data-title>ویرایش مشتری</h2><button type="button" class="icon-btn" data-close aria-label="بستن">✕</button></div>
-        <form class="stack" data-customer-form novalidate>
+        <form method="post" class="stack" data-customer-form novalidate>
             <div class="field"><label for="cu-name">نام</label><div class="input-wrap"><input id="cu-name" name="name" maxlength="80" required></div><div class="err"></div></div>
             <div class="field"><label for="cu-mobile">موبایل (اختیاری)</label><div class="input-wrap ltr-input"><input id="cu-mobile" name="mobile" inputmode="tel" maxlength="14" data-digits></div><div class="err"></div></div>
             <div class="field"><label for="cu-note">یادداشت داخلی (اختیاری)</label><div class="input-wrap"><input id="cu-note" name="note" maxlength="250"></div><div class="err"></div></div>
@@ -94,7 +94,7 @@
 
     <template data-pay-tpl>
         <div class="between"><h2>ثبت دریافت قسط</h2><button type="button" class="icon-btn" data-close aria-label="بستن">✕</button></div>
-        <form class="stack" data-pay-form novalidate>
+        <form method="post" class="stack" data-pay-form novalidate>
             <div class="field"><label for="p-amount">مبلغ دریافتی</label><div class="input-wrap ltr-input"><input id="p-amount" name="amount_toman" inputmode="numeric" required data-digits><span class="unit">تومان</span></div><div class="err"></div><p class="hint">از قدیمی‌ترین قسط پرداخت‌نشده کم می‌شود.</p></div>
             <div class="field" data-jdp data-max="{{ $todayJ }}" data-quick="today" data-required><span class="label" id="p-date-l">تاریخ دریافت</span><div class="input-wrap"><input type="hidden" name="paid_on" value="{{ $todayJ }}"></div><div class="err"></div></div>
             <fieldset class="field"><legend class="label">روش</legend>

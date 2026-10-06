@@ -11,7 +11,7 @@
     </section>
 
     @if ($canBuy)
-        <form class="stack" data-sms-form novalidate>
+        <form method="post" class="stack" data-sms-form novalidate>
             <fieldset class="field"><legend class="label">مبلغ شارژ (بدون مالیات)</legend>
                 <div class="chips">
                     @foreach ($packs as $p)

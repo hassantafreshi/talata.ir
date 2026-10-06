@@ -14,7 +14,19 @@ export default function () {
     const res = await get(url);
     if (mine !== seq) return; // a newer search won
     list.removeAttribute('aria-busy');
-    if (!res.ok) { toast(res.message, { kind: 'error' }); return; }
+    if (!res.ok) {
+      if (append) { toast(res.message, { kind: 'error' }); return; }
+      // The list area itself says what went wrong and offers the retry (not only a passing toast).
+      list.innerHTML = '';
+      const li = document.createElement('li');
+      li.className = 'notice err between';
+      const msg = document.createElement('span'); msg.textContent = res.message;
+      const again = document.createElement('button'); again.type = 'button'; again.className = 'btn sm btn-dark'; again.textContent = 'تلاش دوباره';
+      again.addEventListener('click', () => load(url));
+      li.append(msg, again);
+      list.append(li);
+      return;
+    }
     if (append) { list.querySelector('[data-more]')?.closest('li')?.remove(); list.insertAdjacentHTML('beforeend', res.data.html); }
     else { list.innerHTML = res.data.html; count.textContent = `${toPersian(res.data.total)} مورد`; }
   }

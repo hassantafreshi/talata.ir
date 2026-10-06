@@ -15,7 +15,11 @@
         @endif
         <div class="between meta"><span>آخرین دریافت: <span class="num" data-time>{{ $quote['fetched_at_fa'] ?? '—' }}</span></span>@include('partials.freshness', ['f' => $quote['freshness']])</div>
         <div class="meta">به‌روزرسانی هر ۳ دقیقه · منبع: <span data-source>{{ $quote['source_fa'] ?? '—' }}</span></div>
-        <div class="notice err hidden" data-error-note>سرویس نرخ پاسخ نمی‌دهد. آخرین نرخ معتبر نمایش داده می‌شود؛ صفحه هر ۳ دقیقه دوباره تلاش می‌کند.</div>
+        <div class="notice err {{ $quote['freshness'] === 'ERROR' ? '' : 'hidden' }}" data-error-note role="status">
+            <span>سرویس نرخ پاسخ نمی‌دهد. آخرین نرخ معتبر نمایش داده می‌شود؛ صفحه هر ۳ دقیقه خودش دوباره تلاش می‌کند.</span>
+            <button type="button" class="btn sm btn-dark" data-retry-quote data-busy-text="در حال دریافت…">تلاش دوباره الان</button>
+        </div>
+        <p class="xs" data-start-hint @if($quote['value_irr']) hidden @endif>نرخ بازار هنوز در دسترس نیست؛ پایین همین صفحه «ثبت نرخ دستی» یا «فاکتور فقط متفرقه» را بزنید.</p>
     </section>
 
     <div class="grid-2">
@@ -37,7 +41,7 @@
 
     <template data-manual-tpl>
         <div class="between"><h2>ثبت نرخ دستی برای این فاکتور</h2><button type="button" class="icon-btn" data-close aria-label="بستن">✕</button></div>
-        <form class="stack" data-manual-form novalidate>
+        <form method="post" class="stack" data-manual-form novalidate>
             <div class="field"><label for="m-value">قیمت هر گرم طلای ۱۸ عیار</label><div class="input-wrap ltr-input"><input id="m-value" name="value_toman" inputmode="numeric" data-money required><span class="unit">تومان</span></div><div class="err"></div></div>
             <fieldset class="field"><legend class="label">دلیل</legend>
                 <div class="chips">

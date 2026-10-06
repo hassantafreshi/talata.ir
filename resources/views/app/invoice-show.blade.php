@@ -36,7 +36,7 @@
 
     <template data-void-tpl>
         <div class="between"><h2>ابطال فاکتور <span class="num ltr">{{ $v['number'] }}</span></h2><button type="button" class="icon-btn" data-close aria-label="بستن">✕</button></div>
-        <form class="stack" data-void-form novalidate>
+        <form method="post" class="stack" data-void-form novalidate>
             <fieldset class="field"><legend class="label">دلیل ابطال</legend>
                 <div class="stack-sm">
                     @foreach (\App\Domain\Invoices\InvoicePresenter::VOID_REASONS as $code => $label)

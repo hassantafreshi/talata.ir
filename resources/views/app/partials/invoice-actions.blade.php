@@ -14,7 +14,7 @@
     <section class="band stack-sm" aria-labelledby="sms-h">
         <div class="between"><h2 id="sms-h">پیامک به مشتری</h2>
             <span class="badge {{ $smsStatus[1] ?? 'off' }}" data-sms-badge role="status">{{ $smsStatus[0] ?? 'ارسال نشده' }}</span></div>
-        <p class="small muted">به {{ $v['buyer_mobile'] }}</p>
+        <p class="small muted">به <bdi class="num ltr" dir="ltr">{{ $v['buyer_mobile'] }}</bdi></p>
         <div class="notice warn hidden" data-sms-credit>اعتبار پیامک کافی نیست. پس از خرید اعتبار، پیامک همین فاکتور خودکار ارسال می‌شود. موجودی: {{ $balanceFa }} تومان.
             <a class="btn sm btn-dark" href="{{ route('settings.sms', ['return' => $invoice->public_id]) }}">خرید اعتبار پیامک</a></div>
         @if ($invoice->status === 'issued')
@@ -23,6 +23,13 @@
         @endif
     </section>
 @endif
+
+<section class="band stack-sm qr-panel" aria-labelledby="qr-h">
+    <h2 id="qr-h">بارکد بررسی اصالت</h2>
+    <div class="qr-screen" role="img" aria-label="بارکد بررسی اصالت فاکتور {{ $v['number'] }}">{!! $qr !!}</div>
+    <a class="btn btn-line block" href="{{ $verifyUrl }}" target="_blank" rel="noopener">بررسی این فاکتور</a>
+    <p class="xs muted">همین بارکد بالا-چپ چاپ فاکتور است. مشتری با اسکن آن، بدون ورود، اصالت و وضعیت فاکتور (قطعی یا باطل) را می‌بیند.</p>
+</section>
 
 <section class="band stack-sm" aria-labelledby="share-h">
     <h2 id="share-h">لینک فاکتور برای مشتری</h2>

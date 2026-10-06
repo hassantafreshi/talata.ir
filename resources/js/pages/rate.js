@@ -26,16 +26,25 @@ export default function () {
     badge.className = `badge ${kind}`; badge.textContent = label;
     errNote.classList.toggle('hidden', q.freshness !== 'ERROR');
     if (startBtn) startBtn.disabled = !q.value_irr || !navigator.onLine;
+    const hint = hero.querySelector('[data-start-hint]');
+    if (hint) {
+      hint.hidden = !!q.value_irr && navigator.onLine;
+      hint.textContent = navigator.onLine ? 'نرخ بازار هنوز در دسترس نیست؛ پایین همین صفحه «ثبت نرخ دستی» یا «فاکتور فقط متفرقه» را بزنید.' : 'اینترنت قطع است؛ پس از اتصال، «شروع» دوباره فعال می‌شود.';
+    }
   };
 
-  const refresh = async () => {
+  const refresh = async (btn) => {
     if (document.hidden || !navigator.onLine) return;
+    if (btn) busy(btn);
     const res = await get('/api/quotes/latest');
-    if (res.ok) renderQuote(res.data);
+    if (btn) busy(btn, false);
+    if (res.ok) renderQuote(res.data); else if (btn) toast(res.message, { kind: 'error' });
   };
+  hero.querySelector('[data-retry-quote]')?.addEventListener('click', (e) => refresh(e.currentTarget));
   setInterval(refresh, poll);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
-  window.addEventListener('online', refresh);
+  // Back online: re-enable with the last known rate at once, then fetch (a failed fetch keeps it usable).
+  window.addEventListener('online', () => { renderQuote(quote); refresh(); });
   window.addEventListener('offline', () => renderQuote(quote));
 
   async function start(payload, btn) {
@@ -64,6 +73,7 @@ export default function () {
     });
   }
 
+  renderQuote(quote);
   startBtn?.addEventListener('click', () => start({ mode: 'MARKET', value_irr: quote.value_irr }, startBtn));
   document.querySelector('[data-misc-only]')?.addEventListener('click', (e) => start({ mode: 'NONE' }, e.currentTarget));
   document.querySelector('[data-manual]')?.addEventListener('click', () => {

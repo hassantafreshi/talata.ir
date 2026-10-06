@@ -2,7 +2,8 @@
     <span class="badge info">مرحله ۲ از ۲</span>
     <h1>کد پیامک‌شده را وارد کنید</h1>
     <p class="between"><span>پیامک به <span class="ltr num">{{ $masked }}</span></span><a href="{{ route('login') }}">ویرایش شماره</a></p>
-    <form class="stack" data-code-form data-resend-at="{{ $resendAt }}" novalidate>
+    <form class="stack" method="post" action="{{ route('auth.otp.verify') }}" data-code-form data-resend-at="{{ $resendAt }}" data-mobile="{{ $masked }}" novalidate>
+        @csrf
         <div class="field">
             <span class="label" id="code-label">کد ۶ رقمی</span>
             <div class="otp-boxes" role="group" aria-labelledby="code-label">

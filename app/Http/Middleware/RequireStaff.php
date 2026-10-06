@@ -31,7 +31,7 @@ class RequireStaff
                 $request->session()->invalidate();
             }
 
-            return $request->expectsJson() ? response()->json(['code' => 'UNAUTHENTICATED', 'message_fa' => 'دوباره وارد شوید.'], 401) : redirect()->route('admin.login');
+            return $request->expectsJson() ? response()->json(['code' => 'UNAUTHENTICATED', 'message_fa' => 'نشست مدیریت تمام شد. دوباره وارد شوید.', 'login' => route('admin.login')], 401) : redirect()->route('admin.login');
         }
         if ($role === 'admin' ? ! $staff->isAdmin() : ($role !== null && ! $staff->allows($role))) {
             return $request->expectsJson() ? response()->json(['code' => 'STAFF_FORBIDDEN', 'message_fa' => 'نقش شما اجازه این کار را ندارد.'], 403) : abort(403);

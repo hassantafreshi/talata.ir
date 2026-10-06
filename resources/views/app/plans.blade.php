@@ -4,7 +4,7 @@
     @if ($mock)<div class="notice warn">حالت آزمایشی: درگاه پرداخت واقعی هنوز انتخاب نشده و پرداخت‌ها شبیه‌سازی می‌شوند.</div>@endif
     <p class="small">پلن فعلی: <strong>{{ $summary['plan']['label_fa'] }}</strong>@if($summary['plan']['ends_at_fa']) · تا {{ $summary['plan']['ends_at_fa'] }}@endif</p>
     @if ($canBuy)
-        <form class="band stack-sm" data-discount-form novalidate>
+        <form method="post" class="band stack-sm" data-discount-form novalidate>
             <div class="field"><label for="dc">کد تخفیف یا کد معرف</label>
                 <div class="jdp-typed-row"><div class="input-wrap ltr-input"><input id="dc" name="discount_code" value="{{ $prefillCode }}" maxlength="20" autocomplete="off" placeholder="مثلاً TLAB12CD"></div>
                     <button class="btn btn-dark" type="submit" data-busy-text="…">اعمال</button></div>

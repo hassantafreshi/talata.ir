@@ -35,7 +35,7 @@
 
     <template data-customer-tpl>
         <div class="between"><h2 data-title>مشتری جدید</h2><button type="button" class="icon-btn" data-close aria-label="بستن">✕</button></div>
-        <form class="stack" data-customer-form novalidate>
+        <form method="post" class="stack" data-customer-form novalidate>
             <div class="field"><label for="cu-name">نام</label><div class="input-wrap"><input id="cu-name" name="name" maxlength="80" required></div><div class="err"></div></div>
             <div class="field"><label for="cu-mobile">موبایل (اختیاری)</label><div class="input-wrap ltr-input"><input id="cu-mobile" name="mobile" inputmode="tel" maxlength="14" data-digits></div><div class="err"></div></div>
             <div class="field"><label for="cu-note">یادداشت داخلی (اختیاری)</label><div class="input-wrap"><input id="cu-note" name="note" maxlength="250"></div><div class="err"></div><p class="hint">فقط برای شما؛ روی فاکتور نمی‌آید.</p></div>

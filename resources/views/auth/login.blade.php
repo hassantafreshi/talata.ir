@@ -1,7 +1,8 @@
 <x-layouts.guest title="ورود" page="login">
     <span class="badge info">مرحله ۱ از ۲ · شماره موبایل</span>
     <h1>شماره موبایل خود را وارد کنید</h1>
-    <form class="stack" data-login-form novalidate>
+    <form class="stack" method="post" action="{{ route('auth.otp.request') }}" data-login-form novalidate>
+        @csrf
         <div class="field">
             <label for="mobile">شماره موبایل</label>
             <div class="input-wrap ltr-input"><input id="mobile" name="mobile" type="tel" inputmode="numeric" autocomplete="tel" placeholder="۰۹۱۲ ۳۴۵ ۶۷۸۹" required autofocus></div>
