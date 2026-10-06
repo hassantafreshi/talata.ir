@@ -27,16 +27,16 @@ Route::middleware('staff')->group(function () {
     Route::get('/users/{user}', [ActivityController::class, 'user'])->whereNumber('user')->name('user');
     Route::get('/tenants', [TenantsController::class, 'index'])->name('tenants');
     Route::get('/tenants/{tenant:id}', [TenantsController::class, 'show'])->whereNumber('tenant')->name('tenant');
-    Route::post('/api/tenants/{tenant:id}/backups/{backup}/restore', [TenantsController::class, 'restoreBackup'])->whereNumber(['tenant', 'backup'])->middleware(['staff:admin', 'throttle:20,1'])->name('tenant.backup.restore');
+    Route::post('/api/tenants/{tenant:id}/backups/{backup}/restore', [TenantsController::class, 'restoreBackup'])->whereNumber(['tenant', 'backup'])->middleware(['staff:tenants.restore', 'throttle:20,1'])->name('tenant.backup.restore');
     Route::get('/account', [AccountController::class, 'show'])->name('account');
     Route::post('/api/account/passkeys/options', [AccountController::class, 'options'])->middleware('throttle:20,1')->name('account.passkeys.options');
     Route::post('/api/account/passkeys', [AccountController::class, 'store'])->middleware('throttle:20,1')->name('account.passkeys.store');
     Route::delete('/api/account/passkeys/{passkey}', [AccountController::class, 'destroy'])->whereNumber('passkey')->name('account.passkeys.destroy');
-    Route::get('/tech', [TechLogController::class, 'index'])->middleware('staff:admin')->name('tech');
+    Route::get('/tech', [TechLogController::class, 'index'])->middleware('staff:logs.tech')->name('tech');
 
     // Plan and SMS prices: every change publishes a new pricing version (docs/ADMIN_PRICING.md).
     Route::get('/pricing', [PricingController::class, 'index'])->name('pricing');
-    Route::middleware(['staff:admin', 'throttle:20,1'])->group(function () {
+    Route::middleware(['staff:pricing.manage,fresh', 'throttle:20,1'])->group(function () {
         Route::post('/api/pricing', [PricingController::class, 'publish'])->name('pricing.publish');
         Route::post('/api/pricing/{version}/restore', [PricingController::class, 'restore'])->whereNumber('version')->name('pricing.restore');
     });
@@ -44,7 +44,7 @@ Route::middleware('staff')->group(function () {
     // Affiliate program (همکاری در فروش): support can view, only admins change anything.
     Route::get('/affiliates', [AffiliatesController::class, 'index'])->name('affiliates');
     Route::get('/affiliates/{affiliate}', [AffiliatesController::class, 'show'])->whereNumber('affiliate')->name('affiliate');
-    Route::middleware('staff:admin')->group(function () {
+    Route::middleware('staff:affiliates.manage')->group(function () {
         Route::post('/api/affiliates', [AffiliatesController::class, 'store'])->name('affiliates.store');
         Route::put('/api/affiliates/{affiliate}', [AffiliatesController::class, 'update'])->whereNumber('affiliate')->name('affiliates.update');
         Route::post('/api/affiliates/{affiliate}/payouts', [AffiliatesController::class, 'payout'])->whereNumber('affiliate')->name('affiliates.payout');

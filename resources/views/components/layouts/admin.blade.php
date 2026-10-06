@@ -2,7 +2,7 @@
 @php
     $staff = auth('staff')->user();
     $nav = [['admin.dashboard', 'داشبورد'], ['admin.activity', 'لاگ فعالیت'], ['admin.tenants', 'فروشگاه‌ها'], ['admin.affiliates', 'همکاری در فروش'], ['admin.pricing', 'قیمت‌ها']];
-    if ($staff?->isAdmin()) { $nav[] = ['admin.tech', 'لاگ فنی']; }
+    if ($staff?->allows('logs.tech')) { $nav[] = ['admin.tech', 'لاگ فنی']; }
     $nav[] = ['admin.account', 'حساب من'];
 @endphp
 <!doctype html>

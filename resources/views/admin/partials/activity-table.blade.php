@@ -18,7 +18,7 @@
             <td>@if ($e->tenant_id)<a href="{{ route('admin.tenant', $e->tenant_id) }}">{{ $tenants[$e->tenant_id]?->profile?->name ?: '#'.$e->tenant_id }}</a>@else — @endif</td>
             <td class="xs">{{ $e->subject_type }} <span class="mono">{{ \Illuminate\Support\Str::limit((string) $e->subject_id, 12) }}</span></td>
             <td class="mono">{{ $e->ip }}</td>
-            <td>@if ($e->request_id)@if(auth('staff')->user()->isAdmin())<a class="mono" href="{{ route('admin.tech', ['request' => $e->request_id]) }}" title="لاگ فنی همین درخواست">{{ substr($e->request_id, -8) }}</a>@else<span class="mono">{{ substr($e->request_id, -8) }}</span>@endif @endif</td>
+            <td>@if ($e->request_id)@if(auth('staff')->user()->allows('logs.tech'))<a class="mono" href="{{ route('admin.tech', ['request' => $e->request_id]) }}" title="لاگ فنی همین درخواست">{{ substr($e->request_id, -8) }}</a>@else<span class="mono">{{ substr($e->request_id, -8) }}</span>@endif @endif</td>
         </tr>
     @empty
         <tr><td colspan="8" class="muted center">رویدادی با این فیلترها پیدا نشد.</td></tr>

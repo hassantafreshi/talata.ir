@@ -35,6 +35,9 @@ return [
         'session_cookie' => env('TALATA_ADMIN_SESSION_COOKIE', 'talata_admin'),
         'session_minutes' => 120,
         'idle_minutes' => (int) env('TALATA_ADMIN_IDLE_MINUTES', 30),
+        // Dangerous actions (manual activation, credit, manual payment confirm, prices, tax, emergency rate, staff)
+        // need a sign-in within this many minutes (step-up re-auth).
+        'reauth_minutes' => (int) env('TALATA_ADMIN_REAUTH_MINUTES', 15),
         'allowed_ips' => env('TALATA_ADMIN_ALLOWED_IPS'),   // comma list; empty = any IP (OTP/passkey still required)
     ],
 

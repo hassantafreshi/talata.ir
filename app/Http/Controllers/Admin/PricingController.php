@@ -25,7 +25,7 @@ class PricingController extends Controller
             'history' => $history,
             'authors' => StaffUser::query()->whereIn('id', $history->pluck('created_by_staff')->filter())->pluck('name', 'id'),
             'vat' => app(CommercialConfig::class)->vatRatePercent(),
-            'canEdit' => (bool) Auth::guard('staff')->user()?->isAdmin(),
+            'canEdit' => (bool) Auth::guard('staff')->user()?->allows('pricing.manage'),
         ]);
     }
 

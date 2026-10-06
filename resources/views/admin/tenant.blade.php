@@ -32,7 +32,7 @@
                 <details class="band white stack-sm">
                     <summary><strong>{{ $b->label ?: (\App\Models\SettingsBackup::REASONS[$b->reason] ?? 'پشتیبان') }}</strong> <span class="xs muted num">{{ jdate($b->created_at, true) }}</span></summary>
                     <p class="xs">نام: {{ $b->payload['profile']['name'] ?? '—' }} · آدرس: {{ $b->payload['profile']['address'] ?? '—' }}</p>
-                    @if (auth('staff')->user()->isAdmin())
+                    @if (auth('staff')->user()->allows('tenants.restore'))
                         <form class="stack-sm" data-admin-restore data-url="{{ route('admin.tenant.backup.restore', [$tenant->id, $b->id]) }}">
                             @foreach ($sections as $key => $label)<label class="check"><input type="checkbox" name="sections[]" value="{{ $key }}"> {{ $label }}</label>@endforeach
                             <button class="btn sm btn-dark" type="submit">بازگرداندن بخش‌های انتخاب‌شده</button>

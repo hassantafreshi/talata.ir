@@ -1,6 +1,6 @@
 <x-layouts.admin title="همکاری در فروش (افیلیت)" page="admin-affiliates">
     <p class="small muted">به شماره کاربری که پنل فروشگاه دارد همکاری در فروش بدهید؛ یک کد تخفیف و لینک معرفی برایش ساخته می‌شود. فروشگاه‌های جدیدی که با این کد یا لینک بیایند به او تعلق می‌گیرند و از هر پرداختشان کمیسیون ثبت می‌شود.</p>
-    @if (auth('staff')->user()->isAdmin())
+    @if (auth('staff')->user()->allows('affiliates.manage'))
         <h2>همکار جدید</h2>
         @include('admin.partials.affiliate-form', ['a' => null])
     @endif

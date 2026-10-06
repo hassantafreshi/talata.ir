@@ -95,7 +95,7 @@ class SettingsBackupTest extends TestCase
         $this->api('POST', "/api/settings/backups/{$first->id}/restore", ['sections' => ['profile']])->assertForbidden();
 
         $staff = StaffUser::query()->create(['mobile' => '09120000021', 'name' => 'پشتیبان ارشد', 'role' => 'admin', 'active' => true]);
-        $this->actingAs($staff, 'staff')->withSession(['staff.seen' => now()->getTimestamp()]);
+        $this->asStaff($staff);
         $this->get("/admin/tenants/{$tenant->id}")->assertOk()->assertSee('پشتیبان تنظیمات');
         $this->postJson("/admin/api/tenants/{$tenant->id}/backups/{$first->id}/restore", ['sections' => ['profile']])->assertOk();
         $this->assertSame('نام قدیمی', ShopProfile::withoutGlobalScope('tenant')->where('tenant_id', $tenant->id)->value('name'));
@@ -106,7 +106,7 @@ class SettingsBackupTest extends TestCase
         $this->actingAs($other);
         $this->business('دیگری');
         $foreign = $this->backups($this->tenantOf($other)->id)->first();
-        $this->actingAs($staff, 'staff');
+        $this->asStaff($staff);
         $this->postJson("/admin/api/tenants/{$tenant->id}/backups/{$foreign->id}/restore", ['sections' => ['profile']])->assertNotFound();
     }
 }

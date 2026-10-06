@@ -26,7 +26,12 @@ class AuthController extends Controller
 {
     public function show(Request $request)
     {
-        if (Auth::guard('staff')->check()) {
+        // ?reauth=1: step-up sign-in for a dangerous action; ?back=/admin/... returns there afterwards.
+        $back = (string) $request->query('back', '');
+        if (preg_match('#^/admin(/[A-Za-z0-9/_-]*)?$#', $back)) {
+            $request->session()->put('admin.back', $back);
+        }
+        if (Auth::guard('staff')->check() && ! $request->boolean('reauth')) {
             return redirect()->route('admin.dashboard');
         }
 
@@ -141,8 +146,9 @@ class AuthController extends Controller
         $request->session()->put(['staff.seen' => now()->getTimestamp(), 'staff.auth_at' => now()->getTimestamp()]);
         $staff->forceFill(['last_login_at' => now()])->save();
         Audit::record('admin.login', $staff, ['method' => $method], null, 'staff');
+        $back = $request->session()->pull('admin.back');
 
-        return response()->json(['next' => route('admin.dashboard')]);
+        return response()->json(['next' => $back ? url($back) : route('admin.dashboard')]);
     }
 
     public function logout(Request $request)

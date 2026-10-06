@@ -17,7 +17,7 @@ class AdminPricingTest extends TestCase
     private function admin(string $role = 'admin'): StaffUser
     {
         $staff = StaffUser::query()->create(['mobile' => $role === 'admin' ? '09120000011' : '09120000012', 'name' => 'مدیر قیمت', 'role' => $role, 'active' => true]);
-        $this->actingAs($staff, 'staff')->withSession(['staff.seen' => now()->getTimestamp()]);
+        $this->asStaff($staff);
 
         return $staff;
     }
@@ -86,6 +86,19 @@ class AdminPricingTest extends TestCase
         $this->admin('support');
         $this->get('/admin/pricing')->assertOk()->assertSee('فقط مدیر ارشد می‌تواند قیمت‌ها را تغییر دهد.');
         $this->postJson('/admin/api/pricing', $this->input(['sms' => ['basic' => '400']]))->assertForbidden();
+    }
+
+    public function test_publishing_prices_needs_a_recent_sign_in_and_the_right_role(): void
+    {
+        $staff = StaffUser::query()->create(['mobile' => '09120000013', 'name' => 'مالی', 'role' => 'finance', 'active' => true]);
+        $this->asStaff($staff, 3600);
+        $this->postJson('/admin/api/pricing', $this->input(['sms' => ['basic' => '450']]))->assertStatus(403)->assertJsonPath('code', 'REAUTH_REQUIRED');
+        $this->asStaff($staff);
+        $this->postJson('/admin/api/pricing', $this->input(['sms' => ['basic' => '450']]))->assertCreated();
+
+        $ops = StaffUser::query()->create(['mobile' => '09120000014', 'name' => 'فنی', 'role' => 'ops', 'active' => true]);
+        $this->asStaff($ops);
+        $this->postJson('/admin/api/pricing', $this->input(['sms' => ['basic' => '460']]))->assertStatus(403)->assertJsonPath('code', 'STAFF_FORBIDDEN');
     }
 }
 

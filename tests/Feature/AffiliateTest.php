@@ -178,7 +178,7 @@ class AffiliateTest extends TestCase
     {
         $merchant = $this->merchant(mobile: '09121110000');
         $admin = StaffUser::query()->create(['mobile' => '09120000009', 'name' => 'مدیر', 'role' => 'admin', 'active' => true]);
-        $this->actingAs($admin, 'staff')->withSession(['staff.seen' => now()->getTimestamp()]);
+        $this->asStaff($admin);
         $this->postJson('/admin/api/affiliates', ['mobile' => '09129999990', 'commission_percent' => '10', 'commission_mode' => 'LIFETIME'])->assertStatus(422); // no shop panel
         $this->postJson('/admin/api/affiliates', ['mobile' => '۰۹۱۲۱۱۱۰۰۰۰', 'commission_percent' => '۱۲.۵', 'commission_mode' => 'LIFETIME', 'discount_percent' => '5', 'code' => 'negin-10'])->assertCreated();
         $aff = Affiliate::query()->firstOrFail();
@@ -188,7 +188,7 @@ class AffiliateTest extends TestCase
         $this->putJson('/admin/api/affiliates/'.$aff->id, ['commission_percent' => '60', 'commission_mode' => 'LIFETIME', 'status' => 'active'])->assertStatus(422);
 
         $support = StaffUser::query()->create(['mobile' => '09120000008', 'name' => 'پشتیبان', 'role' => 'support', 'active' => true]);
-        $this->actingAs($support, 'staff');
+        $this->asStaff($support);
         $this->get('/admin/affiliates/'.$aff->id)->assertOk();
         $this->putJson('/admin/api/affiliates/'.$aff->id, ['commission_percent' => '50', 'commission_mode' => 'LIFETIME', 'status' => 'active'])->assertForbidden();
     }

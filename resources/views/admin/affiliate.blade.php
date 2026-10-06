@@ -1,4 +1,4 @@
-@php $isAdmin = auth('staff')->user()->isAdmin(); @endphp
+@php $isAdmin = auth('staff')->user()->allows('affiliates.manage'); @endphp
 <x-layouts.admin :title="'همکار فروش '.\App\Support\Mobile::display($affiliate->user->mobile)" page="admin-affiliates">
     <div class="desk-2">
         <section class="band stack-sm">

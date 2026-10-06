@@ -25,6 +25,11 @@ export async function request(method, url, data = null, { timeout = 20000, heade
     else body = { html: await res.text() };
     if (!res.ok) {
       const message = body?.message_fa || (body?.errors ? Object.values(body.errors)[0]?.[0] : null) || defaultMessage(res.status);
+      if (body?.code === 'REAUTH_REQUIRED' && body.login) {
+        // Admin step-up: offer a fresh sign-in and come back to this page.
+        const back = encodeURIComponent(location.pathname);
+        import('./ui.js').then(({ toast }) => toast(message, { kind: 'error', timeout: 15000, action: { label: 'ورود دوباره', onClick: () => { location.href = `${body.login}&back=${back}`; } } }));
+      }
       return { ok: false, status: res.status, data: body, message, code: body?.code || null, errors: body?.errors || null };
     }
     return { ok: true, status: res.status, data: body };

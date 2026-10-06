@@ -29,7 +29,7 @@
             <h2>هشدار و خطای فنی</h2>
             <table class="t"><thead><tr><th>سرویس</th><th>سطح</th><th class="n">تعداد</th></tr></thead><tbody>
                 @forelse ($techErrors as $row)
-                    <tr><td><a href="{{ auth('staff')->user()->isAdmin() ? route('admin.tech', ['service' => $row->service, 'level' => 'warning']) : '#' }}">{{ $row->service }}</a></td><td><span class="badge {{ $row->level === 'warning' ? 'warn' : 'err' }}">{{ $row->level }}</span></td><td class="n">{{ fa($row->c) }}</td></tr>
+                    <tr><td><a href="{{ auth('staff')->user()->allows('logs.tech') ? route('admin.tech', ['service' => $row->service, 'level' => 'warning']) : '#' }}">{{ $row->service }}</a></td><td><span class="badge {{ $row->level === 'warning' ? 'warn' : 'err' }}">{{ $row->level }}</span></td><td class="n">{{ fa($row->c) }}</td></tr>
                 @empty
                     <tr><td colspan="3" class="muted">خطایی ثبت نشده است.</td></tr>
                 @endforelse

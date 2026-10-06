@@ -5,6 +5,7 @@ namespace Tests;
 use App\Domain\Identity\LoginService;
 use App\Models\Membership;
 use App\Models\ShopProfile;
+use App\Models\StaffUser;
 use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
@@ -73,6 +74,20 @@ abstract class TestCase extends BaseTestCase
         } finally {
             $ctx->clear();
         }
+    }
+
+    /**
+     * Signs a staff member into the admin console. The admin area runs on its own session store
+     * (UseAdminSession), so the data is put there; $authAgo = seconds since sign-in (step-up checks).
+     */
+    protected function asStaff(StaffUser $staff, int $authAgo = 0): static
+    {
+        config(['session.cookie' => config('talata.admin.session_cookie')]);
+        if (app('session')->driver()->getName() !== config('session.cookie')) {
+            app('session')->forgetDrivers();
+        }
+
+        return $this->actingAs($staff, 'staff')->withSession(['staff.seen' => now()->getTimestamp(), 'staff.auth_at' => now()->getTimestamp() - $authAgo]);
     }
 
     /** JSON request helper with the AJAX headers the app uses. */
