@@ -99,5 +99,15 @@ class InstallmentScheduleTest extends TestCase
         $this->travelTo(CarbonImmutable::parse('2026-10-07 12:00', 'Asia/Tehran'));
         $service->sendReminders($sms);
         $this->assertSame(0, SmsMessage::query()->where('purpose', 'REMINDER')->where('schedule_line_id', $line1->id)->count());
+
+        // A cancelled agreement (required before its invoice can be voided) sends nothing more.
+        // Line 2 (due a week later) would be reminded around its due date; walk through that window.
+        $agreement = $this->inTenant($user, fn () => InstallmentAgreement::firstOrFail());
+        $this->inTenant($user, fn () => $service->cancel($agreement, 'مشتری کالا را پس داد'));
+        for ($day = 0; $day < 14; $day++) {
+            $this->travel(1)->days();
+            $service->sendReminders($sms);
+        }
+        $this->assertSame(0, SmsMessage::query()->where('purpose', 'REMINDER')->count());
     }
 }
