@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\App\AffiliateController;
+use App\Http\Controllers\App\BackupsController;
 use App\Http\Controllers\App\BillingController;
 use App\Http\Controllers\App\CalculatorController;
 use App\Http\Controllers\App\CustomerController;
@@ -77,6 +78,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     Route::get('/settings/numbering', [SettingsController::class, 'numbering'])->middleware('perm:settings.manage')->name('settings.numbering');
     Route::get('/settings/sms-template', [SettingsController::class, 'smsTemplate'])->middleware('perm:settings.manage')->name('settings.sms_template');
     Route::get('/settings/users', [UsersController::class, 'index'])->middleware('perm:__owner')->name('settings.users');
+    Route::get('/settings/backups', [BackupsController::class, 'index'])->middleware('perm:__owner')->name('settings.backups');
     Route::get('/settings/plan', [BillingController::class, 'plans'])->name('settings.plan');
     Route::get('/settings/sms', [BillingController::class, 'sms'])->name('settings.sms');
     Route::get('/affiliate', [AffiliateController::class, 'show'])->name('affiliate');
@@ -138,6 +140,8 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::get('/billing/orders/{order}', [BillingController::class, 'order'])->name('api.billing.order');
 
         Route::middleware('perm:__owner')->group(function () {
+            Route::post('/settings/backups', [BackupsController::class, 'store'])->middleware('throttle:10,1')->name('api.backups.store');
+            Route::post('/settings/backups/{backup}/restore', [BackupsController::class, 'restore'])->whereNumber('backup')->middleware('throttle:10,1')->name('api.backups.restore');
             Route::post('/users/invite', [UsersController::class, 'invite'])->middleware('throttle:10,1')->name('api.users.invite');
             Route::put('/users/{membership}', [UsersController::class, 'update'])->name('api.users.update');
             Route::delete('/users/{membership}', [UsersController::class, 'remove'])->name('api.users.remove');

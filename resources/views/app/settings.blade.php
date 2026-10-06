@@ -44,6 +44,7 @@
             <a class="list-item" href="{{ route('settings.sms_template') }}"><span class="body"><strong>متن پیامک فاکتور</strong></span><span aria-hidden="true">‹</span></a>
         @endif
         @if ($isOwner)
+            <a class="list-item" href="{{ route('settings.backups') }}"><span class="body"><strong>پشتیبان تنظیمات</strong><span class="sub">۵۰ تغییر آخر تنظیمات؛ بازگرداندن با یک لمس</span></span><span aria-hidden="true">‹</span></a>
             <a class="list-item" href="{{ route('settings.users') }}"><span class="body"><strong>کاربران و دسترسی‌ها</strong></span><span aria-hidden="true">‹</span></a>
         @endif
     </nav>

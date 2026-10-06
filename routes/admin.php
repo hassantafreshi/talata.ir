@@ -27,6 +27,7 @@ Route::middleware('staff')->group(function () {
     Route::get('/users/{user}', [ActivityController::class, 'user'])->whereNumber('user')->name('user');
     Route::get('/tenants', [TenantsController::class, 'index'])->name('tenants');
     Route::get('/tenants/{tenant:id}', [TenantsController::class, 'show'])->whereNumber('tenant')->name('tenant');
+    Route::post('/api/tenants/{tenant:id}/backups/{backup}/restore', [TenantsController::class, 'restoreBackup'])->whereNumber(['tenant', 'backup'])->middleware(['staff:admin', 'throttle:20,1'])->name('tenant.backup.restore');
     Route::get('/account', [AccountController::class, 'show'])->name('account');
     Route::post('/api/account/passkeys/options', [AccountController::class, 'options'])->middleware('throttle:20,1')->name('account.passkeys.options');
     Route::post('/api/account/passkeys', [AccountController::class, 'store'])->middleware('throttle:20,1')->name('account.passkeys.store');

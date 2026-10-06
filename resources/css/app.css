@@ -412,3 +412,8 @@ table.t tr.lvl-warning td { background: #FFFBF1; }
 .numbering-presets { grid-template-columns: 1fr; }
 @media (min-width: 700px) { .numbering-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .numbering-presets .tile { gap: 4px; padding: 12px 14px; }
+
+/* Settings backups */
+.backups .restore > summary, .backups details > summary { list-style: none; cursor: pointer; }
+.backups details > summary::-webkit-details-marker { display: none; }
+.backups details[open] > summary { margin-bottom: 8px; }

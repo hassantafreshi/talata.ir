@@ -50,6 +50,7 @@ Evidence: `php artisan test` (91 tests on PostgreSQL), `npm run test:js`, Playwr
 - [x] Passkey (fingerprint/face/device-lock) sign-in for merchants and staff; SMS login stays as recovery.
 - [x] Team: members have full access by default; per-permission restriction only on Basic/Pro (`team.permissions_edit`).
 - [x] Activity log per user/shop/service and technical log per service, visible only in the admin console `/admin` (staff guard, OTP/passkey, idle timeout, roles).
+- [x] Settings backups (docs/SETTINGS_BACKUPS.md): last 50 settings states per shop on Basic/Pro, manual backup, per-section restore by owner or admin with an undo backup, audited.
 - [x] Configurable invoice numbering (docs/INVOICE_NUMBERING.md): presets, prefix, year/month parts, yearly/monthly/never reset, start number, unique per shop, never reused, LRM-safe display.
 - [x] Admin price editor (docs/ADMIN_PRICING.md): Basic/Pro monthly+yearly and per-plan SMS segment price publish a new pricing version (never in place), >50% typo guard, restore, audit; paid/pending orders keep their amounts.
 - [x] Screen-level team permissions (docs/TEAM_PERMISSIONS.md): chosen when adding a member, presets, dependencies, filtered menu, /home redirect, seller sees own invoices only.

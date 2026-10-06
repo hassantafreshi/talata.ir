@@ -7,6 +7,7 @@ use App\Domain\DomainError;
 use App\Domain\Invoices\LayoutSettings;
 use App\Domain\Invoices\Numbering;
 use App\Domain\Invoices\Qr;
+use App\Domain\Settings\SettingsBackups;
 use App\Domain\Sms\SmsCredit;
 use App\Domain\Sms\SmsTemplate;
 use App\Models\Affiliate;
@@ -117,6 +118,7 @@ class SettingsController extends BaseController
             'license_union' => $clean($data['license_union'] ?? null, 40), 'license_online' => $clean($data['license_online'] ?? null, 40), 'socials' => $socials,
         ]);
         Audit::record('profile.updated', $profile);
+        app(SettingsBackups::class)->capture($this->tenant(), 'profile'); // Basic/Pro: keep the last 50 settings states
         $return = $request->input('return');
 
         return response()->json(['ok' => true, 'next' => preg_match('/^[0-9a-z]{26}$/', (string) $return) ? route('invoices.review', $return) : null]);
@@ -155,6 +157,7 @@ class SettingsController extends BaseController
         Storage::disk('local')->put($path, $png);
         $profile->update(['logo_path' => $path, 'logo_version' => $version]);
         Audit::record('profile.logo_uploaded', $profile, ['version' => $version]);
+        app(SettingsBackups::class)->capture($this->tenant(), 'logo'); // Basic/Pro: keep the last 50 settings states
 
         return response()->json(['ok' => true, 'url' => route('public.logo', [$tenant->public_id, $version])]);
     }
@@ -164,6 +167,7 @@ class SettingsController extends BaseController
         $profile = ShopProfile::query()->firstOrFail();
         $profile->update(['logo_path' => null]);
         Audit::record('profile.logo_removed', $profile);
+        app(SettingsBackups::class)->capture($this->tenant(), 'logo'); // Basic/Pro: keep the last 50 settings states
 
         return response()->json(['ok' => true]);
     }
@@ -191,6 +195,7 @@ class SettingsController extends BaseController
             }
             $layout->update(['settings' => LayoutSettings::sanitize($data['settings']), 'version' => $layout->version + 1, 'updated_by' => auth()->id()]);
             Audit::record('layout.updated', $layout, ['version' => $layout->version]);
+            app(SettingsBackups::class)->capture($this->tenant(), 'layout'); // Basic/Pro: keep the last 50 settings states
 
             return $layout;
         });
@@ -223,6 +228,7 @@ class SettingsController extends BaseController
         $template = SmsTemplate::validate($data['template']);
         SmsSetting::query()->updateOrCreate([], ['invoice_template' => $template]);
         Audit::record('sms.template_updated', null);
+        app(SettingsBackups::class)->capture($this->tenant(), 'sms_template'); // Basic/Pro: keep the last 50 settings states
 
         return response()->json(['ok' => true]);
     }
@@ -277,6 +283,7 @@ class SettingsController extends BaseController
                 Numbering::setNext($settings, (int) $next, CarbonImmutable::now(), $tenant->timezone);
             }
             Audit::record('settings.numbering_changed', $row, ['before' => $before, 'after' => $settings, 'next' => $next ?: null]);
+            app(SettingsBackups::class)->capture($this->tenant(), 'numbering'); // Basic/Pro: keep the last 50 settings states
 
             return $row;
         });

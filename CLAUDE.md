@@ -14,11 +14,12 @@ For future implementation requests, read:
 8. `docs/design/README.md` and `docs/design/UI_APPROVED_DECISIONS.md` for the Stage A proposal status, owner-stated UI requirements and which design decisions are actually approved (brand spelling: طلاتا / Talata).
 9. `docs/design/UI_BUILD_SPEC.md`, `docs/design/tokens/`, `docs/design/invoice-templates/` and `docs/design/contracts/` for the UI build contract, design tokens, invoice layout schema/presets and frontend adapter/calculation contracts (proposed; palette 1 and logo concept 1 are working defaults, not approvals).
 10. `docs/AFFILIATE_PROGRAM.md` for the affiliate program (codes, referral links, commissions, affiliate and admin panels).
-11. `docs/INVOICE_NUMBERING.md` for configurable invoice numbering (presets, reset periods, start number; display numbers with `invno()`).
-12. `docs/ADMIN_PRICING.md` for the admin plan/SMS price editor (versioned, audited; doc prices are defaults).
-13. `docs/TEAM_PERMISSIONS.md` for screen-level team access (presets, dependencies, home redirect); owners may restrict مظنه/calculator per member, plans/quotas never block them.
-14. `docs/GOLD_RECEIVED_AND_DASHBOARD.md` for gold received from the customer instead of money (GOLD_IN rows, GOLD_IN_V1, 750-equivalent weights, Tahesab-style print) and the sales dashboard.
-15. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
+11. `docs/SETTINGS_BACKUPS.md` for settings backups (last 50 per shop, Basic/Pro, per-section restore by owner or admin).
+12. `docs/INVOICE_NUMBERING.md` for configurable invoice numbering (presets, reset periods, start number; display numbers with `invno()`).
+13. `docs/ADMIN_PRICING.md` for the admin plan/SMS price editor (versioned, audited; doc prices are defaults).
+14. `docs/TEAM_PERMISSIONS.md` for screen-level team access (presets, dependencies, home redirect); owners may restrict مظنه/calculator per member, plans/quotas never block them.
+15. `docs/GOLD_RECEIVED_AND_DASHBOARD.md` for gold received from the customer instead of money (GOLD_IN rows, GOLD_IN_V1, 750-equivalent weights, Tahesab-style print) and the sales dashboard.
+16. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
 
 ## Durable constraints
 

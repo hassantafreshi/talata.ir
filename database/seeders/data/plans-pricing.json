@@ -25,7 +25,7 @@
     "invoice.finalize": true,
     "invoice.print": true,
     "invoice.sms_share": true,
-    "customers.manage": true, "dashboard.view": true,
+    "customers.manage": true, "dashboard.view": true, "settings.backup": false,
     "team.permissions_edit": false,
     "invoice.customize": false,
     "invoice.shop_logo": false,
@@ -43,7 +43,7 @@
     "new_customers_per_month": 50,
     "links_per_month": 10,
     "free_sms_per_year": 5,
-    "team_members": 10
+    "team_members": 10, "settings_backups": 50
    }
   },
   "basic": {
@@ -67,7 +67,7 @@
     "invoice.finalize": true,
     "invoice.print": true,
     "invoice.sms_share": true,
-    "customers.manage": true, "dashboard.view": true,
+    "customers.manage": true, "dashboard.view": true, "settings.backup": true,
     "team.permissions_edit": true,
     "invoice.customize": true,
     "invoice.shop_logo": true,
@@ -85,7 +85,7 @@
     "new_customers_per_month": 500,
     "links_per_month": 100,
     "free_sms_per_year": 0,
-    "team_members": 10
+    "team_members": 10, "settings_backups": 50
    }
   },
   "professional": {
@@ -108,7 +108,7 @@
     "invoice.finalize": true,
     "invoice.print": true,
     "invoice.sms_share": true,
-    "customers.manage": true, "dashboard.view": true,
+    "customers.manage": true, "dashboard.view": true, "settings.backup": true,
     "team.permissions_edit": true,
     "invoice.customize": true,
     "invoice.shop_logo": true,
@@ -126,7 +126,7 @@
     "new_customers_per_month": null,
     "links_per_month": 1000,
     "free_sms_per_year": 0,
-    "team_members": 10
+    "team_members": 10, "settings_backups": 50
    }
   }
  },

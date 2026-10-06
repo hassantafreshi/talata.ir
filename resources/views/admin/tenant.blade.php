@@ -1,4 +1,4 @@
-<x-layouts.admin :title="$profile?->name ?: 'فروشگاه #'.$tenant->id">
+<x-layouts.admin :title="$profile?->name ?: 'فروشگاه #'.$tenant->id" page="admin-tenant">
     <div class="desk-2">
         <section class="band stack-sm">
             <dl class="kv">
@@ -24,6 +24,24 @@
                 @endforeach
             </tbody></table>
             <a class="btn btn-line" href="{{ route('admin.activity', ['tenant' => $tenant->id]) }}">همه فعالیت‌های این فروشگاه</a>
+        </section>
+        <section class="stack-sm" aria-labelledby="bk-h">
+            <h2 id="bk-h">پشتیبان تنظیمات ({{ fa($backups->count()) }})</h2>
+            <p class="xs muted">به درخواست مالک فروشگاه. پیش از بازگرداندن، تنظیمات فعلی پشتیبان گرفته می‌شود و کار با نام شما در لاگ فعالیت ثبت می‌شود.</p>
+            @forelse ($backups as $b)
+                <details class="band white stack-sm">
+                    <summary><strong>{{ $b->label ?: (\App\Models\SettingsBackup::REASONS[$b->reason] ?? 'پشتیبان') }}</strong> <span class="xs muted num">{{ jdate($b->created_at, true) }}</span></summary>
+                    <p class="xs">نام: {{ $b->payload['profile']['name'] ?? '—' }} · آدرس: {{ $b->payload['profile']['address'] ?? '—' }}</p>
+                    @if (auth('staff')->user()->isAdmin())
+                        <form class="stack-sm" data-admin-restore data-url="{{ route('admin.tenant.backup.restore', [$tenant->id, $b->id]) }}">
+                            @foreach ($sections as $key => $label)<label class="check"><input type="checkbox" name="sections[]" value="{{ $key }}"> {{ $label }}</label>@endforeach
+                            <button class="btn sm btn-dark" type="submit">بازگرداندن بخش‌های انتخاب‌شده</button>
+                        </form>
+                    @endif
+                </details>
+            @empty
+                <p class="small muted">پشتیبانی ثبت نشده است (فقط پلن پایه و حرفه‌ای).</p>
+            @endforelse
         </section>
     </div>
 </x-layouts.admin>
