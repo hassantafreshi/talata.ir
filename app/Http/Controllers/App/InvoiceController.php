@@ -41,6 +41,14 @@ class InvoiceController extends BaseController
             'void' => $q->where('status', 'void'),
             default => null,
         };
+        // Independent toggles, combinable with the status chips above.
+        if ($request->boolean('month')) {
+            [$start] = Jalali::monthBounds(now(), $tenant->timezone);
+            $q->where('issued_at', '>=', $start); // issued this Jalali month (drafts have no issue date)
+        }
+        if ($request->boolean('installment')) {
+            $q->whereHas('agreements');
+        }
         if ($s = trim((string) $request->query('q', ''))) {
             $s = Digits::toLatin($s);
             $q->where(fn ($w) => $w->where('number', 'ilike', '%'.addcslashes($s, '%_\\').'%')->orWhere('buyer_name', 'ilike', '%'.addcslashes($s, '%_\\').'%')->orWhere('buyer_mobile', 'like', '%'.preg_replace('/\D/', '', $s).'%'));
@@ -57,6 +65,9 @@ class InvoiceController extends BaseController
             'page' => $this->query($request)->paginate(25)->withQueryString(),
             'filter' => $request->query('filter', 'all'),
             'search' => $request->query('q', ''),
+            'onlyMonth' => $request->boolean('month'),
+            'onlyInstallment' => $request->boolean('installment'),
+            'canInstallments' => $this->ent()->can($tenant, 'installments.manage'),
             'quota' => $this->ent()->quota($tenant, 'invoices_per_month'),
             'links' => $this->ent()->quota($tenant, 'links_per_month'),
             'historyRestricted' => ! $this->ent()->can($tenant, 'history.all'),

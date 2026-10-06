@@ -134,4 +134,45 @@ class InvoiceFlowTest extends TestCase
         $next = $this->api('POST', "/api/invoices/{$id}/replace")->assertOk()->json('next');
         $this->get($next)->assertOk();
     }
+
+    public function test_installment_filter_shows_only_invoices_with_an_agreement(): void
+    {
+        $user = $this->merchant('professional');
+        [$plain, $pv] = $this->draft($user);
+        $this->issue($user, $plain, $pv)->assertCreated();
+        [$withPlan, $wv] = $this->draft($user);
+        $this->issue($user, $withPlan, $wv)->assertCreated();
+
+        $this->inTenant($user, function () use ($withPlan) {
+            $invoice = Invoice::where('public_id', $withPlan)->firstOrFail();
+            $customer = \App\Models\Customer::create(['name' => 'خریدار قسطی']);
+            \App\Models\InstallmentAgreement::create([
+                'customer_id' => $customer->id, 'invoice_id' => $invoice->id, 'principal_irr' => '1000000',
+                'count' => 3, 'frequency' => 'monthly', 'status' => 'active',
+            ]);
+        });
+
+        $all = $this->actingAs($user)->api('GET', '/api/invoices')->assertOk();
+        $this->assertSame(2, $all->json('total'));
+        $only = $this->api('GET', '/api/invoices?installment=1')->assertOk();
+        $this->assertSame(1, $only->json('total'));
+        $this->assertStringContainsString($withPlan, $only->json('html'));
+        $this->assertStringNotContainsString($plain, $only->json('html'));
+    }
+
+    public function test_this_month_filter_excludes_invoices_issued_before_this_month(): void
+    {
+        $user = $this->merchant('professional');
+        [$old, $ov] = $this->draft($user);
+        $this->issue($user, $old, $ov)->assertCreated();
+        [$fresh, $fv] = $this->draft($user);
+        $this->issue($user, $fresh, $fv)->assertCreated();
+
+        $this->inTenant($user, fn () => Invoice::where('public_id', $old)->update(['issued_at' => now()->subMonths(2)]));
+
+        $month = $this->actingAs($user)->api('GET', '/api/invoices?month=1')->assertOk();
+        $this->assertSame(1, $month->json('total'));
+        $this->assertStringContainsString($fresh, $month->json('html'));
+        $this->assertStringNotContainsString($old, $month->json('html'));
+    }
 }

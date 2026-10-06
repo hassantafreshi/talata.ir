@@ -49,6 +49,11 @@ class Invoice extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    public function agreements(): HasMany
+    {
+        return $this->hasMany(InstallmentAgreement::class);
+    }
+
     public function replaces(): BelongsTo
     {
         return $this->belongsTo(Invoice::class, 'replaces_invoice_id');

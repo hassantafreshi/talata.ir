@@ -17,6 +17,16 @@
                 <label><input type="radio" name="filter" value="{{ $k }}" @checked($filter === $k)>{{ $label }}</label>
             @endforeach
         </div>
+        @if (! $historyRestricted || $canInstallments)
+            <div class="chips" role="group" aria-label="فیلترهای بیشتر">
+                @unless ($historyRestricted)
+                    <label class="chip"><input type="checkbox" name="month" value="1" @checked($onlyMonth)>این ماه</label>
+                @endunless
+                @if ($canInstallments)
+                    <label class="chip"><input type="checkbox" name="installment" value="1" @checked($onlyInstallment)>اقساطی</label>
+                @endif
+            </div>
+        @endif
         <noscript><button class="btn btn-line">اعمال</button></noscript>
     </form>
     <p class="xs muted" data-count role="status">{{ fa($page->total()) }} مورد</p>

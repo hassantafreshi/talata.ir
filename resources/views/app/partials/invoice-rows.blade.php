@@ -19,7 +19,7 @@
         </a>
     </li>
 @empty
-    @if (trim((string) request('q')) === '' && in_array(request('filter'), [null, '', 'all'], true))
+    @if (trim((string) request('q')) === '' && in_array(request('filter'), [null, '', 'all'], true) && ! request()->boolean('month') && ! request()->boolean('installment'))
         <li class="empty stack-sm center">
             <strong>هنوز فاکتوری ثبت نشده است.</strong>
             <span class="small muted">اولین فاکتور را با نرخ روز طلای ۱۸ عیار بسازید؛ پس از صدور، اینجا دیده می‌شود.</span>
@@ -27,8 +27,8 @@
         </li>
     @else
         <li class="empty stack-sm center">
-            <strong>با این جستجو فاکتوری پیدا نشد.</strong>
-            <a class="btn btn-line" href="{{ route('invoices.index') }}">پاک‌کردن جستجو و نمایش همه</a>
+            <strong>با این جستجو یا فیلتر فاکتوری پیدا نشد.</strong>
+            <a class="btn btn-line" href="{{ route('invoices.index') }}">پاک‌کردن و نمایش همه</a>
         </li>
     @endif
 @endforelse
