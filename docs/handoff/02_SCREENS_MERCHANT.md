@@ -308,3 +308,13 @@ Other triggers (`plans-pricing.json#quota_notice_triggers`): links exhausted, hi
 **Security:** passkey device table (name, added, last used, rename, remove with confirmation and immediate effect), «افزودن این دستگاه»; login number change (two OTP steps: current then new); explanation that business mobile is separate.
 
 **States:** invite sent, invite expired, last owner protection, removing own passkey on current device, change-number in progress.
+
+## Affiliate panel «همکاری در فروش» (`/affiliate`) — built; full contract in `docs/AFFILIATE_PROGRAM.md`
+
+**Entry:** Settings list item «همکاری در فروش» (code + فعال/متوقف badge), shown only when the logged-in person is an affiliate. Otherwise `/affiliate` is 404.
+
+**Content:** dark hero with the code (large, LTR), one-line explanation including the buyer discount %, read-only referral link, «کپی لینک» and «اشتراک‌گذاری» (Web Share API, hidden when unsupported); stat tiles کل درآمد / در انتظار تأیید / قابل پرداخت / پرداخت‌شده / مشتریان معرفی‌شده; commission terms line; «خریداران شما» table (masked mobile `۰۹۱*****۵۶۷`, since, payments count, income); «ریز درآمد» list (masked mobile, date, product, %, amount, status badge); «واریزها».
+
+**States:** paused (warning banner), no buyers yet (empty-row hint to share the link). Never show full buyer mobiles, shop names or purchase amounts.
+
+**Plans page addition:** «کد تخفیف یا کد معرف» field + «اعمال». It reprices every plan card (adds a «تخفیف» row and updates VAT and payable) through `POST /api/billing/discount`, is prefilled from the referral link or an existing referral, and shows errors at the field.

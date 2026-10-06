@@ -56,7 +56,7 @@ class AuthController extends Controller
             try {
                 $state = ['challenge' => $otp->request($mobile, $request->ip(), 'staff')['challenge_id'], 'decoy' => false] + $state;
             } catch (DomainError $e) {
-                TechLog::warning('admin', 'admin code not sent', ['code' => $e->codeName, 'ip' => $request->ip()]);
+                TechLog::warning('admin', 'admin code not sent', ['reason' => $e->codeName, 'ip' => $request->ip()]);
                 $previous = $request->session()->get('admin.otp');
                 if (is_array($previous) && ($previous['mobile'] ?? null) === $mobile && ! ($previous['decoy'] ?? true)) {
                     $state = $previous; // keep the code that is still valid

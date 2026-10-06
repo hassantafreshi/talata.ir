@@ -92,3 +92,27 @@ API: `GET /provider/api/audit?…`, `GET …/export.csv`.
 Tiles: queue lag, failed jobs, outbox pending, last backup + restore-drill age (warn after 30 days). Scheduler table: job, cadence, last run, duration, result, next run — central quote fetch (180 s), payment reconcile (1 min), abandoned-order expiry (5 min), SMS unknown reconcile (1 min), free-credit expiry + warning (daily), instalment reminders (daily), database backup (daily). Failed jobs card (id, short error, «اجرای دوباره», idempotent). Version/environment card (app version, environment badge, last deploy, pending migrations).
 
 API: `GET /provider/api/system`, `POST /provider/api/system/failed-jobs/{id}/retry`.
+
+## Affiliates «همکاری در فروش» (`/admin/affiliates`, `/admin/affiliates/{id}`) — built; contract in `docs/AFFILIATE_PROGRAM.md`
+
+**List:** «همکار جدید» form (admin role) with these fields:
+- mobile — must already have an active shop panel
+- commission % (0–50)
+- mode: فقط پرداخت اول / مادام‌العمر
+- buyer discount % (first plan purchase)
+- optional code — blank means auto `TL…`
+- «کمیسیون روی خرید اعتبار پیامک»
+- internal note
+
+Below the form: search by code or mobile, and a table with affiliate, code, terms, buyers, pending, payable and paid amounts, and status.
+
+**Detail:**
+- Code and referral link to hand to the person.
+- Stat tiles.
+- Editable terms: changes apply to future payments only.
+- «ثبت واریز» with bank reference: pays all payable commissions.
+- Referred shops: shop, full mobile, link/code, date.
+- Commissions: order ref, pre-VAT base, %, amount, status, «لغو» with a reason.
+- Payout history.
+
+Support role: read-only.

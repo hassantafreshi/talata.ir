@@ -338,3 +338,5 @@ table.t tr.lvl-warning td { background: #FFFBF1; }
 .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; direction: ltr; unicode-bidi: isolate; }
 @media (max-width: 1023px) { body.admin .admin-nav { display: flex; overflow-x: auto; } }
 @media (min-width: 0) { .narrow { max-width: 520px; } }
+.filters .field { display: flex; flex-direction: column; gap: 4px; } .filters .check { align-self: center; }
+.hero .input-wrap { background: #fff; } .hero .input-wrap input { color: var(--t-ink); }

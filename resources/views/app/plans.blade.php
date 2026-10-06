@@ -3,6 +3,14 @@
     <script type="application/json" id="boot">@json($bootData)</script>
     @if ($mock)<div class="notice warn">حالت آزمایشی: درگاه پرداخت واقعی هنوز انتخاب نشده و پرداخت‌ها شبیه‌سازی می‌شوند.</div>@endif
     <p class="small">پلن فعلی: <strong>{{ $summary['plan']['label_fa'] }}</strong>@if($summary['plan']['ends_at_fa']) · تا {{ $summary['plan']['ends_at_fa'] }}@endif</p>
+    @if ($canBuy)
+        <form class="band stack-sm" data-discount-form novalidate>
+            <div class="field"><label for="dc">کد تخفیف یا کد معرف</label>
+                <div class="jdp-typed-row"><div class="input-wrap ltr-input"><input id="dc" name="discount_code" value="{{ $prefillCode }}" maxlength="20" autocomplete="off" placeholder="مثلاً TLAB12CD"></div>
+                    <button class="btn btn-dark" type="submit" data-busy-text="…">اعمال</button></div>
+                <div class="err"></div><p class="hint" data-discount-msg role="status"></p></div>
+        </form>
+    @endif
     <div class="seg" role="radiogroup" aria-label="دوره">
         <label><input type="radio" name="period" value="monthly" checked>ماهانه</label>
         <label><input type="radio" name="period" value="yearly">سالانه</label>
@@ -16,12 +24,13 @@
                     <div><strong class="price-sm">رایگان</strong></div>
                 @else
                     @foreach (['monthly', 'yearly'] as $period)
-                        <div class="stack-sm" data-period="{{ $period }}" @if($period === 'yearly') hidden @endif>
+                        <div class="stack-sm" data-period="{{ $period }}" data-plan="{{ $code }}" @if($period === 'yearly') hidden @endif>
                             <div><strong class="price-sm num">{{ toman($p['prices'][$period]['subtotal']) }}</strong> <span class="small">تومان {{ $period === 'monthly' ? 'در ماه' : 'در سال' }}</span></div>
                             <dl class="kv small">
-                                <div><dt>مبلغ پلن</dt><dd class="num">{{ toman($p['prices'][$period]['subtotal']) }}</dd></div>
-                                <div><dt>مالیات بر ارزش افزوده {{ fa($vat) }}٪</dt><dd class="num">{{ toman($p['prices'][$period]['vat']) }}</dd></div>
-                                <div><dt><strong>قابل پرداخت</strong></dt><dd class="num"><strong>{{ toman($p['prices'][$period]['total']) }}</strong></dd></div>
+                                <div><dt>مبلغ پلن</dt><dd class="num" data-f="list">{{ toman($p['prices'][$period]['subtotal']) }}</dd></div>
+                                <div class="hidden" data-discount-row><dt>تخفیف</dt><dd class="num" data-f="discount"></dd></div>
+                                <div><dt>مالیات بر ارزش افزوده {{ fa($vat) }}٪</dt><dd class="num" data-f="vat">{{ toman($p['prices'][$period]['vat']) }}</dd></div>
+                                <div><dt><strong>قابل پرداخت</strong></dt><dd class="num"><strong data-f="total">{{ toman($p['prices'][$period]['total']) }}</strong></dd></div>
                             </dl>
                             @if ($canBuy)
                                 <button type="button" class="btn {{ $current ? 'btn-line' : 'btn-gold' }} block" data-buy-plan="{{ $code }}" data-period-btn="{{ $period }}" data-busy-text="انتقال به درگاه…">{{ $current ? 'تمدید' : 'خرید '.$p['label_fa'] }}</button>

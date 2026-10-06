@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Domain\Affiliate\AffiliateService;
 use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Domain\Identity\LoginService;
 use App\Domain\Identity\OtpService;
 use App\Domain\Identity\ProofOfWork;
 use App\Http\Controllers\Controller;
+use App\Models\Membership;
 use App\Support\Mobile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
 
 class LoginController extends Controller
@@ -91,6 +94,16 @@ class LoginController extends Controller
         $request->session()->put('auth_at', now()->getTimestamp());
         Audit::record('auth.login', $result['user'], ['new_tenant' => $result['is_new_tenant']], null, 'user');
 
+        if ($result['is_new_tenant'] && ($ref = $request->cookie('talata_ref'))) {
+            // New shop that arrived through an affiliate link: attribute it now (rules in AffiliateService).
+            $affiliates = app(AffiliateService::class);
+            $affiliate = $affiliates->findActive($ref);
+            $tenant = Membership::query()->where('user_id', $result['user']->id)->where('role', 'owner')->latest('id')->first()?->tenant;
+            if ($affiliate && $tenant) {
+                $affiliates->attach($affiliate, $tenant, 'LINK');
+            }
+            Cookie::queue(Cookie::forget('talata_ref'));
+        }
         $then = $request->session()->pull('login.then');
         $next = match (true) {
             $result['is_new_tenant'] => route('settings.business', ['welcome' => 1]),

@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Affiliate\AffiliateService;
 use App\Domain\Audit\Audit;
 use App\Domain\Billing\BillingService;
 use App\Domain\Customers\InstallmentService;
@@ -99,7 +100,11 @@ Artisan::command('talata:logs-prune', function () {
     $this->info("deleted {$n} technical log rows older than {$days} days (activity log is append-only and kept)");
 })->purpose('Apply technical log retention');
 
+Artisan::command('talata:affiliate-approve', fn (AffiliateService $a) => $this->info('approved: '.$a->approveDue()))
+    ->purpose('Move affiliate commissions past the hold period to payable');
+
 Schedule::command('talata:logs-prune')->dailyAt('03:30');
+Schedule::command('talata:affiliate-approve')->hourlyAt(17)->withoutOverlapping();
 Schedule::command('talata:quotes')->everyThreeMinutes()->withoutOverlapping();
 Schedule::command('talata:payments-reconcile')->everyMinute()->withoutOverlapping();
 Schedule::command('talata:sms-reconcile')->everyMinute()->withoutOverlapping();

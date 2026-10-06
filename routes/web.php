@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\App\AffiliateController;
 use App\Http\Controllers\App\BillingController;
 use App\Http\Controllers\App\CalculatorController;
 use App\Http\Controllers\App\CustomerController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Auth\PasskeyLoginController;
 use App\Http\Controllers\Public\MockGatewayController;
 use App\Http\Controllers\Public\PaymentReturnController;
 use App\Http\Controllers\Public\PublicInvoiceController;
+use App\Http\Controllers\Public\ReferralController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route(auth()->check() ? 'invoices.new' : 'login'));
@@ -36,6 +38,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->
 
 // ---------- public (no login) ----------
 Route::middleware('throttle:public')->group(function () {
+    Route::get('/r/{code}', ReferralController::class)->where('code', '[A-Za-z0-9-]{4,20}')->name('public.referral');
     Route::get('/v/{token}', [PublicInvoiceController::class, 'verify'])->name('public.verify');
     Route::get('/i/{token}', [PublicInvoiceController::class, 'show'])->name('public.invoice');
     Route::get('/i/{token}/print', [PublicInvoiceController::class, 'print'])->name('public.invoice.print');
@@ -70,6 +73,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     Route::get('/settings/users', [UsersController::class, 'index'])->middleware('perm:__owner')->name('settings.users');
     Route::get('/settings/plan', [BillingController::class, 'plans'])->name('settings.plan');
     Route::get('/settings/sms', [BillingController::class, 'sms'])->name('settings.sms');
+    Route::get('/affiliate', [AffiliateController::class, 'show'])->name('affiliate');
     Route::get('/settings/payments/{order}/receipt', [BillingController::class, 'receipt'])->middleware('perm:billing.manage')->name('settings.receipt');
 
     // JSON endpoints (AJAX, session + CSRF)
@@ -120,6 +124,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
             Route::put('/settings/sms-template', [SettingsController::class, 'saveSmsTemplate'])->middleware('throttle:20,1')->name('api.settings.sms_template');
         });
         Route::middleware('perm:billing.manage')->group(function () {
+            Route::post('/billing/discount', [BillingController::class, 'discount'])->middleware('throttle:'.config('talata.affiliate.validate_per_minute').',1')->name('api.billing.discount');
             Route::post('/billing/orders', [BillingController::class, 'createOrder'])->middleware('throttle:billing')->name('api.billing.orders');
         });
         Route::get('/billing/orders/{order}', [BillingController::class, 'order'])->name('api.billing.order');

@@ -33,7 +33,7 @@ export default function () {
 
   async function order(payload, btn) {
     busy(btn);
-    const sig = `${payload.product}|${payload.plan || payload.pack_amount_toman}|${payload.period || ''}`;
+    const sig = `${payload.product}|${payload.plan || payload.pack_amount_toman}|${payload.period || ''}|${payload.discount_code || ''}`;
     if (!keys.has(sig)) keys.set(sig, idempotencyKey('ord'));
     const res = await post('/api/billing/orders', { ...payload, idempotency_key: keys.get(sig) });
     if (res.ok) { goToGateway(res.data.redirect); return; }
@@ -45,7 +45,36 @@ export default function () {
   document.querySelectorAll('[name="period"]').forEach((r) => r.addEventListener('change', () => {
     document.querySelectorAll('[data-period]').forEach((el) => { el.hidden = el.dataset.period !== r.value; });
   }));
-  document.querySelectorAll('[data-buy-plan]').forEach((btn) => btn.addEventListener('click', () => order({ product: 'PLAN', plan: btn.dataset.buyPlan, period: btn.dataset.periodBtn }, btn)));
+  // Discount / referral code: live repricing of every plan card (server computes; display only).
+  let appliedCode = '';
+  const dForm = document.querySelector('[data-discount-form]');
+  async function applyCode(code, quiet = false) {
+    const msg = dForm.querySelector('[data-discount-msg]');
+    dForm.querySelector('.field').classList.remove('invalid');
+    const blocks = [...document.querySelectorAll('[data-plan][data-period]')];
+    for (const el of blocks) {
+      const res = await post('/api/billing/discount', { code, plan: el.dataset.plan, period: el.dataset.period });
+      if (!res.ok) {
+        appliedCode = '';
+        if (!quiet) { dForm.querySelector('.field').classList.add('invalid'); dForm.querySelector('.err').textContent = res.message; }
+        msg.textContent = '';
+        return;
+      }
+      const d = res.data;
+      el.querySelector('[data-f="discount"]').textContent = `− ${d.discount_fa}`;
+      el.querySelector('[data-discount-row]').classList.toggle('hidden', !d.applied);
+      el.querySelector('[data-f="vat"]').textContent = d.vat_fa;
+      el.querySelector('[data-f="total"]').textContent = d.total_fa;
+      appliedCode = d.code || '';
+      msg.textContent = d.message_fa || '';
+    }
+  }
+  dForm?.addEventListener('submit', (e) => { e.preventDefault(); applyCode(dForm.discount_code.value.trim()); });
+  if (dForm && dForm.discount_code.value.trim()) applyCode(dForm.discount_code.value.trim(), true);
+
+  document.querySelectorAll('[data-buy-plan]').forEach((btn) => btn.addEventListener('click', () => order({
+    product: 'PLAN', plan: btn.dataset.buyPlan, period: btn.dataset.periodBtn, discount_code: appliedCode || null,
+  }, btn)));
 
   // SMS credit page
   const form = document.querySelector('[data-sms-form]');

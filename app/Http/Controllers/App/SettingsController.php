@@ -8,6 +8,7 @@ use App\Domain\Invoices\LayoutSettings;
 use App\Domain\Invoices\Qr;
 use App\Domain\Sms\SmsCredit;
 use App\Domain\Sms\SmsTemplate;
+use App\Models\Affiliate;
 use App\Models\InvoiceLayout;
 use App\Models\Membership;
 use App\Models\Passkey;
@@ -34,6 +35,7 @@ class SettingsController extends BaseController
             'perSegmentFa' => Money::toman($ent->smsPerSegmentIrr($tenant)),
             'membership' => $this->membership(),
             'user' => auth()->user(),
+            'affiliate' => Affiliate::query()->where('user_id', auth()->id())->first(),
             'passkeys' => Passkey::query()->where('owner_type', 'user')->where('owner_id', auth()->id())->orderBy('id')->get(),
             'invites' => Membership::query()->with(['tenant.profile' => fn ($q) => $q->withoutGlobalScope('tenant')])->where('status', 'invited')->whereNull('user_id')->where('invited_mobile', auth()->user()->mobile)->get(),
             'shops' => Membership::query()->with(['tenant.profile' => fn ($q) => $q->withoutGlobalScope('tenant')])->where('user_id', auth()->id())->where('status', 'active')->get(),

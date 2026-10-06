@@ -101,3 +101,20 @@ POST /provider/api/payments/01J9ORD…/manual-confirm
 { "bank_ref_id": "87654321", "reason": "تأیید تلفنی بانک", "idempotency_key": "mc-9ab0…" }
 → 200 { "status": "FULFILLED", "audit_id": "aud_…" }
 ```
+
+## Affiliate program
+
+```http
+POST /api/billing/discount
+{ "code": "tala2026", "plan": "basic", "period": "monthly" }
+→ 200 { "code": "TALA2026", "applied": true, "message_fa": "کد TALA2026 اعمال شد: ۲۰٪ تخفیف روی خرید اول پلن.",
+        "list_fa": "۷۹۰٬۰۰۰", "discount_fa": "۱۵۸٬۰۰۰", "subtotal_fa": "۶۳۲٬۰۰۰", "vat_fa": "۶۳٬۲۰۰", "total_fa": "۶۹۵٬۲۰۰" }
+→ 422 { "code": "DISCOUNT_CODE_NOT_ELIGIBLE", "message_fa": "این فروشگاه قبلاً با کد معرف دیگری ثبت شده است.", "errors": { "discount_code": ["…"] } }
+
+POST /admin/api/affiliates
+{ "mobile": "09121110000", "commission_percent": "12.5", "commission_mode": "LIFETIME", "discount_percent": "10", "code": "negin-10" }
+→ 201 { "id": 7, "next": "/admin/affiliates/7" }      // code stored as NEGIN10, link {public_url}/r/NEGIN10
+
+POST /admin/api/affiliates/7/payouts   { "reference": "BANK-998877" }   → 200 { "ok": true, "amount_irr": "1264000" }
+POST /admin/api/affiliate-commissions/42/void   { "reason": "بازگشت وجه" }   → 200 { "ok": true }
+```

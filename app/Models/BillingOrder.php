@@ -16,6 +16,7 @@ class BillingOrder extends Model
     protected $fillable = [
         'tenant_id', 'public_ref', 'created_by', 'product', 'plan_code', 'period', 'subtotal_irr', 'vat_rate_percent', 'vat_irr', 'amount_irr',
         'price_snapshot', 'return_to', 'status', 'failure_code', 'failure_message', 'idempotency_key', 'expires_at', 'paid_at', 'fulfilled_at',
+        'list_subtotal_irr', 'discount_irr', 'affiliate_id', 'discount_code',
     ];
 
     protected function casts(): array

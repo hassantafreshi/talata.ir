@@ -2,6 +2,7 @@
 
 namespace App\Domain\Billing;
 
+use App\Domain\Affiliate\AffiliateService;
 use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Domain\Plans\CommercialConfig;
@@ -40,6 +41,7 @@ final class BillingService
         private readonly CommercialConfig $config,
         private readonly Entitlements $entitlements,
         private readonly SmsCredit $credit,
+        private readonly AffiliateService $affiliates,
     ) {}
 
     /** @return array{order:BillingOrder,redirect:array} */
@@ -87,14 +89,21 @@ final class BillingService
             throw new DomainError('PRODUCT_INVALID', 'محصول نامعتبر است.', 422);
         }
 
-        $subtotal = (string) BigInteger::of($subtotalToman)->multipliedBy(10);
+        $listSubtotal = (string) BigInteger::of($subtotalToman)->multipliedBy(10);
+        // Affiliate discount (first plan purchase of a referred shop) comes off the pre-VAT price.
+        [$affiliate, $discount, $code] = $this->affiliates->quote($tenant, $product, $listSubtotal, $input['discount_code'] ?? null);
+        $subtotal = (string) BigInteger::of($listSubtotal)->minus($discount);
+        if ($discount !== '0') {
+            $snapshot['discount'] = ['code' => $code, 'percent' => $affiliate->discount_percent, 'irr' => $discount];
+        }
+        $affiliateFields = ['list_subtotal_irr' => $listSubtotal, 'discount_irr' => $discount, 'affiliate_id' => $affiliate?->id, 'discount_code' => $code];
         $vatRate = $this->config->vatRatePercent();
         $vat = Money::vat($subtotal, $vatRate);
         $amount = (string) BigInteger::of($subtotal)->plus($vat);
         $returnTo = $this->sanitizeReturnTo($input['return_to'] ?? null);
 
-        return DB::transaction(function () use ($tenant, $user, $product, $order, $subtotal, $vatRate, $vat, $amount, $snapshot, $returnTo, $key) {
-            $billing = BillingOrder::create($order + [
+        return DB::transaction(function () use ($tenant, $user, $product, $order, $subtotal, $vatRate, $vat, $amount, $snapshot, $returnTo, $key, $affiliateFields) {
+            $billing = BillingOrder::create($order + $affiliateFields + [
                 'public_ref' => 'TL-'.($product === 'PLAN' ? 'PLAN' : 'SMS').'-'.Jalali::year(now(), $tenant->timezone).'-'.strtoupper(Str::random(6)),
                 'created_by' => $user->id, 'product' => $product, 'subtotal_irr' => $subtotal, 'vat_rate_percent' => $vatRate,
                 'vat_irr' => $vat, 'amount_irr' => $amount, 'price_snapshot' => $snapshot, 'return_to' => $returnTo,
@@ -244,6 +253,12 @@ final class BillingService
         $order->fulfilled_at = now();
         $order->save();
         Audit::record('billing.fulfilled', $order, ['product' => $order->product, 'amount_irr' => $order->amount_irr], $order->tenant_id, 'system');
+        try {
+            // Savepoint: an affiliate problem must never undo the merchant's paid plan or credit.
+            DB::transaction(fn () => $this->affiliates->onOrderFulfilled($order, $tenant));
+        } catch (\Throwable $e) {
+            TechLog::error('affiliate', 'commission not recorded', ['order' => $order->public_ref, 'error' => mb_substr($e->getMessage(), 0, 300)]);
+        }
     }
 
     private function activatePlan(Tenant $tenant, BillingOrder $order): void

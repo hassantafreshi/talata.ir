@@ -59,6 +59,7 @@ npm run test:js         # برابری محاسبه مرورگر و سرور ب�
 | [Payments and SMS credit](docs/PAYMENTS_AND_SMS_CREDIT.md) | خرید پلن و شارژ پیامک از درگاه بانک، صفحه بازگشت موفق/ناموفق، دفتر اعتبار پیامک |
 | [Plans and quotas](docs/PLANS_AND_QUOTAS.md) | قیمت پلن‌ها، سهمیه‌ها و شارژ پیامک به تصمیم مالک (رایگان: ۵۰ فاکتور و ۵۰ مشتری جدید در ماه، فقط ماه جاری، ۵ پیامک در سال؛ شارژ پیامک تومانی) |
 | [Mazneh and calculator](docs/MAZNEH_AND_CALCULATOR.md) | قرارداد «مظنه» (خرید/فروش ۱۸، ۲۴ عیار، دلار، انس) و «ماشین‌حساب طلایی» |
+| [Affiliate program](docs/AFFILIATE_PROGRAM.md) | همکاری در فروش: کد تخفیف و لینک معرفی، کمیسیون درصدی (پرداخت اول یا مادام‌العمر)، پنل همکار با موبایل ماسک‌شده، مدیریت در پنل ادمین |
 | [V2 roadmap](docs/ROADMAP_V2_BUSINESS_TYPES.md) | نسخه ۲: نقره‌فروشی، سکه‌فروشی، طلای آب‌شده، چند نوع کسب‌وکار (حرفه‌ای)، ضمیمه عکس محصول؛ زیرساخت فاز ۱ |
 | [UI build spec](docs/design/UI_BUILD_SPEC.md) | قرارداد کامل ساخت UI مرحله B به‌همراه توکن‌ها، قالب‌های فاکتور (schema + دو preset) و قراردادهای adapter |
 | [Stage A design package](docs/design/README.md) | اتود پیشنهادی مرحله A: وایرفریم، اتود موبایل/دسکتاپ، پالت، لوگو، فونت و toolkit؛ در انتظار تأیید مالک (`docs/design/STAGE_A_REVIEW_REQUEST.md`) |

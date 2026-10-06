@@ -1,6 +1,6 @@
 # Phase 1 implementation and acceptance checklist
 
-Status (2026-10-06): merchant web app implemented in this repository (Laravel 13 + PostgreSQL, Blade + AJAX); 83 PHP feature/unit tests (809 assertions) and 10 JS parity tests pass locally; visual direction still a proposal awaiting owner approval. Service admin console, Passkey and real SMS/PSP adapters are not built. Check boxes require evidence, not a plan or a mock screenshot.
+Status (2026-10-06): merchant web app implemented in this repository (Laravel 13 + PostgreSQL, Blade + AJAX); 91 PHP feature/unit tests (889 assertions) and 10 JS parity tests pass locally; visual direction still a proposal awaiting owner approval. Service admin console, Passkey and real SMS/PSP adapters are not built. Check boxes require evidence, not a plan or a mock screenshot.
 
 ## Planning state
 
@@ -35,7 +35,7 @@ Status (2026-10-06): merchant web app implemented in this repository (Laravel 13
 
 ## Implementation progress (2026-10-06)
 
-Evidence: `php artisan test` (83 tests on PostgreSQL), `npm run test:js`, Playwright mobile journey with screenshots in `docs/screenshots/app/`. Security controls and fixed findings: `docs/SECURITY.md`. Frontend decision: `docs/adr/0001-blade-ajax-frontend.md`.
+Evidence: `php artisan test` (91 tests on PostgreSQL), `npm run test:js`, Playwright mobile journey with screenshots in `docs/screenshots/app/`. Security controls and fixed findings: `docs/SECURITY.md`. Frontend decision: `docs/adr/0001-blade-ajax-frontend.md`.
 
 - [x] Mobile OTP login with proof-of-work, layered limits, global budget, lockout (Passkey not yet).
 - [x] Tenancy fail-closed scope, ULID public ids, per-route permissions, member removal kills sessions.
@@ -50,6 +50,7 @@ Evidence: `php artisan test` (83 tests on PostgreSQL), `npm run test:js`, Playwr
 - [x] Passkey (fingerprint/face/device-lock) sign-in for merchants and staff; SMS login stays as recovery.
 - [x] Team: members have full access by default; per-permission restriction only on Basic/Pro (`team.permissions_edit`).
 - [x] Activity log per user/shop/service and technical log per service, visible only in the admin console `/admin` (staff guard, OTP/passkey, idle timeout, roles).
+- [x] Affiliate program (docs/AFFILIATE_PROGRAM.md): admin enrolment per mobile, code + referral link, buyer discount, % commission first-payment or lifetime, hold → payable → paid, masked affiliate panel.
 - [ ] Real PSP adapter (owner selection pending).
 - [ ] Rest of the service admin console (pricing versions, manual tenant actions, SMS/payment operations). Dashboard + logs are done at `/admin`.
 - [ ] Field performance measurement on throttled networks (bundle sizes measured only at build time).

@@ -13,7 +13,8 @@ For future implementation requests, read:
 7. `docs/PLANS_AND_QUOTAS.md` (owner plan prices, quotas and SMS credit: Free 50 invoices and 50 new customers per month, current-month history only, 5 free SMS per year; prepaid per-segment SMS credit 850/500/350 toman), `docs/MAZNEH_AND_CALCULATOR.md` (quote board and golden calculator) and `docs/PAYMENTS_AND_SMS_CREDIT.md` (online plan purchase and SMS top-up via a gateway adapter, bank-return result page, credit ledger) and `docs/ROADMAP_V2_BUSINESS_TYPES.md` (v2: silver/coin/melted-gold business types, multi-type on Professional, product-photo attachments; Phase 1 prepares the infrastructure).
 8. `docs/design/README.md` and `docs/design/UI_APPROVED_DECISIONS.md` for the Stage A proposal status, owner-stated UI requirements and which design decisions are actually approved (brand spelling: طلاتا / Talata).
 9. `docs/design/UI_BUILD_SPEC.md`, `docs/design/tokens/`, `docs/design/invoice-templates/` and `docs/design/contracts/` for the UI build contract, design tokens, invoice layout schema/presets and frontend adapter/calculation contracts (proposed; palette 1 and logo concept 1 are working defaults, not approvals).
-10. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
+10. `docs/AFFILIATE_PROGRAM.md` for the affiliate program (codes, referral links, commissions, affiliate and admin panels).
+11. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
 
 ## Durable constraints
 

@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\App;
 
+use App\Domain\Affiliate\AffiliateService;
 use App\Domain\Billing\BillingService;
 use App\Domain\Billing\PaymentGateway;
 use App\Domain\Plans\CommercialConfig;
 use App\Domain\Sms\SmsCredit;
+use App\Models\AffiliateReferral;
 use App\Models\BillingOrder;
+use App\Support\Digits;
 use App\Support\Money;
 use Brick\Math\BigInteger;
 use Illuminate\Http\Request;
@@ -32,6 +35,9 @@ class BillingController extends BaseController
             'plans' => $plans, 'summary' => $this->ent()->summary($tenant), 'vat' => $vat, 'sms' => $config->sms(),
             'balanceFa' => Money::toman($credit->balance($tenant->id)), 'canBuy' => $this->membership()->can('billing.manage'),
             'mock' => $gateway->isMock(), 'expiring' => $credit->expiringBalance($tenant->id), 'tz' => $tenant->timezone,
+            // Prefill: ?code= from a referral link, the link cookie, or the shop's existing referral.
+            'prefillCode' => AffiliateService::normalizeCode(request()->query('code') ?? request()->cookie('talata_ref'))
+                ?? AffiliateReferral::query()->where('tenant_id', $tenant->id)->with('affiliate')->first()?->affiliate?->code,
         ]);
     }
 
@@ -62,10 +68,30 @@ class BillingController extends BaseController
         $data = $request->validate([
             'product' => ['required', 'in:PLAN,SMS_CREDIT'], 'plan' => ['nullable', 'string', 'max:20'], 'period' => ['nullable', 'string', 'max:10'],
             'pack_amount_toman' => ['nullable', 'string', 'max:20'], 'return_to' => ['nullable', 'array'], 'idempotency_key' => ['required', 'string', 'max:64'],
+            'discount_code' => ['nullable', 'string', 'max:30'],
         ]);
         $result = $billing->createOrder($this->tenant(), $request->user(), $data);
 
         return response()->json(['order_id' => $result['order']->public_id, 'redirect' => $result['redirect']], 201);
+    }
+
+    /** Live price with an affiliate discount code (display only; the order is priced again on the server). */
+    public function discount(Request $request, AffiliateService $affiliates, CommercialConfig $config)
+    {
+        $data = $request->validate(['code' => ['nullable', 'string', 'max:30'], 'plan' => ['required', 'in:basic,professional'], 'period' => ['required', 'in:monthly,yearly']]);
+        $tenant = $this->tenant();
+        $list = (string) BigInteger::of((string) $config->plan($data['plan'])['price_toman'][$data['period']])->multipliedBy(10);
+        [$affiliate, $discount, $code] = $affiliates->quote($tenant, 'PLAN', $list, $data['code'] ?? null);
+        $sub = (string) BigInteger::of($list)->minus($discount);
+        $vat = Money::vat($sub, $config->vatRatePercent());
+
+        return response()->json([
+            'code' => $code, 'applied' => $discount !== '0',
+            'message_fa' => $discount !== '0' ? 'کد '.$code.' اعمال شد: '.Digits::toPersian(rtrim(rtrim((string) $affiliate->discount_percent, '0'), '.')).'٪ تخفیف روی خرید اول پلن.'
+                : ($code ? 'کد معرف ثبت شد؛ تخفیف فقط روی خرید اول پلن است.' : null),
+            'list_fa' => Money::toman($list), 'discount_fa' => Money::toman($discount), 'subtotal_fa' => Money::toman($sub),
+            'vat_fa' => Money::toman($vat), 'total_fa' => Money::toman((string) BigInteger::of($sub)->plus($vat)),
+        ]);
     }
 
     public function order(BillingOrder $order)

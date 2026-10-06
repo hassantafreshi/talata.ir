@@ -19,6 +19,7 @@
 | بسته تحویل برای مدل برنامه‌نویس | `handoff/` + `design/reference-html/` | آماده؛ مرجع ظاهری پیشنهادی |
 | پنل مدیریت سرویس نسخه ۱ | `handoff/04_SCREENS_ADMIN.md` + تابلوهای `Provider`, `Admin*` | آماده ساخت |
 | تصمیم‌های تأییدشده و باز UI | `design/UI_APPROVED_DECISIONS.md` | مرجع وضعیت تأیید |
+| همکاری در فروش (افیلیت): کد تخفیف، لینک، کمیسیون، پنل همکار و مدیر | `AFFILIATE_PROGRAM.md` | پیاده‌سازی و آزموده |
 | چک‌لیست پیشرفت | `PHASE_1_CHECKLIST.md` | با هر milestone به‌روز شود |
 
 ## ۲. Stack و ساختار مخزن

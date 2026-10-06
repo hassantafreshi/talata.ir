@@ -29,6 +29,9 @@
 
     <nav class="list" aria-label="تنظیمات">
         <a class="list-item" href="{{ route('customers.index') }}"><span class="body"><strong>مشتریان و اقساط</strong></span><span aria-hidden="true">‹</span></a>
+        @if ($affiliate)
+            <a class="list-item" href="{{ route('affiliate') }}"><span class="body"><strong>همکاری در فروش</strong><span class="sub">کد شما: <span class="mono">{{ $affiliate->code }}</span></span></span><span class="badge {{ $affiliate->isActive() ? 'ok' : 'warn' }}">{{ $affiliate->isActive() ? 'فعال' : 'متوقف' }}</span><span aria-hidden="true">‹</span></a>
+        @endif
         @if ($membership->can('settings.manage'))
             <a class="list-item" href="{{ route('settings.business') }}"><span class="body"><strong>اطلاعات کسب‌وکار</strong><span class="sub">{{ $profile?->isComplete() ? $profile->name : 'ناقص؛ پیش از اولین صدور کامل کنید' }}</span></span>@unless($profile?->isComplete())<span class="badge warn">ناقص</span>@endunless<span aria-hidden="true">‹</span></a>
             <a class="list-item" href="{{ route('settings.appearance') }}"><span class="body"><strong>ظاهر فاکتور</strong><span class="sub">قالب، لوگو، ستون‌ها و پیش‌نمایش چاپ</span></span><span aria-hidden="true">‹</span></a>

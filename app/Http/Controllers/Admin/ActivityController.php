@@ -30,7 +30,8 @@ class ActivityController extends Controller
         'membership.invited' => 'دعوت همکار', 'membership.accepted' => 'پذیرش دعوت', 'membership.declined' => 'رد دعوت', 'membership.removed' => 'حذف همکار', 'membership.permissions_changed' => 'تغییر دسترسی همکار',
         'profile.updated' => 'ویرایش اطلاعات کسب‌وکار', 'profile.logo_uploaded' => 'بارگذاری لوگو', 'profile.logo_removed' => 'حذف لوگو', 'layout.updated' => 'تغییر ظاهر فاکتور', 'tenant.created' => 'ساخت فروشگاه',
         'admin.login' => 'ورود مدیر', 'admin.logout' => 'خروج مدیر', 'admin.viewed_user' => 'مشاهده فعالیت کاربر', 'admin.viewed_tenant' => 'مشاهده فروشگاه', 'admin.exported' => 'خروجی گزارش',
-        'admin.staff_saved' => 'ثبت یا ویرایش مدیر', 'admin.staff_deactivated' => 'غیرفعال‌کردن مدیر', 'admin.passkey_registered' => 'کلید عبور مدیر', 'admin.passkey_removed' => 'حذف کلید عبور مدیر',
+        'admin.staff_saved' => 'ثبت یا ویرایش مدیر',
+        'affiliate.enrolled' => 'فعال‌سازی همکاری در فروش', 'affiliate.updated' => 'تغییر شرایط همکار فروش', 'affiliate.referral_attached' => 'ثبت مشتری معرفی‌شده', 'affiliate.commission_created' => 'ثبت کمیسیون', 'affiliate.commission_voided' => 'لغو کمیسیون', 'affiliate.payout_recorded' => 'ثبت واریز کمیسیون', 'admin.staff_deactivated' => 'غیرفعال‌کردن مدیر', 'admin.passkey_registered' => 'کلید عبور مدیر', 'admin.passkey_removed' => 'حذف کلید عبور مدیر',
     ];
 
     private function query(Request $request)

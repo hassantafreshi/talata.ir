@@ -28,3 +28,10 @@ Tick each item with evidence (test name, screenshot path, command output). Anyth
 - [ ] Performance: measured cold/warm journeys on slow profiles recorded; public pages ≤ 20 KiB JS.
 - [ ] Backups and a restore drill executed and documented; runbook for queues, schedulers, provider outages.
 - [ ] Known limitations listed: mock gateway/SMS/quote providers, unapproved palette/logo/toolkit, sample tax rule, pending owner numbers.
+
+## Affiliate program
+- [x] Code discount on the first plan purchase only; VAT on the discounted amount; base, discount, VAT and payable shown separately.
+- [x] Commission = % of the pre-VAT amount paid; FIRST_PAYMENT vs LIFETIME; SMS credit only when enabled; one commission per payment.
+- [x] Attribution: link at new signup, code after the first successful payment; never changes; self-referral, old or paid shops and paused codes rejected.
+- [x] Affiliate panel shows only masked buyer mobiles (first 3 + last 3) and income; non-affiliates get 404.
+- [x] Pending → payable after the hold days; payout with bank reference; void with reason; support role read-only.

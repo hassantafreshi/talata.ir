@@ -35,6 +35,16 @@ return [
         'allowed_ips' => env('TALATA_ADMIN_ALLOWED_IPS'),   // comma list; empty = any IP (OTP/passkey still required)
     ],
 
+    // Affiliate program (همکاری در فروش). Assumptions documented in docs/AFFILIATE_PROGRAM.md.
+    'affiliate' => [
+        'hold_days' => (int) env('TALATA_AFFILIATE_HOLD_DAYS', 7),          // pending → payable after this many days
+        'new_customer_days' => 60,          // a code attaches only to a shop younger than this with no paid order yet
+        'link_cookie_days' => 30,           // referral link remembered for signup
+        'max_commission_percent' => 50,
+        'max_discount_percent' => 50,
+        'validate_per_minute' => 20,        // discount-code checks per user (anti brute force)
+    ],
+
     'logs' => [
         'tech_retention_days' => (int) env('TALATA_TECH_LOG_DAYS', 90),
     ],
