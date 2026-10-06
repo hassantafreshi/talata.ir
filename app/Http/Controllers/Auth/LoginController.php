@@ -108,7 +108,7 @@ class LoginController extends Controller
         $next = match (true) {
             $result['is_new_tenant'] => route('settings.business', ['welcome' => 1]),
             $then === 'passkey' => route('settings').'#passkeys',
-            default => route('invoices.new'),
+            default => route('home'),
         };
 
         return response()->json(['next' => $next]);

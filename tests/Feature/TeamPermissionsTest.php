@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Domain\Identity\LoginService;
+use App\Domain\Market\QuoteService;
 use App\Models\Membership;
 use App\Models\PricingVersion;
 use App\Models\Subscription;
@@ -85,5 +86,54 @@ class TeamPermissionsTest extends TestCase
         Cache::forget('talata.pricing.active');
         $this->app->forgetScopedInstances();
         $this->actingAs($member)->get('/settings/business')->assertForbidden();
+    }
+
+    public function test_owner_picks_screen_level_access_when_adding_a_member(): void
+    {
+        $owner = $this->merchant('professional');
+        $this->actingAs($owner)->get('/settings/users')->assertOk()->assertSee('نقش آماده')->assertSee('فروشنده')->assertSee('ماشین‌حساب طلایی');
+        $this->api('POST', '/api/users/invite', ['mobile' => '09371230001', 'permissions' => []])->assertStatus(422)->assertJsonPath('code', 'PERMISSIONS_EMPTY');
+
+        // «فقط قیمت»: مظنه + ماشین‌حساب.
+        $prices = $this->inviteAndAccept($owner, '09371230002', ['mazneh.view', 'calculator.use']);
+        $this->actingAs($prices)->get('/home')->assertRedirect(route('mazneh'));
+        $this->get('/mazneh')->assertOk();
+        $this->get('/calculator')->assertOk()->assertDontSee('href="'.route('invoices.index').'"', false);
+        foreach (['/invoices/new', '/invoices', '/customers', '/dashboard'] as $url) {
+            $this->get($url)->assertForbidden();
+        }
+        $this->api('GET', '/api/invoices')->assertForbidden();
+        $this->api('GET', '/api/customers?q=09')->assertForbidden();
+    }
+
+    public function test_seller_sees_only_own_invoices_and_void_implies_viewing(): void
+    {
+        $owner = $this->merchant('professional');
+        $seller = $this->inviteAndAccept($owner, '09371230003', ['invoice.issue', 'calculator.use']);
+        $this->actingAs($seller)->get('/home')->assertRedirect(route('invoices.new'));
+        $this->get('/invoices/new')->assertOk();
+        $this->get('/mazneh')->assertForbidden();
+        $this->get('/invoices')->assertForbidden();
+
+        $rate = app(QuoteService::class)->latestDto('Asia/Tehran')['value_irr'];
+        $mk = function ($user) use ($rate) {
+            $res = $this->actingAs($user)->api('POST', '/api/invoices/drafts', ['mode' => 'MARKET', 'value_irr' => $rate])->assertCreated();
+            $id = $res->json('draft_id');
+            $v = $this->api('PUT', "/api/invoices/drafts/{$id}", ['version' => $res->json('version'), 'rows' => [['item_type' => 'GOLD', 'name' => 'انگشتر', 'net_weight_g' => '1', 'purity_ppt' => '750']]])->json('version');
+            $this->api('POST', "/api/invoices/drafts/{$id}/issue", ['mode' => 'ISSUE_ONLY', 'version' => $v, 'idempotency_key' => 'k-'.bin2hex(random_bytes(8))])->assertCreated();
+
+            return $id;
+        };
+        $mine = $mk($seller);
+        $ownerInvoice = $mk($owner);
+        $this->actingAs($seller)->get("/invoices/{$mine}/print")->assertOk();
+        $this->get("/invoices/{$mine}/issued")->assertOk();
+        $this->get("/invoices/{$ownerInvoice}")->assertForbidden();
+
+        // Giving «ابطال» also gives «فاکتورها» (dependency kept server-side).
+        $m = Membership::query()->where('user_id', $seller->id)->where('tenant_id', $this->tenantOf($owner)->id)->first();
+        $this->actingAs($owner)->api('PUT', "/api/users/{$m->id}", ['permissions' => ['invoice.void']])->assertOk();
+        $this->assertSame(['invoices.view', 'invoice.void'], $m->fresh()->permissions);
+        $this->actingAs($seller)->get("/invoices/{$ownerInvoice}")->assertOk();
     }
 }

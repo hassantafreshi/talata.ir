@@ -8,13 +8,50 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Membership extends Model
 {
+    /**
+     * Screen-level access a shop owner can give each team member (docs/TEAM_PERMISSIONS.md).
+     * Members get all of them by default; restricting is a plan capability (team.permissions_edit).
+     */
     public const PERMISSIONS = [
-        'invoice.issue' => 'ساخت و صدور فاکتور',
+        'mazneh.view' => 'مظنه',
+        'calculator.use' => 'ماشین‌حساب طلایی',
+        'invoice.issue' => 'فاکتور جدید (ساخت و صدور)',
+        'invoices.view' => 'فاکتورها (فهرست، مشاهده و چاپ همه فاکتورها)',
         'invoice.void' => 'ابطال و فاکتور جایگزین',
-        'customers.manage' => 'مشتریان و ثبت پرداخت',
+        'customers.view' => 'فهرست مشتریان',
+        'customers.manage' => 'افزودن و ویرایش مشتری، اقساط و ثبت پرداخت',
         'reports.view' => 'داشبورد و گزارش فروش',
-        'settings.manage' => 'تنظیمات و ظاهر فاکتور',
-        'billing.manage' => 'پلن و پرداخت',
+        'settings.manage' => 'تنظیمات فروشگاه و ظاهر فاکتور',
+        'billing.manage' => 'خرید پلن و اعتبار پیامک',
+    ];
+
+    /** UI groups for the checklist (label => keys). */
+    public const GROUPS = [
+        'قیمت و محاسبه' => ['mazneh.view', 'calculator.use'],
+        'فاکتور' => ['invoice.issue', 'invoices.view', 'invoice.void'],
+        'مشتریان' => ['customers.view', 'customers.manage'],
+        'مدیریت' => ['reports.view', 'settings.manage', 'billing.manage'],
+    ];
+
+    /** One-tap presets for low-literacy owners; the checklist stays editable after choosing one. */
+    public const PRESETS = [
+        'full' => ['label' => 'دسترسی کامل', 'hint' => 'همه کارها جز مدیریت کاربران', 'permissions' => null],
+        'seller' => ['label' => 'فروشنده', 'hint' => 'فاکتور جدید، مظنه، ماشین‌حساب، فهرست مشتریان', 'permissions' => ['mazneh.view', 'calculator.use', 'invoice.issue', 'customers.view']],
+        'cashier' => ['label' => 'صندوق‌دار', 'hint' => 'فروشنده + همه فاکتورها و ثبت پرداخت اقساط', 'permissions' => ['mazneh.view', 'calculator.use', 'invoice.issue', 'invoices.view', 'customers.view', 'customers.manage']],
+        'prices' => ['label' => 'فقط قیمت', 'hint' => 'مظنه و ماشین‌حساب', 'permissions' => ['mazneh.view', 'calculator.use']],
+        'accountant' => ['label' => 'حسابدار', 'hint' => 'فاکتورها، مشتریان و داشبورد؛ بدون صدور', 'permissions' => ['invoices.view', 'customers.view', 'customers.manage', 'reports.view']],
+    ];
+
+    /** A permission that needs another to be usable (e.g. voiding needs seeing invoices). */
+    public const IMPLIES = [
+        'invoice.void' => ['invoices.view'],
+        'customers.manage' => ['customers.view'],
+    ];
+
+    /** Pages in the order a member lands on after login (first one they can open). */
+    public const HOME_ROUTES = [
+        'invoice.issue' => 'invoices.new', 'invoices.view' => 'invoices.index', 'mazneh.view' => 'mazneh',
+        'calculator.use' => 'calculator', 'reports.view' => 'dashboard', 'customers.view' => 'customers.index',
     ];
 
     protected $fillable = ['tenant_id', 'user_id', 'invited_mobile', 'role', 'permissions', 'status', 'invited_by'];
@@ -70,5 +107,30 @@ class Membership extends Model
     public static function allPermissions(): array
     {
         return array_keys(self::PERMISSIONS);
+    }
+
+    /** Allowlists, adds implied permissions and keeps catalogue order. @return list<string> */
+    public static function normalize(array $input): array
+    {
+        $set = array_intersect(self::allPermissions(), array_map('strval', $input));
+        foreach (self::IMPLIES as $perm => $needs) {
+            if (in_array($perm, $set, true)) {
+                $set = array_merge($set, $needs);
+            }
+        }
+
+        return array_values(array_intersect(self::allPermissions(), $set));
+    }
+
+    /** Route name of the first page this member may open (settings as the last resort). */
+    public function homeRoute(): string
+    {
+        foreach (self::HOME_ROUTES as $perm => $route) {
+            if ($this->can($perm)) {
+                return $route;
+            }
+        }
+
+        return 'settings';
     }
 }

@@ -19,9 +19,10 @@ use App\Http\Controllers\Public\MockGatewayController;
 use App\Http\Controllers\Public\PaymentReturnController;
 use App\Http\Controllers\Public\PublicInvoiceController;
 use App\Http\Controllers\Public\ReferralController;
+use App\Tenancy\TenantContext;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect()->route(auth()->check() ? 'invoices.new' : 'login'));
+Route::get('/', fn () => redirect()->route(auth()->check() ? 'home' : 'login'));
 
 // ---------- guest: mobile + OTP ----------
 Route::middleware('guest')->group(function () {
@@ -53,19 +54,21 @@ Route::post('/pay/mock/{authority}', [MockGatewayController::class, 'decide'])->
 
 // ---------- merchant app ----------
 Route::middleware(['auth', 'tenant'])->group(function () {
-    Route::get('/invoices/new', [InvoiceDraftController::class, 'start'])->name('invoices.new');
-    Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    // First page this member may open (team permissions decide; owners land on «فاکتور جدید»).
+    Route::get('/home', fn () => redirect()->route(app(TenantContext::class)->membership()?->homeRoute() ?? 'settings'))->name('home');
+    Route::get('/invoices/new', [InvoiceDraftController::class, 'start'])->middleware('perm:invoice.issue')->name('invoices.new');
+    Route::get('/invoices', [InvoiceController::class, 'index'])->middleware('perm:invoices.view')->name('invoices.index');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::get('/invoices/{invoice}/items', [InvoiceDraftController::class, 'items'])->middleware('perm:invoice.issue')->name('invoices.items');
     Route::get('/invoices/{invoice}/review', [InvoiceDraftController::class, 'review'])->middleware('perm:invoice.issue')->name('invoices.review');
     Route::get('/invoices/{invoice}/issued', [InvoiceController::class, 'issued'])->name('invoices.issued');
     Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
-    Route::get('/mazneh', MaznehController::class)->name('mazneh');
-    Route::get('/calculator', CalculatorController::class)->name('calculator');
+    Route::get('/mazneh', MaznehController::class)->middleware('perm:mazneh.view')->name('mazneh');
+    Route::get('/calculator', CalculatorController::class)->middleware('perm:calculator.use')->name('calculator');
     Route::get('/dashboard', [DashboardController::class, 'show'])->middleware('perm:reports.view')->name('dashboard');
 
-    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
-    Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
+    Route::get('/customers', [CustomerController::class, 'index'])->middleware('perm:customers.view')->name('customers.index');
+    Route::get('/customers/{customer}', [CustomerController::class, 'show'])->middleware('perm:customers.view')->name('customers.show');
     Route::get('/customers/{customer}/agreements/new', [InstallmentController::class, 'create'])->middleware('perm:customers.manage')->name('agreements.create');
 
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
@@ -106,9 +109,9 @@ Route::middleware(['auth', 'tenant'])->group(function () {
             Route::post('/invoices/{invoice}/replace', [InvoiceController::class, 'replace'])->middleware('throttle:20,1')->name('api.invoices.replace');
             Route::post('/invoices/{invoice}/share/revoke', [InvoiceController::class, 'revokeShare'])->name('api.invoices.share.revoke');
         });
-        Route::get('/invoices', [InvoiceController::class, 'list'])->name('api.invoices.list');
+        Route::get('/invoices', [InvoiceController::class, 'list'])->middleware('perm:invoices.view')->name('api.invoices.list');
 
-        Route::get('/customers', [CustomerController::class, 'search'])->name('api.customers.search');
+        Route::get('/customers', [CustomerController::class, 'search'])->middleware('perm:customers.view|invoice.issue')->name('api.customers.search');
         Route::middleware('perm:customers.manage')->group(function () {
             Route::post('/customers', [CustomerController::class, 'store'])->middleware('throttle:customers')->name('api.customers.store');
             Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('api.customers.update');

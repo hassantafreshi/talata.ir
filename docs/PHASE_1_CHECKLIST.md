@@ -50,6 +50,7 @@ Evidence: `php artisan test` (91 tests on PostgreSQL), `npm run test:js`, Playwr
 - [x] Passkey (fingerprint/face/device-lock) sign-in for merchants and staff; SMS login stays as recovery.
 - [x] Team: members have full access by default; per-permission restriction only on Basic/Pro (`team.permissions_edit`).
 - [x] Activity log per user/shop/service and technical log per service, visible only in the admin console `/admin` (staff guard, OTP/passkey, idle timeout, roles).
+- [x] Screen-level team permissions (docs/TEAM_PERMISSIONS.md): chosen when adding a member, presets, dependencies, filtered menu, /home redirect, seller sees own invoices only.
 - [x] Sales dashboard (docs/GOLD_RECEIVED_AND_DASHBOARD.md §8–§12): sales, wage, profit, gold received (toman or 750-grams) and VAT; today/week/Jalali month/3 months/year/custom with simple SVG bar chart; Free = sales, wage, gold received for day/week/month (owner decision, capability dashboard.view), reports.financial unlocks the rest; reports.view team permission.
 - [x] Gold received from the customer (docs/GOLD_RECEIVED_AND_DASHBOARD.md): GOLD_IN rows (old gold, coin, melted + assay ref), GOLD_IN_V1 with buy/sell/manual rate and melting deduction, payable = sales − gold received (customer credit when negative), 750-weight column and gold/money split on print, shared PHP/JS vectors.
 - [x] Affiliate program (docs/AFFILIATE_PROGRAM.md): admin enrolment per mobile, code + referral link, buyer discount, % commission first-payment or lifetime, hold → payable → paid, masked affiliate panel.

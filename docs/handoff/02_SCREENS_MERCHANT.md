@@ -345,3 +345,7 @@ Other triggers (`plans-pricing.json#quota_notice_triggers`): links exhausted, hi
   - خطای تاریخ بازه دلخواه.
   - آفلاین (toast).
 - مرجع: `docs/GOLD_RECEIVED_AND_DASHBOARD.md` §۸–§۱۲.
+
+## کاربران و دسترسی‌ها — `/settings/users` (فقط مالک)
+
+افزودن همکار با موبایل + نقش آماده (کامل، فروشنده، صندوق‌دار، فقط قیمت، حسابدار) + چک‌لیست گروهی. حالت‌ها: پلن بدون `team.permissions_edit` (فقط پیام «دسترسی کامل»)، خالی (`PERMISSIONS_EMPTY`)، عضو دعوت‌شده، سقف تعداد کاربر. مرجع: `docs/TEAM_PERMISSIONS.md`.

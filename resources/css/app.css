@@ -393,3 +393,12 @@ table.t tr.lvl-warning td { background: #FFFBF1; }
   .dash-tile.m-sales { grid-column: span 2; grid-row: span 2; justify-content: center; }
   .dash-tile.m-sales .t-big { font-size: 36px; }
 }
+
+/* Team access picker */
+.perm-group { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.perm-group legend { margin-bottom: 4px; }
+.perm-grid { display: grid; grid-template-columns: 1fr; gap: 6px; }
+@media (min-width: 700px) { .perm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.perm-edit > summary { list-style: none; display: inline-flex; cursor: pointer; }
+.perm-edit > summary::-webkit-details-marker { display: none; }
+.perm-edit[open] > summary { margin-bottom: 8px; }

@@ -56,9 +56,10 @@ class PasskeyTest extends TestCase
 
         auth()->logout();
         $this->flushSession();
-        $this->login($device)->assertOk()->assertJsonPath('next', route('invoices.new'));
+        $this->login($device)->assertOk()->assertJsonPath('next', route('home'));
         $this->assertAuthenticatedAs($user);
         $this->assertSame(1, Passkey::query()->value('sign_count'));
+        $this->get('/home')->assertRedirect(route('invoices.new'));
         $this->get('/invoices/new')->assertOk();
     }
 

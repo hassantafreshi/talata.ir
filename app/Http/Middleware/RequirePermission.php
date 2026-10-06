@@ -15,7 +15,9 @@ class RequirePermission
     public function handle(Request $request, Closure $next, string $permission): Response
     {
         $membership = $this->context->membership();
-        $allowed = $permission === '__owner' ? (bool) $membership?->isOwner() : (bool) $membership?->can($permission);
+        // "a|b" = any of the listed permissions.
+        $allowed = $permission === '__owner' ? (bool) $membership?->isOwner()
+            : collect(explode('|', $permission))->contains(fn ($p) => (bool) $membership?->can($p));
         if (! $allowed) {
             throw new DomainError('FORBIDDEN', 'دسترسی این کار را ندارید. از مالک فروشگاه بخواهید.', 403);
         }

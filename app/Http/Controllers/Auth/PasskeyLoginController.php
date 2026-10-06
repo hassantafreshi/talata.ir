@@ -43,6 +43,6 @@ class PasskeyLoginController extends Controller
         $request->session()->put('auth_at', now()->getTimestamp());
         Audit::record('auth.passkey_login', $user, ['passkey' => $passkey->id]);
 
-        return response()->json(['next' => route('invoices.new')]);
+        return response()->json(['next' => route('home')]);
     }
 }

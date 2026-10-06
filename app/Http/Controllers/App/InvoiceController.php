@@ -75,6 +75,11 @@ class InvoiceController extends BaseController
         if ($invoice->isDraft()) {
             abort(redirect()->route('invoices.items', $invoice));
         }
+        // Team access: "invoices.view" sees every invoice; a seller with only "invoice.issue" sees the ones they issued.
+        $m = $this->membership();
+        if (! $m?->can('invoices.view') && ! ($m?->can('invoice.issue') && in_array(auth()->id(), [$invoice->issued_by, $invoice->created_by], true))) {
+            throw new DomainError('FORBIDDEN', 'دسترسی این کار را ندارید. از مالک فروشگاه بخواهید.', 403);
+        }
         $tenant = $this->tenant();
         if (! $this->ent()->can($tenant, 'history.all')) {
             [$start] = Jalali::monthBounds(now(), $tenant->timezone);

@@ -16,6 +16,13 @@
         ['customers.index', 'مشتریان و اقساط', ['customers*']],
         ['settings', 'تنظیمات', ['settings*']],
     ];
+    // Team access: show only the screens this member may open (settings is always reachable).
+    $ctx = app(\App\Tenancy\TenantContext::class);
+    $member = $ctx->has() ? $ctx->membership() : null;
+    $needs = ['invoices.new' => 'invoice.issue', 'invoices.index' => 'invoices.view', 'dashboard' => 'reports.view', 'mazneh' => 'mazneh.view', 'calculator' => 'calculator.use', 'customers.index' => 'customers.view'];
+    $allowed = fn ($route) => ! isset($needs[$route]) || ($member && $member->can($needs[$route]));
+    $nav = array_values(array_filter($nav, fn ($n) => $allowed($n[0])));
+    $desk = array_values(array_filter($desk, fn ($n) => $allowed($n[0])));
     $shopName = app(\App\Tenancy\TenantContext::class)->has() ? (app(\App\Tenancy\TenantContext::class)->tenant()->profile?->name ?: 'فروشگاه من') : '';
 @endphp
 <!doctype html>
@@ -27,7 +34,7 @@
     @if($back)
         <a href="{{ $back }}" class="icon-btn mobile-only" aria-label="بازگشت"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
     @endif
-    <a href="{{ route('invoices.new') }}" class="brand desktop-only">@include('partials.logo')طلاتا</a>
+    <a href="{{ route('home') }}" class="brand desktop-only">@include('partials.logo')طلاتا</a>
     <div class="grow">
         <h1 class="mobile-only">{{ $title ?? 'طلاتا' }}</h1>
         <div class="sub desktop-only">{{ $shopName }}</div>

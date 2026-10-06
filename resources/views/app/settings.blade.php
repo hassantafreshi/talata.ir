@@ -31,7 +31,9 @@
         @if ($membership->can('reports.view'))
             <a class="list-item" href="{{ route('dashboard') }}"><span class="body"><strong>داشبورد فروش</strong><span class="sub">فروش، اجرت، سود و طلای دریافتی با نمودار</span></span><span aria-hidden="true">‹</span></a>
         @endif
-        <a class="list-item" href="{{ route('customers.index') }}"><span class="body"><strong>مشتریان و اقساط</strong></span><span aria-hidden="true">‹</span></a>
+        @if ($membership->can('customers.view'))
+            <a class="list-item" href="{{ route('customers.index') }}"><span class="body"><strong>مشتریان و اقساط</strong></span><span aria-hidden="true">‹</span></a>
+        @endif
         @if ($affiliate)
             <a class="list-item" href="{{ route('affiliate') }}"><span class="body"><strong>همکاری در فروش</strong><span class="sub">کد شما: <span class="mono">{{ $affiliate->code }}</span></span></span><span class="badge {{ $affiliate->isActive() ? 'ok' : 'warn' }}">{{ $affiliate->isActive() ? 'فعال' : 'متوقف' }}</span><span aria-hidden="true">‹</span></a>
         @endif

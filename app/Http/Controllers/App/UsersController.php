@@ -20,7 +20,7 @@ class UsersController extends BaseController
         $tenant = $this->tenant();
 
         return view('app.users', [
-            'members' => $members, 'me' => $this->membership(), 'permissions' => Membership::PERMISSIONS,
+            'members' => $members, 'me' => $this->membership(),
             'canRestrict' => $this->ent()->can($tenant, 'team.permissions_edit'), 'limit' => $this->ent()->limitOr($tenant, 'team_members', 10),
         ]);
     }
@@ -32,7 +32,12 @@ class UsersController extends BaseController
 
     private function permissions(array $input): array
     {
-        return array_values(array_intersect(array_keys(Membership::PERMISSIONS), array_map('strval', $input)));
+        $perms = Membership::normalize($input);
+        if (! $perms) {
+            throw new DomainError('PERMISSIONS_EMPTY', 'دست‌کم یک دسترسی را برای همکار انتخاب کنید.', 422, ['errors' => ['permissions' => ['دست‌کم یک دسترسی را انتخاب کنید.']]]);
+        }
+
+        return $perms;
     }
 
     public function invite(Request $request)
@@ -110,7 +115,7 @@ class UsersController extends BaseController
         Audit::record('membership.accepted', $m, [], $m->tenant_id, 'user');
         $request->session()->put('tenant_id', $m->tenant_id);
 
-        return response()->json(['ok' => true, 'next' => route('invoices.new')]);
+        return response()->json(['ok' => true, 'next' => route('home')]);
     }
 
     public function decline(int $membership)
@@ -127,6 +132,6 @@ class UsersController extends BaseController
         $m = Membership::query()->whereKey($membership)->where('user_id', auth()->id())->where('status', 'active')->firstOrFail();
         $request->session()->put('tenant_id', $m->tenant_id);
 
-        return response()->json(['ok' => true, 'next' => route('invoices.new')]);
+        return response()->json(['ok' => true, 'next' => route('home')]);
     }
 }
