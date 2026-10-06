@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
+use App\Domain\Identity\TrustedDevice;
 use App\Domain\Identity\WebAuthn\WebAuthnException;
 use App\Domain\Identity\WebAuthn\WebAuthnService;
 use App\Http\Controllers\Controller;
@@ -42,6 +43,7 @@ class PasskeyLoginController extends Controller
         $request->session()->regenerate();
         $request->session()->put('auth_at', now()->getTimestamp());
         Audit::record('auth.passkey_login', $user, ['passkey' => $passkey->id]);
+        TrustedDevice::remember($user->mobile);
 
         return response()->json(['next' => route('home')]);
     }

@@ -38,7 +38,9 @@ class Preflight extends Command
         $this->check(config('queue.default') !== 'sync' ? 'ok' : 'fail', 'QUEUE_CONNECTION', 'must not be sync (SMS and payments run in the worker)');
         $this->check(! in_array(config('cache.default'), ['array', 'null'], true) ? 'ok' : 'fail', 'CACHE_STORE', 'rate limits and the quote lock need a shared cache');
         $proxies = (string) config('talata.trusted_proxies');
-        $this->check($proxies !== '127.0.0.1' || ! $prod ? 'ok' : 'warn', 'TRUSTED_PROXIES', $proxies.' (per-IP limits use the client IP only through trusted proxies)');
+        // «*» lets anyone who reaches the app directly forge X-Forwarded-For and dodge every per-IP limit
+        // and the admin IP allowlist: list the load balancer addresses instead.
+        $this->check(str_contains($proxies, '*') ? 'fail' : 'ok', 'TRUSTED_PROXIES', $proxies.(str_contains($proxies, '*') ? ' — never «*»; list the proxy/LB addresses' : ' (client IP only through these proxies)'));
         $stack = implode(',', (array) config('logging.channels.stack.channels'));
         $this->check(str_contains($stack, 'errors_db') ? 'ok' : 'warn', 'LOG_STACK', $stack.' (errors_db shows errors in the admin console)');
 

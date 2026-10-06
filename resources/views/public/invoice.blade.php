@@ -7,7 +7,7 @@
             <div><dt>شماره فاکتور</dt><dd class="num ltr">{{ $v['number'] }}</dd></div>
             <div><dt>تاریخ</dt><dd class="num">{{ $v['issued_fa'] }}</dd></div>
             @if ($v['buyer_name'])<div><dt>خریدار</dt><dd>{{ $v['buyer_name'] }}</dd></div>@endif
-            @if ($v['rate_fa'])<div><dt>نرخ ۱۸ عیار</dt><dd class="num">{{ $v['rate_fa'] }} تومان @if($v['rate_manual'])(دستی)@endif</dd></div>@endif
+            @if ($v['rate_fa'])<div><dt>نرخ ۱۸ عیار</dt><dd class="num">{{ $v['rate_fa'] }} تومان @if($v['rate_manual'])(دستی)@elseif($v['rate_emergency'] ?? false)(نرخ اعلامی زرلیو)@endif</dd></div>@endif
         </dl>
     </section>
     @if ($v['status'] === 'void')<div class="notice err">این فاکتور در {{ $v['voided_fa'] }} باطل شده است.</div>@endif

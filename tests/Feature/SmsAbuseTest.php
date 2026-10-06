@@ -9,6 +9,7 @@ use App\Domain\Sms\SmsGateway;
 use App\Domain\Sms\SmsService;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\ShopProfile;
 use App\Models\SmsCreditLot;
 use App\Models\SmsMessage;
 use App\Models\User;
@@ -181,6 +182,31 @@ class SmsAbuseTest extends TestCase
         // Free plan cannot edit the template at all.
         $free = $this->merchant();
         $this->actingAs($free)->api('PUT', '/api/settings/sms-template', ['template' => '{shop_name} {invoice_link}'])->assertStatus(403);
+    }
+
+    public function test_template_shop_name_and_numbering_cannot_be_combined_into_phishing(): void
+    {
+        $user = $this->merchant('basic');
+        $this->credit($user, 100000);
+        $this->actingAs($user);
+        $base = ['business_mobile' => '09121112233', 'address' => 'تهران'];
+        // Each piece is checked, Latin brand words inside other words too…
+        $this->api('POST', '/api/settings/business', ['name' => 'mellatbank'] + $base)->assertStatus(422);
+        $this->api('POST', '/api/settings/business', ['name' => 'Zarlio Gold'] + $base)->assertStatus(422);
+        // …placeholders cannot be glued into a web address…
+        $this->api('PUT', '/api/settings/sms-template', ['template' => '{shop_name}.ir/pay فاکتور {invoice_number} {invoice_link}'])->assertStatus(422)->assertJsonPath('code', 'TEMPLATE_PLACEHOLDER_GLUED');
+        // …and a numbering scheme that prints phone-number-shaped invoice numbers is refused.
+        $this->api('PUT', '/api/settings/numbering', ['settings' => ['prefix' => '0912', 'year' => 'none', 'month' => false, 'separator' => '-', 'digits' => 7, 'reset' => 'never'], 'next' => '3456789', 'version' => 0])
+            ->assertStatus(422)->assertJsonStructure(['errors' => ['next']]);
+
+        // A name saved before these checks still never goes out: the final text is checked before sending.
+        ShopProfile::withoutGlobalScope('tenant')->where('tenant_id', $this->tenantOf($user)->id)->update(['name' => 'mellat']);
+        $this->api('PUT', '/api/settings/sms-template', ['template' => '{shop_name} .ir/pay فاکتور {invoice_number} {invoice_link}'])->assertOk();
+        $before = $this->sent();
+        $issued = $this->issueTo($user, '09351234567');
+        $this->assertSame('NOT_SENT', $issued['sms']['status']);
+        $this->assertSame($before, $this->sent());
+        $this->assertSame('issued', Invoice::withoutGlobalScope('tenant')->where('public_id', $issued['id'])->value('status'), 'issuing never depends on the SMS');
     }
 
     public function test_installment_reminders_are_at_most_two_per_installment(): void

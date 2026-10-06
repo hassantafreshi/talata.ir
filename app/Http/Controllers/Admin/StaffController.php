@@ -32,6 +32,13 @@ class StaffController extends AdminController
         return response()->json(['id' => $staff->id, 'message_fa' => 'همکار اضافه شد. با همین شماره از صفحه ورود مدیریت وارد می‌شود و باید کلید عبور اضافه کند.'], 201);
     }
 
+    public function resetPasskeys(Request $request, int $staff, StaffAdmin $admin): JsonResponse
+    {
+        $n = $admin->resetPasskeys($this->staff(), StaffUser::query()->findOrFail($staff), $this->reason($request));
+
+        return response()->json(['message_fa' => $n ? 'کلیدهای عبور حذف شد؛ این همکار با کد پیامکی وارد می‌شود و کلید تازه اضافه می‌کند.' : 'کلید عبوری نداشت.']);
+    }
+
     public function update(Request $request, int $staff, StaffAdmin $admin): JsonResponse
     {
         $data = $request->validate(['name' => ['required', 'string', 'min:2', 'max:60'], 'role' => ['required', 'string', 'max:20'], 'active' => ['required', 'boolean']]);

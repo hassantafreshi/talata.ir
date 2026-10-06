@@ -6,6 +6,7 @@ use App\Domain\Customers\CustomerService;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Support\Digits;
+use App\Support\Jalali;
 use App\Support\Mobile;
 use Illuminate\Http\Request;
 
@@ -49,7 +50,13 @@ class CustomerController extends BaseController
     {
         $tenant = $this->tenant();
         $agreements = $customer->agreements()->with('lines', 'payments', 'invoice')->orderByDesc('id')->get();
-        $invoices = Invoice::query()->where('customer_id', $customer->id)->where('status', '!=', 'draft')->orderByDesc('issued_at')->limit(50)->get();
+        // Same visibility as the invoice list: all invoices with «invoices.view», otherwise only the member's own;
+        // plans without full history see the current month only.
+        $m = $this->membership();
+        $invoices = Invoice::query()->where('customer_id', $customer->id)->where('status', '!=', 'draft')
+            ->when(! $m->can('invoices.view'), fn ($q) => $q->where(fn ($w) => $w->where('issued_by', auth()->id())->orWhere('created_by', auth()->id())))
+            ->when(! $this->ent()->can($tenant, 'history.all'), fn ($q) => $q->where('issued_at', '>=', Jalali::monthBounds(now(), $tenant->timezone)[0]))
+            ->orderByDesc('issued_at')->limit(50)->get();
 
         return view('app.customer-show', [
             'customer' => $customer, 'agreements' => $agreements, 'invoices' => $invoices,

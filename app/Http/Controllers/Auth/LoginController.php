@@ -8,6 +8,7 @@ use App\Domain\DomainError;
 use App\Domain\Identity\LoginService;
 use App\Domain\Identity\OtpService;
 use App\Domain\Identity\ProofOfWork;
+use App\Domain\Identity\TrustedDevice;
 use App\Http\Controllers\Controller;
 use App\Models\Membership;
 use App\Support\Mobile;
@@ -68,9 +69,10 @@ class LoginController extends Controller
             return response()->json(['next' => route('login.code')]);
         }
 
-        $result = $otp->request($mobile, $request->ip());
+        $result = $otp->request($mobile, $request->ip(), 'user', TrustedDevice::matches($request, $mobile));
         $request->session()->put([
             'otp.challenge_id' => $result['challenge_id'],
+            'otp.purpose' => $result['purpose'],
             'otp.mobile_display' => Mobile::display($mobile),
             'otp.resend_at' => time() + $result['resend_after_seconds'],
         ]);
@@ -85,10 +87,12 @@ class LoginController extends Controller
         if ($challengeId === '') {
             throw new DomainError('OTP_EXPIRED', 'این کد دیگر معتبر نیست. کد تازه بگیرید.', 422);
         }
-        $mobile = $otp->verify($challengeId, $data['code'], $request->ip());
+        $purpose = $request->session()->get('otp.purpose') === 'user_td' ? 'user_td' : 'user';
+        $mobile = $otp->verify($challengeId, $data['code'], $request->ip(), $purpose);
         $result = $login->completeLogin($mobile);
+        TrustedDevice::remember($mobile);
 
-        $request->session()->forget(['otp.challenge_id', 'otp.mobile_display', 'otp.resend_at']);
+        $request->session()->forget(['otp.challenge_id', 'otp.mobile_display', 'otp.resend_at', 'otp.purpose']);
         Auth::login($result['user'], remember: true);
         $request->session()->regenerate();
         $request->session()->put('auth_at', now()->getTimestamp());

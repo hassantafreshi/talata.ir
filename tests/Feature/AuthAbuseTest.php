@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Domain\Identity\ProofOfWork;
+use App\Domain\Identity\TrustedDevice;
 use App\Domain\Sms\SmsGateway;
 use App\Models\SmsMessage;
 use App\Models\User;
@@ -106,6 +107,37 @@ class AuthAbuseTest extends TestCase
         }
         $this->postJson('/api/auth/otp/verify', ['code' => $this->lastCode()])->assertStatus(429);
         $this->assertGuest();
+    }
+
+    public function test_strangers_cannot_lock_a_known_device_out_of_its_own_number(): void
+    {
+        // The owner signed in on this phone before: the device is remembered for this number only.
+        $this->requestCode('09123456789')->assertOk();
+        $login = $this->postJson('/api/auth/otp/verify', ['code' => $this->lastCode()])->assertOk();
+        $device = $login->getCookie(TrustedDevice::COOKIE)->getValue();
+        $this->assertSame(TrustedDevice::value('09123456789'), $device);
+        $this->post('/logout');
+        $this->flushSession();
+        $this->travel(2)->minutes();
+
+        // A stranger (the number is printed on every invoice) uses up the anonymous allowance and locks it.
+        for ($i = 0; $i < 4; $i++) {
+            $this->travel(91)->seconds();
+            $this->requestCode('09123456789');
+        }
+        $this->travel(91)->seconds();
+        $this->requestCode('09123456789')->assertStatus(429)->assertJsonPath('code', 'OTP_RATE_LIMITED');
+        for ($i = 0; $i < 5; $i++) {
+            $this->postJson('/api/auth/otp/verify', ['code' => '111111']);
+        }
+        $this->flushSession();
+
+        // The owner's phone still gets a code and signs in; a cookie for another number does not help.
+        $this->withCredentials()->withCookie(TrustedDevice::COOKIE, $device); // JSON requests send cookies only with credentials
+        $this->requestCode('09123456789')->assertOk();
+        $this->postJson('/api/auth/otp/verify', ['code' => $this->lastCode()])->assertOk();
+        $this->assertAuthenticated();
+        $this->assertFalse(TrustedDevice::value('09120000000') === $device);
     }
 
     public function test_global_daily_otp_budget(): void

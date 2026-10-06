@@ -6,6 +6,7 @@ use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Domain\Plans\Entitlements;
 use App\Domain\Sms\SmsService;
+use App\Domain\Sms\SmsTemplate;
 use App\Models\Customer;
 use App\Models\InstallmentAgreement;
 use App\Models\InstallmentLine;
@@ -16,6 +17,7 @@ use App\Models\User;
 use App\Support\Digits;
 use App\Support\Jalali;
 use App\Support\Money;
+use App\Support\TechLog;
 use App\Tenancy\TenantContext;
 use Brick\Math\BigInteger;
 use Carbon\CarbonImmutable;
@@ -237,6 +239,12 @@ final class InstallmentService
                     return;
                 }
                 $shop = $tenant->profile?->name ?: 'فروشگاه';
+                // Names saved before a stricter check must not reach customers as a link or a bank-like sender.
+                if (SmsTemplate::containsLinkOrPhone($shop) || SmsTemplate::looksLikeImpersonation($shop)) {
+                    TechLog::warning('sms', 'reminder skipped: unsafe shop name', ['tenant_id' => $tenant->id]);
+
+                    return;
+                }
                 $body = "{$shop}: یادآوری قسط ".Digits::toPersian((string) $line->number).' به مبلغ '.Money::toman($line->remaining()).' تومان، سررسید '.Jalali::date($line->due_date, $tenant->timezone).'.';
                 // At most two reminders per installment, ever: one just before due, one if overdue.
                 $today = now()->setTimezone($tenant->timezone)->startOfDay();

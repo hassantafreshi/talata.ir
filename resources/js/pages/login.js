@@ -1,11 +1,11 @@
 import { get, post } from '../lib/http.js';
-import { solve } from '../lib/pow.js';
 import { busy, fieldErrors, toast } from '../lib/ui.js';
 import { toLatin } from '../lib/digits.js';
-import * as webauthn from '../lib/webauthn.js';
 
+// Weak-network budget (docs/PERFORMANCE_BUDGET.md: ≤8 requests for login): the proof-of-work solver and the
+// passkey helpers load on demand, in parallel with the request that needs them, not with the page.
 export async function requestCode(mobile, website = '') {
-  const pow = await get('/api/auth/pow');
+  const [pow, { solve }] = await Promise.all([get('/api/auth/pow'), import('../lib/pow.js')]);
   if (!pow.ok) return pow;
   const nonce = await solve(pow.data.challenge, pow.data.bits);
   const wait = 2100 - (Date.now() - pow.data.issued_at * 1000);
@@ -33,13 +33,15 @@ export default function () {
 
 async function passkeyLogin() {
   const box = document.querySelector('[data-passkey-login]');
-  if (!box || !webauthn.supported()) return;
+  // Same test as webauthn.supported(), inlined so the helper module is fetched only on use.
+  if (!box || !(window.PublicKeyCredential && navigator.credentials && window.isSecureContext)) return;
   box.classList.remove('hidden');
   const btn = box.querySelector('[data-passkey-btn]');
   btn.addEventListener('click', async () => {
     busy(btn);
     try {
-      const opts = await post('/api/auth/passkey/options');
+      // Options and helper module in parallel: the browser prompt follows the tap as closely as before.
+      const [opts, webauthn] = await Promise.all([post('/api/auth/passkey/options'), import('../lib/webauthn.js')]);
       if (!opts.ok) { toast(opts.message, { kind: 'error' }); return; }
       let credential;
       try { credential = await webauthn.get(opts.data); } catch (e) { toast(webauthn.errorMessage(e), { kind: 'error' }); return; }

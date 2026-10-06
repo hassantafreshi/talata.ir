@@ -129,6 +129,19 @@ class TeamPermissionsTest extends TestCase
         $this->actingAs($seller)->get("/invoices/{$mine}/print")->assertOk();
         $this->get("/invoices/{$mine}/issued")->assertOk();
         $this->get("/invoices/{$ownerInvoice}")->assertForbidden();
+        $this->api('GET', "/api/invoices/{$ownerInvoice}/status")->assertForbidden();
+        $this->api('GET', "/api/invoices/{$mine}/status")->assertOk();
+
+        // Another member's draft is not the seller's to open, change, delete or issue.
+        $draft = $this->actingAs($owner)->api('POST', '/api/invoices/drafts', ['mode' => 'MARKET', 'value_irr' => $rate])->assertCreated();
+        $d = $draft->json('draft_id');
+        $this->actingAs($seller)->get("/invoices/{$d}/items")->assertForbidden();
+        $this->api('PUT', "/api/invoices/drafts/{$d}", ['version' => $draft->json('version'), 'rows' => []])->assertForbidden();
+        $this->api('DELETE', "/api/invoices/drafts/{$d}")->assertForbidden();
+        $this->api('POST', "/api/invoices/drafts/{$d}/issue", ['mode' => 'ISSUE_ONLY', 'version' => $draft->json('version'), 'idempotency_key' => 'k-'.bin2hex(random_bytes(8))])->assertForbidden();
+        // Quotes: the seller has the new-invoice screen (latest rate) but not the مظنه board.
+        $this->api('GET', '/api/quotes/latest')->assertOk();
+        $this->api('GET', '/api/quotes/board')->assertForbidden();
 
         // Giving «ابطال» also gives «فاکتورها» (dependency kept server-side).
         $m = Membership::query()->where('user_id', $seller->id)->where('tenant_id', $this->tenantOf($owner)->id)->first();

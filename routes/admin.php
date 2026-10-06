@@ -86,6 +86,7 @@ Route::middleware('staff')->group(function () {
     Route::middleware(['staff:staff.manage,fresh', 'throttle:20,1'])->group(function () {
         Route::post('/api/staff', [StaffController::class, 'store'])->name('staff.store');
         Route::put('/api/staff/{staff}', [StaffController::class, 'update'])->whereNumber('staff')->name('staff.update');
+        Route::post('/api/staff/{staff}/reset-passkeys', [StaffController::class, 'resetPasskeys'])->whereNumber('staff')->name('staff.passkeys.reset');
     });
     Route::get('/system', [SystemController::class, 'index'])->name('system');
     Route::post('/api/system/failed-jobs/{uuid}/retry', [SystemController::class, 'retry'])->middleware(['staff:system.manage', 'throttle:20,1'])->name('system.retry');
@@ -105,7 +106,7 @@ Route::middleware('staff')->group(function () {
     // Affiliate program (همکاری در فروش): support can view, only admins change anything.
     Route::get('/affiliates', [AffiliatesController::class, 'index'])->name('affiliates');
     Route::get('/affiliates/{affiliate}', [AffiliatesController::class, 'show'])->whereNumber('affiliate')->name('affiliate');
-    Route::middleware('staff:affiliates.manage')->group(function () {
+    Route::middleware(['staff:affiliates.manage,fresh', 'throttle:20,1'])->group(function () {
         Route::post('/api/affiliates', [AffiliatesController::class, 'store'])->name('affiliates.store');
         Route::put('/api/affiliates/{affiliate}', [AffiliatesController::class, 'update'])->whereNumber('affiliate')->name('affiliates.update');
         Route::post('/api/affiliates/{affiliate}/payouts', [AffiliatesController::class, 'payout'])->whereNumber('affiliate')->name('affiliates.payout');

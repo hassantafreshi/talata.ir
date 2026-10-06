@@ -36,14 +36,19 @@ class RequireStaff
         if ($role === 'admin' ? ! $staff->isAdmin() : ($role !== null && ! $staff->allows($role))) {
             return $request->expectsJson() ? response()->json(['code' => 'STAFF_FORBIDDEN', 'message_fa' => 'نقش شما اجازه این کار را ندارد.'], 403) : abort(403);
         }
-        // Mandatory passkey: without one, only the dashboard and «حساب من» (to add it) are usable.
-        if (config('talata.admin.require_passkey') && ! $request->routeIs('admin.dashboard', 'admin.account', 'admin.account.*', 'admin.logout')
-            && ! Passkey::query()->where('owner_type', 'staff')->where('owner_id', $staff->id)->exists()) {
-            $message = 'برای کار با کنسول مدیریت، اول در «حساب من» کلید عبور (اثر انگشت یا قفل دستگاه) اضافه کنید.';
+        // Mandatory passkey (A-00): an SMS-code session only reaches the dashboard and «حساب من» (to add the first
+        // passkey). Once the person has a passkey, everything else needs a passkey sign-in, so a stolen SMS code
+        // (SIM swap, SS7) never opens the console.
+        if (config('talata.admin.require_passkey') && $request->session()->get('staff.auth_method') !== 'passkey'
+            && ! $request->routeIs('admin.dashboard', 'admin.account', 'admin.account.*', 'admin.logout')) {
+            $has = Passkey::query()->where('owner_type', 'staff')->where('owner_id', $staff->id)->exists();
+            [$code, $message, $to] = $has
+                ? ['PASSKEY_SIGNIN_REQUIRED', 'برای این بخش با کلید عبور (اثر انگشت یا قفل دستگاه) وارد شوید؛ ورود پیامکی کافی نیست.', route('admin.login', ['reauth' => 1])]
+                : ['PASSKEY_REQUIRED', 'برای کار با کنسول مدیریت، اول در «حساب من» کلید عبور (اثر انگشت یا قفل دستگاه) اضافه کنید.', route('admin.account')];
 
             return $request->expectsJson()
-                ? response()->json(['code' => 'PASSKEY_REQUIRED', 'message_fa' => $message], 403)
-                : redirect()->route('admin.account')->with('error', $message);
+                ? response()->json(['code' => $code, 'message_fa' => $message, 'login' => $has ? $to : null], 403)
+                : redirect($to)->with('error', $message);
         }
         if ($fresh === 'fresh') {
             $authAt = (int) $request->session()->get('staff.auth_at', 0);

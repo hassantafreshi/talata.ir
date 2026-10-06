@@ -78,16 +78,17 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * Signs a staff member into the admin console. The admin area runs on its own session store
-     * (UseAdminSession), so the data is put there; $authAgo = seconds since sign-in (step-up checks).
+     * (UseAdminSession), so the data is put there; $authAgo = seconds since sign-in (step-up checks),
+     * $method = how they signed in (an SMS-code session is limited when passkeys are mandatory).
      */
-    protected function asStaff(StaffUser $staff, int $authAgo = 0): static
+    protected function asStaff(StaffUser $staff, int $authAgo = 0, string $method = 'passkey'): static
     {
         config(['session.cookie' => config('talata.admin.session_cookie')]);
         if (app('session')->driver()->getName() !== config('session.cookie')) {
             app('session')->forgetDrivers();
         }
 
-        return $this->actingAs($staff, 'staff')->withSession(['staff.seen' => now()->getTimestamp(), 'staff.auth_at' => now()->getTimestamp() - $authAgo]);
+        return $this->actingAs($staff, 'staff')->withSession(['staff.seen' => now()->getTimestamp(), 'staff.auth_at' => now()->getTimestamp() - $authAgo, 'staff.auth_method' => $method]);
     }
 
     /** JSON request helper with the AJAX headers the app uses. */

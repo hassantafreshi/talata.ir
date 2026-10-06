@@ -143,7 +143,8 @@ class AuthController extends Controller
         $request->session()->forget('admin.otp');
         Auth::guard('staff')->login($staff);
         $request->session()->regenerate();
-        $request->session()->put(['staff.seen' => now()->getTimestamp(), 'staff.auth_at' => now()->getTimestamp()]);
+        // The method matters: with TALATA_ADMIN_REQUIRE_PASSKEY an SMS sign-in only bootstraps the first passkey.
+        $request->session()->put(['staff.seen' => now()->getTimestamp(), 'staff.auth_at' => now()->getTimestamp(), 'staff.auth_method' => $method]);
         $staff->forceFill(['last_login_at' => now()])->save();
         Audit::record('admin.login', $staff, ['method' => $method], null, 'staff');
         $back = $request->session()->pull('admin.back');

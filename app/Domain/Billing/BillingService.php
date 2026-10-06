@@ -19,6 +19,7 @@ use App\Support\Money;
 use App\Support\TechLog;
 use Brick\Math\BigDecimal;
 use Brick\Math\BigInteger;
+use Brick\Math\BigRational;
 use Brick\Math\RoundingMode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -304,7 +305,7 @@ final class BillingService
             if ($current->plan_code === $order->plan_code) {
                 $start = $current->ends_at; // renewal extends
             } else {
-                $carry = (int) max(0, now()->diffInDays($current->ends_at)); // proration: ADD_REMAINING_DAYS (owner-pending policy)
+                $carry = $this->prorateDays($current, $order);
                 $current->update(['status' => 'superseded', 'ends_at' => now()]);
             }
         }
@@ -315,6 +316,29 @@ final class BillingService
             'source_order_id' => $order->id, 'status' => 'active',
         ]);
         app(CommercialConfig::class)->forget();
+    }
+
+    /**
+     * Plan change: what is left of the current plan is converted by value, not day for day — remaining days ×
+     * its daily list price ÷ the new plan's daily list price (pre-VAT, current pricing version). Day for day
+     * would turn a cheap yearly plan into months of an expensive one. Policy PRORATE_BY_VALUE_V1, documented
+     * in docs/PAYMENTS_AND_SMS_CREDIT.md (owner may still change it).
+     */
+    private function prorateDays(Subscription $current, BillingOrder $order): int
+    {
+        $remaining = max(0, $current->ends_at->getTimestamp() - now()->getTimestamp());
+        $daily = function (?string $plan, ?string $period): BigRational {
+            $toman = (string) ($plan && $period ? ($this->config->plan($plan)['price_toman'][$period] ?? '0') : '0');
+
+            return BigRational::of($toman === '' ? '0' : $toman)->dividedBy($period === 'yearly' ? 365 : 30);
+        };
+        $old = $daily($current->plan_code, $current->period);
+        $new = $daily($order->plan_code, $order->period);
+        if ($remaining === 0 || $old->isZero() || $new->isZero()) {
+            return 0;
+        }
+
+        return (int) BigRational::of($remaining)->dividedBy(86400)->multipliedBy($old)->dividedBy($new)->toScale(0, RoundingMode::Down)->toInt();
     }
 
     /** Scheduler: retries ambiguous verifications, expires abandoned orders. */

@@ -263,17 +263,34 @@ class AdminOpsTest extends TestCase
         $this->get('/admin/staff')->assertOk()->assertSee('جدول اجازه‌ها')->assertSee('پشتیبان تازه');
     }
 
-    public function test_passkey_is_mandatory_for_everything_but_dashboard_and_account(): void
+    public function test_passkey_is_mandatory_and_an_sms_sign_in_never_opens_the_console(): void
     {
         config(['talata.admin.require_passkey' => true]);
-        $staff = $this->staff();
+        $staff = StaffUser::query()->create(['mobile' => '09120003001', 'name' => 'مدیر تازه', 'role' => 'admin', 'active' => true]);
+        $this->asStaff($staff, 0, 'otp');
         $this->get('/admin')->assertOk()->assertSee('افزودن کلید عبور');
         $this->get('/admin/payments')->assertRedirect('/admin/account');
         $this->postJson('/admin/api/sms/test')->assertForbidden()->assertJsonPath('code', 'PASSKEY_REQUIRED');
         $this->get('/admin/account')->assertOk();
+        $this->postJson('/admin/api/account/passkeys/options')->assertOk(); // bootstrap: the first key may be added after SMS
 
+        // Once a key exists, an SMS-code session (stolen SIM) reaches nothing sensitive and cannot add its own key.
         Passkey::query()->create(['owner_type' => 'staff', 'owner_id' => $staff->id, 'credential_id' => 'cred-'.bin2hex(random_bytes(6)), 'public_key_pem' => 'x', 'alg' => -7, 'name' => 'لپ‌تاپ']);
+        $this->get('/admin/payments')->assertRedirect('/admin/login?reauth=1');
+        $tenant = $this->tenantOf($this->merchant());
+        $this->asStaff($staff, 0, 'otp');
+        $this->postJson("/admin/api/tenants/{$tenant->id}/suspend", ['reason' => 'سوءاستفاده با پیامک دزدی'])->assertForbidden()->assertJsonPath('code', 'PASSKEY_SIGNIN_REQUIRED');
+        $this->assertTrue($tenant->fresh()->isActive());
+        $this->postJson('/admin/api/account/passkeys/options')->assertForbidden()->assertJsonPath('code', 'PASSKEY_SIGNIN_REQUIRED');
+
+        // A passkey sign-in opens it.
+        $this->asStaff($staff, 0, 'passkey');
         $this->get('/admin/payments')->assertOk();
+
+        // Lost device: another admin resets the keys (reason, fresh sign-in, audit).
+        $this->staff();
+        $this->postJson("/admin/api/staff/{$staff->id}/reset-passkeys", ['reason' => 'گوشی همکار گم شد'])->assertOk();
+        $this->assertSame(0, Passkey::query()->where('owner_type', 'staff')->where('owner_id', $staff->id)->count());
     }
 
     public function test_every_admin_page_renders_for_every_role_without_customer_data(): void

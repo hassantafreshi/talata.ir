@@ -120,6 +120,7 @@ class InvoiceDraftController extends BaseController
             'buyer.mobile' => ['nullable', 'string', 'max:20'],
             'save_customer' => ['nullable', 'boolean'],
         ]);
+        $this->assertOwnDraft($invoice);
         $result = $this->invoices->issue($invoice, $this->tenant(), $request->user(), $data);
         $issued = $result['invoice'];
         $sms = $result['sms'] ?? null;
@@ -135,6 +136,15 @@ class InvoiceDraftController extends BaseController
     {
         if (! $invoice->isDraft()) {
             abort(redirect()->route('invoices.show', $invoice));
+        }
+        $this->assertOwnDraft($invoice);
+    }
+
+    /** A seller works on their own drafts; members who can see every invoice («invoices.view») may open any. */
+    private function assertOwnDraft(Invoice $invoice): void
+    {
+        if ($invoice->created_by !== auth()->id() && ! $this->membership()?->can('invoices.view')) {
+            throw new DomainError('FORBIDDEN', 'این پیش‌نویس را همکار دیگری ساخته است.', 403);
         }
     }
 }

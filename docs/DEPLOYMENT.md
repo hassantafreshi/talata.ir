@@ -23,7 +23,7 @@ APP_KEY=base64:...                 # یک بار بسازید و جای امن �
 APP_LOCALE=fa
 APP_FALLBACK_LOCALE=fa
 TALATA_PUBLIC_URL=https://zarlio.ir # دامنه لینک /i و QR /v؛ بعداً فقط با redirect دامنه قبلی عوض شود
-TRUSTED_PROXIES=127.0.0.1           # اگر پشت load balancer است، IP آن (یا *)
+TRUSTED_PROXIES=127.0.0.1           # اگر پشت load balancer است، نشانی/CIDR دقیق آن؛ هرگز * (جعل X-Forwarded-For)
 
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
@@ -33,6 +33,7 @@ DB_PASSWORD=...
 
 SESSION_DRIVER=database
 SESSION_SECURE_COOKIE=true
+SESSION_ENCRYPT=true
 SESSION_SAME_SITE=lax
 CACHE_STORE=database                 # یا redis
 QUEUE_CONNECTION=database            # یا redis

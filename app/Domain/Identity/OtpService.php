@@ -22,10 +22,19 @@ final class OtpService
 {
     public function __construct(private readonly SmsService $sms) {}
 
-    /** @return array{challenge_id:string,resend_after_seconds:int} */
-    public function request(string $mobile, string $ip, string $purpose = 'user'): array
+    /**
+     * $trustedDevice: the request carries this device's signed «signed in here before» cookie for the same
+     * number (TrustedDevice). Such requests use their own per-number counters and lock and skip the global
+     * pools, so strangers who exhaust a shop's number (printed on every invoice) cannot lock its owner out.
+     *
+     * @return array{challenge_id:string,resend_after_seconds:int,purpose:string}
+     */
+    public function request(string $mobile, string $ip, string $purpose = 'user', bool $trustedDevice = false): array
     {
         $cfg = config('talata.otp');
+        if ($trustedDevice && $purpose === 'user') {
+            $purpose = 'user_td';
+        }
 
         $code = str_pad((string) random_int(0, 10 ** $cfg['length'] - 1), $cfg['length'], '0', STR_PAD_LEFT);
 
@@ -45,9 +54,11 @@ final class OtpService
 
                 return new DomainError('OTP_COOLDOWN', 'کد قبلی تازه فرستاده شده است. '.Digits::toPersian((string) $wait).' ثانیه دیگر دوباره امتحان کنید.', 429, ['retry_after_seconds' => $wait]);
             }
+            // Per-number counters are kept per purpose: merchant-side requests never use up a staff number's
+            // allowance (or reveal that it is a staff number), and a trusted device has its own allowance.
             $checks = [
-                ['otp:m:h:'.$mobile, $cfg['per_mobile_hour'], 3600],
-                ['otp:m:d:'.$mobile, $cfg['per_mobile_day'], 86400],
+                ['otp:m:h:'.$purpose.':'.$mobile, $cfg['per_mobile_hour'], 3600],
+                ['otp:m:d:'.$purpose.':'.$mobile, $cfg['per_mobile_day'], 86400],
                 ['otp:ip:h:'.$ip, $cfg['per_ip_hour'], 3600],
                 ['otp:net:h:'.self::subnet($ip), $cfg['per_subnet_hour'], 3600],
             ];
@@ -63,7 +74,8 @@ final class OtpService
             $budget = $existing ? $cfg['existing_users_daily_budget'] : $cfg['global_daily_budget'];
             $budgetKey = 'otp:budget:'.($existing ? 'existing:' : 'new:').now()->format('Ymd');
             Cache::add($budgetKey, 0, 90000);
-            if (Cache::increment($budgetKey) > $budget) {
+            // A trusted device proves this number signed in here before: never blocked by a flood of others.
+            if ($purpose !== 'user_td' && Cache::increment($budgetKey) > $budget) {
                 Log::critical('OTP daily budget exhausted', ['pool' => $existing ? 'existing' : 'new', 'budget' => $budget]);
 
                 return new DomainError('OTP_BUDGET', 'ارسال کد موقتاً ممکن نیست. چند دقیقه دیگر دوباره امتحان کنید.', 503);
@@ -87,7 +99,7 @@ final class OtpService
         $this->sms->queueOtp($mobile, $code, $challenge->id);
         Audit::record('auth.otp_requested', null, ['mobile_tail' => substr($mobile, -4)], null, 'system');
 
-        return ['challenge_id' => $challenge->id, 'resend_after_seconds' => $cfg['resend_cooldown_seconds']];
+        return ['challenge_id' => $challenge->id, 'resend_after_seconds' => $cfg['resend_cooldown_seconds'], 'purpose' => $purpose];
     }
 
     /** Returns the verified mobile, or throws. Attempts are counted atomically. */

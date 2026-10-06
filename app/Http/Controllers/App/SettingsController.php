@@ -282,6 +282,12 @@ class SettingsController extends BaseController
             if ($next !== '') {
                 Numbering::setNext($settings, (int) $next, CarbonImmutable::now(), $tenant->timezone);
             }
+            // Invoice numbers travel in SMS: a scheme that prints numbers shaped like a phone number is refused.
+            foreach (Numbering::preview($settings, CarbonImmutable::now(), $tenant->timezone) as $sample) {
+                if (SmsTemplate::looksLikePhoneNumber($sample)) {
+                    throw new DomainError('VALIDATION', 'شماره فاکتور نباید شبیه شماره تلفن باشد.', 422, ['errors' => ['next' => ['این ترکیب شماره‌ای شبیه تلفن می‌سازد؛ پیشوند یا شماره شروع را عوض کنید.']]]);
+                }
+            }
             Audit::record('settings.numbering_changed', $row, ['before' => $before, 'after' => $settings, 'next' => $next ?: null]);
             app(SettingsBackups::class)->capture($this->tenant(), 'numbering'); // Basic/Pro: keep the last 50 settings states
 

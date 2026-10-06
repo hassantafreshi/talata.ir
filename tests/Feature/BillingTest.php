@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Domain\Billing\Gateways\MockGateway;
 use App\Domain\Billing\PaymentGateway;
 use App\Domain\Billing\PaymentGateways;
+use App\Domain\Plans\CommercialConfig;
 use App\Domain\Sms\SmsCredit;
 use App\Models\BillingOrder;
 use App\Models\PaymentAttempt;
@@ -61,6 +62,28 @@ class BillingTest extends TestCase
         $this->get("/pay/callback/mock?Authority={$authority}&Status=OK")->assertRedirect();
         $this->assertSame(1, Subscription::withoutGlobalScope('tenant')->where('plan_code', 'basic')->count());
         $this->get('/settings/appearance')->assertOk()->assertDontSee('در پلن رایگان قالب ثابت');
+    }
+
+    public function test_plan_change_carries_remaining_time_by_value_not_day_for_day(): void
+    {
+        $user = $this->merchant();
+        $tenant = $this->tenantOf($user);
+        // A full year of Basic left.
+        Subscription::withoutGlobalScope('tenant')->forceCreate([
+            'tenant_id' => $tenant->id, 'plan_code' => 'basic', 'period' => 'yearly', 'starts_at' => now()->subMinute(),
+            'ends_at' => now()->addDays(365), 'activated_by' => 'PAYMENT', 'status' => 'active',
+        ]);
+        $res = $this->order($user, ['product' => 'PLAN', 'plan' => 'professional', 'period' => 'monthly'])->assertCreated();
+        $this->pay($res->json('redirect.url'), 'success');
+
+        $cfg = app(CommercialConfig::class);
+        $basicDaily = (int) $cfg->plan('basic')['price_toman']['yearly'] / 365;
+        $proDaily = (int) $cfg->plan('professional')['price_toman']['monthly'] / 30;
+        $pro = Subscription::withoutGlobalScope('tenant')->where('tenant_id', $tenant->id)->where('plan_code', 'professional')->firstOrFail();
+        $expected = (int) floor(365 * $basicDaily / $proDaily);
+        $this->assertEqualsWithDelta($expected, $pro->carry_over_days, 1);
+        $this->assertLessThan(365, $pro->carry_over_days, 'a year of Basic must not become a year of Professional');
+        $this->assertEqualsWithDelta(30 + $pro->carry_over_days, now()->diffInDays($pro->ends_at), 1);
     }
 
     public function test_amount_mismatch_and_cancel_never_fulfil(): void

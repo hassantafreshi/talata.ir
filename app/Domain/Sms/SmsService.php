@@ -149,6 +149,7 @@ final class SmsService
                 throw new DomainError('SMS_TENANT_RATE', 'سقف ارسال پیامک این فروشگاه در این بازه پر شده است. کمی بعد دوباره امتحان کنید.', 429);
             }
 
+            SmsTemplate::assertSafeToSend($this->templateFor($tenant), (string) ($invoice->snapshot['shop']['name'] ?? $tenant->profile?->name ?? ''), Digits::invoiceNumber($invoice->number));
             $preview = $this->previewFor($invoice, $tenant, $link);
             $message = new SmsMessage([
                 'tenant_id' => $tenant->id, 'purpose' => 'INVOICE', 'invoice_id' => $invoice->id, 'recipient' => $recipient,

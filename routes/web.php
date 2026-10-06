@@ -93,8 +93,8 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::post('/passkeys', [PasskeyController::class, 'store'])->middleware('throttle:20,1')->name('api.passkeys.store');
         Route::delete('/passkeys/{passkey}', [PasskeyController::class, 'destroy'])->whereNumber('passkey')->name('api.passkeys.destroy');
         Route::post('/memberships/{membership}/switch', [UsersController::class, 'switchTenant'])->whereNumber('membership')->name('api.memberships.switch');
-        Route::get('/quotes/latest', [QuoteController::class, 'latest'])->name('api.quotes.latest');
-        Route::get('/quotes/board', [QuoteController::class, 'board'])->name('api.quotes.board');
+        Route::get('/quotes/latest', [QuoteController::class, 'latest'])->middleware('perm:mazneh.view|invoice.issue|calculator.use')->name('api.quotes.latest');
+        Route::get('/quotes/board', [QuoteController::class, 'board'])->middleware('perm:mazneh.view')->name('api.quotes.board');
         Route::get('/entitlements', [SettingsController::class, 'entitlements'])->name('api.entitlements');
         Route::get('/dashboard', [DashboardController::class, 'data'])->middleware(['perm:reports.view', 'throttle:60,1'])->name('api.dashboard');
 

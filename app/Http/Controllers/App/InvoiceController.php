@@ -129,6 +129,7 @@ class InvoiceController extends BaseController
 
     public function status(Invoice $invoice)
     {
+        $this->load($invoice);
         $sms = SmsMessage::query()->where('invoice_id', $invoice->id)->orderByDesc('id')->first();
 
         return response()->json([

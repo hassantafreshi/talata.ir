@@ -160,4 +160,28 @@ class AdminConsoleTest extends TestCase
         $this->signIn($staff); // staff ceremony has its own challenge, cooldown and lock
         $this->get('/admin')->assertOk();
     }
+
+    public function test_merchant_side_requests_never_use_up_a_staff_numbers_allowance(): void
+    {
+        $staff = $this->staff();
+        $otp = app(OtpService::class);
+        // Four merchant-side requests reach the hourly per-number limit of the «user» purpose…
+        for ($i = 0; $i < 4; $i++) {
+            $otp->request($staff->mobile, '10.0.0.'.(20 + $i));
+            $this->travel(91)->seconds();
+        }
+        $this->expectsDomainError(fn () => $otp->request($staff->mobile, '10.0.0.30'), 'OTP_RATE_LIMITED');
+        // …and the staff sign-in still gets its code.
+        $this->assertArrayHasKey('challenge_id', $otp->request($staff->mobile, '10.0.0.31', 'staff'));
+    }
+
+    private function expectsDomainError(callable $fn, string $code): void
+    {
+        try {
+            $fn();
+            $this->fail("expected {$code}");
+        } catch (DomainError $e) {
+            $this->assertSame($code, $e->codeName);
+        }
+    }
 }

@@ -30,6 +30,11 @@ final class SmsTemplate
                 throw new DomainError('TEMPLATE_PLACEHOLDER', "عبارت {$placeholder} مجاز نیست.");
             }
         }
+        // A placeholder may not be glued to letters, digits or URL characters: «{shop_name}.ir/pay» would turn a
+        // shop name into a web address in a message sent from our line.
+        if (preg_match('~[\p{L}\p{N}._\-/@\\\\:]\{(shop_name|invoice_number|amount|invoice_link)\}|\{(shop_name|invoice_number|amount)\}[\p{L}\p{N}._\-/@\\\\]|\{invoice_link\}[\p{L}\p{N}/@\\\\]~u', $template)) {
+            throw new DomainError('TEMPLATE_PLACEHOLDER_GLUED', 'هر عبارت داخل {} باید با فاصله یا علامت از بقیه متن جدا باشد.');
+        }
         if (substr_count($template, '{invoice_number}') < 1) {
             throw new DomainError('TEMPLATE_NUMBER_REQUIRED', 'متن باید شماره فاکتور {invoice_number} را داشته باشد تا پیامک فقط اطلاع‌رسانی همان فاکتور باشد.');
         }
@@ -74,7 +79,37 @@ final class SmsTemplate
             }
         }
 
-        return (bool) preg_match('/\b(bank|shaparak|sana|police|support|talata|verify|code)\b/iu', $t);
+        // Latin brand words match inside other words too («mellatbank»); short ambiguous ones only as words.
+        if (preg_match('/(bank|shaparak|zarlio|talata|police|adliran|yaraneh|edalat|sahamedalat)/iu', $t)) {
+            return true;
+        }
+
+        return (bool) preg_match('/\b(sana|support|verify|code|otp)\b/iu', $t);
+    }
+
+    /**
+     * Iranian phone-number shapes once separators are removed (mobile 09…/9…/98…, or a landline with area
+     * code). Used for invoice numbers inside SMS: a number styled «۰۹۱۲-۳۴۵۶۷۸۹» must never go out.
+     */
+    public static function looksLikePhoneNumber(string $text): bool
+    {
+        $latin = Digits::toLatin($text);
+        $compact = preg_replace('/(?<=\d)[\s\x{200C}\x{200E}\x{200F}\-\x{2013}\x{2014}_.()\/\\|*+]+(?=\d)/u', '', $latin) ?? $latin;
+
+        return (bool) preg_match('/(?<!\d)(0\d{10}|98\d{10}|9\d{9})(?!\d)/', $compact);
+    }
+
+    /**
+     * Final check of what will actually be sent, after the merchant's template and shop name are put together
+     * (each can pass alone and still combine into a link or a bank-like text). Numbers and the trusted link are
+     * neutralised; the invoice number is checked separately for phone-number shapes.
+     */
+    public static function assertSafeToSend(string $template, string $shopName, string $invoiceNumber): void
+    {
+        $probe = self::render($template, ['shop_name' => $shopName, 'invoice_number' => 'N', 'amount' => 'A', 'invoice_link' => ' ']);
+        if (self::containsLinkOrPhone($probe) || self::looksLikeImpersonation($probe) || self::looksLikePhoneNumber($invoiceNumber)) {
+            throw new DomainError('SMS_CONTENT_BLOCKED', 'متن این پیامک مجاز نیست: شبیه لینک، شماره تلفن یا پیام بانک و سامانه می‌شود. نام فروشگاه، متن پیامک یا شیوه شماره‌گذاری را اصلاح کنید.', 422);
+        }
     }
 
     public static function render(string $template, array $vars): string

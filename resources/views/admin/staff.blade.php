@@ -19,6 +19,12 @@
                                 <label class="check"><input type="checkbox" name="active" @checked($s->active)> فعال</label>
                                 <button class="btn sm btn-dark" type="submit">ذخیره</button>
                             </form>
+                            @if ($s->id !== $me->id && ($passkeys[$s->id] ?? 0))
+                                <form class="stack-sm" data-action="{{ route('admin.staff.passkeys.reset', $s->id) }}" data-reload data-confirm="همه کلیدهای عبور {{ $s->name }} حذف شود؟ (برای دستگاه گم‌شده؛ با کد پیامکی وارد می‌شود و کلید تازه می‌سازد)">
+                                    <div class="field"><label for="pr{{ $s->id }}">دلیل بازنشانی کلید</label><input id="pr{{ $s->id }}" name="reason" required minlength="5" maxlength="250"></div>
+                                    <button class="btn sm btn-line" type="submit">بازنشانی کلیدهای عبور</button>
+                                </form>
+                            @endif
                         </details>
                     </td>
                 @endif
