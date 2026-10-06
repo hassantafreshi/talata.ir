@@ -7,6 +7,7 @@ use App\Domain\Invoices\Qr;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\InvoiceShare;
+use App\Models\InvoiceVerificationRevocation;
 use App\Models\Tenant;
 use App\Support\Tokens;
 use Illuminate\Support\Facades\Storage;
@@ -25,7 +26,10 @@ class PublicInvoiceController extends Controller
     {
         $invoice = Tokens::isWellFormed($token) ? Invoice::withoutGlobalScope('tenant')->where('verify_token_hash', Tokens::hash($token))->whereIn('status', ['issued', 'void'])->first() : null;
         if (! $invoice) {
-            return $this->headers(response()->view('public.verify-invalid', [], 404));
+            // A token the shop revoked for security reads «لغوشده» — and reveals nothing about the invoice.
+            $revoked = Tokens::isWellFormed($token) && InvoiceVerificationRevocation::withoutGlobalScope('tenant')->where('token_hash', Tokens::hash($token))->exists();
+
+            return $this->headers(response()->view('public.verify-invalid', ['revoked' => $revoked], $revoked ? 410 : 404));
         }
         $replacement = Invoice::withoutGlobalScope('tenant')->where('replaces_invoice_id', $invoice->id)->where('status', '!=', 'draft')->exists();
 

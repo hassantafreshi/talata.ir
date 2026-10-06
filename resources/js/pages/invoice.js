@@ -92,6 +92,22 @@ export default function () {
     });
   });
 
+  // Security revocation of the QR token: old printed sheets read «لغوشده»; a fresh print carries the new code.
+  document.querySelector('[data-verify-revoke]')?.addEventListener('click', () => {
+    const tpl = document.querySelector('[data-verify-revoke-tpl]');
+    const { sheet: el, close } = sheet(tpl.innerHTML, { label: 'لغو امنیتی بارکد' });
+    const form = el.querySelector('[data-verify-revoke-form]');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('[type=submit]');
+      busy(btn, true);
+      const res = await post(boot.verify_revoke_api, { reason: form.reason.value.trim() });
+      busy(btn, false);
+      if (res.ok) { close(); toast('بارکد قبلی لغو شد. برای مشتری برگه تازه چاپ کنید.', { timeout: 9000 }); setTimeout(() => location.reload(), 1200); return; }
+      if (res.errors) fieldErrors(form, res.errors); else toast(res.message, { kind: 'error', timeout: 9000 });
+    });
+  });
+
   const replaceBtn = document.querySelector('[data-replace]');
   replaceBtn?.addEventListener('click', async () => {
     busy(replaceBtn, true);

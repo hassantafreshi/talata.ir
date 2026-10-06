@@ -157,7 +157,7 @@
 
 ## ۴. صفحات عمومی
 - توکن بررسی و توکن اشتراک ۲۵۶ بیتی، جستجو با SHA-256، نسخه خام فقط رمزنگاری‌شده با `APP_KEY` (برای چاپ دوباره همان QR).
-- `/v/{token}` بدون نام/موبایل خریدار و صادرکننده (این داده‌ها اصلاً به view داده نمی‌شوند)؛ `/i/{token}` موبایل ماسک‌شده؛ `no-store`، `noindex`، `Referrer-Policy: no-referrer` (هم سربرگ و هم meta)، محدودیت ۳۰ درخواست در دقیقه؛ لینک مشتری قابل لغو و با انقضای اختیاری (`TALATA_SHARE_TTL_DAYS`)؛ QR با حاشیه خالی ۴ ماژولی (`PublicPagesTest`، `QrTest`).
+- `/v/{token}` بدون نام/موبایل خریدار و صادرکننده (این داده‌ها اصلاً به view داده نمی‌شوند)؛ `/i/{token}` موبایل ماسک‌شده؛ `no-store`، `noindex`، `Referrer-Policy: no-referrer` (هم سربرگ و هم meta)، محدودیت ۳۰ درخواست در دقیقه؛ لینک مشتری قابل لغو و با انقضای اختیاری (`TALATA_SHARE_TTL_DAYS`)؛ لغو امنیتی بارکد بررسی اقدامی جدا است (فقط با مجوز `invoice.void`، دلیل اجباری، ثبت در رویدادها `invoice.verification_revoked`): hash توکن قبلی در `invoice_verification_revocations` می‌ماند و صفحه آن فقط «لغوشده» (کد ۴۱۰) بدون هیچ داده‌ای از فاکتور نشان می‌دهد و فاکتور کد تازه می‌گیرد؛ QR با حاشیه خالی ۴ ماژولی (`PublicPagesTest`، `QrTest`).
 
 ## ۵. وب
 CSP سخت با nonce (بدون inline script/style attribute)، `X-Frame-Options: DENY`، nosniff، Referrer-Policy، Permissions-Policy، COOP/CORP، HSTS روی HTTPS؛ CSRF برای همه درخواست‌ها جز callback بانک؛ نشست رمزنگاری‌شده و بازسازی پس از ورود؛ لوگو با بازسازی تصویر (حذف EXIF/محتوای پنهان) و سرو با `default-src 'none'`؛ خروجی Blade escape و `innerHTML` در JS فقط با HTML سرور یا `escapeHtml`.

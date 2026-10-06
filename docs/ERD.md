@@ -3,7 +3,7 @@
 Generated from the database schema by `php artisan talata:erd` (do not edit by hand; re-run after migrations).
 Shows primary keys, foreign keys, `tenant_id`, `public_id` and `status`. Framework tables (sessions, cache, jobs, migrations) are omitted.
 
-Tables carrying `tenant_id` (merchant data uses the fail-closed `BelongsToTenant` scope; audit, log and admin tables only reference the shop — see `docs/adr/0003-tenant-isolation.md`): `admin_actions`, `affiliate_commissions`, `affiliate_referrals`, `audit_events`, `billing_orders`, `customers`, `feature_overrides`, `installment_agreements`, `installment_lines`, `installment_payments`, `invoice_counters`, `invoice_item_assets`, `invoice_items`, `invoice_layouts`, `invoice_shares`, `invoices`, `memberships`, `settings_backups`, `shop_profiles`, `sms_credit_entries`, `sms_credit_lots`, `sms_messages`, `sms_settings`, `subscriptions`, `system_logs`, `tenant_business_types`, `tenant_settings`.
+Tables carrying `tenant_id` (merchant data uses the fail-closed `BelongsToTenant` scope; audit, log and admin tables only reference the shop — see `docs/adr/0003-tenant-isolation.md`): `admin_actions`, `affiliate_commissions`, `affiliate_referrals`, `audit_events`, `billing_orders`, `customers`, `feature_overrides`, `installment_agreements`, `installment_lines`, `installment_payments`, `invoice_counters`, `invoice_item_assets`, `invoice_items`, `invoice_layouts`, `invoice_shares`, `invoice_verification_revocations`, `invoices`, `memberships`, `settings_backups`, `shop_profiles`, `sms_credit_entries`, `sms_credit_lots`, `sms_messages`, `sms_settings`, `subscriptions`, `system_logs`, `tenant_business_types`, `tenant_settings`.
 
 ```mermaid
 erDiagram
@@ -41,6 +41,9 @@ erDiagram
     users ||--o{ invoice_shares : "created_by"
     invoices ||--o{ invoice_shares : "invoice_id"
     tenants ||--o{ invoice_shares : "tenant_id"
+    invoices ||--o{ invoice_verification_revocations : "invoice_id"
+    users ||--o{ invoice_verification_revocations : "revoked_by"
+    tenants ||--o{ invoice_verification_revocations : "tenant_id"
     users ||--o{ invoices : "created_by"
     customers ||--o{ invoices : "customer_id"
     users ||--o{ invoices : "issued_by"
@@ -163,6 +166,12 @@ erDiagram
         bigint tenant_id FK
         bigint invoice_id FK
         bigint created_by FK
+    }
+    invoice_verification_revocations {
+        bigint id PK
+        bigint tenant_id FK
+        bigint invoice_id FK
+        bigint revoked_by FK
     }
     invoices {
         bigint id PK

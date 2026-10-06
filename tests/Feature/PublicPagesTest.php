@@ -2,9 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Identity\LoginService;
 use App\Domain\Invoices\InvoiceService;
+use App\Domain\Invoices\Qr;
 use App\Domain\Market\QuoteService;
+use App\Models\AuditEvent;
 use App\Models\Invoice;
+use App\Models\Membership;
 use Tests\TestCase;
 
 /** Public token pages: headers, what they show, link revoke/expiry (docs/INVOICE_DELIVERY_AND_VERIFICATION.md). */
@@ -88,5 +92,72 @@ class PublicPagesTest extends TestCase
 
         $this->get('/v/'.str_repeat('A', 43))->assertNotFound();
         $this->get('/v/not-a-token')->assertNotFound();
+    }
+
+    public function test_security_revocation_retires_the_qr_code_shows_revoked_and_is_audited(): void
+    {
+        $user = $this->merchant('basic');
+        $id = $this->issued($user);
+        $invoice = Invoice::where('public_id', $id)->firstOrFail();
+        $old = parse_url(app(InvoiceService::class)->verifyUrl($invoice), PHP_URL_PATH);
+
+        $this->api('POST', "/api/invoices/{$id}/verification/revoke", ['reason' => ''])->assertStatus(422);
+        $this->api('POST', "/api/invoices/{$id}/verification/revoke", ['reason' => 'عکس فاکتور در فضای مجازی پخش شده'])->assertOk();
+
+        $invoice->refresh();
+        $new = parse_url(app(InvoiceService::class)->verifyUrl($invoice), PHP_URL_PATH);
+        $this->assertNotSame($old, $new);
+        $this->assertSame('issued', $invoice->status, 'the invoice itself is unchanged');
+        $this->assertSame(1, AuditEvent::withoutGlobalScopes()->where('event', 'invoice.verification_revoked')->count());
+        $this->get("/invoices/{$id}/print")->assertOk()->assertSee(Qr::svg(config('talata.public_url').$new), false);
+        auth()->logout();
+
+        // The old printed sheet reads «لغوشده» and reveals nothing about the invoice; the new code verifies.
+        $this->get($old)->assertStatus(410)->assertSee('لغوشده')->assertDontSee($invoice->number)->assertDontSee('خانم آزمون')
+            ->assertHeader('Referrer-Policy', 'no-referrer');
+        $this->get($new)->assertOk()->assertSee('قطعی و معتبر');
+        $this->get('/v/'.str_repeat('A', 43))->assertNotFound()->assertDontSee('لغوشده');
+    }
+
+    public function test_only_members_who_may_void_can_revoke_and_never_across_shops(): void
+    {
+        $owner = $this->merchant('basic');
+        $id = $this->issued($owner);
+        $this->api('POST', '/api/users/invite', ['mobile' => '09371230077', 'permissions' => ['invoice.issue', 'invoices.view']])->assertOk();
+        $seller = app(LoginService::class)->completeLogin('09371230077')['user'];
+        $invite = Membership::query()->where('invited_mobile', '09371230077')->where('status', 'invited')->firstOrFail();
+        $this->actingAs($seller)->api('POST', "/api/invites/{$invite->id}/accept")->assertOk();
+
+        $this->actingAs($seller)->api('POST', "/api/invoices/{$id}/verification/revoke", ['reason' => 'آزمون دسترسی'])->assertForbidden();
+        $this->actingAs($this->merchant())->api('POST', "/api/invoices/{$id}/verification/revoke", ['reason' => 'آزمون دسترسی'])->assertNotFound();
+        $this->assertSame(0, AuditEvent::withoutGlobalScopes()->where('event', 'invoice.verification_revoked')->count());
+    }
+
+    public function test_verification_code_is_stable_and_shows_void_and_replaced_states_independent_of_links_and_plan(): void
+    {
+        $user = $this->merchant('basic');
+        $id = $this->issued($user);
+        $invoice = Invoice::where('public_id', $id)->firstOrFail();
+        $path = parse_url(app(InvoiceService::class)->verifyUrl($invoice), PHP_URL_PATH);
+
+        // A share link revoked and the plan downgraded: the printed QR keeps verifying the same record.
+        $this->api('POST', "/api/invoices/{$id}/share")->assertOk();
+        $this->api('POST', "/api/invoices/{$id}/share/revoke")->assertOk();
+        $this->setPlan($this->tenantOf($user), 'free');
+        $this->assertSame($path, parse_url(app(InvoiceService::class)->verifyUrl($invoice->fresh()), PHP_URL_PATH));
+        $this->get($path)->assertOk()->assertSee('قطعی و معتبر');
+
+        // Void, then replaced: the same code says so, never «معتبر», and never links to the new invoice.
+        $this->actingAs($user)->api('POST', "/api/invoices/{$id}/void", ['reason' => 'WRONG_WEIGHT'])->assertOk();
+        $this->get($path)->assertOk()->assertSee('باطل‌شده')->assertDontSee('قطعی و معتبر');
+        $next = $this->api('POST', "/api/invoices/{$id}/replace")->assertOk()->json('next');
+        $draftId = basename(dirname(parse_url($next, PHP_URL_PATH)));
+        $this->get($path)->assertDontSee('جایگزین‌شده', false); // a draft replacement is not announced yet
+        $draft = Invoice::where('public_id', $draftId)->firstOrFail();
+        $this->assertNull($draft->verify_token_hash, 'drafts have no verification code');
+        $this->inTenant($user, fn () => Invoice::whereKey($draft->id)->update(['status' => 'issued', 'issued_at' => now()]));
+        auth()->logout();
+        $page = $this->get($path)->assertOk()->assertSee('باطل‌شده و جایگزین‌شده');
+        $page->assertDontSee($draftId)->assertDontSee('/v/', false);
     }
 }

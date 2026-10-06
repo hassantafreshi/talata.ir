@@ -35,7 +35,7 @@ Status (2026-10-06): merchant web app and service admin console v1 implemented i
 
 ## Implementation progress (2026-10-06)
 
-Evidence: `php artisan test` (162 tests / 1710 assertions on PostgreSQL), `npm run test:js`, Playwright mobile journey with screenshots in `docs/screenshots/app/`. Security controls and fixed findings: `docs/SECURITY.md`. Frontend decision: `docs/adr/0001-blade-ajax-frontend.md`.
+Evidence: `php artisan test` (220 tests / 2251 assertions on PostgreSQL, 2026-10-11), `npm run test:js`, Playwright mobile journey with screenshots in `docs/screenshots/app/`. Security controls and fixed findings: `docs/SECURITY.md`. Frontend decision: `docs/adr/0001-blade-ajax-frontend.md`.
 
 - [x] Mobile OTP login with proof-of-work, layered limits, global budget, lockout (Passkey not yet).
 - [x] Tenancy fail-closed scope, ULID public ids, per-route permissions, member removal kills sessions.
@@ -68,6 +68,7 @@ Evidence: `php artisan test` (162 tests / 1710 assertions on PostgreSQL), `npm r
 - [x] Invoice-list filters «این ماه» and «اقساطی», combinable with the status chips, plan-gated (`tests/Feature/InvoiceFlowTest.php`).
 - [x] Customer list shows and filters by outstanding installment balance (همه / مانده قسط دارند / تسویه‌شده), Professional-only (`tests/Feature/CustomerBalanceTest.php`).
 - [x] Over-quota sheet adapts its title, reassurance and actions to the limit that was hit (`tests/js/quota-panel.test.mjs`).
+- [x] Security revocation of an invoice's QR verification code (docs/INVOICE_DELIVERY_AND_VERIFICATION.md): separate action for members who may void, reason required, audited `invoice.verification_revoked`; the merchant is told that every sheet printed so far will read «لغوشده» and to print a fresh one; the invoice itself is unchanged (`tests/Feature/PublicPagesTest.php`).
 - [ ] Independent penetration test and owner approval of visual direction.
 
 ## M0 — Foundations
@@ -95,15 +96,15 @@ Evidence: `php artisan test` (162 tests / 1710 assertions on PostgreSQL), `npm r
 
 ## M2 — Pricing
 
-- [ ] Standalone exact calculator works without Invoices or MarketPrices enabled.
-- [ ] Asset/currency/unit normalization and quote provenance implemented.
+- [x] Standalone exact calculator works without Invoices or MarketPrices enabled. (`InvoiceAcceptanceTest::test_calculator_works_with_no_market_rate_and_without_invoice_rights`.)
+- [x] Asset/currency/unit normalization and quote provenance implemented. (`QuoteService::normalize`: toman and per-مثقال feeds converted to IRR per gram, unknown units/non-positive values refused and logged; each invoice stores `rate_provenance` — quote id, feed, demo flag, freshness, quote/fetch time, market value, mode — also in the issued snapshot. `FreshnessAndWindowsTest`, `InvoiceAcceptanceTest`.)
 - [ ] Fresh/stale/manual/offline and tenant/transaction override behavior tested.
 - [ ] Effective rules, exact discounts and HALF_UP line rounding implemented.
-- [ ] Master prompt sample fixtures pass; browser/server results match.
-- [ ] Quote updates never silently change an accepted transaction rate.
-- [ ] Gold scheduler/visible-client refresh every 180 seconds, foreground/reconnect and single-flight behavior tested with a controlled clock.
+- [x] Master prompt sample fixtures pass; browser/server results match. (One vector file `docs/design/contracts/calculation-vectors.json` run by `tests/Unit/PricingVectorsTest.php` and by `tests/js/pricing.test.mjs` against the same `resources/js/lib/pricing.js` the browser loads; run in Node, not in a browser.)
+- [x] Quote updates never silently change an accepted transaction rate. (`InvoiceFlowTest::test_a_newer_rate_is_applied_only_when_it_is_the_one_the_merchant_saw`, `test_market_start_with_stale_rate_returns_rate_changed`.)
+- [ ] Gold scheduler/visible-client refresh every 180 seconds, foreground/reconnect and single-flight behavior tested with a controlled clock. (Server side tested: `*/3` schedule without overlap, single-flight lock, failure keeps the old timestamp, stale after 240 s with a controlled clock — `FreshnessAndWindowsTest`. Client foreground/reconnect refresh exists in the مظنه page but has no automated browser test yet.)
 - [ ] New-invoice entry shows large 18K price, unit/time/status and شروع immediately below; Start captures the visible accepted rate and handles a changed value explicitly.
-- [ ] Stale/missing quote, manual rate and MISC-only entry remain recoverable; no fabricated fresh timestamp.
+- [x] Stale/missing quote, manual rate and MISC-only entry remain recoverable; no fabricated fresh timestamp. (`InvoiceAcceptanceTest::test_manual_rate_start_and_misc_only_invoice_without_any_market_rate`, `FreshnessAndWindowsTest`.)
 
 ## M3 — Invoices and public views
 
@@ -124,10 +125,10 @@ Evidence: `php artisan test` (162 tests / 1710 assertions on PostgreSQL), `npm r
 - [ ] Issued edits/deletes rejected; void/replacement and installment consequences defined.
 - [ ] Print A4, multi-page Persian and browser Save as PDF verified.
 - [ ] QR at physical upper-left survives print/PDF and reprint; actual paper/PDF scanning and four-module quiet zone checked.
-- [ ] Stable InvoiceVerification token/page serves issued snapshot and void/replacement/revocation states, independently of share quotas; drafts/offline/invalid tokens never falsely verify.
+- [x] Stable InvoiceVerification token/page serves issued snapshot and void/replacement/revocation states, independently of share quotas; drafts/offline/invalid tokens never falsely verify. (`PublicPagesTest`: stable across share revoke + downgrade, void, replaced without link, security revoke → «لغوشده» 410; drafts have no token; the service worker never caches `/v/` — `tests/js/sw.test.mjs`.)
 - [ ] Merchant/customer invoice reflows at 360/390/768px without A4 shrinking or horizontal page scrolling; same-phone verification link works.
 - [ ] Public verification/share DTOs omit customer mobile/private data; token storage, tenant isolation, no-store/log redaction and revoked-token behavior checked.
-- [ ] High-entropy public links, revocation/expiry/regeneration implemented.
+- [x] High-entropy public links, revocation/expiry/regeneration implemented. (256-bit tokens; share link revoke/expiry/new link; separate, permission-gated and audited security revocation of the QR code with a new code for future prints — `PublicPagesTest`.)
 - [ ] Public DTO hides private data; noindex/referrer/cache/log policies verified.
 - [ ] Link quota counting, period boundaries and downgrade behavior tested.
 

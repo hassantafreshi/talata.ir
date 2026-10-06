@@ -121,6 +121,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
             Route::post('/invoices/{invoice}/void', [InvoiceController::class, 'void'])->middleware('throttle:20,1')->name('api.invoices.void');
             Route::post('/invoices/{invoice}/replace', [InvoiceController::class, 'replace'])->middleware('throttle:20,1')->name('api.invoices.replace');
             Route::post('/invoices/{invoice}/share/revoke', [InvoiceController::class, 'revokeShare'])->name('api.invoices.share.revoke');
+            Route::post('/invoices/{invoice}/verification/revoke', [InvoiceController::class, 'revokeVerification'])->middleware('throttle:10,1')->name('api.invoices.verification.revoke');
         });
         Route::get('/invoices', [InvoiceController::class, 'list'])->middleware('perm:invoices.view')->name('api.invoices.list');
 

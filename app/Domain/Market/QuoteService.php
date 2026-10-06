@@ -21,6 +21,39 @@ final class QuoteService
 {
     public const ASSETS = ['GOLD_18_SELL', 'GOLD_18_BUY', 'GOLD_24', 'USD_IRR', 'XAU_USD'];
 
+    /** Stored unit per asset. Every provider value is converted to it before it can reach a price. */
+    public const CANONICAL_UNIT = [
+        'GOLD_18_SELL' => 'IRR_PER_GRAM', 'GOLD_18_BUY' => 'IRR_PER_GRAM', 'GOLD_24' => 'IRR_PER_GRAM',
+        'USD_IRR' => 'IRR_PER_USD', 'XAU_USD' => 'USD_PER_OUNCE',
+    ];
+
+    /** 1 مثقال = 4.608 g (the bazaar unit some feeds quote in). */
+    public const GRAMS_PER_MITHQAL = '4.608';
+
+    /**
+     * Converts a provider value to the asset's canonical unit. Accepts toman (×10) and per-مثقال gold quotes;
+     * any other unit — or a zero/negative value — is refused, so a mislabelled feed can never price an invoice
+     * 10× or 4.6× off. Returns null when refused.
+     */
+    public static function normalize(string $asset, string $value, string $unit): ?string
+    {
+        $canonical = self::CANONICAL_UNIT[$asset] ?? null;
+        if (! $canonical || ! is_numeric($value)) {
+            return null;
+        }
+        $v = BigDecimal::of($value);
+        $unit = strtoupper(trim($unit));
+        $v = match (true) {
+            $unit === $canonical, $asset === 'USD_IRR' && $unit === 'IRR' => $v,
+            $canonical === 'IRR_PER_GRAM' && $unit === 'TOMAN_PER_GRAM', $asset === 'USD_IRR' && in_array($unit, ['TOMAN_PER_USD', 'TOMAN'], true) => $v->multipliedBy(10),
+            $canonical === 'IRR_PER_GRAM' && $unit === 'IRR_PER_MITHQAL' => $v->dividedBy(self::GRAMS_PER_MITHQAL, 0, RoundingMode::HalfUp),
+            $canonical === 'IRR_PER_GRAM' && $unit === 'TOMAN_PER_MITHQAL' => $v->multipliedBy(10)->dividedBy(self::GRAMS_PER_MITHQAL, 0, RoundingMode::HalfUp),
+            default => null,
+        };
+
+        return $v && $v->isPositive() ? (string) $v : null;
+    }
+
     public const EMERGENCY_SOURCE_FA = 'نرخ اعلامی زرلیو (دستی)';
 
     public function __construct(private readonly QuoteProvider $provider) {}
@@ -37,14 +70,21 @@ final class QuoteService
                 if (! isset($data[$asset])) {
                     continue;
                 }
+                $normalized = self::normalize($asset, (string) $data[$asset]['value'], (string) ($data[$asset]['unit'] ?? ''));
+                if ($normalized === null) {
+                    // Unknown unit or impossible value: keep the last good quote (it turns stale honestly).
+                    TechLog::warning('quotes', 'quote refused: unknown unit or non-positive value', ['source' => $this->provider->name(), 'asset' => $asset, 'unit' => mb_substr((string) ($data[$asset]['unit'] ?? ''), 0, 40)]);
+
+                    continue;
+                }
                 $previous = MarketQuote::query()->where('asset', $asset)->latest('fetched_at')->first();
-                $value = BigDecimal::of($data[$asset]['value']);
+                $value = BigDecimal::of($normalized);
                 $change = null;
                 if ($previous && ! BigDecimal::of($previous->value)->isZero()) {
                     $change = (string) $value->minus($previous->value)->multipliedBy(100)->dividedBy($previous->value, 4, RoundingMode::HalfUp);
                 }
                 MarketQuote::create([
-                    'asset' => $asset, 'value' => (string) $value, 'unit' => $data[$asset]['unit'], 'change_vs_previous_pct' => $change,
+                    'asset' => $asset, 'value' => (string) $value, 'unit' => self::CANONICAL_UNIT[$asset], 'change_vs_previous_pct' => $change,
                     'source' => $this->provider->name(), 'is_demo' => $this->provider->isDemo(),
                     'quote_time' => $data[$asset]['quote_time'], 'fetched_at' => now(),
                 ]);

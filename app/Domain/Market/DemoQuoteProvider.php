@@ -30,7 +30,7 @@ final class DemoQuoteProvider implements QuoteProvider
             'GOLD_18_SELL' => ['value' => (string) $sell, 'unit' => 'IRR_PER_GRAM', 'quote_time' => now()],
             'GOLD_18_BUY' => ['value' => (string) $buy, 'unit' => 'IRR_PER_GRAM', 'quote_time' => now()],
             'GOLD_24' => ['value' => (string) $k24, 'unit' => 'IRR_PER_GRAM', 'quote_time' => now()],
-            'USD_IRR' => ['value' => '1000000', 'unit' => 'IRR', 'quote_time' => now()],
+            'USD_IRR' => ['value' => '1000000', 'unit' => 'IRR_PER_USD', 'quote_time' => now()],
             'XAU_USD' => ['value' => (string) (2650 + ($drift / 10)), 'unit' => 'USD_PER_OUNCE', 'quote_time' => now()],
         ];
     }

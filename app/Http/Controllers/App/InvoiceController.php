@@ -201,4 +201,15 @@ class InvoiceController extends BaseController
 
         return response()->json(['next' => route('invoices.items', $draft)]);
     }
+
+    public function revokeVerification(Request $request, Invoice $invoice)
+    {
+        if ($invoice->isDraft()) {
+            throw new DomainError('NOT_ISSUED', 'فقط فاکتور صادرشده کد بررسی دارد.', 409);
+        }
+        $data = $request->validate(['reason' => ['required', 'string', 'max:250']]);
+        $this->invoices->revokeVerification($this->load($invoice), $request->user(), $data['reason']);
+
+        return response()->json(['ok' => true]);
+    }
 }

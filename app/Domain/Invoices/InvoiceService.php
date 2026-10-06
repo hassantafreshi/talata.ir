@@ -15,6 +15,8 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\InvoiceLayout;
 use App\Models\InvoiceShare;
+use App\Models\InvoiceVerificationRevocation;
+use App\Models\MarketQuote;
 use App\Models\SmsMessage;
 use App\Models\Tenant;
 use App\Models\User;
@@ -46,6 +48,25 @@ final class InvoiceService
     ) {}
 
     /** Start: captures the displayed rate. A newer server value must be accepted explicitly. */
+    /**
+     * Where an accepted rate came from, at the moment it was accepted: the quote row, its feed/demo/emergency
+     * origin and freshness. For a manual rate it records the market value it replaced (null if none).
+     */
+    private function provenance(?MarketQuote $quote, string $mode): array
+    {
+        return [
+            'quote_id' => $quote?->id,
+            'feed' => $quote ? ($quote->isEmergency ? 'EMERGENCY' : $quote->source) : null,
+            'is_demo' => (bool) ($quote?->is_demo ?? false),
+            'freshness' => $this->quotes->freshness($quote),
+            'quote_time' => $quote?->quote_time?->toIso8601String(),
+            'fetched_at' => $quote?->fetched_at?->toIso8601String(),
+            'market_value_irr' => $quote ? (string) BigDecimal::of($quote->value)->toScale(0, RoundingMode::HalfUp) : null,
+            'captured_at' => now()->toIso8601String(),
+            'mode' => $mode,
+        ];
+    }
+
     public function createDraft(Tenant $tenant, User $user, array $rate): Invoice
     {
         $this->entitlements->assertCan($tenant, 'invoice.finalize', 'صدور فاکتور در این پلن فعال نیست.');
@@ -57,8 +78,8 @@ final class InvoiceService
         $fetchedAt = null;
         $reason = null;
         $source = null;
+        $latest = $mode === 'NONE' ? null : $this->quotes->latest('GOLD_18_SELL');
         if ($mode === 'MARKET') {
-            $latest = $this->quotes->latest('GOLD_18_SELL');
             if (! $latest || $this->quotes->freshness($latest) === 'ERROR') {
                 throw new DomainError('RATE_UNAVAILABLE', 'نرخ بازار در دسترس نیست. نرخ دستی ثبت کنید یا فاکتور فقط متفرقه بسازید.', 409);
             }
@@ -80,10 +101,12 @@ final class InvoiceService
             }
         }
 
-        return DB::transaction(function () use ($user, $mode, $value, $buyValue, $fetchedAt, $reason, $source) {
+        $provenance = $mode === 'NONE' ? null : $this->provenance($latest, $mode);
+
+        return DB::transaction(function () use ($user, $mode, $value, $buyValue, $fetchedAt, $reason, $source, $provenance) {
             $invoice = Invoice::create([
                 'status' => 'draft', 'rate_mode' => $mode, 'accepted_rate_irr' => $value, 'accepted_buy_rate_irr' => $buyValue, 'rate_fetched_at' => $fetchedAt,
-                'rate_manual_reason' => $reason, 'rate_source' => $source, 'created_by' => $user->id, 'version' => 1,
+                'rate_manual_reason' => $reason, 'rate_source' => $source, 'created_by' => $user->id, 'version' => 1, 'rate_provenance' => $provenance,
             ]);
             InvoiceItem::create($this->calculator->normalizeRow(
                 $mode === 'NONE' ? ['item_type' => 'MISC'] : ['item_type' => 'GOLD', 'name' => 'طلای ۱۸ عیار', 'purity_ppt' => '750'], 1,
@@ -123,6 +146,7 @@ final class InvoiceService
                     ]);
                 }
                 if ($latest) {
+                    $invoice->rate_provenance = $this->provenance($latest, 'MARKET');
                     $invoice->rate_mode = 'MARKET';
                     $invoice->accepted_rate_irr = (string) BigDecimal::of($latest->value)->toScale(0, RoundingMode::HalfUp);
                     $invoice->rate_fetched_at = $latest->fetched_at;
@@ -353,6 +377,7 @@ final class InvoiceService
                 'mode' => $invoice->rate_mode, 'value_irr' => $invoice->accepted_rate_irr, 'buy_value_irr' => $invoice->accepted_buy_rate_irr,
                 'fetched_at' => $invoice->rate_fetched_at?->toIso8601String(), 'manual_reason' => $invoice->rate_manual_reason,
                 'source' => $invoice->rate_mode === 'MARKET' ? ($invoice->rate_source ?? 'FEED') : null,
+                'provenance' => $invoice->rate_provenance,
             ],
             'tax' => ['category' => 'GOLD_SERVICES', 'rule_id' => $rule->id, 'version' => $rule->version, 'rate_percent' => (string) $rule->rate_percent, 'is_sample' => (bool) $rule->is_sample],
             'rounding_policy' => 'IRR_LINE_HALF_UP_V1',
@@ -394,6 +419,34 @@ final class InvoiceService
     public function shareUrl(InvoiceShare $share): string
     {
         return config('talata.public_url').'/i/'.$share->token;
+    }
+
+    /**
+     * Security revocation of the QR verification token (e.g. a printed copy was misused): the old token is
+     * retired (its page shows «لغوشده», nothing else), the invoice gets a new token for future prints, and the
+     * action is audited. The invoice itself and its status are unchanged.
+     */
+    public function revokeVerification(Invoice $invoice, User $user, string $reason): Invoice
+    {
+        $reason = trim(strip_tags($reason));
+        if (mb_strlen($reason) < 3) {
+            throw new DomainError('VALIDATION', 'دلیل لغو را بنویسید.', 422, ['errors' => ['reason' => ['دلیل لغو را بنویسید.']]]);
+        }
+
+        return DB::transaction(function () use ($invoice, $user, $reason) {
+            $inv = Invoice::query()->whereKey($invoice->id)->lockForUpdate()->firstOrFail();
+            if (! in_array($inv->status, ['issued', 'void'], true) || ! $inv->verify_token_hash) {
+                throw new DomainError('NOT_ISSUED', 'فقط فاکتور صادرشده کد بررسی دارد.', 409);
+            }
+            InvoiceVerificationRevocation::create([
+                'invoice_id' => $inv->id, 'token_hash' => $inv->verify_token_hash, 'reason' => mb_substr($reason, 0, 250),
+                'revoked_by' => $user->id, 'revoked_at' => now(),
+            ]);
+            $inv->forceFill(['verify_token' => $vt = Tokens::make(), 'verify_token_hash' => Tokens::hash($vt)])->save();
+            Audit::record('invoice.verification_revoked', $inv, ['reason' => mb_substr($reason, 0, 250)]);
+
+            return $inv;
+        });
     }
 
     public function verifyUrl(Invoice $invoice): string

@@ -49,6 +49,9 @@ class InvoiceAcceptanceTest extends TestCase
         $m = $this->api('POST', '/api/invoices/drafts', ['mode' => 'MANUAL', 'value_toman' => '۱۰٬۰۰۰٬۰۰۰', 'reason' => 'MARKET_UNAVAILABLE'])->assertCreated();
         $inv = Invoice::where('public_id', $m->json('draft_id'))->firstOrFail();
         $this->assertSame('MANUAL', $inv->rate_mode);
+        // No market rate existed: provenance says so instead of inventing one.
+        $this->assertNull($inv->rate_provenance['market_value_irr']);
+        $this->assertSame('ERROR', $inv->rate_provenance['freshness']);
         $this->assertSame('100000000', (string) $inv->accepted_rate_irr);
         $this->assertSame('MARKET_UNAVAILABLE', $inv->rate_manual_reason);
 
@@ -142,5 +145,20 @@ class InvoiceAcceptanceTest extends TestCase
         // The old logo file is still served for that invoice.
         $tenantPublic = $this->tenantOf($user)->public_id;
         $this->get(route('public.logo', [$tenantPublic, $logoV1], false))->assertOk();
+    }
+
+    public function test_issued_snapshot_records_where_the_market_rate_came_from(): void
+    {
+        $user = $this->merchant();
+        $quote = app(QuoteService::class)->latest('GOLD_18_SELL');
+        $d = $this->actingAs($user)->api('POST', '/api/invoices/drafts', ['mode' => 'MARKET', 'value_irr' => $this->irr()])->assertCreated();
+        $s = $this->save($d->json('draft_id'), $d->json('version'), [['row_uid' => 'r1', 'item_type' => 'GOLD', 'name' => 'انگشتر', 'net_weight_g' => '1', 'purity_ppt' => '750', 'wage_percent' => '0', 'profit_percent' => '0']])->assertOk();
+        $this->issueNow($d->json('draft_id'), $s->json('version'))->assertCreated();
+        $p = Invoice::where('public_id', $d->json('draft_id'))->value('snapshot')['rate']['provenance'];
+        $this->assertSame($quote->id, $p['quote_id']);
+        $this->assertSame($quote->source, $p['feed']);
+        $this->assertSame((bool) $quote->is_demo, $p['is_demo']);
+        $this->assertSame('FRESH', $p['freshness']);
+        $this->assertSame($this->irr(), $p['market_value_irr']);
     }
 }
