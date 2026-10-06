@@ -131,6 +131,10 @@ final class OtpService
             return ['OK', $c->mobile];
         });
 
+        if ($outcome[0] !== 'OK') {
+            Audit::record($outcome[0] === 'LOCKED' ? 'auth.otp_locked' : 'auth.otp_wrong', null, ['outcome' => strtolower($outcome[0])], null, 'system');
+        }
+
         return match ($outcome[0]) {
             'OK' => $outcome[1],
             'EXPIRED' => throw new DomainError('OTP_EXPIRED', 'این کد دیگر معتبر نیست. کد تازه بگیرید.', 422),

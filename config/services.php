@@ -14,6 +14,15 @@ return [
     |
     */
 
+    // SMS provider for login codes, invoice SMS and reminders (TALATA_SMS_DRIVER=kavenegar).
+    'kavenegar' => [
+        'api_key' => env('KAVENEGAR_API_KEY', ''),
+        'sender' => env('KAVENEGAR_SENDER'),                 // dedicated line; empty = account default
+        'otp_template' => env('KAVENEGAR_OTP_TEMPLATE'),     // Verify Lookup template with %token; empty = sms/send
+        'base_url' => env('KAVENEGAR_BASE_URL', 'https://api.kavenegar.com/v1'),
+        'timeout' => (int) env('KAVENEGAR_TIMEOUT', 10),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

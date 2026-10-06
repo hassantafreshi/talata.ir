@@ -37,7 +37,7 @@
                 <div class="between small"><span>پرداخت‌شده: <span class="num">{{ toman((string) $paid) }}</span> از <span class="num">{{ toman((string) $total) }}</span> تومان</span></div>
                 <progress class="meter" max="{{ max($total, 1) }}" value="{{ $paid }}" aria-label="پیشرفت پرداخت"></progress>
                 <div class="table-wrap">
-                    <table>
+                    <table class="t">
                         <thead><tr><th scope="col">قسط</th><th scope="col">سررسید</th><th scope="col">مبلغ</th><th scope="col">وضعیت</th></tr></thead>
                         <tbody>
                             @foreach ($a->lines as $l)

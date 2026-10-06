@@ -7,6 +7,7 @@ use App\Tenancy\TenantContext;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Context;
 use Symfony\Component\HttpFoundation\Response;
 
 /** Binds the logged-in user's active membership to the request. Suspended tenants are blocked. */
@@ -32,6 +33,7 @@ class ResolveTenant
         }
         $request->session()->put('tenant_id', $membership->tenant_id);
         $this->context->set($membership->tenant, $membership);
+        Context::add(['tenant_id' => $membership->tenant_id, 'user_id' => $user->id]);
 
         return $next($request);
     }

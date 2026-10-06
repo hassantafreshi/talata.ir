@@ -6,10 +6,10 @@ use App\Models\MarketQuote;
 use App\Support\Digits;
 use App\Support\Jalali;
 use App\Support\Money;
+use App\Support\TechLog;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
@@ -47,11 +47,12 @@ final class QuoteService
                 ]);
             }
             Cache::put('talata.quotes.last_error', null);
+            TechLog::info('quotes', 'quotes refreshed', ['source' => $this->provider->name(), 'assets' => count($data)]);
 
             return true;
         } catch (Throwable $e) {
             Cache::put('talata.quotes.last_error', now()->toIso8601String(), 3600);
-            Log::warning('quote fetch failed', ['error' => $e->getMessage()]);
+            TechLog::warning('quotes', 'quote fetch failed', ['source' => $this->provider->name(), 'error' => mb_substr($e->getMessage(), 0, 300)]);
 
             return false;
         } finally {

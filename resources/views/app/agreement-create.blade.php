@@ -35,7 +35,7 @@
         <section class="band stack-sm" aria-live="polite">
             <h2>جدول اقساط</h2>
             <p class="small muted" data-preview-empty>مبلغ، تعداد و تاریخ اولین قسط را وارد کنید.</p>
-            <div class="table-wrap hidden" data-preview><table><thead><tr><th scope="col">قسط</th><th scope="col">سررسید</th><th scope="col">مبلغ (تومان)</th></tr></thead><tbody></tbody></table>
+            <div class="table-wrap hidden" data-preview><table class="t"><thead><tr><th scope="col">قسط</th><th scope="col">سررسید</th><th scope="col">مبلغ (تومان)</th></tr></thead><tbody></tbody></table>
                 <p class="xs muted">اقساط به هزار تومان گرد می‌شود و باقیمانده در قسط آخر می‌آید. مانده اقساط: <span class="num" data-principal></span> تومان</p></div>
         </section>
         <button class="btn btn-gold block" type="submit" data-busy-text="در حال ثبت…">ثبت قرارداد</button>

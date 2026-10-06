@@ -22,7 +22,7 @@ export default function () {
     e.preventDefault();
     const btn = form.querySelector('[type=submit]');
     busy(btn);
-    const res = await post('/api/users/invite', { mobile: toLatin(form.mobile.value), permissions: [...form.querySelectorAll('[name="permissions[]"]:checked')].map((c) => c.value) });
+    const res = await post('/api/users/invite', { mobile: toLatin(form.mobile.value), ...(form.querySelector('[name="permissions[]"]') ? { permissions: [...form.querySelectorAll('[name="permissions[]"]:checked')].map((c) => c.value) } : {}) });
     busy(btn, false);
     if (res.ok) { toast('همکار اضافه شد.'); setTimeout(() => location.reload(), 600); return; }
     if (res.errors) fieldErrors(form, res.errors); else toast(res.message, { kind: 'error' });

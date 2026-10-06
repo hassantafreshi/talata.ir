@@ -46,8 +46,12 @@ Evidence: `php artisan test` (55 tests on PostgreSQL), `npm run test:js`, Playwr
 - [x] Settings: business profile (phishing-safe name), logo re-encode, appearance editor with live A4/mobile preview, SMS template, users.
 - [x] Plans + SMS credit purchase with VAT shown separately, MockGateway, bank-return page, receipt.
 - [x] Mobile-friendly Jalali date picker (year/month grids, swipe, quick chips, typed date).
-- [ ] Real SMS provider and PSP adapters (owner selection pending).
-- [ ] Service admin console `/provider/*`.
+- [x] Kavenegar SMS adapter (send, Verify Lookup OTP, delivery status, error mapping, key redaction); tested with a faked API — live send needs the owner's key/line/template.
+- [x] Passkey (fingerprint/face/device-lock) sign-in for merchants and staff; SMS login stays as recovery.
+- [x] Team: members have full access by default; per-permission restriction only on Basic/Pro (`team.permissions_edit`).
+- [x] Activity log per user/shop/service and technical log per service, visible only in the admin console `/admin` (staff guard, OTP/passkey, idle timeout, roles).
+- [ ] Real PSP adapter (owner selection pending).
+- [ ] Rest of the service admin console (pricing versions, manual tenant actions, SMS/payment operations). Dashboard + logs are done at `/admin`.
 - [ ] Field performance measurement on throttled networks (bundle sizes measured only at build time).
 - [ ] Independent penetration test and owner approval of visual direction.
 

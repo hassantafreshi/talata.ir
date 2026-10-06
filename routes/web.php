@@ -7,10 +7,12 @@ use App\Http\Controllers\App\InstallmentController;
 use App\Http\Controllers\App\InvoiceController;
 use App\Http\Controllers\App\InvoiceDraftController;
 use App\Http\Controllers\App\MaznehController;
+use App\Http\Controllers\App\PasskeyController;
 use App\Http\Controllers\App\QuoteController;
 use App\Http\Controllers\App\SettingsController;
 use App\Http\Controllers\App\UsersController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasskeyLoginController;
 use App\Http\Controllers\Public\MockGatewayController;
 use App\Http\Controllers\Public\PaymentReturnController;
 use App\Http\Controllers\Public\PublicInvoiceController;
@@ -26,6 +28,8 @@ Route::middleware('guest')->group(function () {
         Route::get('/api/auth/pow', [LoginController::class, 'pow'])->name('auth.pow');
         Route::post('/api/auth/otp/request', [LoginController::class, 'requestOtp'])->name('auth.otp.request');
         Route::post('/api/auth/otp/verify', [LoginController::class, 'verifyOtp'])->name('auth.otp.verify');
+        Route::post('/api/auth/passkey/options', [PasskeyLoginController::class, 'options'])->name('auth.passkey.options');
+        Route::post('/api/auth/passkey/verify', [PasskeyLoginController::class, 'verify'])->name('auth.passkey.verify');
     });
 });
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
@@ -73,6 +77,9 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         // User-level (not tenant permission): own invites and shop switching.
         Route::post('/invites/{membership}/accept', [UsersController::class, 'accept'])->whereNumber('membership')->name('api.invites.accept');
         Route::post('/invites/{membership}/decline', [UsersController::class, 'decline'])->whereNumber('membership')->name('api.invites.decline');
+        Route::post('/passkeys/options', [PasskeyController::class, 'options'])->middleware('throttle:20,1')->name('api.passkeys.options');
+        Route::post('/passkeys', [PasskeyController::class, 'store'])->middleware('throttle:20,1')->name('api.passkeys.store');
+        Route::delete('/passkeys/{passkey}', [PasskeyController::class, 'destroy'])->whereNumber('passkey')->name('api.passkeys.destroy');
         Route::post('/memberships/{membership}/switch', [UsersController::class, 'switchTenant'])->whereNumber('membership')->name('api.memberships.switch');
         Route::get('/quotes/latest', [QuoteController::class, 'latest'])->name('api.quotes.latest');
         Route::get('/quotes/board', [QuoteController::class, 'board'])->name('api.quotes.board');

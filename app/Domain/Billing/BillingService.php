@@ -14,6 +14,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Support\Jalali;
 use App\Support\Money;
+use App\Support\TechLog;
 use Brick\Math\BigInteger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -133,6 +134,7 @@ final class BillingService
             return null;
         }
         $cb = $this->gateway->parseCallback($request);
+        TechLog::info('payments', 'gateway callback', ['gateway' => $gatewayCode, 'status' => $cb['status'] ?? null, 'has_authority' => (bool) ($cb['authority'] ?? null), 'ip' => $request->ip()]);
         if (! $cb['authority']) {
             return null;
         }
@@ -173,10 +175,11 @@ final class BillingService
             $v = $this->gateway->verify($attempt->authority, $attempt->amount_irr);
         } catch (\Throwable $e) {
             // Network/PSP error: never lose a possibly-paid order; reconcile retries with backoff.
-            report($e);
+            TechLog::error('payments', 'gateway verify error', ['gateway' => $attempt->gateway, 'order' => $order->public_ref, 'error' => mb_substr($e->getMessage(), 0, 300)]);
             $v = ['status' => 'UNKNOWN', 'bank_code' => null];
         }
         $attempt->bank_code = $v['bank_code'];
+        TechLog::info('payments', 'gateway verify', ['gateway' => $attempt->gateway, 'order' => $order->public_ref, 'status' => $v['status'], 'bank_code' => $v['bank_code'] ?? null]);
         if ($v['status'] === 'UNKNOWN') {
             $order->status = 'PENDING_VERIFICATION';
             $attempt->status = 'PENDING_VERIFICATION';

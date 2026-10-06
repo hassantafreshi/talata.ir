@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Domain\Sms\SmsGateway;
 use App\Domain\Sms\SmsService;
 use App\Models\SmsMessage;
+use App\Support\TechLog;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -29,12 +30,26 @@ class SendSms implements ShouldQueue
             return;
         }
         $message = SmsMessage::query()->findOrFail($this->messageId);
+        $message->forceFill(['provider' => $gateway->name()])->save();
         try {
-            $result = $gateway->send($message->recipient, $message->body);
+            if ($message->purpose === 'OTP') {
+                $code = (string) ($message->payload['code'] ?? '');
+                $result = $gateway->sendOtp($message->recipient, $code, SmsService::otpBody($code));
+            } else {
+                $result = $gateway->send($message->recipient, $message->body);
+            }
             $service->applyOutcome($message, $result['status'], $result['provider_id'], $result['error']);
+            TechLog::write($result['status'] === 'SENT' ? 'info' : 'warning', 'sms', 'sms '.strtolower($message->purpose).' '.strtolower($result['status']), [
+                'message' => $message->public_id, 'tenant_id' => $message->tenant_id, 'provider' => $gateway->name(),
+                'provider_id' => $result['provider_id'], 'segments' => $message->segments, 'receptor' => TechLog::scrub($message->recipient), 'error' => $result['error'],
+            ]);
         } catch (Throwable $e) {
             // Network/provider ambiguity: keep the reservation; reconciliation decides later.
-            $service->applyOutcome($message, 'UNKNOWN', null, $e->getMessage());
+            $service->applyOutcome($message, 'UNKNOWN', null, TechLog::scrub($e->getMessage()));
+            TechLog::error('sms', 'sms send exception', ['message' => $message->public_id, 'error' => mb_substr(TechLog::scrub($e->getMessage()), 0, 300)]);
+        } finally {
+            // The login code is single-use; never keep it after the attempt (tries = 1).
+            DB::table('sms_messages')->where('id', $message->id)->update(['payload' => null]);
         }
     }
 }

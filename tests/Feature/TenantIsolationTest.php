@@ -46,7 +46,7 @@ class TenantIsolationTest extends TestCase
 
     public function test_removed_member_loses_access_immediately_and_permissions_are_enforced(): void
     {
-        $owner = $this->merchant();
+        $owner = $this->merchant('basic'); // restricting permissions is a Basic/Pro capability
         $this->actingAs($owner)->api('POST', '/api/users/invite', ['mobile' => '09361112233', 'permissions' => ['invoice.issue']])->assertOk();
         $staff = app(LoginService::class)->completeLogin('09361112233')['user'];
         // Not auto-accepted: the staff member got their own shop and a pending invite.

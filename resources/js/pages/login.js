@@ -2,6 +2,7 @@ import { get, post } from '../lib/http.js';
 import { solve } from '../lib/pow.js';
 import { busy, fieldErrors, toast } from '../lib/ui.js';
 import { toLatin } from '../lib/digits.js';
+import * as webauthn from '../lib/webauthn.js';
 
 export async function requestCode(mobile, website = '') {
   const pow = await get('/api/auth/pow');
@@ -25,5 +26,26 @@ export default function () {
     busy(btn, false);
     if (res.ok) { location.href = res.data.next; return; }
     if (res.errors) fieldErrors(form, res.errors); else toast(res.message, { kind: 'error' });
+  });
+
+  passkeyLogin();
+}
+
+async function passkeyLogin() {
+  const box = document.querySelector('[data-passkey-login]');
+  if (!box || !webauthn.supported()) return;
+  box.classList.remove('hidden');
+  const btn = box.querySelector('[data-passkey-btn]');
+  btn.addEventListener('click', async () => {
+    busy(btn);
+    try {
+      const opts = await post('/api/auth/passkey/options');
+      if (!opts.ok) { toast(opts.message, { kind: 'error' }); return; }
+      let credential;
+      try { credential = await webauthn.get(opts.data); } catch (e) { toast(webauthn.errorMessage(e), { kind: 'error' }); return; }
+      const res = await post('/api/auth/passkey/verify', { credential });
+      if (res.ok) { location.href = res.data.next; return; }
+      toast(res.message, { kind: 'error', timeout: 8000 });
+    } finally { busy(btn, false); }
   });
 }

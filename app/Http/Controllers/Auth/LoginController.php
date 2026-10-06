@@ -16,8 +16,12 @@ use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
-    public function show()
+    public function show(Request $request)
     {
+        if ($request->query('then') === 'passkey') {
+            $request->session()->put('login.then', 'passkey'); // continue to passkey setup after the SMS login
+        }
+
         return view('auth.login');
     }
 
@@ -84,17 +88,26 @@ class LoginController extends Controller
         $request->session()->forget(['otp.challenge_id', 'otp.mobile_display', 'otp.resend_at']);
         Auth::login($result['user'], remember: true);
         $request->session()->regenerate();
+        $request->session()->put('auth_at', now()->getTimestamp());
         Audit::record('auth.login', $result['user'], ['new_tenant' => $result['is_new_tenant']], null, 'user');
 
-        return response()->json(['next' => $result['is_new_tenant'] ? route('settings.business', ['welcome' => 1]) : route('invoices.new')]);
+        $then = $request->session()->pull('login.then');
+        $next = match (true) {
+            $result['is_new_tenant'] => route('settings.business', ['welcome' => 1]),
+            $then === 'passkey' => route('settings').'#passkeys',
+            default => route('invoices.new'),
+        };
+
+        return response()->json(['next' => $next]);
     }
 
     public function logout(Request $request)
     {
+        Audit::record('auth.logout', $request->user());
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return redirect()->route('login', $request->query('then') === 'passkey' ? ['then' => 'passkey'] : []);
     }
 }

@@ -39,6 +39,19 @@
         @endif
     </nav>
 
+    <section class="band stack-sm" id="passkeys" aria-labelledby="pk-h" data-passkeys>
+        <h2 id="pk-h">ورود با اثر انگشت یا چهره</h2>
+        <p class="small muted">به‌جای کد پیامکی، با اثر انگشت، چهره یا قفل صفحه همین گوشی وارد شوید. اثر انگشت روی گوشی شما می‌ماند و به طلاتا فرستاده نمی‌شود؛ ورود با کد پیامکی هم همیشه فعال است.</p>
+        <ul class="list" data-passkey-list>
+            @foreach ($passkeys as $pk)
+                <li class="list-item" data-passkey="{{ $pk->id }}"><span class="body"><strong>{{ $pk->name }}</strong><span class="sub">فعال‌شده {{ jdate($pk->created_at) }}@if($pk->last_used_at) · آخرین ورود {{ jdate($pk->last_used_at, true) }}@endif</span></span>
+                    <button type="button" class="btn btn-link sm" data-passkey-remove="{{ $pk->id }}">حذف</button></li>
+            @endforeach
+        </ul>
+        <button type="button" class="btn btn-dark block hidden" data-passkey-add data-busy-text="منتظر اثر انگشت…">{{ $passkeys->isEmpty() ? 'فعال‌کردن ورود با اثر انگشت روی این گوشی' : 'افزودن این دستگاه' }}</button>
+        <p class="xs muted hidden" data-passkey-unsupported>این مرورگر یا دستگاه ورود با اثر انگشت را پشتیبانی نمی‌کند.</p>
+    </section>
+
     @if ($invites->isNotEmpty())
         <section class="band stack-sm" aria-labelledby="inv-h">
             <h2 id="inv-h">دعوت به فروشگاه</h2>

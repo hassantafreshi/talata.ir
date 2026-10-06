@@ -9,7 +9,7 @@ class AuditEvent extends Model
 {
     public $timestamps = false;
 
-    protected $fillable = ['tenant_id', 'actor_user_id', 'actor_type', 'event', 'subject_type', 'subject_id', 'data', 'ip', 'created_at'];
+    protected $fillable = ['tenant_id', 'actor_user_id', 'actor_type', 'event', 'subject_type', 'subject_id', 'data', 'ip', 'created_at', 'service', 'staff_id', 'request_id', 'user_agent'];
 
     protected function casts(): array
     {

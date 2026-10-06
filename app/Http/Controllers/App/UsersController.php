@@ -6,6 +6,7 @@ use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Models\Membership;
 use App\Models\User;
+use App\Support\Digits;
 use App\Support\Mobile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,12 @@ class UsersController extends BaseController
     {
         $members = Membership::query()->where('tenant_id', $this->tenant()->id)->whereIn('status', ['active', 'invited'])->with('user')->orderByRaw("role = 'owner' DESC")->orderBy('id')->get();
 
-        return view('app.users', ['members' => $members, 'me' => $this->membership(), 'permissions' => Membership::PERMISSIONS]);
+        $tenant = $this->tenant();
+
+        return view('app.users', [
+            'members' => $members, 'me' => $this->membership(), 'permissions' => Membership::PERMISSIONS,
+            'canRestrict' => $this->ent()->can($tenant, 'team.permissions_edit'), 'limit' => $this->ent()->limit($tenant, 'team_members'),
+        ]);
     }
 
     private function find(int|string $id): Membership
@@ -40,13 +46,17 @@ class UsersController extends BaseController
         if (Membership::query()->where('tenant_id', $tenantId)->where('status', '!=', 'removed')->where(fn ($q) => $q->where('invited_mobile', $mobile)->orWhereHas('user', fn ($u) => $u->where('mobile', $mobile)))->exists()) {
             throw new DomainError('ALREADY_MEMBER', 'این شماره قبلاً عضو یا دعوت شده است.', 409);
         }
-        if (Membership::query()->where('tenant_id', $tenantId)->whereIn('status', ['active', 'invited'])->count() >= 10) {
-            throw new DomainError('MEMBER_LIMIT', 'حداکثر ۱۰ کاربر برای هر فروشگاه.', 422);
+        $limit = $this->ent()->limit($this->tenant(), 'team_members');
+        if ($limit !== null && Membership::query()->where('tenant_id', $tenantId)->whereIn('status', ['active', 'invited'])->count() >= $limit) {
+            throw new DomainError('MEMBER_LIMIT', 'حداکثر '.Digits::toPersian((string) $limit).' کاربر برای هر فروشگاه.', 422);
         }
+        // Full access by default; a chosen subset only where the plan allows restricting access.
+        $permissions = $this->ent()->can($this->tenant(), 'team.permissions_edit') && isset($data['permissions'])
+            ? $this->permissions($data['permissions']) : Membership::allPermissions();
         // Always pending: the invited person must accept in their own Settings.
         $m = Membership::create([
             'tenant_id' => $tenantId, 'user_id' => null, 'invited_mobile' => $mobile, 'role' => 'member',
-            'permissions' => $this->permissions($data['permissions'] ?? ['invoice.issue']), 'status' => 'invited', 'invited_by' => auth()->id(),
+            'permissions' => $permissions, 'status' => 'invited', 'invited_by' => auth()->id(),
         ]);
         Audit::record('membership.invited', $m, ['mobile_tail' => substr($mobile, -4)]);
 
@@ -59,6 +69,7 @@ class UsersController extends BaseController
         if ($m->isOwner()) {
             throw new DomainError('OWNER_FIXED', 'دسترسی مالک قابل تغییر نیست.', 422);
         }
+        $this->ent()->assertCan($this->tenant(), 'team.permissions_edit', 'تعیین سطح دسترسی همکاران در پلن پایه و حرفه‌ای است. در پلن رایگان همه همکاران دسترسی کامل دارند.');
         $m->update(['permissions' => $this->permissions((array) $request->input('permissions', []))]);
         Audit::record('membership.permissions_changed', $m, ['permissions' => $m->permissions]);
 

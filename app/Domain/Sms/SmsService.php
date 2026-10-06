@@ -33,11 +33,16 @@ final class SmsService
     public function __construct(private readonly Entitlements $entitlements, private readonly SmsCredit $credit) {}
 
     /** Login OTP: operational budget, never tenant credit. Limits are enforced by OtpService before this. */
+    public static function otpBody(string $code): string
+    {
+        return "کد ورود طلاتا: {$code}\nاین کد را به کسی ندهید.";
+    }
+
     public function queueOtp(string $mobile, string $code, string $challengeId): SmsMessage
     {
         $message = SmsMessage::create([
             'tenant_id' => null, 'purpose' => 'OTP', 'recipient' => $mobile,
-            'body' => "کد ورود طلاتا: {$code}\nاین کد را به کسی ندهید.",
+            'body' => self::otpBody('••••••'), 'payload' => ['code' => $code],
             'segments' => 1, 'cost_irr' => '0', 'charge_source' => 'OPERATIONAL', 'status' => 'QUEUED',
             'idempotency_key' => 'otp:'.$challengeId,
         ]);

@@ -19,6 +19,14 @@ php artisan queue:work --queue=otp,default   # صف otp جدا و با اولو�
 php artisan schedule:work                    # مظنه هر ۱۸۰ ثانیه، بررسی پرداخت، انقضای اعتبار، یادآوری اقساط
 ```
 
+مدیر سامانه (کنسول `/admin`: داشبورد، لاگ فعالیت هر کاربر و هر سرویس، لاگ فنی):
+
+```bash
+php artisan talata:staff 09120000000 "نام مدیر" --role=admin   # یا --role=support (بدون لاگ فنی)؛ --deactivate برای غیرفعال‌کردن
+```
+
+پیامک با **کاوه‌نگار**: `TALATA_SMS_DRIVER=kavenegar`، `KAVENEGAR_API_KEY`، `KAVENEGAR_SENDER` و برای کد ورود یک الگوی Verify Lookup با `%token` در پنل کاوه‌نگار بسازید و نامش را در `KAVENEGAR_OTP_TEMPLATE` بگذارید. ورود با اثر انگشت به HTTPS و دامنه ثابت نیاز دارد (`TALATA_WEBAUTHN_RP_ID=talata.ir`).
+
 در حالت توسعه پیامک‌ها در `storage/logs/laravel.log` نوشته می‌شوند (`TALATA_SMS_DRIVER=log`)، مظنه نمونه و برچسب‌دار است (`TALATA_QUOTE_DRIVER=demo`) و پرداخت آزمایشی است (`TALATA_PAYMENT_DRIVER=mock`).
 
 آزمون‌ها (روی پایگاه `talata_test` در PostgreSQL):
@@ -32,7 +40,8 @@ npm run test:js         # برابری محاسبه مرورگر و سرور ب�
 - `APP_ENV=production`، `APP_DEBUG=false`، HTTPS و `TALATA_PUBLIC_URL` دامنه نهایی.
 - **از `APP_KEY` نسخه پشتیبان بگیرید**: توکن خام QR فاکتورها با آن رمز شده است. برای چرخش کلید از `APP_PREVIOUS_KEYS` استفاده کنید؛ وگرنه چاپ دوباره QR فاکتورهای قدیمی ممکن نیست (بررسی اصالت چاپ‌های قبلی کار می‌کند).
 - آداپتر پیامک و درگاه واقعی را پس از انتخاب مالک اضافه کنید؛ درگاه آزمایشی در production رد می‌شود مگر `TALATA_ALLOW_MOCK_PAYMENTS_IN_PRODUCTION=true`.
-- `TALATA_OTP_DAILY_BUDGET` را با حجم واقعی تنظیم کنید و لاگ CRITICAL آن را پایش کنید.
+- `TALATA_OTP_DAILY_BUDGET` (شماره‌های جدید) و `TALATA_OTP_EXISTING_DAILY_BUDGET` (کاربران موجود) را با حجم واقعی تنظیم و هشدار آن را در لاگ فنی پایش کنید.
+- `LOG_STACK=daily,errors_db` تا خطاها در کنسول مدیر دیده شوند؛ `TALATA_ADMIN_ALLOWED_IPS` برای محدودکردن کنسول به IP دفتر.
 - worker صف با supervisor و cron برای `php artisan schedule:run` هر دقیقه.
 
 ## فایل‌های اصلی

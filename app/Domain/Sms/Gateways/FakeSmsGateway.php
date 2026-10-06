@@ -25,6 +25,11 @@ final class FakeSmsGateway implements SmsGateway
         return ['status' => $this->nextStatus, 'provider_id' => 'fake-'.Str::ulid(), 'error' => $this->nextStatus === 'FAILED' ? 'fake failure' : null];
     }
 
+    public function sendOtp(string $recipient, string $code, string $body): array
+    {
+        return $this->send($recipient, $body);
+    }
+
     public function status(string $providerId): string
     {
         return 'DELIVERED';

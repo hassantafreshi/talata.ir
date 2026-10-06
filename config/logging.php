@@ -1,5 +1,6 @@
 <?php
 
+use App\Logging\DatabaseLogHandler;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -52,9 +53,36 @@ return [
 
     'channels' => [
 
+        // Per-service technical log (providers, gateways, jobs); visible only in the admin dashboard.
+        'tech' => [
+            'driver' => 'stack',
+            'channels' => ['tech_file', 'tech_db'],
+            'ignore_exceptions' => true,
+        ],
+
+        'tech_db' => [
+            'driver' => 'monolog',
+            'handler' => DatabaseLogHandler::class,
+            'level' => 'debug',
+        ],
+
+        // Warnings, errors and exceptions of the whole app, also visible in the admin dashboard.
+        'errors_db' => [
+            'driver' => 'monolog',
+            'handler' => DatabaseLogHandler::class,
+            'level' => 'warning',
+        ],
+
+        'tech_file' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/tech.log'),
+            'level' => 'debug',
+            'days' => 14,
+        ],
+
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            'channels' => explode(',', (string) env('LOG_STACK', 'daily,errors_db')),
             'ignore_exceptions' => false,
         ],
 

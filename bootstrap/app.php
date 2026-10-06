@@ -2,26 +2,50 @@
 
 use App\Domain\DomainError;
 use App\Domain\Pricing\PricingError;
+use App\Http\Middleware\RequestContext;
 use App\Http\Middleware\RequirePermission;
+use App\Http\Middleware\RequireStaff;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\UseAdminSession;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        then: function () {
+            Route::middleware('admin')->prefix('admin')->name('admin.')->group(base_path('routes/admin.php'));
+        },
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(RequestContext::class);
         $middleware->append(SecurityHeaders::class);
+        $middleware->group('admin', [
+            UseAdminSession::class,
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            ShareErrorsFromSession::class,
+            ValidateCsrfToken::class,
+            SubstituteBindings::class,
+        ]);
         $middleware->alias([
+            'staff' => RequireStaff::class,
             'tenant' => ResolveTenant::class,
             'perm' => RequirePermission::class,
         ]);
@@ -40,7 +64,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (DomainError $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
-                return response()->json(['code' => $e->codeName, 'message_fa' => $e->messageFa, 'trace_id' => (string) Str::ulid()] + $e->context, $e->status);
+                return response()->json(['code' => $e->codeName, 'message_fa' => $e->messageFa, 'trace_id' => (string) (Context::get('request_id') ?? Str::ulid())] + $e->context, $e->status);
             }
 
             if ($request->isMethod('GET')) {

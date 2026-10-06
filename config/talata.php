@@ -13,9 +13,30 @@ return [
     'public_url' => rtrim(env('TALATA_PUBLIC_URL', env('APP_URL', 'http://localhost')), '/'),
 
     'drivers' => [
-        'sms' => env('TALATA_SMS_DRIVER', 'log'),          // log | fake
+        'sms' => env('TALATA_SMS_DRIVER', 'log'),          // kavenegar | log | fake
         'quotes' => env('TALATA_QUOTE_DRIVER', 'demo'),    // demo
         'payment' => env('TALATA_PAYMENT_DRIVER', 'mock'), // mock
+    ],
+
+    'sms_dev_driver_allowed_in_production' => (bool) env('TALATA_ALLOW_DEV_SMS_IN_PRODUCTION', false),
+
+    // Passkeys (fingerprint / face / device lock). RP ID = registrable domain, e.g. talata.ir.
+    'webauthn' => [
+        'rp_id' => env('TALATA_WEBAUTHN_RP_ID'),          // default: host of APP_URL
+        'origins' => env('TALATA_WEBAUTHN_ORIGINS'),      // comma list; default: APP_URL origin
+        'recent_auth_minutes' => 15,                       // adding a passkey needs a recent login
+    ],
+
+    // Platform administrator console (/admin). Separate guard, cookie and session.
+    'admin' => [
+        'session_cookie' => env('TALATA_ADMIN_SESSION_COOKIE', 'talata_admin'),
+        'session_minutes' => 120,
+        'idle_minutes' => (int) env('TALATA_ADMIN_IDLE_MINUTES', 30),
+        'allowed_ips' => env('TALATA_ADMIN_ALLOWED_IPS'),   // comma list; empty = any IP (OTP/passkey still required)
+    ],
+
+    'logs' => [
+        'tech_retention_days' => (int) env('TALATA_TECH_LOG_DAYS', 90),
     ],
 
     'otp' => [

@@ -10,6 +10,7 @@ use App\Domain\Sms\SmsCredit;
 use App\Domain\Sms\SmsTemplate;
 use App\Models\InvoiceLayout;
 use App\Models\Membership;
+use App\Models\Passkey;
 use App\Models\ShopProfile;
 use App\Models\SmsSetting;
 use App\Support\Digits;
@@ -33,6 +34,7 @@ class SettingsController extends BaseController
             'perSegmentFa' => Money::toman($ent->smsPerSegmentIrr($tenant)),
             'membership' => $this->membership(),
             'user' => auth()->user(),
+            'passkeys' => Passkey::query()->where('owner_type', 'user')->where('owner_id', auth()->id())->orderBy('id')->get(),
             'invites' => Membership::query()->with(['tenant.profile' => fn ($q) => $q->withoutGlobalScope('tenant')])->where('status', 'invited')->whereNull('user_id')->where('invited_mobile', auth()->user()->mobile)->get(),
             'shops' => Membership::query()->with(['tenant.profile' => fn ($q) => $q->withoutGlobalScope('tenant')])->where('user_id', auth()->id())->where('status', 'active')->get(),
         ]);

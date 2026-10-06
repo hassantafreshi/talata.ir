@@ -18,6 +18,9 @@ abstract class TestCase extends BaseTestCase
 
     protected bool $seed = true;
 
+    /** Log writes use their own connection; keep them inside each test's transaction too. */
+    protected array $connectionsToTransact = ['pgsql', 'pgsql_log'];
+
     private int $mobileSeq = 1000000;
 
     protected function nextMobile(): string
