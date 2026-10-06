@@ -29,7 +29,7 @@ class Erd extends Command
             where tc.constraint_type = 'FOREIGN KEY' and tc.table_schema = current_schema()
             order by child, col
         SQL));
-        $cols = collect(DB::select("select table_name, column_name, data_type, is_nullable from information_schema.columns where table_schema = current_schema() order by table_name, ordinal_position"))->groupBy('table_name');
+        $cols = collect(DB::select('select table_name, column_name, data_type, is_nullable from information_schema.columns where table_schema = current_schema() order by table_name, ordinal_position'))->groupBy('table_name');
 
         $lines = ['erDiagram'];
         foreach ($fks as $fk) {

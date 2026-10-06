@@ -141,12 +141,12 @@ final class Entitlements
      * Start of the current free-SMS year (docs/PLANS_AND_QUOTAS.md): by default the shop's registration
      * anniversary (a year = 365 days from sign-up, renewing each year); or the current Jalali year.
      */
-    public function freeSmsYearStart(Tenant $tenant): \Carbon\CarbonImmutable
+    public function freeSmsYearStart(Tenant $tenant): CarbonImmutable
     {
         if (config('talata.sms.free_yearly_window') === 'jalali_year') {
             return Jalali::yearBounds(now(), $tenant->timezone)[0];
         }
-        $start = \Carbon\CarbonImmutable::parse($tenant->created_at);
+        $start = CarbonImmutable::parse($tenant->created_at);
         $years = intdiv(max(0, (int) $start->diffInDays(now())), 365);
 
         return $start->addDays(365 * $years);
