@@ -128,3 +128,25 @@ export function priceGoldIn(input, limits = {}) {
     G: G.toString(), D: (G - T).toString(), T: T.toString(),
   };
 }
+
+// GOLD_IN_V1 weight settlement («حساب وزنی»): credited in 750-grams, no money value. Mirrors GoldInV1::priceWeight().
+export function priceGoldInWeight(input, limits = {}) {
+  const weight = dec(input.net_weight_g, 'net_weight_g', { positive: true, max: limits.max_weight_g ?? '100000', maxScale: 6 });
+  const purity = dec(input.purity_ppt, 'purity_ppt', { positive: true, max: '1000', maxScale: 3 });
+  const deduction = dec(input.deduction_percent ?? '0', 'deduction_percent', { positive: false, max: String(limits.max_gold_in_deduction_percent ?? '50'), maxScale: 4 });
+  const w750 = weight.mul(purity).div(new Rat(750n));
+  const credit = w750.mul(new Rat(100n).add(new Rat(-deduction.n, deduction.d))).div(new Rat(100n));
+  const g3 = (r) => { const v = (r.n * 1000n * 2n + r.d) / (2n * r.d); const s = v.toString().padStart(4, '0'); return `${s.slice(0, -3)}.${s.slice(-3)}`; };
+  return {
+    formula_version: 'GOLD_IN_V1', rounding_policy: 'WEIGHT_750_HALF_UP_3', direction: 'IN', settlement: 'WEIGHT',
+    weight_750: g3(w750), credit_750: g3(credit), deduction_percent: deduction.toFixed(4) || '0', G: '0', D: '0', T: '0',
+  };
+}
+
+// 750-equivalent grams of a sold row settled by weight (HALF_UP to 0.001), as InvoiceCalculator::weight750().
+export function weight750(net, purity) {
+  const r = dec(net, 'net_weight_g', { positive: true, max: '100000', maxScale: 6 }).mul(dec(purity, 'purity_ppt', { positive: true, max: '1000', maxScale: 3 })).div(new Rat(750n));
+  const v = (r.n * 1000n * 2n + r.d) / (2n * r.d);
+  const s = v.toString().padStart(4, '0');
+  return `${s.slice(0, -3)}.${s.slice(-3)}`;
+}

@@ -2,12 +2,14 @@
 
 namespace Tests\Unit;
 
+use App\Domain\Invoices\InvoiceCalculator;
 use App\Domain\Pricing\GoldInV1;
 use App\Domain\Pricing\GoldIrV1;
 use App\Domain\Pricing\ManualLineV1;
 use App\Domain\Pricing\PricingError;
 use App\Support\Digits;
 use App\Support\Money;
+use Brick\Math\BigDecimal;
 use Brick\Math\BigInteger;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -140,6 +142,36 @@ class PricingVectorsTest extends TestCase
             $this->assertSame($value, $result[$key], $vector['id'].' '.$key);
         }
         $this->assertSame($result['G'], bcadd_safe($result['T'], $result['D']));
+    }
+
+    public function test_weight_settlement_vectors(): void
+    {
+        $json = json_decode(file_get_contents(__DIR__.'/../../docs/design/contracts/calculation-vectors.json'), true);
+        $base = collect($json['vectors'])->firstWhere('id', 'base')['input'];
+        $in = new GoldInV1;
+        foreach ($json['weight_settlement_vectors']['vectors'] as $v) {
+            $i = $v['input'];
+            $e = $v['expected'];
+            if (($i['kind'] ?? '') === 'GOLD_IN') {
+                $r = $in->priceWeight($i);
+                foreach ($e as $k => $val) {
+                    $this->assertSame($val, $r[$k], $v['id'].' '.$k);
+                }
+            } elseif (($i['kind'] ?? '') === 'GOLD') {
+                $r = (new GoldIrV1)->price($base);
+                $this->assertSame($e['money_irr'], bcadd_safe($r['B'], $r['V']), $v['id']);
+                $this->assertSame($e['debit_750'], InvoiceCalculator::weight750($base['net_weight_g'], $base['purity_ppt']));
+            } else {
+                $debit = InvoiceCalculator::weight750($i['sale']['net_weight_g'], $i['sale']['purity_ppt']);
+                $credit = BigDecimal::zero();
+                foreach ($i['gold_in'] as $g) {
+                    $credit = $credit->plus($in->priceWeight($g + ['deduction_percent' => '0'])['credit_750']);
+                }
+                $this->assertSame($e['gold_debit_750'], $debit);
+                $this->assertSame($e['gold_credit_750'], (string) $credit);
+                $this->assertSame($e['gold_balance_750'], (string) BigDecimal::of($debit)->minus($credit));
+            }
+        }
     }
 
     public function test_two_gold_rows_different_purities(): void

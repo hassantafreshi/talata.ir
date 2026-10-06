@@ -63,35 +63,76 @@
         @if ($v['rate_fa'])<span>نرخ هر گرم طلای ۱۸ عیار: <span class="num">{{ $v['rate_fa'] }}</span> تومان @if($v['rate_manual'])(نرخ دستی)@endif</span>@endif
     </div>
 
-    <div class="table-scroll">
-        <table class="{{ count($cols) >= 9 ? 'cols-many' : '' }}">
-            <thead><tr>@foreach ($cols as $c)<th class="{{ in_array($c, $numeric, true) ? 'n' : '' }}" scope="col">{{ $colLabels[$c] }}</th>@endforeach</tr></thead>
-            <tbody>
-                @foreach ($v['rows'] as $r)
-                    <tr class="{{ ($r['direction'] ?? 'OUT') === 'IN' ? 'row-in' : '' }}">
-                        @foreach ($cols as $c)
-                            @switch($c)
-                                @case('row_no')<td class="n">{{ $r['no'] }}</td>@break
-                                @case('name')<td>@if(($r['direction'] ?? 'OUT') === 'IN')<span class="in-tag">دریافتی</span> @endif{{ $r['name'] }}@if(! in_array('description', $cols, true) && $r['description'])<span class="desc">{{ $r['description'] }}</span>@endif
-                                    @if(! empty($r['deduction_percent']) || ! empty($r['assay_ref']))<span class="desc">@if(! empty($r['deduction_percent']))کسر ذوب/ناخالصی {{ $r['deduction_percent'] }} ({{ $r['deduction_fa'] }} تومان)@endif @if(! empty($r['assay_ref'])) · برگه عیارسنجی {{ $r['assay_ref'] }}@endif</span>@endif</td>@break
-                                @case('description')<td>{{ $r['description'] ?: '—' }}</td>@break
-                                @case('weight_g')<td class="n">{{ in_array($r['type'], ['GOLD', 'GOLD_IN'], true) ? $r['weight'] : '—' }}</td>@break
-                                @case('purity')<td>{{ ($v['has_gold_in'] ?? false) ? ($r['purity_short'] ?? $r['purity']) : $r['purity'] }}</td>@break
-                                @case('weight_750')<td class="n">{{ $r['weight_750'] ?? '—' }}</td>@break
-                                @case('unit_rate')<td class="n">{{ $r['unit_rate'] }}</td>@break
-                                @case('wage')<td class="n">{{ $r['wage'] }}</td>@break
-                                @case('profit')<td class="n">{{ $r['profit'] }}</td>@break
-                                @case('vat')<td class="n">{{ $r['vat'] }}</td>@break
-                                @case('amount')<td class="n"><strong>{{ $r['amount'] }}</strong></td>@break
-                            @endswitch
-                        @endforeach
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
+    @if ($v['use_ledger'] ?? false)
+        @php $L2 = $v['ledger']; $side = \App\Domain\Invoices\InvoicePresenter::SIDE_FA; $sideShort = \App\Domain\Invoices\InvoicePresenter::SIDE_SHORT; @endphp
+        {{-- «حساب طلا و ریال»: bazaar-style debit/credit table from the customer's account (بد = مشتری بدهکار، بس = مشتری بستانکار). --}}
+        <div class="table-scroll">
+            <table class="ledger cols-many" aria-label="جدول بد و بس طلا و مبلغ">
+                <thead>
+                    <tr><th class="n" scope="col">ردیف</th><th scope="col">شرح</th><th scope="col">عیار</th><th class="n" scope="col">وزن</th><th class="n" scope="col">وزن ۷۵۰</th><th class="n" scope="col">فی (هر گرم ۱۸)</th>
+                        <th class="n" scope="col">طلا (گرم ۷۵۰) بد/بس</th><th class="n" scope="col">مبلغ (تومان) بد/بس</th></tr>
+                </thead>
+                <tbody>
+                    @foreach ($v['rows'] as $r)
+                        <tr class="{{ ($r['direction'] ?? 'OUT') === 'IN' ? 'row-in' : '' }}">
+                            <td class="n">{{ $r['no'] }}</td>
+                            <td>@if(($r['direction'] ?? 'OUT') === 'IN')<span class="in-tag">دریافتی</span> @endif{{ $r['name'] }}
+                                @if($r['by_weight'] ?? false)<span class="desc">{{ $r['type'] === 'GOLD' ? 'تسویه وزنی؛ اجرت، سود و مالیات نقدی' : 'حساب وزنی (بدون تبدیل به پول)' }}</span>@endif
+                                @if($r['description'])<span class="desc">{{ $r['description'] }}</span>@endif
+                                @if(! empty($r['deduction_percent']))<span class="desc">کسر ذوب/ناخالصی {{ $r['deduction_percent'] }}</span>@endif
+                                @if(! empty($r['assay_ref']))<span class="desc">برگه عیارسنجی {{ $r['assay_ref'] }}</span>@endif</td>
+                            <td>{{ $r['purity_short'] ?? '—' }}</td>
+                            <td class="n">{{ in_array($r['type'], ['GOLD', 'GOLD_IN'], true) ? $r['weight'] : '—' }}</td>
+                            <td class="n">{{ $r['weight_750'] ?? '—' }}</td>
+                            <td class="n">{{ $r['unit_rate'] }}</td>
+                            <td class="n side"><strong>{{ $r['gold_cell'] ?? '—' }}</strong></td>
+                            <td class="n side"><strong>{{ $r['money_cell'] ?? '—' }}</strong></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr><th colspan="6" scope="row">جمع</th><td class="n side">{{ $L2['gold_total_cell'] }}</td><td class="n side">{{ $L2['money_total_cell'] }}</td></tr>
+                    <tr class="bal"><th colspan="6" scope="row">مانده سند · <span class="num">{{ $v['issued_fa'] }}</span></th>
+                        <td class="n side">{{ $L2['gold_side'] === 'ZERO' ? 'تسویه' : $sideShort[$L2['gold_side']].' '.$L2['gold_balance'].' گرم طلای ۱۸ عیار' }}</td>
+                        <td class="n side">{{ $L2['money_side'] === 'ZERO' ? 'تسویه' : $sideShort[$L2['money_side']].' '.$L2['money_balance'].' تومان' }}</td></tr>
+                </tfoot>
+            </table>
+        </div>
+        <section class="inv-split" aria-label="مانده سند">
+            <dl><div class="h"><dt>مانده سند (طلا)</dt><dd class="num">{{ $v['issued_fa'] }}</dd></div><div class="t"><dt>{{ $side[$L2['gold_side']] }}</dt><dd>{{ $L2['gold_balance'] }} گرم ۱۸ عیار</dd></div></dl>
+            <dl><div class="h"><dt>مانده سند (مبلغ)</dt><dd class="num">{{ $v['issued_fa'] }}</dd></div><div class="t"><dt>{{ $side[$L2['money_side']] }}</dt><dd>{{ $L2['money_balance'] }} تومان</dd></div></dl>
+        </section>
+    @else
+        <div class="table-scroll">
+            <table class="{{ count($cols) >= 9 ? 'cols-many' : '' }}">
+                <thead><tr>@foreach ($cols as $c)<th class="{{ in_array($c, $numeric, true) ? 'n' : '' }}" scope="col">{{ $colLabels[$c] }}</th>@endforeach</tr></thead>
+                <tbody>
+                    @foreach ($v['rows'] as $r)
+                        <tr class="{{ ($r['direction'] ?? 'OUT') === 'IN' ? 'row-in' : '' }}">
+                            @foreach ($cols as $c)
+                                @switch($c)
+                                    @case('row_no')<td class="n">{{ $r['no'] }}</td>@break
+                                    @case('name')<td>@if(($r['direction'] ?? 'OUT') === 'IN')<span class="in-tag">دریافتی</span> @endif{{ $r['name'] }}@if(! in_array('description', $cols, true) && $r['description'])<span class="desc">{{ $r['description'] }}</span>@endif
+                                        @if(! empty($r['deduction_percent']) || ! empty($r['assay_ref']))<span class="desc">@if(! empty($r['deduction_percent']))کسر ذوب/ناخالصی {{ $r['deduction_percent'] }} ({{ $r['deduction_fa'] }} تومان)@endif @if(! empty($r['assay_ref'])) · برگه عیارسنجی {{ $r['assay_ref'] }}@endif</span>@endif</td>@break
+                                    @case('description')<td>{{ $r['description'] ?: '—' }}</td>@break
+                                    @case('weight_g')<td class="n">{{ in_array($r['type'], ['GOLD', 'GOLD_IN'], true) ? $r['weight'] : '—' }}</td>@break
+                                    @case('purity')<td>{{ ($v['has_gold_in'] ?? false) ? ($r['purity_short'] ?? $r['purity']) : $r['purity'] }}</td>@break
+                                    @case('weight_750')<td class="n">{{ $r['weight_750'] ?? '—' }}</td>@break
+                                    @case('unit_rate')<td class="n">{{ $r['unit_rate'] }}</td>@break
+                                    @case('wage')<td class="n">{{ $r['wage'] }}</td>@break
+                                    @case('profit')<td class="n">{{ $r['profit'] }}</td>@break
+                                    @case('vat')<td class="n">{{ $r['vat'] }}</td>@break
+                                    @case('amount')<td class="n"><strong>{{ $r['amount'] }}</strong></td>@break
+                                @endswitch
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endif
 
-    @if ($v['has_gold_in'] ?? false)
+    @if (($v['has_gold_in'] ?? false) && ! ($v['use_ledger'] ?? false))
         {{-- Tahesab-style split: gold ledger (750-equivalent grams) and money ledger (toman). --}}
         <section class="inv-split" aria-label="تفکیک طلایی و مبلغ">
             <dl aria-label="تفکیک طلایی">
@@ -120,7 +161,7 @@
                 <dl>
                     @if ($v['has_gold'])
                         <div><dt>وزن کل طلا</dt><dd>{{ $v['weight_total'] }} گرم</dd></div>
-                        <div><dt>ارزش طلا</dt><dd>{{ $v['metal_fa'] }}</dd></div>
+                        <div><dt>ارزش طلا</dt><dd>@if(($v['ledger']['by_weight'] ?? false) && $v['metal_fa'] === '۰')با طلا تسویه شد (وزنی)@else{{ $v['metal_fa'] }}@endif</dd></div>
                         <div><dt>اجرت</dt><dd>{{ $v['wage_fa'] }}</dd></div>
                         <div><dt>سود</dt><dd>{{ $v['profit_fa'] }}</dd></div>
                         <div><dt>مالیات ({{ $v['tax_rate_fa'] }}٪)</dt><dd>{{ $v['vat_fa'] }}</dd></div>
@@ -133,7 +174,7 @@
     </section>
 
     @if ($L['summary']['signature_box'] ?? true)
-        <div class="inv-sign"><div>مهر و امضای فروشنده</div><div>امضای خریدار</div></div>
+        <div class="inv-sign">@if(($L['template_id'] ?? '') === 'ledger')<div>صادرکننده سند (مهر و امضا)</div><div>گیرنده سند (امضای خریدار)</div>@else<div>مهر و امضای فروشنده</div><div>امضای خریدار</div>@endif</div>
     @endif
 
     @php $footer = $blocks->where('area', 'footer')->map(fn ($b) => ['align' => $b['align'], 'html' => $render($b)])->filter(fn ($x) => $x['html']); @endphp

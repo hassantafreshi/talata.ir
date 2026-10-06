@@ -9,7 +9,7 @@ namespace App\Domain\Invoices;
  */
 final class LayoutSettings
 {
-    public const TEMPLATES = ['simple_readable', 'shop'];
+    public const TEMPLATES = ['simple_readable', 'shop', 'ledger'];
 
     public const REQUIRED_BLOCKS = ['shop_name', 'contact_primary', 'address'];
 

@@ -61,6 +61,21 @@ final class InvoiceCalculator
                 $row['discount_scope'] = in_array($raw['discount_scope'] ?? '', ['TAXABLE_COMPONENTS', 'WAGE', 'PROFIT'], true) ? $raw['discount_scope'] : 'TAXABLE_COMPONENTS';
                 $row['discount_irr'] = Money::parseTomanToIrr($discountToman, true) ?? 'invalid';
             }
+            // «تسویه وزنی»: the metal is settled with gold (customer owes 750-grams), only wage/profit/VAT in money.
+            $attrs = [];
+            if (($raw['settlement'] ?? 'MONEY') === 'WEIGHT') {
+                $attrs['settlement'] = 'WEIGHT';
+            }
+            // Melted/assayed gold sold by the shop («فروش طلای آب‌شده»): exact assay purity and an optional assay slip number.
+            if (($raw['kind'] ?? '') === 'MELTED') {
+                $attrs['kind'] = 'MELTED';
+                if ($ref = $text($raw['assay_ref'] ?? '', 40)) {
+                    $attrs['assay_ref'] = $ref;
+                }
+            }
+            if ($attrs) {
+                $row['item_attributes'] = $attrs;
+            }
         } elseif ($type === 'GOLD_IN') {
             // Gold the customer gives instead of money (old gold, coin, melted). Valued at an 18K rate, credited against the sale.
             $row['net_weight_g'] = $dec($raw['net_weight_g'] ?? '');
@@ -104,9 +119,23 @@ final class InvoiceCalculator
                     'discount' => $row['discount_irr'] ? ['scope' => $row['discount_scope'], 'amount_irr' => $row['discount_irr']] : null,
                     'vat_rate_percent' => $vatRatePercent,
                 ]);
+                if (($row['item_attributes']['settlement'] ?? 'MONEY') === 'WEIGHT') {
+                    // Metal value M is settled in gold; the money total of the row is wage + profit + VAT.
+                    $computed += ['settlement' => 'WEIGHT', 'debit_750' => self::weight750($row['net_weight_g'], $row['purity_ppt']), 'money_irr' => (string) BigInteger::of($computed['B'])->plus($computed['V'])];
+
+                    return ['ok' => true, 'errors' => [], 'computed' => $computed, 'total' => $computed['money_irr']];
+                }
+                $computed += ['settlement' => 'MONEY'];
             } elseif ($row['item_type'] === 'GOLD_IN') {
                 $a = $row['item_attributes'] ?? [];
                 $basis = $a['rate_basis'] ?? 'BUY';
+                if ($basis === 'WEIGHT') {
+                    $computed = $this->registry->for('GOLD_IN')->priceWeight([
+                        'net_weight_g' => $row['net_weight_g'], 'purity_ppt' => $row['purity_ppt'], 'deduction_percent' => $a['deduction_percent'] ?? '0',
+                    ]);
+
+                    return ['ok' => true, 'errors' => [], 'computed' => $computed, 'total' => '0'];
+                }
                 $rate = match ($basis) {
                     'SELL' => $rateIrr,
                     'MANUAL' => $a['rate_irr_per_g'] ?? null,
@@ -153,6 +182,8 @@ final class InvoiceCalculator
         $agg = ['M' => BigInteger::zero(), 'W' => BigInteger::zero(), 'P' => BigInteger::zero(), 'V' => BigInteger::zero(), 'weight' => '0'];
         $inAgg = ['G' => BigInteger::zero(), 'D' => BigInteger::zero(), 'weight' => BigDecimal::zero(), 'weight_750' => BigDecimal::zero()];
         $out750 = BigDecimal::zero();
+        // Double-entry view from the customer's account: debit (بد) = customer owes, credit (بس) = shop owes.
+        $ledger = ['gold_debit' => BigDecimal::zero(), 'gold_credit' => BigDecimal::zero(), 'money_debit' => BigInteger::zero(), 'money_credit' => BigInteger::zero()];
         $out = [];
         $valid = count($rows) > 0;
         $hasSale = false;
@@ -163,19 +194,33 @@ final class InvoiceCalculator
             if ($r['ok']) {
                 if ($row['item_type'] === 'GOLD') {
                     $gold = $gold->plus($r['total']);
+                    $byWeight = ($r['computed']['settlement'] ?? 'MONEY') === 'WEIGHT';
                     foreach (['M', 'W', 'P', 'V'] as $k) {
+                        // Metal settled with gold is not part of the money total.
+                        if ($k === 'M' && $byWeight) {
+                            continue;
+                        }
                         $agg[$k] = $agg[$k]->plus($r['computed'][$k]);
+                    }
+                    $ledger['money_debit'] = $ledger['money_debit']->plus($r['total']);
+                    if ($byWeight) {
+                        $ledger['gold_debit'] = $ledger['gold_debit']->plus($r['computed']['debit_750']);
                     }
                     $agg['weight'] = (string) BigDecimal::of($agg['weight'])->plus($row['net_weight_g']);
                     $out750 = $out750->plus(self::weight750($row['net_weight_g'], $row['purity_ppt']));
                 } elseif ($row['item_type'] === 'GOLD_IN') {
                     $in = $in->plus($r['total']);
+                    $ledger['money_credit'] = $ledger['money_credit']->plus($r['total']);
+                    if (($r['computed']['settlement'] ?? 'MONEY') === 'WEIGHT') {
+                        $ledger['gold_credit'] = $ledger['gold_credit']->plus($r['computed']['credit_750']);
+                    }
                     $inAgg['G'] = $inAgg['G']->plus($r['computed']['G']);
                     $inAgg['D'] = $inAgg['D']->plus($r['computed']['D']);
                     $inAgg['weight'] = $inAgg['weight']->plus($row['net_weight_g']);
                     $inAgg['weight_750'] = $inAgg['weight_750']->plus($r['computed']['weight_750']);
                 } else {
                     $misc = $misc->plus($r['total']);
+                    $ledger['money_debit'] = $ledger['money_debit']->plus($r['total']);
                 }
             }
             $out[] = $row + ['result' => $r];
@@ -190,6 +235,13 @@ final class InvoiceCalculator
             'gold_in' => ['G' => (string) $inAgg['G'], 'D' => (string) $inAgg['D'], 'weight' => (string) $inAgg['weight'], 'weight_750' => (string) $inAgg['weight_750']],
             // 750-equivalent grams (per row HALF_UP to 0.001, then summed — the same numbers the invoice rows show).
             'weights' => ['out_750' => (string) $out750, 'in_750' => (string) $inAgg['weight_750'], 'net_750' => (string) $out750->minus($inAgg['weight_750'])],
+            // Balances of this document: positive = customer owes (بدهکار), negative = shop owes the customer (بستانکار).
+            'ledger' => [
+                'gold_debit_750' => (string) $ledger['gold_debit']->toScale(3), 'gold_credit_750' => (string) $ledger['gold_credit']->toScale(3),
+                'gold_balance_750' => (string) $ledger['gold_debit']->minus($ledger['gold_credit'])->toScale(3),
+                'money_debit_irr' => (string) $ledger['money_debit'], 'money_credit_irr' => (string) $ledger['money_credit'],
+                'money_balance_irr' => (string) $ledger['money_debit']->minus($ledger['money_credit']),
+            ],
         ];
     }
 

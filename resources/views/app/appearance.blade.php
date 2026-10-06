@@ -15,6 +15,7 @@
                 <div class="seg" role="radiogroup">
                     <label><input type="radio" name="template_id" value="simple_readable">ساده و خوانا</label>
                     <label><input type="radio" name="template_id" value="shop">فروشگاهی</label>
+                    <label><input type="radio" name="template_id" value="ledger">حساب طلا و ریال (بد/بس)</label>
                 </div>
                 <p class="xs muted">با تغییر قالب، تنظیمات پیش‌فرض همان قالب بارگذاری می‌شود.</p>
             </fieldset>

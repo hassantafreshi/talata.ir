@@ -22,7 +22,8 @@ final class GoldInV1 implements PricingPolicy
 
     public const KINDS = ['OLD_GOLD', 'COIN', 'MELTED', 'OTHER'];
 
-    public const RATE_BASES = ['BUY', 'SELL', 'MANUAL'];
+    /** WEIGHT = «حساب وزنی»: credited in 750-grams, not converted to money (gold-for-gold settlement). */
+    public const RATE_BASES = ['BUY', 'SELL', 'MANUAL', 'WEIGHT'];
 
     public function __construct(private readonly array $limits = []) {}
 
@@ -51,9 +52,36 @@ final class GoldInV1 implements PricingPolicy
             'weight_750' => (string) $w750->toScale(3, RoundingMode::HalfUp),
             'rate_irr_per_g' => (string) $rate,
             'deduction_percent' => (string) $deduction->strippedOfTrailingZeros(),
+            'settlement' => 'MONEY',
             'G' => (string) $g,
             'D' => (string) $g->minus($t),
             'T' => (string) $t,
+        ];
+    }
+
+    /**
+     * Weight settlement («حساب وزنی»): the gold is credited to the customer in 750-grams, no money value.
+     *   credit_750 = round3(w × purity / 750 × (100 − d) / 100)
+     *
+     * @param  array{net_weight_g:string,purity_ppt:string,deduction_percent:string}  $in
+     */
+    public function priceWeight(array $in): array
+    {
+        $weight = $this->decimal($in['net_weight_g'] ?? null, 'net_weight_g', true, $this->limits['max_weight_g'] ?? '100000', 6);
+        $purity = $this->decimal($in['purity_ppt'] ?? null, 'purity_ppt', true, '1000', 3);
+        $deduction = $this->decimal($in['deduction_percent'] ?? '0', 'deduction_percent', false, (string) ($this->limits['max_gold_in_deduction_percent'] ?? '50'), 4);
+        $w750 = BigRational::of($weight)->multipliedBy($purity)->dividedBy(750);
+        $credit = $w750->multipliedBy(BigDecimal::of(100)->minus($deduction))->dividedBy(100);
+
+        return [
+            'formula_version' => self::ID,
+            'rounding_policy' => 'WEIGHT_750_HALF_UP_3',
+            'direction' => 'IN',
+            'settlement' => 'WEIGHT',
+            'weight_750' => (string) $w750->toScale(3, RoundingMode::HalfUp),
+            'credit_750' => (string) $credit->toScale(3, RoundingMode::HalfUp),
+            'deduction_percent' => (string) $deduction->strippedOfTrailingZeros(),
+            'G' => '0', 'D' => '0', 'T' => '0',
         ];
     }
 

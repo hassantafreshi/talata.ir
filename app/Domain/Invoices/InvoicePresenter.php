@@ -92,8 +92,11 @@ final class InvoicePresenter
             'gold_in_has_deduction' => ($s['totals']['gold_in']['D'] ?? '0') !== '0',
             // تفکیک طلایی: 750-equivalent grams sold vs received (older snapshots: derived from rows).
             'w750' => self::weights750($s),
+            'ledger' => self::ledger($s),
             'layout' => $s['layout'],
             'columns' => LayoutSettings::columnsFor($s['layout'], collect($s['rows'])->contains('item_type', 'GOLD'), $hasGoldIn),
+            // The debit/credit table is used by the «حساب طلا و ریال» template and whenever gold is settled by weight.
+            'use_ledger' => ($s['layout']['template_id'] ?? '') === 'ledger' || self::ledger($s)['by_weight'],
             'show_talata_mark' => (bool) ($s['branding']['show_talata_mark'] ?? true),
         ];
     }
@@ -112,7 +115,7 @@ final class InvoicePresenter
             'no' => Digits::toPersian((string) ($i + 1)),
             'type' => $type,
             'direction' => $in ? 'IN' : 'OUT',
-            'name' => $r['name'] ?: ($gold ? 'طلا' : ($in ? $kind.' دریافتی از مشتری' : 'متفرقه')),
+            'name' => $r['name'] ?: ($gold ? (($a['kind'] ?? '') === 'MELTED' ? 'فروش طلای آب‌شده' : 'طلا') : ($in ? $kind.' دریافتی از مشتری' : 'متفرقه')),
             'description' => $r['description'],
             'weight' => self::weight($r['net_weight_g']),
             'purity' => $gold || $in ? self::purityLabel($r['purity_ppt']) : '—',
@@ -135,7 +138,21 @@ final class InvoicePresenter
             'rate_basis_fa' => $in ? (self::GOLD_IN_BASES[$a['rate_basis'] ?? 'BUY'] ?? null) : null,
             'deduction_percent' => $in && ($a['deduction_percent'] ?? '0') !== '0' ? self::percent($a['deduction_percent']) : null,
             'deduction_fa' => $in && ($c['D'] ?? '0') !== '0' ? Money::toman($c['D']) : null,
-            'assay_ref' => $in ? ($a['assay_ref'] ?? null) : null,
+            'assay_ref' => $a['assay_ref'] ?? null,
+            'by_weight' => ($c['settlement'] ?? 'MONEY') === 'WEIGHT',
+            // Debit/credit from the customer's account (بد = customer owes, بس = shop owes the customer).
+            'gold_debit' => $gold && ($c['settlement'] ?? '') === 'WEIGHT' ? self::weight($c['debit_750']) : '',
+            'gold_credit' => $in && ($c['settlement'] ?? '') === 'WEIGHT' ? self::weight($c['credit_750']) : '',
+            'money_debit' => ! $in && ($r['total_irr'] ?? '0') !== '0' ? Money::toman($r['total_irr']) : '',
+            'money_credit' => $in && ($r['total_irr'] ?? '0') !== '0' ? Money::toman($r['total_irr']) : '',
+            // Bazaar style: one value per ledger with its side, e.g. «۱۰.۱۶ بد» / «۹.۷۵۶ بس».
+            'gold_cell' => match (true) {
+                $gold && ($c['settlement'] ?? '') === 'WEIGHT' => self::weight($c['debit_750']).' بد',
+                $in && ($c['settlement'] ?? '') === 'WEIGHT' => self::weight($c['credit_750']).' بس',
+                default => '—',
+            },
+            'money_cell' => ($r['total_irr'] ?? '0') === '0' ? '—' : Money::toman($r['total_irr']).($in ? ' بس' : ' بد'),
+            'melted' => ($a['kind'] ?? '') === 'MELTED',
         ];
     }
 
@@ -159,4 +176,33 @@ final class InvoicePresenter
             'net_label' => $net->isNegative() ? 'طلای دریافتی بیشتر از فروش' : 'خالص طلای تحویل‌شده به مشتری',
         ];
     }
+
+    /** Document balances for the debit/credit (بد/بس) view; older snapshots are derived from the rows. */
+    public static function ledger(array $s): array
+    {
+        $l = $s['totals']['ledger'] ?? null;
+        if (! $l) {
+            $debit = BigDecimal::of($s['totals']['gold_irr'])->plus($s['totals']['misc_irr']);
+            $credit = BigDecimal::of($s['totals']['gold_in_irr'] ?? '0');
+            $l = ['gold_debit_750' => '0', 'gold_credit_750' => '0', 'gold_balance_750' => '0',
+                'money_debit_irr' => (string) $debit, 'money_credit_irr' => (string) $credit, 'money_balance_irr' => (string) $debit->minus($credit)];
+        }
+        $gold = BigDecimal::of($l['gold_balance_750']);
+        $money = BigDecimal::of($l['money_balance_irr']);
+
+        return [
+            'by_weight' => ! BigDecimal::of($l['gold_debit_750'])->isZero() || ! BigDecimal::of($l['gold_credit_750'])->isZero(),
+            'gold_debit' => self::weight($l['gold_debit_750']), 'gold_credit' => self::weight($l['gold_credit_750']),
+            'money_debit' => Money::toman($l['money_debit_irr']), 'money_credit' => Money::toman($l['money_credit_irr']),
+            'gold_balance' => self::weight((string) $gold->abs()), 'gold_side' => $gold->isZero() ? 'ZERO' : ($gold->isNegative() ? 'CREDIT' : 'DEBIT'),
+            'money_balance' => Money::toman((string) $money->abs()), 'money_side' => $money->isZero() ? 'ZERO' : ($money->isNegative() ? 'CREDIT' : 'DEBIT'),
+            'gold_total_cell' => trim(($l['gold_debit_750'] !== '0' && $l['gold_debit_750'] !== '0.000' ? self::weight($l['gold_debit_750']).' بد' : '').'  '.($l['gold_credit_750'] !== '0' && $l['gold_credit_750'] !== '0.000' ? self::weight($l['gold_credit_750']).' بس' : '')) ?: '—',
+            'money_total_cell' => trim(($l['money_debit_irr'] !== '0' ? Money::toman($l['money_debit_irr']).' بد' : '').'  '.($l['money_credit_irr'] !== '0' ? Money::toman($l['money_credit_irr']).' بس' : '')) ?: '—',
+        ];
+    }
+
+    public const SIDE_FA = ['DEBIT' => 'بدهکار (مشتری باید بدهد)', 'CREDIT' => 'بستانکار (فروشگاه باید بدهد)', 'ZERO' => 'تسویه'];
+
+    /** Short side word for the «مانده سند» row. */
+    public const SIDE_SHORT = ['DEBIT' => 'بدهکار', 'CREDIT' => 'بستانکار', 'ZERO' => 'تسویه'];
 }

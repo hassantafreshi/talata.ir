@@ -1,7 +1,7 @@
 import { put, del } from '../lib/http.js';
 import { toast } from '../lib/ui.js';
 import { toLatin, toman, toPersian, parseTomanToIrr } from '../lib/digits.js';
-import { priceGold, priceGoldIn, priceManual, PricingError } from '../lib/pricing.js';
+import { priceGold, priceGoldIn, priceGoldInWeight, priceManual, weight750, PricingError } from '../lib/pricing.js';
 
 const ERR = {
   REQUIRED: 'این مورد را وارد کنید.', INVALID_NUMBER: 'عدد درست نیست.', MUST_BE_POSITIVE: 'باید بیشتر از صفر باشد.',
@@ -32,7 +32,7 @@ export default function () {
   function newRow(type) {
     return {
       row_uid: uid(), item_type: type, name: type === 'GOLD' ? 'طلای ۱۸ عیار' : '', description: '', net_weight_g: '', purity_ppt: '750', wage_percent: '0', profit_percent: '0', discount_toman: '', discount_scope: 'TAXABLE_COMPONENTS', manual_total_toman: '',
-      kind: 'OLD_GOLD', rate_basis: defaultBasis(), rate_toman: '', deduction_percent: '0', assay_ref: '',
+      kind: type === 'GOLD' ? 'JEWELRY' : 'OLD_GOLD', rate_basis: defaultBasis(), rate_toman: '', deduction_percent: '0', assay_ref: '', settlement: 'MONEY',
     };
   }
 
@@ -54,7 +54,7 @@ export default function () {
     el.querySelectorAll('[data-sec]').forEach((sec) => { sec.hidden = !sec.dataset.sec.split(',').includes(row.item_type); });
     el.querySelectorAll('[data-only]').forEach((c) => { c.hidden = c.dataset.only !== row.item_type; });
     if (isIn) {
-      el.querySelector('[data-row-total-label]').textContent = 'از مبلغ فاکتور کم می‌شود';
+      el.querySelector('[data-row-total-label]').textContent = row.rate_basis === 'WEIGHT' ? 'به حساب طلای مشتری (بس)' : 'از مبلغ فاکتور کم می‌شود';
       el.querySelector('[data-weight-hint]').textContent = 'وزن ترازو؛ برای سکه وزن خود سکه.';
       el.querySelector('[data-sec="GOLD,GOLD_IN"] [data-f="name"]').placeholder = KIND_NAME[row.kind] || 'طلای دریافتی';
       el.querySelector('[data-basis-opt="BUY"]').hidden = !buyRate && row.rate_basis !== 'BUY';
@@ -64,7 +64,10 @@ export default function () {
       el.querySelector('[data-rate-manual]').hidden = row.rate_basis !== 'MANUAL';
       el.querySelector('[data-assay]').hidden = row.kind !== 'MELTED' && !row.assay_ref;
     }
-    el.querySelectorAll('input[type="radio"][data-f="kind"], input[type="radio"][data-f="rate_basis"]').forEach((r) => { r.name = `${r.dataset.f}-${row.row_uid}`; r.checked = r.value === row[r.dataset.f]; });
+    el.querySelectorAll('input[type="radio"][data-f="kind"], input[type="radio"][data-f="rate_basis"], input[type="radio"][data-f="settlement"]').forEach((r) => { r.name = `${r.dataset.f}-${row.row_uid}`; r.checked = r.value === (row[r.dataset.f] || (r.dataset.f === 'settlement' ? 'MONEY' : '')); });
+    if (row.item_type === 'GOLD' && row.settlement === 'WEIGHT') el.querySelector('[data-row-total-label]').textContent = 'مبلغ نقدی (اجرت، سود، مالیات)';
+    if (row.item_type === 'GOLD') el.querySelector('[data-assay-sale]').hidden = row.kind !== 'MELTED' && !row.assay_ref;
+    if (row.item_type === 'GOLD') el.querySelector('[data-settle-hint]').textContent = row.settlement === 'WEIGHT' ? 'مشتری به‌جای پولِ طلا، همین وزن (معادل ۷۵۰) طلا بدهکار می‌شود؛ فقط اجرت، سود و مالیات نقدی است.' : 'ارزش طلا به تومان حساب می‌شود.';
     el.querySelectorAll('input[data-f]').forEach((inp) => {
       const f = inp.dataset.f;
       if (f === 'item_type' || inp.type === 'radio') return;
@@ -91,11 +94,16 @@ export default function () {
   });
   host.addEventListener('change', (e) => {
     const f = e.target.dataset.f;
-    if (f === 'kind' || f === 'rate_basis') {
+    if (f === 'kind' || f === 'rate_basis' || f === 'settlement') {
       const row = rowOf(e.target);
       row[f] = e.target.value;
       if (f === 'kind' && e.target.value === 'COIN' && row.purity_ppt === '750') row.purity_ppt = '900';
       if (f === 'kind' && e.target.value !== 'COIN' && row.purity_ppt === '900') row.purity_ppt = '750';
+      // Melted gold sold by the shop: usually no wage/profit and an exact assay purity.
+      if (f === 'kind' && e.target.value === 'MELTED' && row.item_type === 'GOLD') {
+        if (!row.name || row.name === 'طلای ۱۸ عیار') row.name = 'طلای آب‌شده';
+      }
+      if (f === 'kind' && e.target.value === 'JEWELRY' && row.name === 'طلای آب‌شده') row.name = 'طلای ۱۸ عیار';
       render(); changed();
       if (f === 'rate_basis' && row.rate_basis === 'MANUAL') host.querySelector(`[data-uid="${row.row_uid}"] [data-f="rate_toman"]`)?.focus();
       return;
@@ -105,6 +113,8 @@ export default function () {
     const prev = row.item_type;
     row.item_type = e.target.value;
     Object.entries(newRow(row.item_type)).forEach(([k, v]) => { if (row[k] === undefined) row[k] = v; });
+    const kinds = row.item_type === 'GOLD' ? ['JEWELRY', 'MELTED'] : ['OLD_GOLD', 'COIN', 'MELTED', 'OTHER'];
+    if (!kinds.includes(row.kind)) row.kind = kinds[0];
     if (row.item_type !== 'GOLD' && row.name === 'طلای ۱۸ عیار') row.name = '';
     if (row.item_type === 'GOLD' && !row.name && prev !== 'GOLD_IN') row.name = 'طلای ۱۸ عیار';
     if (row.item_type !== 'GOLD_IN' && row.purity_ppt === '900') row.purity_ppt = '750';
@@ -142,20 +152,24 @@ export default function () {
     const w = toLatin(row.net_weight_g);
     if (row.item_type === 'GOLD_IN') {
       const basis = row.rate_basis || 'BUY';
+      if (basis === 'WEIGHT') return priceGoldInWeight({ net_weight_g: w, purity_ppt: toLatin(row.purity_ppt), deduction_percent: toLatin(row.deduction_percent) || '0' }, boot.limits);
       const r = basis === 'BUY' ? buyRate : basis === 'SELL' ? rate : (row.rate_toman ? (parseTomanToIrr(row.rate_toman) ?? 'x') : null);
       if (!r) throw new PricingError(basis === 'BUY' ? 'NO_BUY_RATE' : 'REQUIRED', 'rate_irr_per_g');
       return priceGoldIn({ net_weight_g: w, purity_ppt: toLatin(row.purity_ppt), rate_irr_per_g: r, deduction_percent: toLatin(row.deduction_percent) || '0' }, boot.limits);
     }
     if (row.item_type === 'GOLD') {
       const discountIrr = row.discount_toman ? parseTomanToIrr(row.discount_toman, true) : null;
-      return priceGold({ net_weight_g: w, purity_ppt: toLatin(row.purity_ppt), price18_irr_per_g: rate, wage_percent: toLatin(row.wage_percent) || '0', profit_percent: toLatin(row.profit_percent) || '0', discount: discountIrr && discountIrr !== '0' ? { scope: row.discount_scope || 'TAXABLE_COMPONENTS', amount_irr: discountIrr } : null, vat_rate_percent: boot.vat }, boot.limits);
+      const r = priceGold({ net_weight_g: w, purity_ppt: toLatin(row.purity_ppt), price18_irr_per_g: rate, wage_percent: toLatin(row.wage_percent) || '0', profit_percent: toLatin(row.profit_percent) || '0', discount: discountIrr && discountIrr !== '0' ? { scope: row.discount_scope || 'TAXABLE_COMPONENTS', amount_irr: discountIrr } : null, vat_rate_percent: boot.vat }, boot.limits);
+      // «تسویه وزنی»: the metal is owed in gold; only wage + profit + VAT are money (as InvoiceCalculator).
+      if (row.settlement === 'WEIGHT') return { ...r, settlement: 'WEIGHT', debit_750: weight750(w, toLatin(row.purity_ppt)), T: (BigInt(r.B) + BigInt(r.V)).toString() };
+      return r;
     }
     if (!row.name?.trim()) throw new PricingError('REQUIRED', 'name');
     return priceManual({ manual_total_irr: parseTomanToIrr(row.manual_total_toman) ?? 'x' }, boot.limits);
   }
 
   function preview(serverRows = null) {
-    let total = 0n, received = 0n, valid = rows.length > 0;
+    let total = 0n, received = 0n, valid = rows.length > 0, goldBal = 0n; // gold balance in milligrams of 750
     const hasSale = rows.some((r) => r.item_type === 'GOLD' || r.item_type === 'MISC');
     const hasIn = rows.some((r) => r.item_type === 'GOLD_IN');
     rows.forEach((row) => {
@@ -167,6 +181,15 @@ export default function () {
       card.querySelectorAll('.field.invalid').forEach((f) => f.classList.remove('invalid'));
       try {
         const r = localPrice(row);
+        const mg = (s) => BigInt(s.replace('.', ''));
+        if (r.settlement === 'WEIGHT' && row.item_type === 'GOLD_IN') {
+          goldBal -= mg(r.credit_750);
+          totalEl.textContent = `بستانکار ${toPersian(r.credit_750.replace(/\.?0+$/, ''))} گرم ۷۵۰`;
+          bd.textContent = `حساب وزنی: معادل ${toPersian(r.weight_750.replace(/\.?0+$/, ''))} گرم ۷۵۰` + (r.credit_750 !== r.weight_750 ? ` · بعد از کسر ${toPersian(r.credit_750.replace(/\.?0+$/, ''))}` : '');
+          eff.textContent = '';
+          return;
+        }
+        if (r.settlement === 'WEIGHT' && row.item_type === 'GOLD') goldBal += mg(r.debit_750);
         if (row.item_type === 'GOLD_IN') {
           received += BigInt(r.T);
           totalEl.textContent = `−${toman(r.T)} تومان`;
@@ -176,7 +199,10 @@ export default function () {
         }
         total += BigInt(r.T);
         totalEl.textContent = `${toman(r.T)} تومان`;
-        if (row.item_type === 'GOLD') {
+        if (row.item_type === 'GOLD' && r.settlement === 'WEIGHT') {
+          bd.textContent = `طلا بدهکار ${toPersian(r.debit_750.replace(/\.?0+$/, ''))} گرم ۷۵۰ · اجرت ${toman(r.W)} · سود ${toman(r.P)} · مالیات ${toman(r.V)}`;
+          eff.textContent = '';
+        } else if (row.item_type === 'GOLD') {
           bd.textContent = `ارزش طلا ${toman(r.M)} · اجرت ${toman(r.W)} · سود ${toman(r.P)} · مالیات ${toman(r.V)}`;
           eff.textContent = `نرخ این عیار: ${toman(String(BigInt(r.effective_rate_irr_per_g.split('.')[0])))} تومان/گرم`;
         } else { bd.textContent = ''; }
@@ -198,6 +224,13 @@ export default function () {
     const credit = payable < 0n;
     valid = valid && hasSale;
     document.querySelector('[data-split]').classList.toggle('hidden', !hasIn);
+    const hasWeight = rows.some((r) => r.settlement === 'WEIGHT' || (r.item_type === 'GOLD_IN' && r.rate_basis === 'WEIGHT'));
+    document.querySelector('[data-gold-balance]').classList.toggle('hidden', !hasWeight);
+    if (hasWeight) {
+      const abs = goldBal < 0n ? -goldBal : goldBal;
+      const g = `${abs / 1000n}.${String(abs % 1000n).padStart(3, '0')}`.replace(/\.?0+$/, '');
+      document.querySelector('[data-gold-balance-value]').textContent = goldBal === 0n ? 'تسویه' : `${toPersian(g)} ${goldBal > 0n ? 'بدهکار (مشتری)' : 'بستانکار (به نفع مشتری)'}`;
+    }
     document.querySelector('[data-sales]').textContent = toman(total.toString());
     document.querySelector('[data-gold-in]').textContent = `−${toman(received.toString())}`;
     document.querySelector('[data-payable-label]').textContent = !hasIn ? 'جمع فاکتور' : credit ? 'مانده به نفع مشتری' : 'قابل پرداخت';

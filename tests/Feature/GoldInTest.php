@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Domain\Market\QuoteService;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Support\Jalali;
 use Brick\Math\BigDecimal;
 use Brick\Math\BigInteger;
 use Brick\Math\RoundingMode;
@@ -149,5 +150,66 @@ class GoldInTest extends TestCase
         $this->assertNotNull($draft->accepted_buy_rate_irr);
         $copied = InvoiceItem::withoutGlobalScope('tenant')->where('invoice_id', $draft->id)->where('item_type', 'GOLD_IN')->first();
         $this->assertSame('COIN', $copied->item_attributes['kind']);
+    }
+
+    public function test_reference_invoice_settled_by_weight_on_the_ledger_template(): void
+    {
+        // The reference (Tahesab) document: 10.16 g sold, settled with an Emami coin and old gold by weight.
+        $user = $this->merchant('basic');
+        $this->actingAs($user)->api('PUT', '/api/settings/appearance', ['settings' => ['template_id' => 'ledger'], 'version' => 1])->assertOk();
+        [$id, $v] = $this->start($user);
+        $state = $this->save($id, $v, [
+            $this->gold(['settlement' => 'WEIGHT']),
+            $this->goldIn(['kind' => 'COIN', 'name' => 'سکه امامی', 'net_weight_g' => '8.13', 'purity_ppt' => '900', 'rate_basis' => 'WEIGHT']),
+            $this->goldIn(['name' => 'ورود متفرقه', 'net_weight_g' => '2.03', 'rate_basis' => 'WEIGHT']),
+        ]);
+        $this->assertTrue($state->json('valid'));
+        $sale = $state->json('rows.0.computed');
+        $this->assertSame('WEIGHT', $sale['settlement']);
+        $this->assertSame('10.160', $sale['debit_750']);
+        $this->assertSame((string) BigInteger::of($sale['B'])->plus($sale['V']), $state->json('rows.0.total_irr'), 'only wage, profit and VAT are money');
+        $this->assertSame('9.756', $state->json('rows.1.computed.credit_750'));
+        $this->assertSame('0', $state->json('rows.1.total_irr'));
+        $this->assertSame(['gold_debit_750' => '10.160', 'gold_credit_750' => '11.786', 'gold_balance_750' => '-1.626'], array_intersect_key($state->json('totals.ledger'), array_flip(['gold_debit_750', 'gold_credit_750', 'gold_balance_750'])));
+        $this->assertSame($state->json('totals.payable_irr'), $state->json('totals.ledger.money_balance_irr'));
+        $this->assertSame('CREDIT', $state->json('totals.gold_balance_side'));
+
+        $this->issue($id, $state->json('version'))->assertCreated();
+        $inv = Invoice::withoutGlobalScope('tenant')->where('public_id', $id)->first();
+        $this->assertSame('-1.626', $inv->snapshot['totals']['ledger']['gold_balance_750']);
+        $this->assertSame('ledger', $inv->snapshot['layout']['template_id']);
+        $print = $this->get("/invoices/{$id}/print")->assertOk();
+        $print->assertSee('طلا (گرم ۷۵۰) بد/بس')->assertSee('مبلغ (تومان) بد/بس')->assertSee('مانده سند')
+            ->assertSee('۱۰.۱۶ بد')->assertSee('۹.۷۵۶ بس')->assertSee('۲.۰۳ بس')->assertSee('بستانکار ۱.۶۲۶ گرم طلای ۱۸ عیار')->assertSee($inv->issued_at ? Jalali::date($inv->issued_at, 'Asia/Tehran', true) : '')->assertSee('تسویه وزنی؛ اجرت، سود و مالیات نقدی')->assertSee('حساب وزنی (بدون تبدیل به پول)')
+            ->assertSee('اشتباه از طرفین قابل برگشت است.')->assertSee('گیرنده سند');
+    }
+
+    public function test_weight_settlement_shows_the_debit_credit_table_even_on_the_free_layout(): void
+    {
+        $user = $this->merchant('free');
+        [$id, $v] = $this->start($user);
+        $state = $this->save($id, $v, [$this->gold(['settlement' => 'WEIGHT', 'net_weight_g' => '3']), $this->goldIn(['net_weight_g' => '3', 'rate_basis' => 'WEIGHT'])]);
+        $this->assertSame('0.000', $state->json('totals.ledger.gold_balance_750'));
+        $this->issue($id, $state->json('version'))->assertCreated();
+        $this->get("/invoices/{$id}/print")->assertOk()->assertSee('مانده سند')->assertSee('تسویه');
+    }
+
+    public function test_melted_gold_sale_by_weight_against_melted_gold_received(): void
+    {
+        // «فاکتور آب‌شده»: the shop sells assayed melted gold and takes melted gold back, both by weight.
+        $user = $this->merchant('professional');
+        [$id, $v] = $this->start($user);
+        $state = $this->save($id, $v, [
+            ['item_type' => 'GOLD', 'kind' => 'MELTED', 'name' => '', 'assay_ref' => 'ع-۱۲۳', 'net_weight_g' => '50', 'purity_ppt' => '995', 'wage_percent' => '0', 'profit_percent' => '0.5', 'settlement' => 'WEIGHT'],
+            $this->goldIn(['kind' => 'MELTED', 'net_weight_g' => '60', 'purity_ppt' => '705.5', 'deduction_percent' => '0.5', 'assay_ref' => 'ع-۱۲۴', 'rate_basis' => 'WEIGHT']),
+        ]);
+        $this->assertTrue($state->json('valid'));
+        $this->assertSame('66.333', $state->json('rows.0.computed.debit_750'));      // 50 × 995 / 750
+        $this->assertSame('56.158', $state->json('rows.1.computed.credit_750'));     // 60 × 705.5 / 750 = 56.44 × 0.995 = 56.1578
+        $this->assertSame('10.175', $state->json('totals.ledger.gold_balance_750')); // customer owes 10.175 g of 750
+        $this->issue($id, $state->json('version'))->assertCreated();
+        $this->get("/invoices/{$id}/print")->assertOk()
+            ->assertSee('فروش طلای آب‌شده')->assertSee('برگه عیارسنجی ع-۱۲۳')->assertSee('۶۶.۳۳۳ بد')->assertSee('۵۶.۱۵۸ بس')
+            ->assertSee('بدهکار ۱۰.۱۷۵ گرم طلای ۱۸ عیار')->assertSee('مانده سند');
     }
 }

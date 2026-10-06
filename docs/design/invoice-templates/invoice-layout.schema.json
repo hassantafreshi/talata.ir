@@ -23,9 +23,10 @@
     "template_id": {
       "enum": [
         "simple_readable",
-        "shop"
+        "shop",
+        "ledger"
       ],
-      "description": "simple_readable = «ساده و خوانا» (also the fixed Free layout); shop = «فروشگاهی»."
+      "description": "simple_readable = «ساده و خوانا» (also the fixed Free layout); shop = «فروشگاهی»; ledger = «حساب طلا و ریال» (debit/credit columns for gold 750-grams and money, like bazaar gold-shop software)."
     },
     "template_version": {
       "type": "integer",

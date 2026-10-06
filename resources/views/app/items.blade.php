@@ -9,11 +9,12 @@
         'discount_scope' => $r->discount_scope ?? 'TAXABLE_COMPONENTS',
         'manual_total_toman' => $r->manual_total_irr ? \App\Support\Money::irrToToman($r->manual_total_irr) : '',
         // GOLD_IN (gold received from the customer) attributes.
-        'kind' => $r->item_attributes['kind'] ?? 'OLD_GOLD',
+        'kind' => $r->item_attributes['kind'] ?? ($r->item_type === 'GOLD' ? 'JEWELRY' : 'OLD_GOLD'),
         'rate_basis' => $r->item_attributes['rate_basis'] ?? 'BUY',
         'rate_toman' => isset($r->item_attributes['rate_irr_per_g']) && $r->item_attributes['rate_irr_per_g'] !== 'invalid' ? \App\Support\Money::irrToToman($r->item_attributes['rate_irr_per_g']) : '',
         'deduction_percent' => $r->item_attributes['deduction_percent'] ?? '0',
         'assay_ref' => $r->item_attributes['assay_ref'] ?? '',
+        'settlement' => $r->item_attributes['settlement'] ?? 'MONEY',
     ])->values();
     $boot = [
         'id' => $invoice->public_id, 'version' => $invoice->version, 'rows' => $rowsJson, 'state' => $state,
@@ -44,6 +45,7 @@
 
     <div class="sticky-bar">
         <div class="xs between hidden" data-split><span>فروش <strong class="num" data-sales>—</strong></span><span>طلای دریافتی <strong class="num" data-gold-in>—</strong></span></div>
+        <div class="xs between hidden" data-gold-balance><span>مانده طلایی (گرم ۷۵۰)</span><strong class="num" data-gold-balance-value>—</strong></div>
         <div class="between"><span><span data-payable-label>جمع فاکتور</span> (<span data-row-count>۰</span> ردیف)</span><strong class="num" data-payable>—</strong></div>
         <div class="xs err-text hidden" data-sale-required role="alert">طلای دریافتی به‌تنهایی فاکتور فروش نیست؛ دست‌کم یک ردیف طلا یا متفرقه بفروشید.</div>
         <div class="xs muted center" data-preview-note>پیش‌نمایش محلی؛ محاسبه نهایی توسط سرور انجام می‌شود.</div>
@@ -84,7 +86,19 @@
                     <p class="hint" data-eff></p>
                 </fieldset>
             </div>
+            <fieldset class="field" data-sec="GOLD"><legend class="label">چه طلایی می‌فروشید؟</legend>
+                <div class="chips" role="radiogroup">
+                    <label class="chip"><input type="radio" class="sr-only" value="JEWELRY" data-f="kind">طلای ساخته (زیورآلات)</label>
+                    <label class="chip"><input type="radio" class="sr-only" value="MELTED" data-f="kind">طلای آب‌شده</label>
+                </div>
+            </fieldset>
             <div data-sec="GOLD" class="stack">
+                <fieldset class="field"><legend class="label">فلز طلا چطور تسویه شود؟</legend>
+                    <div class="seg" role="radiogroup">
+                        <label><input type="radio" value="MONEY" data-f="settlement">با پول</label>
+                        <label><input type="radio" value="WEIGHT" data-f="settlement">با طلا (وزنی)</label>
+                    </div>
+                    <p class="hint" data-settle-hint>ارزش طلا به تومان حساب می‌شود.</p></fieldset>
                 <div class="grid-2">
                     <div class="field"><label>اجرت</label><div class="input-wrap ltr-input"><input data-f="wage_percent" inputmode="decimal"><span class="unit">٪</span></div><div class="err"></div></div>
                     <div class="field"><label>سود</label><div class="input-wrap ltr-input"><input data-f="profit_percent" inputmode="decimal"><span class="unit">٪</span></div><div class="err"></div></div>
@@ -97,12 +111,14 @@
                         <label class="choice" data-basis-opt="BUY"><input type="radio" value="BUY" data-f="rate_basis"><span>نرخ خرید بازار <strong class="num" data-buy-rate></strong></span></label>
                         <label class="choice" data-basis-opt="SELL"><input type="radio" value="SELL" data-f="rate_basis"><span>همان نرخ فروش این فاکتور (معاوضه) <strong class="num" data-sell-rate></strong></span></label>
                         <label class="choice"><input type="radio" value="MANUAL" data-f="rate_basis"><span>نرخ دستی</span></label>
+                        <label class="choice"><input type="radio" value="WEIGHT" data-f="rate_basis"><span>حساب وزنی (طلا به طلا، بدون نرخ)</span></label>
                     </div>
                 </fieldset>
                 <div class="field" data-rate-manual><label>نرخ دستی هر گرم ۱۸ عیار</label><div class="input-wrap ltr-input"><input data-f="rate_toman" inputmode="numeric"><span class="unit">تومان</span></div><div class="err"></div></div>
                 <div class="field"><label>کسر ذوب یا ناخالصی (اختیاری)</label><div class="input-wrap ltr-input"><input data-f="deduction_percent" inputmode="decimal"><span class="unit">٪</span></div><div class="err"></div><p class="hint">اگر چیزی کم نمی‌کنید، صفر بماند.</p></div>
                 <div class="field" data-assay><label>شماره برگه عیارسنجی (اختیاری)</label><div class="input-wrap"><input data-f="assay_ref" maxlength="40"></div></div>
             </div>
+            <div class="field" data-sec="GOLD" data-assay-sale><label>شماره برگه عیارسنجی (اختیاری)</label><div class="input-wrap"><input data-f="assay_ref" maxlength="40"></div></div>
             <div data-sec="MISC" class="stack">
                 <div class="field"><label>عنوان (الزامی)</label><div class="input-wrap"><input data-f="name" maxlength="120" placeholder="مثلاً جعبه هدیه"></div><div class="err"></div></div>
                 <div class="field"><label>قیمت ردیف (الزامی)</label><div class="input-wrap ltr-input"><input data-f="manual_total_toman" inputmode="numeric"><span class="unit">تومان</span></div><div class="err"></div><p class="hint">قیمت کل همین ردیف را بنویسید. برای متفرقه، وزن و عیار و محاسبه طلا به کار نمی‌رود.</p></div>

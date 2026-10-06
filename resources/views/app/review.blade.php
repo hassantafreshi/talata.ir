@@ -23,11 +23,11 @@
                     @php $a = $row->item_attributes ?? []; $c = $s['computed'] ?? []; @endphp
                     <li class="list-item"><span class="body"><strong><span class="badge info">دریافتی</span> {{ $row->name ?: (\App\Domain\Invoices\InvoicePresenter::GOLD_IN_KINDS[$a['kind'] ?? 'OLD_GOLD'] ?? 'طلای دریافتی').' از مشتری' }}</strong>
                         <span class="sub">{{ \App\Domain\Invoices\InvoicePresenter::weight($row->net_weight_g) }} گرم · عیار {{ fa((string) \Brick\Math\BigDecimal::of($row->purity_ppt)->strippedOfTrailingZeros()) }} · معادل {{ \App\Domain\Invoices\InvoicePresenter::weight($c['weight_750'] ?? null) }} گرم ۷۵۰ · {{ \App\Domain\Invoices\InvoicePresenter::GOLD_IN_BASES[$a['rate_basis'] ?? 'BUY'] ?? '' }} @if(isset($c['rate_irr_per_g']))({{ toman($c['rate_irr_per_g']) }})@endif @if(($c['D'] ?? '0') !== '0')· کسر {{ toman($c['D']) }}@endif</span></span>
-                        <span class="num strong nowrap">@if($s['total_irr'] ?? null)−{{ $s['total_fa'] }}@else—@endif</span></li>
+                        <span class="num strong nowrap">@if(($c['settlement'] ?? '') === 'WEIGHT')بستانکار {{ \App\Domain\Invoices\InvoicePresenter::weight($c['credit_750']) }} گرم@elseif($s['total_irr'] ?? null)−{{ $s['total_fa'] }}@else—@endif</span></li>
                     @continue
                 @endif
                 <li class="list-item"><span class="body"><strong>{{ $row->name ?: ($row->item_type === 'GOLD' ? 'طلا' : 'متفرقه') }}</strong>
-                    <span class="sub">@if($row->item_type === 'GOLD'){{ \App\Domain\Invoices\InvoicePresenter::weight($row->net_weight_g) }} گرم · {{ \App\Domain\Invoices\InvoicePresenter::purityLabel($row->purity_ppt) }} · اجرت {{ \App\Domain\Invoices\InvoicePresenter::percent($row->wage_percent) }} · سود {{ \App\Domain\Invoices\InvoicePresenter::percent($row->profit_percent) }}@else متفرقه@endif</span></span>
+                    <span class="sub">@if($row->item_type === 'GOLD' && ($row->item_attributes['settlement'] ?? '') === 'WEIGHT')<span class="badge info">تسویه وزنی</span> @endif @if($row->item_type === 'GOLD'){{ \App\Domain\Invoices\InvoicePresenter::weight($row->net_weight_g) }} گرم · {{ \App\Domain\Invoices\InvoicePresenter::purityLabel($row->purity_ppt) }} · اجرت {{ \App\Domain\Invoices\InvoicePresenter::percent($row->wage_percent) }} · سود {{ \App\Domain\Invoices\InvoicePresenter::percent($row->profit_percent) }}@else متفرقه@endif</span></span>
                     <span class="num strong nowrap">{{ $s['total_fa'] ?? '—' }}</span></li>
             @endforeach
         </ul>
@@ -40,6 +40,12 @@
             @endif
             @if ($state['totals']['misc_irr'] !== '0')<div><dt>اقلام متفرقه</dt><dd class="num">{{ $state['totals']['misc_fa'] }}</dd></div>@endif
         </dl>
+        @if ($state['totals']['has_weight_settlement'])
+            <dl class="kv">
+                <div><dt>طلا بدهکار / بستانکار (گرم ۷۵۰)</dt><dd class="num">{{ \App\Domain\Invoices\InvoicePresenter::weight($state['totals']['ledger']['gold_debit_750']) }} / {{ \App\Domain\Invoices\InvoicePresenter::weight($state['totals']['ledger']['gold_credit_750']) }}</dd></div>
+                <div><dt>مانده طلایی این سند</dt><dd class="num strong">{{ $state['totals']['gold_balance_fa'] }} گرم · {{ \App\Domain\Invoices\InvoicePresenter::SIDE_FA[$state['totals']['ledger']['gold_balance_750'] === '0.000' ? 'ZERO' : $state['totals']['gold_balance_side']] }}</dd></div>
+            </dl>
+        @endif
         @if ($state['totals']['has_gold_in'])
             <dl class="kv">
                 <div><dt>جمع فروش</dt><dd class="num">{{ $state['totals']['sales_fa'] }}</dd></div>

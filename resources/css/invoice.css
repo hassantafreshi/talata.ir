@@ -98,3 +98,9 @@
 .receipt-head { grid-template-columns: 1fr; }
 .receipt-meta { display: block; }
 .receipt-meta div { display: flex; justify-content: space-between; padding: 2pt 0; }
+/* «حساب طلا و ریال» debit/credit table */
+.inv table.ledger th.c { text-align: center; }
+.inv table.ledger tfoot th, .inv table.ledger tfoot td { font-weight: 700; background: #F0EDE6; }
+.inv table.ledger tfoot tr.bal th, .inv table.ledger tfoot tr.bal td { background: #fff; border-top: 1.5pt solid #000; font-weight: 800; }
+.inv table.ledger td.side { white-space: nowrap; }
+.inv table.ledger td:nth-child(2) { min-width: 42mm; }

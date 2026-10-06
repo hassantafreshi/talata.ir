@@ -165,6 +165,10 @@ final class InvoiceService
                 'customer_credit' => BigDecimal::of($priced['payable'])->isNegative(),
                 'payable_abs_fa' => Money::toman((string) BigDecimal::of($priced['payable'])->abs()),
                 'weights' => array_map(fn ($w) => InvoicePresenter::weight($w), $priced['weights']),
+                'ledger' => $priced['ledger'],
+                'has_weight_settlement' => $priced['ledger']['gold_debit_750'] !== '0.000' || $priced['ledger']['gold_credit_750'] !== '0.000',
+                'gold_balance_fa' => InvoicePresenter::weight((string) BigDecimal::of($priced['ledger']['gold_balance_750'])->abs()),
+                'gold_balance_side' => BigDecimal::of($priced['ledger']['gold_balance_750'])->isNegative() ? 'CREDIT' : 'DEBIT',
             ],
             'buyer_mobile_invalid' => $buyerMobileInvalid,
         ];
@@ -334,6 +338,7 @@ final class InvoiceService
             'totals' => [
                 'gold_irr' => $priced['gold_total'], 'misc_irr' => $priced['misc_total'], 'payable_irr' => $priced['payable'], 'gold_components' => $priced['gold'],
                 'sales_irr' => $priced['sales_total'], 'gold_in_irr' => $priced['gold_in_total'], 'gold_in' => $priced['gold_in'], 'weights' => $priced['weights'],
+                'ledger' => $priced['ledger'],
             ],
             'layout' => $layout,
             'branding' => ['show_talata_mark' => ! $this->entitlements->can($tenant, 'invoice.hide_provider_brand')],

@@ -2,10 +2,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { priceGold, priceGoldIn, priceManual, PricingError } from '../../resources/js/lib/pricing.js';
+import { priceGold, priceGoldIn, priceGoldInWeight, weight750, priceManual, PricingError } from '../../resources/js/lib/pricing.js';
 import { toLatin, parseTomanToIrr, toman } from '../../resources/js/lib/digits.js';
 
-const { vectors, gold_in_vectors: goldIn } = JSON.parse(readFileSync(new URL('../../docs/design/contracts/calculation-vectors.json', import.meta.url)));
+const { vectors, gold_in_vectors: goldIn, weight_settlement_vectors: weightV } = JSON.parse(readFileSync(new URL('../../docs/design/contracts/calculation-vectors.json', import.meta.url)));
 
 for (const v of vectors) {
   test(`vector ${v.id}`, () => {
@@ -55,6 +55,26 @@ for (const v of goldIn.vectors) {
     const res = priceGoldIn(i);
     for (const [k, val] of Object.entries(e)) assert.equal(res[k], val, `${v.id} ${k}`);
     assert.equal(res.G, (BigInt(res.T) + BigInt(res.D)).toString());
+  });
+}
+
+for (const v of weightV.vectors) {
+  test(`weight settlement ${v.id}`, () => {
+    const { input: i, expected: e } = v;
+    if (i.kind === 'GOLD_IN') { const r = priceGoldInWeight(i); for (const [k, val] of Object.entries(e)) assert.equal(r[k], val, k); return; }
+    const base = vectors.find((x) => x.id === 'base').input;
+    if (i.kind === 'GOLD') {
+      const r = priceGold(base);
+      assert.equal((BigInt(r.B) + BigInt(r.V)).toString(), e.money_irr);
+      assert.equal(weight750(base.net_weight_g, base.purity_ppt), e.debit_750);
+      return;
+    }
+    const mg = (s) => BigInt(s.replace('.', ''));
+    const debit = weight750(i.sale.net_weight_g, i.sale.purity_ppt);
+    const credit = i.gold_in.reduce((s, g) => s + mg(priceGoldInWeight({ ...g, deduction_percent: '0' }).credit_750), 0n);
+    assert.equal(debit, e.gold_debit_750);
+    assert.equal(credit.toString(), e.gold_credit_750.replace('.', ''));
+    assert.equal((mg(debit) - credit).toString(), e.gold_balance_750.replace('.', '').replace(/^-0+/, '-'));
   });
 }
 

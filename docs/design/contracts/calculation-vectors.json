@@ -327,5 +327,75 @@
         "note": "Gold received exceeds the sale: negative payable = balance owed to the customer («مانده به نفع مشتری»)."
       }
     ]
+  },
+  "weight_settlement_vectors": {
+    "$comment": "Weight settlement («تسویه وزنی» / «حساب وزنی»): gold is owed/credited in 750-grams instead of money. GOLD_IN: credit_750 = round3(w×purity/750×(100−d)/100). Sold GOLD settled by weight: debit_750 = round3(w×purity/750), money of the row = B + V of GOLD_IR_V1 (wage, profit, VAT only). Document gold balance = Σdebit − Σcredit (negative = shop owes the customer gold).",
+    "vectors": [
+      {
+        "id": "w_in_coin",
+        "input": {
+          "kind": "GOLD_IN",
+          "net_weight_g": "8.13",
+          "purity_ppt": "900",
+          "deduction_percent": "0"
+        },
+        "expected": {
+          "weight_750": "9.756",
+          "credit_750": "9.756",
+          "T": "0"
+        }
+      },
+      {
+        "id": "w_in_melted_deduction",
+        "input": {
+          "kind": "GOLD_IN",
+          "net_weight_g": "10.5",
+          "purity_ppt": "705.5",
+          "deduction_percent": "1.5"
+        },
+        "expected": {
+          "weight_750": "9.877",
+          "credit_750": "9.729",
+          "T": "0"
+        }
+      },
+      {
+        "id": "w_sale_base",
+        "input": {
+          "kind": "GOLD",
+          "ref": "base"
+        },
+        "expected": {
+          "debit_750": "2.000",
+          "money_irr": "15620000"
+        },
+        "note": "Vector 'base' settled by weight: only wage 4,000,000 + profit 10,200,000 + VAT 1,420,000 IRR are money."
+      },
+      {
+        "id": "w_reference_invoice",
+        "input": {
+          "sale": {
+            "net_weight_g": "10.16",
+            "purity_ppt": "750"
+          },
+          "gold_in": [
+            {
+              "net_weight_g": "8.13",
+              "purity_ppt": "900"
+            },
+            {
+              "net_weight_g": "2.03",
+              "purity_ppt": "750"
+            }
+          ]
+        },
+        "expected": {
+          "gold_debit_750": "10.160",
+          "gold_credit_750": "11.786",
+          "gold_balance_750": "-1.626"
+        },
+        "note": "The reference (Tahesab) invoice: 10.16 g sold by weight; Emami coin and old gold received by weight; the shop owes the customer 1.626 g of 750."
+      }
+    ]
   }
 }

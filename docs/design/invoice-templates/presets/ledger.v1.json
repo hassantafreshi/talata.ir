@@ -1,0 +1,25 @@
+{
+  "$comment": "Preset «حساب طلا و ریال» v1 — Basic and Professional. Bazaar-style document like gold-shop accounting software: per row weight, purity, 750-weight, rate and separate debit/credit (بد/بس) columns for gold (750-grams) and money, plus the balance of this document. Black-and-white. See docs/GOLD_RECEIVED_AND_DASHBOARD.md §13.",
+  "schema_version": 1,
+  "template_id": "ledger",
+  "template_version": 1,
+  "blocks": [
+    {"kind": "shop_name", "area": "header", "align": "right", "visible": true},
+    {"kind": "address", "area": "header", "align": "right", "visible": true},
+    {"kind": "contact_primary", "area": "header", "align": "right", "visible": true},
+    {"kind": "contact_mobile_extra", "area": "header", "align": "right", "visible": false},
+    {"kind": "website", "area": "footer", "align": "center", "visible": false},
+    {"kind": "license_union", "area": "footer", "align": "center", "visible": true},
+    {"kind": "license_online", "area": "footer", "align": "center", "visible": false}
+  ],
+  "logo": {"visible": false, "size": "small"},
+  "items_table": {"columns": ["row_no", "name", "weight_g", "purity", "weight_750", "unit_rate", "amount"]},
+  "summary": {
+    "show_component_breakdown": true,
+    "public_note": {"visible": true, "text": "اشتباه از طرفین قابل برگشت است."},
+    "signature_box": true
+  },
+  "typography": {"text_size": "normal", "density": "compact", "accent": "ink", "section_spacing": "normal", "dividers": true},
+  "print": {"paper": "A4", "orientation": "portrait", "margins": "narrow", "repeat_header": true, "repeat_footer": false},
+  "version": 0
+}
