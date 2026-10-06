@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\AffiliatesController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PricingController;
 use App\Http\Controllers\Admin\TechLogController;
 use App\Http\Controllers\Admin\TenantsController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,13 @@ Route::middleware('staff')->group(function () {
     Route::post('/api/account/passkeys', [AccountController::class, 'store'])->middleware('throttle:20,1')->name('account.passkeys.store');
     Route::delete('/api/account/passkeys/{passkey}', [AccountController::class, 'destroy'])->whereNumber('passkey')->name('account.passkeys.destroy');
     Route::get('/tech', [TechLogController::class, 'index'])->middleware('staff:admin')->name('tech');
+
+    // Plan and SMS prices: every change publishes a new pricing version (docs/ADMIN_PRICING.md).
+    Route::get('/pricing', [PricingController::class, 'index'])->name('pricing');
+    Route::middleware(['staff:admin', 'throttle:20,1'])->group(function () {
+        Route::post('/api/pricing', [PricingController::class, 'publish'])->name('pricing.publish');
+        Route::post('/api/pricing/{version}/restore', [PricingController::class, 'restore'])->whereNumber('version')->name('pricing.restore');
+    });
 
     // Affiliate program (همکاری در فروش): support can view, only admins change anything.
     Route::get('/affiliates', [AffiliatesController::class, 'index'])->name('affiliates');

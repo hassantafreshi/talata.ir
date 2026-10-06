@@ -116,3 +116,7 @@ Below the form: search by code or mobile, and a table with affiliate, code, term
 - Payout history.
 
 Support role: read-only.
+
+## قیمت‌ها — `/admin/pricing`
+
+سه کارت (پایه، حرفه‌ای، پیامک هر پلن) با پیش‌نمایش «با مالیات» و «پیامک ۲ بخشی»، فهرست تغییرات قبل ← بعد، یادداشت، «انتشار قیمت‌های جدید» (تأیید؛ تأیید دوم برای تغییر بیش از ۵۰٪)، تاریخچه نسخه‌ها با «بازگرداندن». پشتیبان فقط مشاهده. مرجع: `docs/ADMIN_PRICING.md`.

@@ -1,7 +1,7 @@
 @props(['title' => null, 'page' => 'admin'])
 @php
     $staff = auth('staff')->user();
-    $nav = [['admin.dashboard', 'داشبورد'], ['admin.activity', 'لاگ فعالیت'], ['admin.tenants', 'فروشگاه‌ها'], ['admin.affiliates', 'همکاری در فروش']];
+    $nav = [['admin.dashboard', 'داشبورد'], ['admin.activity', 'لاگ فعالیت'], ['admin.tenants', 'فروشگاه‌ها'], ['admin.affiliates', 'همکاری در فروش'], ['admin.pricing', 'قیمت‌ها']];
     if ($staff?->isAdmin()) { $nav[] = ['admin.tech', 'لاگ فنی']; }
     $nav[] = ['admin.account', 'حساب من'];
 @endphp

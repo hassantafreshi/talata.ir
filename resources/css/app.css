@@ -402,3 +402,8 @@ table.t tr.lvl-warning td { background: #FFFBF1; }
 .perm-edit > summary { list-style: none; display: inline-flex; cursor: pointer; }
 .perm-edit > summary::-webkit-details-marker { display: none; }
 .perm-edit[open] > summary { margin-bottom: 8px; }
+
+/* Admin price editor */
+.pricing-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 1000px) { .pricing-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.list-item.warn-row { background: var(--t-warn-bg, #FBF0D9); }

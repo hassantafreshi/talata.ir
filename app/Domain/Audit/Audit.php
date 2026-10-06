@@ -19,7 +19,7 @@ final class Audit
     public const SERVICES = [
         'auth' => 'auth', 'passkey' => 'auth', 'invoice' => 'invoices', 'sms' => 'sms', 'sms_credit' => 'sms',
         'billing' => 'billing', 'customer' => 'customers', 'installment' => 'customers', 'membership' => 'team',
-        'profile' => 'settings', 'layout' => 'settings', 'tenant' => 'tenants', 'admin' => 'admin', 'affiliate' => 'affiliate',
+        'profile' => 'settings', 'layout' => 'settings', 'tenant' => 'tenants', 'admin' => 'admin', 'affiliate' => 'affiliate', 'pricing' => 'admin',
     ];
 
     public const SERVICE_LABELS = [
