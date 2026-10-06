@@ -7,13 +7,14 @@
         <div class="between">
             <span class="label" id="price-label">قیمت هر گرم طلای ۱۸ عیار</span>
             @if ($quote['is_demo'])<span class="badge dark">عدد نمونه</span>@endif
+            <span class="badge warn" data-emergency @if(! $quote['is_emergency']) hidden @endif>نرخ اعلامی زرلیو (دستی)</span>
         </div>
         <div><span class="price" data-price aria-live="polite">{{ $quote['value_toman_fa'] ?? '—' }}</span> <span class="unit">تومان</span></div>
         @if ($canIssue)
             <button class="btn btn-gold block lg" type="button" data-start data-busy-text="در حال شروع…" @disabled(! $quote['value_irr'])>شروع</button>
         @endif
         <div class="between meta"><span>آخرین دریافت: <span class="num" data-time>{{ $quote['fetched_at_fa'] ?? '—' }}</span></span>@include('partials.freshness', ['f' => $quote['freshness']])</div>
-        <div class="meta">به‌روزرسانی هر ۳ دقیقه · منبع: {{ $quote['source_fa'] ?? '—' }}</div>
+        <div class="meta">به‌روزرسانی هر ۳ دقیقه · منبع: <span data-source>{{ $quote['source_fa'] ?? '—' }}</span></div>
         <div class="notice err hidden" data-error-note>سرویس نرخ پاسخ نمی‌دهد. آخرین نرخ معتبر نمایش داده می‌شود؛ صفحه هر ۳ دقیقه دوباره تلاش می‌کند.</div>
     </section>
 

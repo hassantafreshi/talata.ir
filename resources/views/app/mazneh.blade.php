@@ -11,7 +11,7 @@
         <div class="between"><span class="label" id="g18">طلای ۱۸ عیار (هر گرم)</span>@if($board['is_demo'])<span class="badge dark">عدد نمونه</span>@endif</div>
         <div class="grid-2">
             <div><span class="small">خرید از شما</span><div class="price sm num" data-asset="GOLD_18_BUY">{{ $r['GOLD_18_BUY']['display_fa'] ?? '—' }}</div><span class="xs" data-chg="GOLD_18_BUY">{{ $chg($r['GOLD_18_BUY']) }}</span></div>
-            <div><span class="small">فروش به مشتری · مبنای فاکتور</span><div class="price sm num" data-asset="GOLD_18_SELL">{{ $r['GOLD_18_SELL']['display_fa'] ?? '—' }}</div><span class="xs" data-chg="GOLD_18_SELL">{{ $chg($r['GOLD_18_SELL']) }}</span></div>
+            <div><span class="small">فروش به مشتری · مبنای فاکتور</span> <span class="badge warn" data-emergency @if(! $r['GOLD_18_SELL']['is_emergency']) hidden @endif>نرخ اعلامی زرلیو (دستی)</span><div class="price sm num" data-asset="GOLD_18_SELL">{{ $r['GOLD_18_SELL']['display_fa'] ?? '—' }}</div><span class="xs" data-chg="GOLD_18_SELL">{{ $chg($r['GOLD_18_SELL']) }}</span></div>
         </div>
         <div class="meta">اختلاف خرید و فروش: <span class="num" data-spread>{{ $board['spread_fa'] ?? '—' }}</span> تومان · واحد: تومان / گرم</div>
         <a class="btn btn-gold block" href="{{ route('invoices.new') }}">شروع فاکتور با نرخ فروش</a>

@@ -2,6 +2,7 @@
 
 namespace App\Domain\Market;
 
+use App\Models\EmergencyRate;
 use App\Models\MarketQuote;
 use App\Support\Digits;
 use App\Support\Jalali;
@@ -19,6 +20,8 @@ use Throwable;
 final class QuoteService
 {
     public const ASSETS = ['GOLD_18_SELL', 'GOLD_18_BUY', 'GOLD_24', 'USD_IRR', 'XAU_USD'];
+
+    public const EMERGENCY_SOURCE_FA = 'نرخ اعلامی زرلیو (دستی)';
 
     public function __construct(private readonly QuoteProvider $provider) {}
 
@@ -60,15 +63,43 @@ final class QuoteService
         }
     }
 
+    /**
+     * Latest value of an asset. While staff have announced an emergency 18K sell rate (feed wrong or
+     * down), it replaces the feed value everywhere merchants read the rate; issued invoices keep theirs.
+     */
     public function latest(string $asset = 'GOLD_18_SELL'): ?MarketQuote
     {
+        if ($asset === 'GOLD_18_SELL' && ($e = $this->emergency())) {
+            $q = new MarketQuote([
+                'asset' => $asset, 'value' => $e->value_irr, 'unit' => 'IRR_PER_GRAM', 'change_vs_previous_pct' => null,
+                'source' => self::EMERGENCY_SOURCE_FA, 'is_demo' => false, 'quote_time' => $e->starts_at, 'fetched_at' => $e->starts_at,
+            ]);
+            $q->isEmergency = true;
+
+            return $q;
+        }
+
+        return $this->feed($asset);
+    }
+
+    /** Latest value from the quote provider itself (ignores an emergency rate). */
+    public function feed(string $asset): ?MarketQuote
+    {
         return MarketQuote::query()->where('asset', $asset)->latest('fetched_at')->first();
+    }
+
+    public function emergency(): ?EmergencyRate
+    {
+        return EmergencyRate::query()->active()->latest('id')->first();
     }
 
     public function freshness(?MarketQuote $quote): string
     {
         if (! $quote) {
             return 'ERROR';
+        }
+        if ($quote->isEmergency) {
+            return 'FRESH'; // valid until staff cancel it or its validity ends
         }
         if (Cache::get('talata.quotes.last_error') && $quote->fetched_at->lt(now()->subMinutes(4))) {
             return 'ERROR';
@@ -90,6 +121,7 @@ final class QuoteService
             'freshness' => $this->freshness($q),
             'source_fa' => $q?->source,
             'is_demo' => (bool) $q?->is_demo,
+            'is_emergency' => (bool) $q?->isEmergency,
         ];
     }
 
@@ -109,10 +141,11 @@ final class QuoteService
                 'value' => $q ? (string) $q->value : null,
                 'display_fa' => $display,
                 'change_pct' => $q?->change_vs_previous_pct,
-                'change_fa' => $q && $q->change_vs_previous_pct !== null ? Digits::toPersian(rtrim(rtrim(number_format((float) abs((float) $q->change_vs_previous_pct), 2, '.', ''), '0'), '.')).'٪' : null,
+                'change_fa' => $q && $q->change_vs_previous_pct !== null ? Digits::percent(number_format(abs((float) $q->change_vs_previous_pct), 2, '.', '')).'٪' : null,
                 'direction' => $q && $q->change_vs_previous_pct !== null ? ((float) $q->change_vs_previous_pct <=> 0) : 0,
                 'freshness' => $this->freshness($q),
                 'fetched_at_fa' => $q ? Jalali::time($q->fetched_at, $tz) : null,
+                'is_emergency' => (bool) $q?->isEmergency,
             ];
         }
         $sell = $this->latest('GOLD_18_SELL');
@@ -125,6 +158,7 @@ final class QuoteService
             'freshness' => $this->freshness($sell),
             'source_fa' => $sell?->source,
             'is_demo' => (bool) $sell?->is_demo,
+            'is_emergency' => (bool) $sell?->isEmergency,
         ];
     }
 }

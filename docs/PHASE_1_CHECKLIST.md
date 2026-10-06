@@ -1,6 +1,6 @@
 # Phase 1 implementation and acceptance checklist
 
-Status (2026-10-06): merchant web app implemented in this repository (Laravel 13 + PostgreSQL, Blade + AJAX); 91 PHP feature/unit tests (889 assertions) and 10 JS parity tests pass locally; visual direction still a proposal awaiting owner approval. Service admin console, Passkey and real SMS/PSP adapters are not built. Check boxes require evidence, not a plan or a mock screenshot.
+Status (2026-10-06): merchant web app and service admin console v1 implemented in this repository (Laravel 13 + PostgreSQL, Blade + AJAX); 144 PHP feature/unit tests (1,549 assertions) and 23 JS parity tests pass locally. Kavenegar SMS and ZarinPal adapters exist and are tested against faked HTTP only (no live send/payment yet). Visual direction: working defaults (palette midnight_gold, Vazirmatn, logo v2) used for production UI at the owner's instruction; formal approval record still open. Check boxes require evidence, not a plan or a mock screenshot.
 
 ## Planning state
 
@@ -22,7 +22,7 @@ Status (2026-10-06): merchant web app implemented in this repository (Laravel 13
 - [x] Owner plan prices, quotas and SMS credit, مظنه/calculator contract and v2 business-type roadmap documented (2026-10-05); reflected in the draft boards.
 - [x] Quotas enforced server-side (Free: 50 invoices and 50 new customers per month, current-month history, 5 free SMS per year; Basic configurable caps; Professional unlimited) with friendly notices.
 - [x] ChatGPT handoff package (`docs/handoff/`), standalone reference HTML for all 68 boards and v1 service-admin boards (12 screens) prepared (2026-10-05).
-- [ ] Service admin console v1 (`/provider/*`): staff passkey auth, roles, dashboard, tenants and manual actions, versioned pricing, payments, SMS, quotes, tax rules, integrations, audit, system health.
+- [x] Service admin console v1 (built at `/admin`, not `/provider`; see `docs/handoff/04_SCREENS_ADMIN.md` «وضعیت پیاده‌سازی»): staff OTP + mandatory passkey (configurable), permission-based roles, step-up re-auth, dashboard with alerts and today's tasks, tenants with filters/CSV and manual actions (plan activation, SMS credit ±, feature overrides, suspension), versioned pricing, payments (inquire, manual confirm, mark failed, monthly CSV), SMS operations, quotes + emergency 18K rate, versioned tax rules, integrations (read-only), staff, audit (activity log), system health. Every dangerous action: permission + recent sign-in + reason + idempotency key + audit.
 - [x] Build package documented: implementation guide, payments/SMS credit contract, SMS purchase and bank-return boards (2026-10-05).
 - [x] 10% VAT on plan and SMS-credit purchases: configurable rate snapshotted per order, base/VAT/payable shown separately, credit equals pre-VAT amount.
 - [x] Billing module with MockGateway: plan purchase, SMS top-up, server-sourced result page, reconcile, receipts; real PSP after owner selection.
@@ -59,7 +59,7 @@ Evidence: `php artisan test` (91 tests on PostgreSQL), `npm run test:js`, Playwr
 - [x] Gold received from the customer (docs/GOLD_RECEIVED_AND_DASHBOARD.md): GOLD_IN rows (old gold, coin, melted + assay ref), GOLD_IN_V1 with buy/sell/manual rate and melting deduction, payable = sales − gold received (customer credit when negative), 750-weight column and gold/money split on print, shared PHP/JS vectors.
 - [x] Affiliate program (docs/AFFILIATE_PROGRAM.md): admin enrolment per mobile, code + referral link, buyer discount, % commission first-payment or lifetime, hold → payable → paid, masked affiliate panel.
 - [x] Real PSP adapter: ZarinPal v4 (`ZarinpalGateway`) behind a PSP registry — switching PSP is one class + one config line; in-flight payments stay with their own gateway; payer-never-returned recovery; faked-HTTP tests. Live sandbox/production payment not yet performed (official docs host blocked from the build environment).
-- [ ] Rest of the service admin console (pricing versions, manual tenant actions, SMS/payment operations). Dashboard + logs are done at `/admin`.
+- [x] Rest of the service admin console (manual tenant actions, SMS/payment operations, quotes, tax rules, staff, system health) — tests in `tests/Feature/AdminOpsTest.php`, screenshots 53–64.
 - [ ] Field performance measurement on throttled networks (bundle sizes measured only at build time).
 - [ ] Independent penetration test and owner approval of visual direction.
 
@@ -84,7 +84,7 @@ Evidence: `php artisan test` (91 tests on PostgreSQL), `npm run test:js`, Playwr
 - [ ] Skip/cancel/unsupported/lost-device flows work; biometrics are never collected by Zarlio; virtual-authenticator evidence is separate from real-device tests.
 - [ ] Permissions, feature flags and atomic quota primitives implemented.
 - [ ] Two demo tenants prove HTTP, relation, cache, job and file isolation.
-- [ ] Provider administration can manage plans/subscriptions/configuration with audit.
+- [x] Provider administration can manage plans/subscriptions/configuration with audit (admin console v1; secrets stay in the server environment).
 
 ## M2 — Pricing
 

@@ -11,6 +11,7 @@ use App\Domain\Sms\SmsService;
 use App\Models\SmsMessage;
 use App\Models\StaffUser;
 use App\Support\Mobile;
+use App\Support\ScheduleMonitor;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
@@ -23,26 +24,8 @@ Artisan::command('talata:payments-reconcile', fn (BillingService $b) => $this->i
 
 Artisan::command('talata:sms-reconcile', function (SmsGateway $gateway, SmsService $sms) {
     $n = 0;
-    // Apply a provider report. FAILED = never charged (refund); UNDELIVERED = charged, keep SENT with the reason.
     $apply = function (SmsMessage $m, string $status, ?string $providerId = null) use ($sms, &$n) {
-        if ($status === 'UNKNOWN') {
-            $m->touch();
-
-            return;
-        }
-        if ($status === 'UNDELIVERED') {
-            if ($m->status !== 'SENT') {
-                $sms->applyOutcome($m, 'SENT', $providerId);
-            }
-            SmsMessage::query()->whereKey($m->id)->update(['last_error' => 'undelivered (provider report)', 'updated_at' => now()]);
-        } elseif ($m->status === 'SENT' && $status === 'FAILED') {
-            SmsMessage::query()->whereKey($m->id)->update(['last_error' => 'failed after send (provider report)', 'updated_at' => now()]);
-        } elseif ($status !== $m->status) {
-            $sms->applyOutcome($m, $status, $providerId);
-        } else {
-            $m->touch();
-        }
-        $n++;
+        $n += $sms->applyProviderReport($m, $status, $providerId) ? 1 : 0;
     };
 
     // 1) Ambiguous sends that have a provider id, and 2) delivery reports for recent SENT messages (batched).
@@ -103,11 +86,12 @@ Artisan::command('talata:logs-prune', function () {
 Artisan::command('talata:affiliate-approve', fn (AffiliateService $a) => $this->info('approved: '.$a->approveDue()))
     ->purpose('Move affiliate commissions past the hold period to payable');
 
-Schedule::command('talata:logs-prune')->dailyAt('03:30');
-Schedule::command('talata:affiliate-approve')->hourlyAt(17)->withoutOverlapping();
-Schedule::command('talata:quotes')->everyThreeMinutes()->withoutOverlapping();
-Schedule::command('talata:payments-reconcile')->everyMinute()->withoutOverlapping();
-Schedule::command('talata:sms-reconcile')->everyMinute()->withoutOverlapping();
-Schedule::command('talata:sms-credit-expire')->everyFiveMinutes()->withoutOverlapping();
-Schedule::command('talata:reminders')->hourlyAt(5)->withoutOverlapping();
-Schedule::command('queue:prune-failed --hours=720')->daily();
+// Each job records its last run for the admin «سلامت سیستم» page (App\Support\ScheduleMonitor).
+ScheduleMonitor::track(Schedule::command('talata:logs-prune')->dailyAt('03:30'), 'logs-prune');
+ScheduleMonitor::track(Schedule::command('talata:affiliate-approve')->hourlyAt(17)->withoutOverlapping(), 'affiliate-approve');
+ScheduleMonitor::track(Schedule::command('talata:quotes')->everyThreeMinutes()->withoutOverlapping(), 'quotes');
+ScheduleMonitor::track(Schedule::command('talata:payments-reconcile')->everyMinute()->withoutOverlapping(), 'payments-reconcile');
+ScheduleMonitor::track(Schedule::command('talata:sms-reconcile')->everyMinute()->withoutOverlapping(), 'sms-reconcile');
+ScheduleMonitor::track(Schedule::command('talata:sms-credit-expire')->everyFiveMinutes()->withoutOverlapping(), 'sms-credit-expire');
+ScheduleMonitor::track(Schedule::command('talata:reminders')->hourlyAt(5)->withoutOverlapping(), 'reminders');
+ScheduleMonitor::track(Schedule::command('queue:prune-failed --hours=720')->daily(), 'failed-prune');

@@ -1,9 +1,8 @@
-@props(['title' => null, 'page' => 'admin'])
+@props(['title' => null, 'page' => 'admin', 'description' => null])
 @php
     $staff = auth('staff')->user();
-    $nav = [['admin.dashboard', 'داشبورد'], ['admin.activity', 'لاگ فعالیت'], ['admin.tenants', 'فروشگاه‌ها'], ['admin.affiliates', 'همکاری در فروش'], ['admin.pricing', 'قیمت‌ها']];
-    if ($staff?->allows('logs.tech')) { $nav[] = ['admin.tech', 'لاگ فنی']; }
-    $nav[] = ['admin.account', 'حساب من'];
+    $nav = $staff ? \App\Support\AdminNav::items($staff) : [];
+    $sample = ! app()->environment('production');
 @endphp
 <!doctype html>
 <html lang="fa" dir="rtl">
@@ -12,23 +11,42 @@
 <meta name="robots" content="noindex, nofollow">
 </head>
 <body data-page="{{ $page }}" class="admin">
-<header class="topbar">
-    <a href="{{ route('admin.dashboard') }}" class="brand">@include('partials.logo')زرلیو <span class="badge warn">مدیریت سامانه</span></a>
-    <div class="grow"></div>
+<a class="skip-link" href="#main">رفتن به محتوا</a>
+<div class="admin-shell">
     @if ($staff)
-        <nav class="topnav admin-nav" aria-label="منوی مدیریت">
-            @foreach ($nav as [$route, $label])
-                <a href="{{ route($route) }}" @if(request()->routeIs($route)) aria-current="page" @endif>{{ $label }}</a>
-            @endforeach
-        </nav>
-        <form method="post" action="{{ route('admin.logout') }}">@csrf<button class="btn sm btn-line" type="submit">خروج {{ $staff->name }}</button></form>
+        <aside class="admin-side" aria-label="منوی مدیریت">
+            <a href="{{ route('admin.dashboard') }}" class="brand">@include('partials.logo')زرلیو</a>
+            <p class="side-sub">مدیریت سرویس · نسخه ۱</p>
+            <nav class="side-nav">
+                @foreach ($nav as $item)
+                    <a href="{{ route($item['route']) }}" @if(request()->routeIs(...$item['match'])) aria-current="page" @endif>
+                        <span>{{ $item['label'] }}</span>
+                        @if ($item['count'] !== null)<span class="side-count {{ $item['alert'] ? 'alert' : '' }}">{{ fa($item['count']) }}</span>@endif
+                    </a>
+                @endforeach
+            </nav>
+            <div class="side-foot">
+                <span><strong>{{ $staff->name }}</strong><span class="side-sub">{{ \App\Models\StaffUser::ROLES[$staff->role] ?? $staff->role }}</span></span>
+                <form method="post" action="{{ route('admin.logout') }}">@csrf<button class="btn sm btn-line-light" type="submit">خروج</button></form>
+            </div>
+        </aside>
     @endif
-</header>
-@include('partials.flash')
-<main id="main" class="main admin-main">
-    @if ($title)<h1>{{ $title }}</h1>@endif
-    {{ $slot }}
-</main>
+    <div class="admin-body">
+        @include('partials.flash')
+        <main id="main" class="main admin-main">
+            @if ($title)
+                <header class="page-head">
+                    <div>
+                        <h1>{{ $title }} @if($sample)<span class="badge warn">محیط آزمایشی · داده نمونه</span>@endif</h1>
+                        @if ($description)<p class="small muted">{{ $description }}</p>@endif
+                    </div>
+                    @isset($actions)<div class="page-actions">{{ $actions }}</div>@endisset
+                </header>
+            @endif
+            {{ $slot }}
+        </main>
+    </div>
+</div>
 <div class="toasts" aria-live="polite"></div>
 </body>
 </html>

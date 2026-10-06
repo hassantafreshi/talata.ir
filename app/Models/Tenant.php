@@ -11,7 +11,12 @@ class Tenant extends Model
 {
     use HasPublicId;
 
-    protected $fillable = ['timezone', 'status'];
+    protected $fillable = ['timezone', 'status', 'suspended_at', 'suspension_reason'];
+
+    protected function casts(): array
+    {
+        return ['suspended_at' => 'datetime'];
+    }
 
     public function profile(): HasOne
     {

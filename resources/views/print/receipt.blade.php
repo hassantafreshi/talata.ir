@@ -23,7 +23,7 @@
         <thead><tr><th scope="col">شرح</th><th class="n" scope="col">مبلغ (تومان)</th></tr></thead>
         <tbody>
             <tr><td>{{ $order->product === 'PLAN' ? 'پلن '.($order->price_snapshot['plan_label_fa'] ?? $order->plan_code).' '.($order->period === 'yearly' ? 'سالانه' : 'ماهانه') : 'اعتبار پیامک' }}</td><td class="n">{{ toman($order->subtotal_irr) }}</td></tr>
-            <tr><td>مالیات بر ارزش افزوده {{ fa(rtrim(rtrim((string) $order->vat_rate_percent, '0'), '.')) }}٪</td><td class="n">{{ toman($order->vat_irr) }}</td></tr>
+            <tr><td>مالیات بر ارزش افزوده {{ pct($order->vat_rate_percent) }}٪</td><td class="n">{{ toman($order->vat_irr) }}</td></tr>
             <tr><td><strong>جمع پرداختی</strong></td><td class="n"><strong>{{ toman($order->amount_irr) }}</strong></td></tr>
         </tbody>
     </table>

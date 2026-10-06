@@ -1,6 +1,6 @@
 @php
     $a = $affiliate;
-    $pct = fn ($v) => fa(rtrim(rtrim((string) $v, '0'), '.'));
+    $pct = fn ($v) => pct($v);
 @endphp
 <x-layouts.app title="همکاری در فروش" page="affiliate" :back="route('settings')">
     @php $bootData = ['link' => $a->link(), 'code' => $a->code]; @endphp

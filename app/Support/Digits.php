@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Brick\Math\BigDecimal;
+
 /** Normalizes Persian/Arabic-Indic digits and separators so user input in any keyboard layout is accepted. */
 final class Digits
 {
@@ -47,5 +49,13 @@ final class Digits
         }
 
         return self::toPersian(preg_replace('/(\p{L}+)(?=[^\p{L}]|$)/u', "$1\u{200E}", $number));
+    }
+
+    /** Decimal percentage → Persian digits without trailing zeros ("10.5000" → "۱۰٫۵", "10" → "۱۰"). */
+    public static function percent(string|int|float|null $value): string
+    {
+        $v = (string) BigDecimal::of(is_float($value) ? number_format($value, 4, '.', '') : (string) ($value ?? '0'))->strippedOfTrailingZeros();
+
+        return self::toPersian(str_replace('.', '٫', $v));
     }
 }

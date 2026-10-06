@@ -39,6 +39,8 @@ return [
         // need a sign-in within this many minutes (step-up re-auth).
         'reauth_minutes' => (int) env('TALATA_ADMIN_REAUTH_MINUTES', 15),
         'allowed_ips' => env('TALATA_ADMIN_ALLOWED_IPS'),   // comma list; empty = any IP (OTP/passkey still required)
+        // Staff must add a passkey before using anything but the dashboard and «حساب من» (A-00).
+        'require_passkey' => (bool) env('TALATA_ADMIN_REQUIRE_PASSKEY', true),
     ],
 
     // Affiliate program (همکاری در فروش). Assumptions documented in docs/AFFILIATE_PROGRAM.md.
@@ -53,6 +55,13 @@ return [
 
     'logs' => [
         'tech_retention_days' => (int) env('TALATA_TECH_LOG_DAYS', 90),
+    ],
+
+    // Operations facts shown on the admin «سلامت سیستم» page (docs/DEPLOYMENT.md).
+    'ops' => [
+        'release' => env('TALATA_RELEASE', 'dev'),                          // set by the deploy script (e.g. git short hash)
+        'backup_heartbeat_file' => env('TALATA_BACKUP_HEARTBEAT_FILE'),     // touched by the DB backup script after success
+        'restore_drill_file' => env('TALATA_RESTORE_DRILL_FILE'),           // touched after a successful restore drill
     ],
 
     'otp' => [

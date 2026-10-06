@@ -2,6 +2,29 @@
 
 Desktop-first (1280 px; must remain usable at 1024 px; mobile not required in v1). Area `/provider/*`, separate guard, chunk `provider`, never imported by merchant routes. Boards: `Provider`, `AdminTenants`, `AdminTenantDetail`, `AdminPlans`, `AdminPayments`, `AdminSms`, `AdminQuotes`, `AdminTax`, `AdminIntegrations`, `AdminStaff`, `AdminAudit`, `AdminSystem`.
 
+## وضعیت پیاده‌سازی (Implementation status, 2026-10-06)
+
+Built in this repository at **`/admin`** (not `/provider`): own session cookie scoped to `/admin`, `staff` guard, `routes/admin.php`, controllers in `app/Http/Controllers/Admin/`, views in `resources/views/admin/`, tests in `tests/Feature/AdminOpsTest.php`, `AdminConsoleTest.php`, `AdminPricingTest.php`. Screenshots: `docs/screenshots/app/53–64-admin-*.png`.
+
+| Screen | Route | Status and deviations |
+|---|---|---|
+| A-00 shell | all | Dark right sidebar with counters (payments needing review, SMS alerts, shops), page header with «محیط آزمایشی · داده نمونه» outside production. OTP + **mandatory passkey** (`TALATA_ADMIN_REQUIRE_PASSKEY`, default on: without a passkey only the dashboard and «حساب من» open). Idle timeout 30 min, session 120 min. Step-up: dangerous routes use `staff:<permission>,fresh` = sign-in within `TALATA_ADMIN_REAUTH_MINUTES` (default 15, OTP **or** passkey). |
+| Roles | — | admin (مالک سرویس), finance, ops, support; permissions in `StaffUser::PERMISSIONS`; every write route checks a permission, never a role name. |
+| A-01 | `/admin` | Tiles, status row, «هشدارهای باز», «کارهای امروز», technical errors (no charts). |
+| A-02 | `/admin/tenants` | Search (name, business mobile, order ref, verification token, id), plan/status/quota/period filters, quick views, usage columns, CSV (`tenants.export`, formula-safe cells). |
+| A-03 | `/admin/tenants/{id}` | Summary, plan history, payments, SMS credit lots/ledger, feature overrides, users, recent events, settings backups, manual actions: plan activation (`BillingService::manualActivation`, same fulfilment, `activated_by=PROVIDER`), SMS credit ± (never below zero), feature override with expiry (always-on مظنه/calculator/print excluded), suspend/unsuspend (merchant panel blocked, public verification unaffected). |
+| A-04 | `/admin/pricing` | Prices only (see `docs/ADMIN_PRICING.md`); the quota/capability matrix and VAT rate are edited through a new pricing version, not this page, in v1. |
+| A-05 | `/admin/payments` | Tiles, filters, detail with attempts and redacted raw answer, «استعلام دوباره از بانک», «ثبت تأیید دستی…», «علامت ناموفق…», monthly finance CSV (`payments.export`). |
+| A-06 | `/admin/sms` | Tiles, needs-review/queued/all, masked recipients, no bodies, provider inquiry, test SMS to own number (3/hour). Segment/OTP/template settings shown read-only (server config). |
+| A-07 | `/admin/quotes` | Feed status per asset, fetch log, «دریافت دوباره الان», emergency 18K sell rate (30 min / 1 h / 4 h / until cancelled, >20% typo guard, reason, cancel); merchants see «نرخ اعلامی زرلیو (دستی)», invoices record `rate_source=EMERGENCY`. |
+| A-08 | `/admin/tax-rules` | Versioned table with usage counts; new versions only future-dated (Tehran midnight) for GOLD_SERVICES; scheduled versions can be disabled; started versions immutable; all labelled «نمونه» until an expert confirms. |
+| A-09 | `/admin/integrations` | Read-only: secrets live only in the server environment and are shown as «تنظیم‌شده / تنظیم نشده». |
+| A-10 | `/admin/staff` | Staff list, invite, edit role/active (no self-change, last admin protected), permission matrix. Deactivation applies on the next request. |
+| A-11 | `/admin/activity` | Activity log (append-only, DB trigger) with filters; technical log at `/admin/tech` (`logs.tech`). |
+| A-12 | `/admin/system` | Queue lag, failed jobs + retry, SMS outbox, scheduler last runs (`App\Support\ScheduleMonitor`), backup/restore-drill heartbeat files, version/env, pending migrations. |
+
+Every dangerous action carries a reason, a confirmation dialog that repeats the effect, a permission, a recent sign-in, an idempotency key (`admin_actions`, applied once) and an audit entry with the staff actor.
+
 ## A-00 Shell, access and privacy rules
 
 - Dark right sidebar (232 px): logo, «مدیریت سرویس · نسخه ۱», items with counters: «داشبورد», «فروشگاه‌ها ({n})», «پلن‌ها و قیمت‌ها», «پرداخت‌ها ({needs action})», «پیامک ({alerts})», «نرخ و مظنه», «قواعد مالیات», «اتصال‌ها», «کارکنان و دسترسی», «سوابق (audit)», «سلامت سیستم»; footer with staff name, role, «خروج».

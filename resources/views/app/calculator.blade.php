@@ -6,7 +6,7 @@
         <form class="band stack" data-calc novalidate>
             <div class="field"><label for="c-rate">نرخ هر گرم طلای ۱۸ عیار</label>
                 <div class="input-wrap ltr-input"><input id="c-rate" name="rate" inputmode="numeric" value="{{ $quote['value_toman_fa'] }}" data-digits><span class="unit">تومان</span></div><div class="err"></div>
-                <p class="hint" data-rate-hint>@if($quote['value_irr'])از مظنه فروش · دریافت {{ $quote['fetched_at_fa'] }}@if($quote['is_demo']) · عدد نمونه@endif @else نرخ بازار در دسترس نیست؛ نرخ را وارد کنید.@endif</p></div>
+                <p class="hint" data-rate-hint>@if($quote['value_irr'])از مظنه فروش · دریافت {{ $quote['fetched_at_fa'] }}@if($quote['is_demo']) · عدد نمونه@endif @if($quote['is_emergency'] ?? false) · نرخ اعلامی زرلیو (دستی)@endif @else نرخ بازار در دسترس نیست؛ نرخ را وارد کنید.@endif</p></div>
             <div class="field"><label for="c-weight">وزن خالص طلا</label><div class="input-wrap ltr-input"><input id="c-weight" name="weight" inputmode="decimal" placeholder="۰" autofocus><span class="unit">گرم</span></div><div class="err"></div></div>
             <fieldset class="field"><legend class="label">عیار</legend>
                 <div class="chips purity-chips" data-purity>

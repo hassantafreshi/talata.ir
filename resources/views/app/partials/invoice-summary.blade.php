@@ -41,7 +41,7 @@
     <div class="row-total"><span>{{ ($v['payable_label'] ?? 'قابل پرداخت') === 'قابل پرداخت' ? 'مبلغ قابل پرداخت' : $v['payable_label'] }}</span><strong class="num">{{ $v['payable_fa'] }} تومان</strong></div>
     <p class="xs muted">
         صدور: {{ $v['issued_fa'] }} @if($v['issuer'])· صادرکننده: {{ $v['issuer'] }}@endif
-        @if ($v['rate_fa']) · نرخ ۱۸ عیار: {{ $v['rate_fa'] }} تومان @if($v['rate_manual'])(نرخ دستی: {{ $v['rate_reason_fa'] }})@endif @endif
+        @if ($v['rate_fa']) · نرخ ۱۸ عیار: {{ $v['rate_fa'] }} تومان @if($v['rate_manual'])(نرخ دستی: {{ $v['rate_reason_fa'] }})@elseif($v['rate_emergency'] ?? false)(نرخ اعلامی زرلیو)@endif @endif
         @if ($v['tax_sample']) · نرخ مالیات نمونه است و باید با مشاور تأیید شود @endif
     </p>
 </section>

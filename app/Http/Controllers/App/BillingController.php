@@ -87,7 +87,7 @@ class BillingController extends BaseController
 
         return response()->json([
             'code' => $code, 'applied' => $discount !== '0',
-            'message_fa' => $discount !== '0' ? 'کد '.$code.' اعمال شد: '.Digits::toPersian(rtrim(rtrim((string) $affiliate->discount_percent, '0'), '.')).'٪ تخفیف روی خرید اول پلن.'
+            'message_fa' => $discount !== '0' ? 'کد '.$code.' اعمال شد: '.Digits::percent($affiliate->discount_percent).'٪ تخفیف روی خرید اول پلن.'
                 : ($code ? 'کد معرف ثبت شد؛ تخفیف فقط روی خرید اول پلن است.' : null),
             'list_fa' => Money::toman($list), 'discount_fa' => Money::toman($discount), 'subtotal_fa' => Money::toman($sub),
             'vat_fa' => Money::toman($vat), 'total_fa' => Money::toman((string) BigInteger::of($sub)->plus($vat)),

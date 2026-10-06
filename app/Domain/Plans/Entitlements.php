@@ -26,6 +26,24 @@ final class Entitlements
         'links_per_month' => 'لینک فاکتور',
     ];
 
+    /** Capabilities staff may override per shop (with expiry). Always-on entries (مظنه, calculator, printing) are not listed. */
+    public const OVERRIDABLE_FA = [
+        'invoice.finalize' => 'صدور فاکتور',
+        'invoice.sms_share' => 'ارسال پیامکی فاکتور',
+        'invoice.customize' => 'شخصی‌سازی فاکتور',
+        'invoice.shop_logo' => 'لوگوی فروشگاه روی فاکتور',
+        'invoice.hide_provider_brand' => 'حذف نام زرلیو از پای فاکتور',
+        'customers.manage' => 'مدیریت مشتریان',
+        'installments.manage' => 'اقساط',
+        'installments.sms_remind' => 'یادآوری پیامکی قسط',
+        'history.all' => 'دسترسی به سوابق ماه‌های قبل',
+        'reports.financial' => 'گزارش مالی',
+        'dashboard.view' => 'داشبورد فروش',
+        'settings.backup' => 'پشتیبان تنظیمات',
+        'sms.template_edit' => 'ویرایش متن پیامک فاکتور',
+        'team.permissions_edit' => 'تعیین دسترسی همکاران',
+    ];
+
     public function __construct(private readonly CommercialConfig $config) {}
 
     public function subscription(Tenant $tenant): ?Subscription

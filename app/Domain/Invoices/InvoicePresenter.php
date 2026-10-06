@@ -73,6 +73,7 @@ final class InvoicePresenter
             'rate_fa' => $s['rate']['value_irr'] ? Money::toman($s['rate']['value_irr']) : null,
             'rate_time_fa' => $s['rate']['fetched_at'] ? Jalali::time(CarbonImmutable::parse($s['rate']['fetched_at']), $tz) : null,
             'rate_manual' => $s['rate']['mode'] === 'MANUAL',
+            'rate_emergency' => ($s['rate']['source'] ?? null) === 'EMERGENCY',
             'rate_reason_fa' => self::RATE_REASONS[$s['rate']['manual_reason'] ?? ''] ?? null,
             'tax_rate_fa' => Digits::toPersian((string) BigDecimal::of($s['tax']['rate_percent'])->strippedOfTrailingZeros()),
             'tax_sample' => (bool) ($s['tax']['is_sample'] ?? true),

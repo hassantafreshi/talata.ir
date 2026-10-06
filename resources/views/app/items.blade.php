@@ -30,7 +30,7 @@
     <script type="application/json" id="boot">@json($boot)</script>
     <div class="between small"><span class="muted" data-save-state role="status">پیش‌نویس ذخیره شد</span>
         @if ($invoice->rate_mode !== 'NONE')
-            <span>نرخ معامله: <strong class="num" data-rate>{{ toman($invoice->accepted_rate_irr) }}</strong> تومان/گرم ۱۸ عیار @if($invoice->rate_mode === 'MANUAL')<span class="badge warn">نرخ دستی</span>@endif</span>
+            <span>نرخ معامله: <strong class="num" data-rate>{{ toman($invoice->accepted_rate_irr) }}</strong> تومان/گرم ۱۸ عیار @if($invoice->rate_mode === 'MANUAL')<span class="badge warn">نرخ دستی</span>@elseif($invoice->rate_source === 'EMERGENCY')<span class="badge warn">نرخ اعلامی زرلیو</span>@endif</span>
         @else
             <span class="badge info">فاکتور فقط متفرقه</span>
         @endif

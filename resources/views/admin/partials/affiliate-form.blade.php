@@ -1,5 +1,5 @@
 {{-- Shared enrol/edit form. $a = existing affiliate or null. --}}
-@php $pct = fn ($v) => rtrim(rtrim((string) $v, '0'), '.'); @endphp
+@php $pct = fn ($v) => (string) \Brick\Math\BigDecimal::of((string) $v)->strippedOfTrailingZeros(); @endphp
 <form class="filters band" data-affiliate-form data-url="{{ $a ? route('admin.affiliates.update', $a->id) : route('admin.affiliates.store') }}" data-method="{{ $a ? 'PUT' : 'POST' }}" novalidate>
     @unless ($a)
         <label class="small field">موبایل کاربر (باید پنل فروشگاه داشته باشد)<input name="mobile" inputmode="tel" dir="ltr" required><span class="err"></span></label>

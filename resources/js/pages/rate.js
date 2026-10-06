@@ -17,6 +17,10 @@ export default function () {
     quote = q;
     priceEl.textContent = q.value_toman_fa ?? '—';
     timeEl.textContent = q.fetched_at_fa ?? '—';
+    const em = hero.querySelector('[data-emergency]');
+    if (em) em.hidden = !q.is_emergency;
+    const src = hero.querySelector('[data-source]');
+    if (src && q.source_fa) src.textContent = q.source_fa;
     const map = { FRESH: ['ok', 'به‌روز'], STALE: ['warn', 'قدیمی'], ERROR: ['err', 'خطا'] };
     const [kind, label] = navigator.onLine ? (map[q.freshness] || ['off', '—']) : ['off', 'آفلاین'];
     badge.className = `badge ${kind}`; badge.textContent = label;

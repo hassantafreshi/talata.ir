@@ -3,12 +3,14 @@
 namespace App\Domain\Sms;
 
 use App\Domain\Audit\Audit;
+use App\Domain\DomainError;
 use App\Models\BillingOrder;
 use App\Models\SmsCreditEntry;
 use App\Models\SmsCreditLot;
 use App\Models\SmsMessage;
 use App\Models\Tenant;
 use App\Support\Jalali;
+use App\Support\Money;
 use Brick\Math\BigInteger;
 use Illuminate\Support\Facades\DB;
 
@@ -101,6 +103,53 @@ final class SmsCredit
         $this->entry($order->tenant_id, $lot->id, 'CREDIT', $order->subtotal_irr, null);
 
         return $lot;
+    }
+
+    /**
+     * Provider adjustment recorded by staff with a reason (compensation, correction, goodwill).
+     * Positive: a PROVIDER_ADJUST lot (month-end expiry unless it carries over). Negative: taken from
+     * the soonest-expiring lots; the balance never goes below zero. Caller holds the tenant row lock.
+     *
+     * @return array{balance_irr:string,lots:list<int>}
+     */
+    public function adjust(Tenant $tenant, string $amountIrr, bool $carriesOver, string $note, int $staffId, string $planCode): array
+    {
+        $amount = BigInteger::of($amountIrr);
+        if ($amount->isZero()) {
+            throw new DomainError('AMOUNT_ZERO', 'مبلغ تغییر اعتبار نمی‌تواند صفر باشد.', 422);
+        }
+        $lots = [];
+        if ($amount->isPositive()) {
+            $lot = SmsCreditLot::withoutGlobalScope('tenant')->create([
+                'tenant_id' => $tenant->id, 'source' => 'PROVIDER_ADJUST', 'amount_irr' => (string) $amount, 'remaining_irr' => (string) $amount,
+                'carries_over' => $carriesOver, 'expires_at' => $carriesOver ? null : Jalali::monthBounds(now(), $tenant->timezone)[1],
+                'plan_at_purchase' => $planCode, 'created_by_staff' => $staffId, 'note' => mb_substr($note, 0, 250),
+            ]);
+            $this->entry($tenant->id, $lot->id, 'ADJUST', (string) $amount, null);
+            $lots[] = $lot->id;
+        } else {
+            $need = $amount->negated();
+            $open = SmsCreditLot::withoutGlobalScope('tenant')->where('tenant_id', $tenant->id)
+                ->where('remaining_irr', '>', 0)->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+                ->orderByRaw('expires_at IS NULL, expires_at ASC, id ASC')->lockForUpdate()->get();
+            $available = $open->reduce(fn ($c, $l) => $c->plus($l->remaining_irr), BigInteger::zero());
+            if ($available->isLessThan($need)) {
+                throw new DomainError('CREDIT_INSUFFICIENT', 'اعتبار فعلی این فروشگاه '.Money::toman((string) $available).' تومان است؛ بیش از آن کسر نمی‌شود.', 422);
+            }
+            foreach ($open as $lot) {
+                if ($need->isZero()) {
+                    break;
+                }
+                $take = BigInteger::min($need, BigInteger::of($lot->remaining_irr));
+                $lot->remaining_irr = (string) BigInteger::of($lot->remaining_irr)->minus($take);
+                $lot->save();
+                $this->entry($tenant->id, $lot->id, 'ADJUST', (string) $take->negated(), null);
+                $lots[] = $lot->id;
+                $need = $need->minus($take);
+            }
+        }
+
+        return ['balance_irr' => $this->balance($tenant->id), 'lots' => $lots];
     }
 
     /** Month-end expiry of non-carry-over credit (Free plan purchases). */

@@ -11,7 +11,7 @@ class FeatureOverride extends Model
 
     protected $table = 'feature_overrides';
 
-    protected $fillable = ['key', 'value', 'expires_at', 'reason'];
+    protected $fillable = ['tenant_id', 'key', 'value', 'expires_at', 'reason', 'created_by_staff'];
 
     protected function casts(): array
     {

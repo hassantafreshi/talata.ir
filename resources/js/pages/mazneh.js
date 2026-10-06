@@ -12,6 +12,8 @@ export default function () {
       const c = document.querySelector(`[data-chg="${asset}"]`);
       if (c) c.textContent = row.change_fa ? `${row.direction > 0 ? '+ ' : row.direction < 0 ? '− ' : ''}${row.change_fa} از دریافت قبلی` : 'بدون تغییر';
     }
+    const em = document.querySelector('[data-emergency]');
+    if (em) em.hidden = !b.rows.GOLD_18_SELL?.is_emergency;
     document.querySelector('[data-spread]').textContent = b.spread_fa ?? '—';
     document.querySelector('[data-time]').textContent = b.fetched_at_fa ?? '—';
     const [kind, label] = navigator.onLine ? (BADGE[b.freshness] || ['off', '—']) : ['off', 'آفلاین'];

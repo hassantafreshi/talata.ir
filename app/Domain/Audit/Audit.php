@@ -20,11 +20,12 @@ final class Audit
         'auth' => 'auth', 'passkey' => 'auth', 'invoice' => 'invoices', 'sms' => 'sms', 'sms_credit' => 'sms',
         'billing' => 'billing', 'customer' => 'customers', 'installment' => 'customers', 'membership' => 'team',
         'profile' => 'settings', 'layout' => 'settings', 'tenant' => 'tenants', 'admin' => 'admin', 'affiliate' => 'affiliate', 'pricing' => 'admin',
+        'quotes' => 'market', 'tax' => 'admin', 'system' => 'admin',
     ];
 
     public const SERVICE_LABELS = [
         'auth' => 'ورود و امنیت', 'invoices' => 'فاکتور', 'sms' => 'پیامک', 'billing' => 'پرداخت', 'customers' => 'مشتری و اقساط',
-        'team' => 'کاربران فروشگاه', 'settings' => 'تنظیمات', 'tenants' => 'فروشگاه', 'admin' => 'مدیریت', 'affiliate' => 'همکاری در فروش', 'app' => 'سایر',
+        'team' => 'کاربران فروشگاه', 'settings' => 'تنظیمات', 'tenants' => 'فروشگاه', 'admin' => 'مدیریت', 'affiliate' => 'همکاری در فروش', 'market' => 'نرخ و مظنه', 'app' => 'سایر',
     ];
 
     public static function serviceFor(string $event): string

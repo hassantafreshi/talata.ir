@@ -225,6 +225,34 @@ final class SmsService
         });
     }
 
+    /**
+     * Applies a provider status report (reconcile job and the admin «استعلام»). FAILED = never charged
+     * (refund); UNDELIVERED = charged but not delivered (stays SENT with the reason). Returns false when
+     * the provider does not know yet (UNKNOWN).
+     */
+    public function applyProviderReport(SmsMessage $m, string $status, ?string $providerId = null): bool
+    {
+        if ($status === 'UNKNOWN') {
+            $m->touch();
+
+            return false;
+        }
+        if ($status === 'UNDELIVERED') {
+            if ($m->status !== 'SENT') {
+                $this->applyOutcome($m, 'SENT', $providerId);
+            }
+            SmsMessage::query()->whereKey($m->id)->update(['last_error' => 'undelivered (provider report)', 'updated_at' => now()]);
+        } elseif ($m->status === 'SENT' && $status === 'FAILED') {
+            SmsMessage::query()->whereKey($m->id)->update(['last_error' => 'failed after send (provider report)', 'updated_at' => now()]);
+        } elseif ($status !== $m->status) {
+            $this->applyOutcome($m, $status, $providerId);
+        } else {
+            $m->touch();
+        }
+
+        return true;
+    }
+
     /** Applies a provider outcome; releases credit on definite failure, captures on success. */
     public function applyOutcome(SmsMessage $message, string $status, ?string $providerId = null, ?string $error = null): void
     {

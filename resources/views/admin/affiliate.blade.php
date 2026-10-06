@@ -50,7 +50,7 @@
         @forelse ($commissions as $c)
             @php [$label, $kind] = \App\Models\AffiliateCommission::STATUS_FA[$c->status]; @endphp
             <tr><td class="n">{{ jdate($c->created_at) }}</td><td class="mono">{{ $orders[$c->order_id] ?? $c->order_id }}</td><td class="mono">{{ \App\Support\Mobile::display($c->referral?->buyer_mobile) }}</td>
-                <td class="n">{{ toman($c->base_irr) }}</td><td>{{ fa(rtrim(rtrim($c->percent, '0'), '.')) }}٪</td><td class="n"><strong>{{ toman($c->amount_irr) }}</strong></td>
+                <td class="n">{{ toman($c->base_irr) }}</td><td>{{ pct($c->percent) }}٪</td><td class="n"><strong>{{ toman($c->amount_irr) }}</strong></td>
                 <td><span class="badge {{ $kind }}">{{ $label }}</span>@if($c->void_reason)<div class="xs muted">{{ $c->void_reason }}</div>@endif</td>
                 <td>@if ($isAdmin && in_array($c->status, ['PENDING', 'APPROVED'], true))<button type="button" class="btn btn-link sm" data-void="{{ route('admin.affiliates.void', $c->id) }}">لغو</button>@endif</td></tr>
         @empty

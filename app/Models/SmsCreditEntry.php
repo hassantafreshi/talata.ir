@@ -13,4 +13,9 @@ class SmsCreditEntry extends Model
     public $timestamps = false;
 
     protected $fillable = ['tenant_id', 'lot_id', 'type', 'amount_irr', 'sms_message_id', 'segments', 'per_segment_irr', 'created_at'];
+
+    protected function casts(): array
+    {
+        return ['created_at' => 'datetime', 'amount_irr' => 'string'];
+    }
 }

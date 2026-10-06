@@ -20,6 +20,14 @@ if (! function_exists('fa')) {
     }
 }
 
+if (! function_exists('pct')) {
+    /** Percentage number for display without trailing zeros: "10.5000" → "۱۰٫۵", "10" → "۱۰" (never "۱"). */
+    function pct(string|int|float|null $value): string
+    {
+        return Digits::percent($value);
+    }
+}
+
 if (! function_exists('jdate')) {
     function jdate(?DateTimeInterface $at, bool $time = false, ?string $tz = null): string
     {

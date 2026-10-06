@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Passkey;
 use App\Models\StaffUser;
 use Closure;
 use Illuminate\Http\Request;
@@ -34,6 +35,15 @@ class RequireStaff
         }
         if ($role === 'admin' ? ! $staff->isAdmin() : ($role !== null && ! $staff->allows($role))) {
             return $request->expectsJson() ? response()->json(['code' => 'STAFF_FORBIDDEN', 'message_fa' => 'نقش شما اجازه این کار را ندارد.'], 403) : abort(403);
+        }
+        // Mandatory passkey: without one, only the dashboard and «حساب من» (to add it) are usable.
+        if (config('talata.admin.require_passkey') && ! $request->routeIs('admin.dashboard', 'admin.account', 'admin.account.*', 'admin.logout')
+            && ! Passkey::query()->where('owner_type', 'staff')->where('owner_id', $staff->id)->exists()) {
+            $message = 'برای کار با کنسول مدیریت، اول در «حساب من» کلید عبور (اثر انگشت یا قفل دستگاه) اضافه کنید.';
+
+            return $request->expectsJson()
+                ? response()->json(['code' => 'PASSKEY_REQUIRED', 'message_fa' => $message], 403)
+                : redirect()->route('admin.account')->with('error', $message);
         }
         if ($fresh === 'fresh') {
             $authAt = (int) $request->session()->get('staff.auth_at', 0);

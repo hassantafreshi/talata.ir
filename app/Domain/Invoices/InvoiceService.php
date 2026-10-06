@@ -56,6 +56,7 @@ final class InvoiceService
         $buyValue = null;
         $fetchedAt = null;
         $reason = null;
+        $source = null;
         if ($mode === 'MARKET') {
             $latest = $this->quotes->latest('GOLD_18_SELL');
             if (! $latest || $this->quotes->freshness($latest) === 'ERROR') {
@@ -69,6 +70,7 @@ final class InvoiceService
             }
             $value = $latestValue;
             $fetchedAt = $latest->fetched_at;
+            $source = $latest->isEmergency ? 'EMERGENCY' : 'FEED';
             $buyValue = $this->latestBuyRate();
         } elseif ($mode === 'MANUAL') {
             $value = Money::parseTomanToIrr((string) ($rate['value_toman'] ?? ''));
@@ -78,10 +80,10 @@ final class InvoiceService
             }
         }
 
-        return DB::transaction(function () use ($user, $mode, $value, $buyValue, $fetchedAt, $reason) {
+        return DB::transaction(function () use ($user, $mode, $value, $buyValue, $fetchedAt, $reason, $source) {
             $invoice = Invoice::create([
                 'status' => 'draft', 'rate_mode' => $mode, 'accepted_rate_irr' => $value, 'accepted_buy_rate_irr' => $buyValue, 'rate_fetched_at' => $fetchedAt,
-                'rate_manual_reason' => $reason, 'created_by' => $user->id, 'version' => 1,
+                'rate_manual_reason' => $reason, 'rate_source' => $source, 'created_by' => $user->id, 'version' => 1,
             ]);
             InvoiceItem::create($this->calculator->normalizeRow(
                 $mode === 'NONE' ? ['item_type' => 'MISC'] : ['item_type' => 'GOLD', 'name' => 'طلای ۱۸ عیار', 'purity_ppt' => '750'], 1,
@@ -112,6 +114,7 @@ final class InvoiceService
                     $invoice->rate_mode = 'MARKET';
                     $invoice->accepted_rate_irr = (string) BigDecimal::of($latest->value)->toScale(0, RoundingMode::HalfUp);
                     $invoice->rate_fetched_at = $latest->fetched_at;
+                    $invoice->rate_source = $latest->isEmergency ? 'EMERGENCY' : 'FEED';
                     $invoice->rate_manual_reason = null;
                     $invoice->accepted_buy_rate_irr = $this->latestBuyRate();
                 }
@@ -331,6 +334,7 @@ final class InvoiceService
             'rate' => [
                 'mode' => $invoice->rate_mode, 'value_irr' => $invoice->accepted_rate_irr, 'buy_value_irr' => $invoice->accepted_buy_rate_irr,
                 'fetched_at' => $invoice->rate_fetched_at?->toIso8601String(), 'manual_reason' => $invoice->rate_manual_reason,
+                'source' => $invoice->rate_mode === 'MARKET' ? ($invoice->rate_source ?? 'FEED') : null,
             ],
             'tax' => ['category' => 'GOLD_SERVICES', 'rule_id' => $rule->id, 'version' => $rule->version, 'rate_percent' => (string) $rule->rate_percent, 'is_sample' => (bool) $rule->is_sample],
             'rounding_policy' => 'IRR_LINE_HALF_UP_V1',

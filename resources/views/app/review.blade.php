@@ -56,7 +56,7 @@
         <div class="row-total"><span>{{ $state['totals']['customer_credit'] ? 'مانده به نفع مشتری' : 'مبلغ قابل پرداخت' }}</span><strong class="num">{{ $state['totals']['payable_abs_fa'] }} تومان</strong></div>
         @if ($state['totals']['customer_credit'])<p class="notice warn small">ارزش طلای دریافتی از جمع فروش بیشتر است. این مبلغ را باید به مشتری بپردازید.</p>@endif
         @if ($invoice->rate_mode !== 'NONE')
-            <p class="xs muted">نرخ معامله: {{ toman($invoice->accepted_rate_irr) }} تومان/گرم ۱۸ عیار @if($invoice->rate_mode === 'MANUAL')(نرخ دستی)@endif · مبالغ به تومان · محاسبه نهایی سرور</p>
+            <p class="xs muted">نرخ معامله: {{ toman($invoice->accepted_rate_irr) }} تومان/گرم ۱۸ عیار @if($invoice->rate_mode === 'MANUAL')(نرخ دستی)@elseif($invoice->rate_source === 'EMERGENCY')(نرخ اعلامی زرلیو)@endif · مبالغ به تومان · محاسبه نهایی سرور</p>
         @endif
     </section>
 

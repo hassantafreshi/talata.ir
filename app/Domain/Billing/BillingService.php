@@ -10,13 +10,16 @@ use App\Domain\Plans\Entitlements;
 use App\Domain\Sms\SmsCredit;
 use App\Models\BillingOrder;
 use App\Models\PaymentAttempt;
+use App\Models\StaffUser;
 use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Support\Jalali;
 use App\Support\Money;
 use App\Support\TechLog;
+use Brick\Math\BigDecimal;
 use Brick\Math\BigInteger;
+use Brick\Math\RoundingMode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -34,6 +37,7 @@ final class BillingService
         '-11' => 'پرداخت تأیید نشد',
         'AMOUNT_MISMATCH' => 'مبلغ تأییدشده بانک با سفارش یکسان نبود',
         'EXPIRED' => 'مهلت پرداخت تمام شد',
+        'MANUAL_FAILED' => 'ناموفق به تشخیص مالی (پرداختی انجام نشده بود)',
     ] + Gateways\ZarinpalGateway::CODES_FA;
 
     public function __construct(
@@ -307,7 +311,8 @@ final class BillingService
         $ends = ($order->period === 'yearly' ? $start->copy()->addYear() : $start->copy()->addMonth())->addDays($carry);
         Subscription::withoutGlobalScope('tenant')->create([
             'tenant_id' => $tenant->id, 'plan_code' => $order->plan_code, 'period' => $order->period, 'starts_at' => now(),
-            'ends_at' => $ends, 'carry_over_days' => $carry, 'activated_by' => 'PAYMENT', 'source_order_id' => $order->id, 'status' => 'active',
+            'ends_at' => $ends, 'carry_over_days' => $carry, 'activated_by' => $order->channel === 'MANUAL' ? 'PROVIDER' : 'PAYMENT',
+            'source_order_id' => $order->id, 'status' => 'active',
         ]);
         app(CommercialConfig::class)->forget();
     }
@@ -374,6 +379,119 @@ final class BillingService
             });
 
         return $done;
+    }
+
+    /**
+     * Finance records a plan paid outside the gateway (bank transfer, POS, card-to-card). It becomes an
+     * order on the MANUAL channel and then runs the same fulfilment as an online payment (subscription
+     * activated_by=PROVIDER; any affiliate commission on the actual base). The received amount (VAT
+     * included) is split back into base + VAT for the finance export; 0 = complimentary.
+     */
+    public function manualActivation(Tenant $tenant, StaffUser $staff, string $planCode, string $period, string $receivedIrr, string $reference, string $reason): BillingOrder
+    {
+        if (! in_array($planCode, ['basic', 'professional'], true) || ! in_array($period, ['monthly', 'yearly'], true)) {
+            throw new DomainError('PLAN_INVALID', 'پلن یا دوره انتخاب‌شده معتبر نیست.', 422);
+        }
+        $vatRate = $this->config->vatRatePercent();
+        $list = (string) BigInteger::of((string) $this->config->plan($planCode)['price_toman'][$period])->multipliedBy(10);
+        $base = (string) BigDecimal::of($receivedIrr)->multipliedBy(100)->dividedBy(BigDecimal::of(100)->plus($vatRate), 0, RoundingMode::HalfUp);
+
+        return DB::transaction(function () use ($tenant, $staff, $planCode, $period, $receivedIrr, $reference, $reason, $vatRate, $list, $base) {
+            Tenant::query()->whereKey($tenant->id)->lockForUpdate()->first();
+            $order = BillingOrder::create([
+                'tenant_id' => $tenant->id, 'public_ref' => 'TL-PLAN-'.Jalali::year(now(), $tenant->timezone).'-'.strtoupper(Str::random(6)),
+                'created_by' => null, 'product' => 'PLAN', 'plan_code' => $planCode, 'period' => $period,
+                'list_subtotal_irr' => $list, 'discount_irr' => '0', 'subtotal_irr' => $base, 'vat_rate_percent' => $vatRate,
+                'vat_irr' => (string) BigInteger::of($receivedIrr)->minus($base), 'amount_irr' => $receivedIrr,
+                'price_snapshot' => [
+                    'pricing_version' => $this->config->version(), 'plan_at_order' => $this->entitlements->planCode($tenant),
+                    'plan_label_fa' => $this->config->plan($planCode)['label_fa'],
+                    'list_amount_irr' => (string) BigInteger::of($list)->plus(Money::vat($list, $vatRate)),
+                ],
+                'status' => 'PAID', 'paid_at' => now(), 'idempotency_key' => 'manual-'.strtolower((string) Str::ulid()), 'expires_at' => now(),
+                'channel' => 'MANUAL', 'staff_id' => $staff->id, 'staff_reason' => $reason, 'manual_reference' => $reference,
+            ]);
+            PaymentAttempt::create([
+                'order_id' => $order->id, 'gateway' => 'manual', 'authority' => 'M'.strtolower((string) Str::ulid()), 'amount_irr' => $receivedIrr,
+                'status' => 'PAID', 'ref_id' => $reference, 'verified_at' => now(),
+            ]);
+            Audit::record('billing.manual_activation', $order, [
+                'plan' => $planCode, 'period' => $period, 'received_irr' => $receivedIrr, 'reference' => $reference, 'reason' => $reason,
+            ], $tenant->id, 'staff');
+            $this->fulfil($order);
+
+            return $order->fresh();
+        });
+    }
+
+    /**
+     * Finance confirms a payment that the bank statement shows but the gateway never confirmed
+     * (verify kept failing, payer never returned, order expired). Runs the normal idempotent fulfilment.
+     */
+    public function manualConfirm(BillingOrder $order, StaffUser $staff, string $bankReference, string $reason): BillingOrder
+    {
+        return DB::transaction(function () use ($order, $staff, $bankReference, $reason) {
+            $order = BillingOrder::withoutGlobalScope('tenant')->whereKey($order->id)->lockForUpdate()->firstOrFail();
+            if ($order->status === 'FULFILLED') {
+                throw new DomainError('ORDER_ALREADY_FULFILLED', 'این سفارش قبلاً انجام شده است.', 409);
+            }
+            $before = $order->status;
+            if ($order->status !== 'PAID') {
+                $attempt = PaymentAttempt::query()->where('order_id', $order->id)->latest('id')->lockForUpdate()->first();
+                $attempt?->forceFill(['status' => 'PAID', 'ref_id' => $attempt->ref_id ?? $bankReference, 'verified_at' => $attempt->verified_at ?? now()])->save();
+                $order->forceFill(['status' => 'PAID', 'paid_at' => now(), 'failure_code' => null, 'failure_message' => null]);
+            }
+            $order->forceFill(['staff_id' => $staff->id, 'staff_reason' => $reason, 'manual_reference' => $bankReference])->save();
+            Audit::record('billing.manual_confirm', $order, ['before' => $before, 'reference' => $bankReference, 'reason' => $reason], $order->tenant_id, 'staff');
+            $this->fulfil($order);
+
+            return $order->fresh();
+        });
+    }
+
+    /** Finance closes an open order the payer did not pay. A later genuine bank confirmation still reopens it. */
+    public function markFailed(BillingOrder $order, StaffUser $staff, string $reason): BillingOrder
+    {
+        return DB::transaction(function () use ($order, $staff, $reason) {
+            $order = BillingOrder::withoutGlobalScope('tenant')->whereKey($order->id)->lockForUpdate()->firstOrFail();
+            if (! in_array($order->status, ['AWAITING_PAYMENT', 'VERIFYING', 'PENDING_VERIFICATION'], true)) {
+                throw new DomainError('ORDER_NOT_OPEN', 'فقط سفارش باز یا در انتظار بررسی را می‌توان ناموفق ثبت کرد.', 409);
+            }
+            $attempt = PaymentAttempt::query()->where('order_id', $order->id)->latest('id')->lockForUpdate()->firstOrFail();
+            $order->forceFill(['staff_id' => $staff->id, 'staff_reason' => $reason]);
+            $this->fail($order, $attempt, 'MANUAL_FAILED');
+            Audit::record('billing.manual_failed', $order, ['reason' => $reason], $order->tenant_id, 'staff');
+
+            return $order->fresh();
+        });
+    }
+
+    /**
+     * «استعلام دوباره از بانک»: asks the PSP that opened the payment. Open orders follow the answer;
+     * a FAILED/EXPIRED order is fulfilled only when the bank confirms the stored amount was paid.
+     *
+     * @return array{result:string,bank_code:?string,status:string}
+     */
+    public function inquire(BillingOrder $order): array
+    {
+        return DB::transaction(function () use ($order) {
+            $order = BillingOrder::withoutGlobalScope('tenant')->whereKey($order->id)->lockForUpdate()->firstOrFail();
+            $attempt = PaymentAttempt::query()->where('order_id', $order->id)->latest('id')->lockForUpdate()->first();
+            if (! $attempt || $attempt->gateway === 'manual') {
+                throw new DomainError('NO_GATEWAY_PAYMENT', 'این سفارش از درگاه پرداخت نشده است؛ استعلام بانکی ندارد.', 422);
+            }
+            $before = $order->status;
+            $v = $this->askGateway($order, $attempt);
+            if ($order->status === 'PAID') {
+                DB::transaction(fn () => $this->fulfil($order));
+            } elseif ($order->status !== 'FULFILLED' && ($v['status'] === 'OK' || ! $order->isFinal())) {
+                $order->status = 'VERIFYING';
+                $this->applyVerification($order, $attempt, $v);
+            }
+            Audit::record('billing.inquired', $order, ['result' => $v['status'], 'bank_code' => $v['bank_code'] ?? null, 'before' => $before, 'after' => $order->status], $order->tenant_id, 'staff');
+
+            return ['result' => $v['status'], 'bank_code' => $v['bank_code'] ?? null, 'status' => $order->status];
+        });
     }
 
     public function resultSignature(BillingOrder $order): string

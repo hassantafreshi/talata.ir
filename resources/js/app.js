@@ -25,7 +25,8 @@ function digitNormalizer() {
 function confirmLinks() {
   document.addEventListener('submit', (e) => {
     const form = e.target;
-    if (form.dataset.confirm && !window.confirm(form.dataset.confirm)) e.preventDefault();
+    // AJAX admin action forms (data-action) ask themselves, with the placeholders filled in.
+    if (form.dataset.confirm && !form.dataset.action && !window.confirm(form.dataset.confirm)) e.preventDefault();
   });
 }
 

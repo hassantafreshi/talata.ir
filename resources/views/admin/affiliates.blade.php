@@ -11,8 +11,8 @@
         @forelse ($page as $a)
             @php $t = $totals[$a->id]; @endphp
             <tr><td><a class="mono" href="{{ route('admin.affiliate', $a->id) }}">{{ \App\Support\Mobile::display($a->user->mobile) }}</a></td><td class="mono">{{ $a->code }}</td>
-                <td>{{ fa(rtrim(rtrim($a->commission_percent, '0'), '.')) }}٪ · {{ $a->commission_mode === 'LIFETIME' ? 'مادام‌العمر' : 'پرداخت اول' }}</td>
-                <td>{{ fa(rtrim(rtrim($a->discount_percent, '0'), '.')) }}٪</td><td class="n">{{ fa($a->referrals_count) }}</td>
+                <td>{{ pct($a->commission_percent) }}٪ · {{ $a->commission_mode === 'LIFETIME' ? 'مادام‌العمر' : 'پرداخت اول' }}</td>
+                <td>{{ pct($a->discount_percent) }}٪</td><td class="n">{{ fa($a->referrals_count) }}</td>
                 <td class="n">{{ toman($t['PENDING']) }}</td><td class="n"><strong>{{ toman($t['APPROVED']) }}</strong></td><td class="n">{{ toman($t['PAID']) }}</td>
                 <td><span class="badge {{ $a->isActive() ? 'ok' : 'warn' }}">{{ $a->isActive() ? 'فعال' : 'متوقف' }}</span></td></tr>
         @empty

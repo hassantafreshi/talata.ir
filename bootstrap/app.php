@@ -8,6 +8,7 @@ use App\Http\Middleware\RequireStaff;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\UseAdminSession;
+use App\Support\Digits;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Application;
@@ -21,6 +22,7 @@ use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -72,6 +74,16 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return back()->with('error', $e->messageFa)->withInput();
+        });
+
+        // Validation errors as {code, message_fa, errors} with Persian digits (lang/fa/validation.php).
+        $exceptions->render(function (ValidationException $e, Request $request) {
+            if (! $request->expectsJson() && ! $request->is('api/*')) {
+                return null;
+            }
+            $errors = array_map(fn (array $messages) => array_map(fn ($m) => Digits::toPersian((string) $m), $messages), $e->errors());
+
+            return response()->json(['code' => 'VALIDATION', 'message_fa' => reset($errors)[0] ?? 'اطلاعات واردشده کامل یا درست نیست.', 'errors' => $errors], $e->status);
         });
 
         $exceptions->render(function (TokenMismatchException $e, Request $request) {
