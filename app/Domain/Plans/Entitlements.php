@@ -56,6 +56,20 @@ final class Entitlements
         return (bool) ($this->plan($tenant)['capabilities'][$capability] ?? false);
     }
 
+    /** Whether the tenant's plan (in the active pricing version) defines the capability at all. */
+    public function defines(Tenant $tenant, string $capability): bool
+    {
+        return array_key_exists($capability, $this->plan($tenant)['capabilities'] ?? []);
+    }
+
+    /** Quota with a safe default when an older pricing version does not define it (null = unlimited). */
+    public function limitOr(Tenant $tenant, string $resource, ?int $default): ?int
+    {
+        $quotas = $this->plan($tenant)['quotas'] ?? [];
+
+        return array_key_exists($resource, $quotas) ? ($quotas[$resource] === null ? null : (int) $quotas[$resource]) : $default;
+    }
+
     public function limit(Tenant $tenant, string $resource): ?int
     {
         $value = $this->plan($tenant)['quotas'][$resource] ?? null;

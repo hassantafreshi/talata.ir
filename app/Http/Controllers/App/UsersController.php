@@ -21,7 +21,7 @@ class UsersController extends BaseController
 
         return view('app.users', [
             'members' => $members, 'me' => $this->membership(), 'permissions' => Membership::PERMISSIONS,
-            'canRestrict' => $this->ent()->can($tenant, 'team.permissions_edit'), 'limit' => $this->ent()->limit($tenant, 'team_members'),
+            'canRestrict' => $this->ent()->can($tenant, 'team.permissions_edit'), 'limit' => $this->ent()->limitOr($tenant, 'team_members', 10),
         ]);
     }
 
@@ -46,7 +46,7 @@ class UsersController extends BaseController
         if (Membership::query()->where('tenant_id', $tenantId)->where('status', '!=', 'removed')->where(fn ($q) => $q->where('invited_mobile', $mobile)->orWhereHas('user', fn ($u) => $u->where('mobile', $mobile)))->exists()) {
             throw new DomainError('ALREADY_MEMBER', 'این شماره قبلاً عضو یا دعوت شده است.', 409);
         }
-        $limit = $this->ent()->limit($this->tenant(), 'team_members');
+        $limit = $this->ent()->limitOr($this->tenant(), 'team_members', 10);
         if ($limit !== null && Membership::query()->where('tenant_id', $tenantId)->whereIn('status', ['active', 'invited'])->count() >= $limit) {
             throw new DomainError('MEMBER_LIMIT', 'حداکثر '.Digits::toPersian((string) $limit).' کاربر برای هر فروشگاه.', 422);
         }

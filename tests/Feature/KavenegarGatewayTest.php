@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\Domain\Sms\Gateways\KavenegarSmsGateway;
+use App\Domain\Sms\SmsCredit;
 use App\Domain\Sms\SmsGateway;
 use App\Domain\Sms\SmsService;
+use App\Models\SmsCreditLot;
+use App\Models\SmsMessage;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\DB;
@@ -82,7 +85,7 @@ class KavenegarGatewayTest extends TestCase
     {
         Http::fakeSequence('api.kavenegar.com/*')->push($this->ok(1, 10))->push($this->ok(1, 4))->push($this->ok(1, 11))->push($this->ok(1, 100));
         $g = $this->gateway();
-        $this->assertSame(['DELIVERED', 'SENT', 'FAILED', 'UNKNOWN'], [$g->status('1'), $g->status('1'), $g->status('1'), $g->status('1')]);
+        $this->assertSame(['DELIVERED', 'SENT', 'UNDELIVERED', 'UNKNOWN'], [$g->status('1'), $g->status('1'), $g->status('1'), $g->status('1')]);
     }
 
     public function test_otp_code_is_never_stored_in_plain_text(): void
@@ -108,5 +111,51 @@ class KavenegarGatewayTest extends TestCase
         $this->app->forgetInstance(SmsGateway::class);
         $this->expectException(\RuntimeException::class);
         app(SmsGateway::class);
+    }
+
+    public function test_send_passes_local_id_and_reconcile_never_refunds_charged_messages(): void
+    {
+        $user = $this->merchant('basic');
+        $tenant = $this->tenantOf($user);
+        SmsCreditLot::withoutGlobalScope('tenant')->forceCreate(['tenant_id' => $tenant->id, 'amount_irr' => '100000', 'remaining_irr' => '100000', 'source' => 'PROVIDER_ADJUST', 'carries_over' => true, 'plan_at_purchase' => 'basic']);
+        $credit = app(SmsCredit::class);
+        $make = function (string $status, ?string $providerId) use ($tenant, $credit) {
+            $m = SmsMessage::query()->create(['tenant_id' => $tenant->id, 'purpose' => 'INVOICE', 'recipient' => '09351234567', 'body' => 'x', 'segments' => 1,
+                'cost_irr' => '5000', 'charge_source' => 'CREDIT', 'status' => 'SENDING', 'idempotency_key' => 'k'.uniqid(), 'provider_message_id' => $providerId]);
+            $this->assertTrue($credit->reserve($tenant->id, '5000', $m));
+            $m->forceFill(['status' => $status])->save();
+            DB::table('sms_messages')->where('id', $m->id)->update(['updated_at' => now()->subMinutes(40)]);
+
+            return $m;
+        };
+        $undelivered = $make('UNKNOWN', '111');   // provider says 11: sent but undelivered → charged
+        $neverSent = $make('UNKNOWN', null);      // lookup by localid: not found → refund
+        $foundLocal = $make('UNKNOWN', null);     // lookup by localid: found and sent → charged
+        $this->app->instance(SmsGateway::class, $this->gateway());
+        Http::fake(function (Request $req) use ($foundLocal) {
+            if (str_ends_with($req->url(), '/sms/status.json')) {
+                return Http::response(['return' => ['status' => 200], 'entries' => [['messageid' => 111, 'status' => 11]]]);
+            }
+            if (str_ends_with($req->url(), '/sms/statuslocalmessageid.json')) {
+                return $req['localid'] === $foundLocal->public_id
+                    ? Http::response(['return' => ['status' => 200], 'entries' => [['messageid' => 222, 'localid' => $req['localid'], 'status' => 10]]])
+                    : Http::response(['return' => ['status' => 200], 'entries' => [['messageid' => 0, 'status' => 100]]]);
+            }
+
+            return Http::response([], 404);
+        });
+        $this->artisan('talata:sms-reconcile')->assertSuccessful();
+
+        $this->assertSame('SENT', $undelivered->fresh()->status);
+        $this->assertStringContainsString('undelivered', $undelivered->fresh()->last_error);
+        $this->assertSame('FAILED', $neverSent->fresh()->status);
+        $this->assertSame('DELIVERED', $foundLocal->fresh()->status);
+        $this->assertSame('222', $foundLocal->fresh()->provider_message_id);
+        // 100000 − two charged messages (5000 each); the never-sent one was refunded.
+        $this->assertSame('90000', $credit->balance($tenant->id));
+
+        Http::fake(['api.kavenegar.com/*' => Http::response($this->ok(5))]);
+        $this->gateway()->send('09121234567', 'x', 'localid-abc');
+        Http::assertSent(fn (Request $req) => ($req['localid'] ?? null) === 'localid-abc');
     }
 }

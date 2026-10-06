@@ -4,9 +4,11 @@ namespace Tests\Feature;
 
 use App\Domain\Identity\LoginService;
 use App\Models\Membership;
+use App\Models\PricingVersion;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Tenancy\TenantContext;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class TeamPermissionsTest extends TestCase
@@ -64,5 +66,24 @@ class TeamPermissionsTest extends TestCase
         }
         $this->api('POST', '/api/users/invite', ['mobile' => '09372229999'])->assertStatus(422)->assertJsonPath('code', 'MEMBER_LIMIT');
         $this->assertSame(10, Membership::query()->where('tenant_id', $tenant->id)->whereIn('status', ['active', 'invited'])->count());
+    }
+
+    public function test_restrictions_fail_closed_when_pricing_lacks_the_capability(): void
+    {
+        $owner = $this->merchant('basic');
+        $member = $this->inviteAndAccept($owner, '09371110003');
+        $tenant = $this->tenantOf($owner);
+        $m = Membership::query()->where('user_id', $member->id)->where('tenant_id', $tenant->id)->first();
+        $this->actingAs($owner)->api('PUT', "/api/users/{$m->id}", ['permissions' => ['invoice.issue']])->assertOk();
+        // Simulate an older pricing version without the new keys.
+        $row = PricingVersion::query()->first();
+        $payload = $row->payload;
+        foreach ($payload['plans'] as $code => $p) {
+            unset($payload['plans'][$code]['capabilities']['team.permissions_edit'], $payload['plans'][$code]['quotas']['team_members']);
+        }
+        $row->update(['payload' => $payload]);
+        Cache::forget('talata.pricing.active');
+        $this->app->forgetScopedInstances();
+        $this->actingAs($member)->get('/settings/business')->assertForbidden();
     }
 }

@@ -59,7 +59,10 @@ class Membership extends Model
 
     public function restrictionsApply(): bool
     {
-        return $this->restrictionsApply ??= app(Entitlements::class)->can($this->tenant, 'team.permissions_edit');
+        // Fail closed: if the active pricing version does not define the capability at all,
+        // keep applying the stored restrictions rather than silently granting full access.
+        return $this->restrictionsApply ??= ! app(Entitlements::class)->defines($this->tenant, 'team.permissions_edit')
+            || app(Entitlements::class)->can($this->tenant, 'team.permissions_edit');
     }
 
     /** @return list<string> */

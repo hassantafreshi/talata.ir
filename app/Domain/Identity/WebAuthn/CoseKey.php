@@ -15,14 +15,14 @@ final class CoseKey
         $kty = $cose[1] ?? null;
         $alg = $cose[3] ?? null;
         if ($kty === 2 && $alg === self::ES256) {
-            if (($cose[-1] ?? null) !== 1 || strlen($cose[-2] ?? '') !== 32 || strlen($cose[-3] ?? '') !== 32) {
+            if (($cose[-1] ?? null) !== 1 || ! is_string($cose[-2] ?? null) || ! is_string($cose[-3] ?? null) || strlen($cose[-2]) !== 32 || strlen($cose[-3]) !== 32) {
                 throw new WebAuthnException('Invalid P-256 key');
             }
             $der = hex2bin('3059301306072a8648ce3d020106082a8648ce3d030107034200')."\x04".$cose[-2].$cose[-3];
         } elseif ($kty === 3 && $alg === self::RS256) {
             $n = $cose[-1] ?? '';
             $e = $cose[-2] ?? '';
-            if (strlen($n) < 256 || $e === '') {
+            if (! is_string($n) || ! is_string($e) || strlen($n) < 256 || strlen($n) > 1024 || $e === '' || strlen($e) > 8) {
                 throw new WebAuthnException('RSA key too small');
             }
             $rsa = self::seq(self::int($n).self::int($e));

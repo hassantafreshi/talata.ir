@@ -11,7 +11,7 @@ class OtpChallenge extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['mobile', 'code_hash', 'attempts', 'ip', 'expires_at', 'consumed_at', 'created_at'];
+    protected $fillable = ['mobile', 'purpose', 'code_hash', 'attempts', 'ip', 'expires_at', 'consumed_at', 'created_at'];
 
     protected $hidden = ['code_hash'];
 

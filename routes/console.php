@@ -22,32 +22,52 @@ Artisan::command('talata:payments-reconcile', fn (BillingService $b) => $this->i
 
 Artisan::command('talata:sms-reconcile', function (SmsGateway $gateway, SmsService $sms) {
     $n = 0;
-    SmsMessage::query()->where('status', 'UNKNOWN')->where('updated_at', '<', now()->subMinutes(5))->whereNotNull('provider_message_id')->limit(200)->get()
-        ->each(function (SmsMessage $m) use ($gateway, $sms, &$n) {
-            $status = $gateway->status($m->provider_message_id);
-            if ($status !== 'UNKNOWN') {
-                $sms->applyOutcome($m, $status);
-                $n++;
+    // Apply a provider report. FAILED = never charged (refund); UNDELIVERED = charged, keep SENT with the reason.
+    $apply = function (SmsMessage $m, string $status, ?string $providerId = null) use ($sms, &$n) {
+        if ($status === 'UNKNOWN') {
+            $m->touch();
+
+            return;
+        }
+        if ($status === 'UNDELIVERED') {
+            if ($m->status !== 'SENT') {
+                $sms->applyOutcome($m, 'SENT', $providerId);
+            }
+            SmsMessage::query()->whereKey($m->id)->update(['last_error' => 'undelivered (provider report)', 'updated_at' => now()]);
+        } elseif ($m->status === 'SENT' && $status === 'FAILED') {
+            SmsMessage::query()->whereKey($m->id)->update(['last_error' => 'failed after send (provider report)', 'updated_at' => now()]);
+        } elseif ($status !== $m->status) {
+            $sms->applyOutcome($m, $status, $providerId);
+        } else {
+            $m->touch();
+        }
+        $n++;
+    };
+
+    // 1) Ambiguous sends that have a provider id, and 2) delivery reports for recent SENT messages (batched).
+    $pending = SmsMessage::query()->whereNotNull('provider_message_id')
+        ->where(fn ($q) => $q->where('status', 'UNKNOWN')->where('updated_at', '<', now()->subMinutes(5))
+            ->orWhere(fn ($w) => $w->where('status', 'SENT')->where('created_at', '>', now()->subDays(2))->where('updated_at', '<', now()->subMinutes(2))))
+        ->orderBy('updated_at')->limit(400)->get();
+    if ($pending->isNotEmpty()) {
+        $statuses = $gateway->statusMany($pending->pluck('provider_message_id')->all());
+        foreach ($pending as $m) {
+            $apply($m, $statuses[$m->provider_message_id] ?? 'UNKNOWN');
+        }
+    }
+
+    // 3) Ambiguous sends without a provider id: look them up by our local id before refunding.
+    SmsMessage::query()->where('status', 'UNKNOWN')->whereNull('provider_message_id')->where('updated_at', '<', now()->subMinutes(5))->limit(100)->get()
+        ->each(function (SmsMessage $m) use ($gateway, $sms, $apply) {
+            $found = $m->purpose === 'OTP' ? null : $gateway->lookupLocal($m->public_id);
+            if ($found) {
+                SmsMessage::query()->whereKey($m->id)->update(['provider_message_id' => $found['provider_id']]);
+                $apply($m->refresh(), $found['status'] === 'UNKNOWN' ? 'SENT' : $found['status'], $found['provider_id']);
+            } elseif ($m->updated_at->lt(now()->subMinutes(30))) {
+                // The provider never received it: release the credit (and free allowance).
+                $sms->applyOutcome($m, 'FAILED', null, 'not found at provider after 30 minutes');
             }
         });
-    // Delivery reports for recently sent messages (SENT → DELIVERED). An undelivered report keeps
-    // the message SENT (the provider charged it) and records the reason.
-    SmsMessage::query()->where('status', 'SENT')->whereNotNull('provider_message_id')->where('created_at', '>', now()->subDays(2))
-        ->where('updated_at', '<', now()->subMinutes(2))->orderBy('updated_at')->limit(100)->get()
-        ->each(function (SmsMessage $m) use ($gateway, $sms, &$n) {
-            $status = $gateway->status($m->provider_message_id);
-            if ($status === 'DELIVERED') {
-                $sms->applyOutcome($m, 'DELIVERED');
-                $n++;
-            } elseif ($status === 'FAILED') {
-                $m->forceFill(['last_error' => 'undelivered (provider report)'])->save();
-            } else {
-                $m->touch();
-            }
-        });
-    // Without a provider id after 30 minutes the send is treated as failed and credit is returned.
-    SmsMessage::query()->where('status', 'UNKNOWN')->whereNull('provider_message_id')->where('updated_at', '<', now()->subMinutes(30))->limit(200)->get()
-        ->each(fn (SmsMessage $m) => $sms->applyOutcome($m, 'FAILED', null, 'no provider id after 30 minutes'));
     $this->info("reconciled {$n}");
 })->purpose('Resolve SMS messages with unknown delivery status');
 

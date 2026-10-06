@@ -42,7 +42,7 @@ class AccountController extends Controller
     public function store(Request $request, WebAuthnService $webauthn): JsonResponse
     {
         $this->requireRecentLogin($request);
-        $data = $request->validate(['credential' => ['required', 'array']]);
+        $data = $request->validate(WebAuthnService::rules(true));
         try {
             $pk = $webauthn->register($this->staff(), 'staff', $data['credential'], 'کلید مدیر');
         } catch (WebAuthnException) {

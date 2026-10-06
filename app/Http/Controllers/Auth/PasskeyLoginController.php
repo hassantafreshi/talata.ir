@@ -24,7 +24,7 @@ class PasskeyLoginController extends Controller
 
     public function verify(Request $request, WebAuthnService $webauthn): JsonResponse
     {
-        $data = $request->validate(['credential' => ['required', 'array']]);
+        $data = $request->validate(WebAuthnService::rules(false));
         try {
             $passkey = $webauthn->authenticate('user', $data['credential'], fn ($pk) => User::query()->whereKey($pk->owner_id)->value('webauthn_handle'));
         } catch (WebAuthnException $e) {

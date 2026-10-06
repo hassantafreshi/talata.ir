@@ -7,8 +7,11 @@ interface SmsGateway
 {
     public function name(): string;
 
-    /** @return array{status:'SENT'|'FAILED'|'UNKNOWN',provider_id:?string,error:?string} */
-    public function send(string $recipient, string $body): array;
+    /**
+     * @param  ?string  $localId  our message id, so an ambiguous send can be looked up later (Kavenegar localid)
+     * @return array{status:'SENT'|'FAILED'|'UNKNOWN',provider_id:?string,error:?string}
+     */
+    public function send(string $recipient, string $body, ?string $localId = null): array;
 
     /**
      * Login code. Providers with an approved OTP template (e.g. Kavenegar Verify Lookup) send only
@@ -18,6 +21,25 @@ interface SmsGateway
      */
     public function sendOtp(string $recipient, string $code, string $body): array;
 
-    /** @return 'SENT'|'DELIVERED'|'FAILED'|'UNKNOWN' */
+    /**
+     * FAILED = not sent and not charged by the provider; UNDELIVERED = sent (charged) but not delivered.
+     *
+     * @return 'SENT'|'DELIVERED'|'UNDELIVERED'|'FAILED'|'UNKNOWN'
+     */
     public function status(string $providerId): string;
+
+    /**
+     * Batched delivery status.
+     *
+     * @param  list<string>  $providerIds
+     * @return array<string,string> provider id => status (as status())
+     */
+    public function statusMany(array $providerIds): array;
+
+    /**
+     * Finds a message by our local id after an ambiguous send (no provider id known).
+     *
+     * @return ?array{status:string,provider_id:string} null when the provider has no such message
+     */
+    public function lookupLocal(string $localId): ?array;
 }

@@ -35,7 +35,7 @@ class PasskeyController extends BaseController
     public function store(Request $request, WebAuthnService $webauthn): JsonResponse
     {
         $this->requireRecentLogin($request);
-        $data = $request->validate(['credential' => ['required', 'array'], 'name' => ['nullable', 'string', 'max:60']]);
+        $data = $request->validate(WebAuthnService::rules(true) + ['name' => ['nullable', 'string', 'max:60']]);
         try {
             $passkey = $webauthn->register($request->user(), 'user', $data['credential'], $data['name'] ?? $this->deviceName($request));
         } catch (WebAuthnException $e) {

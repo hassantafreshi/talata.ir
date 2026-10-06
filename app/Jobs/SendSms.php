@@ -36,7 +36,7 @@ class SendSms implements ShouldQueue
                 $code = (string) ($message->payload['code'] ?? '');
                 $result = $gateway->sendOtp($message->recipient, $code, SmsService::otpBody($code));
             } else {
-                $result = $gateway->send($message->recipient, $message->body);
+                $result = $gateway->send($message->recipient, $message->body, $message->public_id);
             }
             $service->applyOutcome($message, $result['status'], $result['provider_id'], $result['error']);
             TechLog::write($result['status'] === 'SENT' ? 'info' : 'warning', 'sms', 'sms '.strtolower($message->purpose).' '.strtolower($result['status']), [

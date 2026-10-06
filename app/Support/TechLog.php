@@ -35,10 +35,10 @@ final class TechLog
     public static function redact(array $context): array
     {
         foreach ($context as $k => $v) {
-            if (is_array($v)) {
+            if (is_string($k) && in_array(strtolower($k), self::SECRET_KEYS, true)) {
+                $context[$k] = '[redacted]'; // whole value, whatever its type
+            } elseif (is_array($v)) {
                 $context[$k] = self::redact($v);
-            } elseif (is_string($k) && in_array(strtolower($k), self::SECRET_KEYS, true)) {
-                $context[$k] = '[redacted]';
             } elseif (is_string($v)) {
                 $context[$k] = self::scrub($v);
             }
@@ -54,6 +54,9 @@ final class TechLog
             $text = str_replace($secret, '[redacted]', $text);
         }
 
-        return preg_replace('/\b(09\d{2})\d{4}(\d{3})\b/', '$1****$2', $text) ?? $text;
+        // Persian/Arabic digits → Latin (spaces kept), then mask 09…, 989…, +989…, 00989… numbers.
+        $text = strtr($text, array_combine(mb_str_split('۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩'), str_split('01234567890123456789')));
+
+        return preg_replace('/(?<!\d)(\+98|0098|98|0)(9\d{2})\d{4}(\d{3})(?!\d)/', '$1$2****$3', $text) ?? $text;
     }
 }

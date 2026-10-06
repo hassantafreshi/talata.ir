@@ -20,7 +20,7 @@ final class KavenegarSmsGateway implements SmsGateway
     private const DEFINITE_FAILURE = [400, 401, 402, 403, 404, 405, 406, 407, 409, 411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 422, 424, 426, 427, 428, 431, 432, 451, 501];
 
     /** Message entry status → ours. 1 queue, 2 scheduled, 4/5 sent to operator, 6 failed, 10 delivered, 11 undelivered, 13 cancelled, 14 blocked by recipient, 100 unknown id. */
-    private const ENTRY_STATUS = [1 => 'SENT', 2 => 'SENT', 4 => 'SENT', 5 => 'SENT', 6 => 'FAILED', 10 => 'DELIVERED', 11 => 'FAILED', 13 => 'FAILED', 14 => 'FAILED', 100 => 'UNKNOWN'];
+    private const ENTRY_STATUS = [1 => 'SENT', 2 => 'SENT', 4 => 'SENT', 5 => 'SENT', 6 => 'FAILED', 10 => 'DELIVERED', 11 => 'UNDELIVERED', 13 => 'FAILED', 14 => 'UNDELIVERED', 100 => 'UNKNOWN'];
 
     public function __construct(
         private readonly string $apiKey,
@@ -39,9 +39,9 @@ final class KavenegarSmsGateway implements SmsGateway
         return 'kavenegar';
     }
 
-    public function send(string $recipient, string $body): array
+    public function send(string $recipient, string $body, ?string $localId = null): array
     {
-        return $this->call('sms/send.json', array_filter(['receptor' => $recipient, 'sender' => $this->sender, 'message' => $body]), 'send');
+        return $this->call('sms/send.json', array_filter(['receptor' => $recipient, 'sender' => $this->sender, 'message' => $body, 'localid' => $localId]), 'send');
     }
 
     public function sendOtp(string $recipient, string $code, string $body): array
@@ -65,6 +65,37 @@ final class KavenegarSmsGateway implements SmsGateway
         return 'UNKNOWN';
     }
 
+    public function statusMany(array $providerIds): array
+    {
+        $out = [];
+        foreach (array_chunk(array_values(array_unique($providerIds)), 200) as $chunk) {
+            $r = $this->request('sms/status.json', ['messageid' => implode(',', $chunk)], 'status');
+            foreach ($chunk as $id) {
+                $out[$id] = 'UNKNOWN';
+            }
+            if ($r['http_ok'] && ($r['json']['return']['status'] ?? null) === 200) {
+                foreach ((array) ($r['json']['entries'] ?? []) as $e) {
+                    if (isset($e['messageid'])) {
+                        $out[(string) $e['messageid']] = self::ENTRY_STATUS[(int) ($e['status'] ?? 100)] ?? 'UNKNOWN';
+                    }
+                }
+            }
+        }
+
+        return $out;
+    }
+
+    public function lookupLocal(string $localId): ?array
+    {
+        $r = $this->request('sms/statuslocalmessageid.json', ['localid' => $localId], 'status-local');
+        $e = $r['json']['entries'][0] ?? null;
+        if (! $r['http_ok'] || ($r['json']['return']['status'] ?? null) !== 200 || ! isset($e['messageid']) || (int) ($e['status'] ?? 100) === 100) {
+            return null;
+        }
+
+        return ['status' => self::ENTRY_STATUS[(int) $e['status']] ?? 'UNKNOWN', 'provider_id' => (string) $e['messageid']];
+    }
+
     private function call(string $path, array $params, string $op): array
     {
         $r = $this->request($path, $params, $op);
@@ -77,7 +108,7 @@ final class KavenegarSmsGateway implements SmsGateway
             $entry = $r['json']['entries'][0] ?? [];
             $id = isset($entry['messageid']) ? (string) $entry['messageid'] : null;
             $status = self::ENTRY_STATUS[(int) ($entry['status'] ?? 1)] ?? 'SENT';
-            if ($status === 'DELIVERED' || $status === 'UNKNOWN') {
+            if (in_array($status, ['DELIVERED', 'UNDELIVERED', 'UNKNOWN'], true)) {
                 $status = 'SENT';
             }
 

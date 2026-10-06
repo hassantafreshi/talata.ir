@@ -10,12 +10,13 @@ use App\Domain\Identity\WebAuthn\WebAuthnException;
 use App\Domain\Identity\WebAuthn\WebAuthnService;
 use App\Http\Controllers\Controller;
 use App\Models\StaffUser;
+use App\Support\Digits;
 use App\Support\Mobile;
 use App\Support\TechLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\RateLimiter;
 
 /**
  * Staff sign-in: SMS code (same proof-of-work and limits as merchants) or passkey.
@@ -47,12 +48,24 @@ class AuthController extends Controller
         if (! $pow->verify($data['pow_challenge'], $data['pow_nonce'], $request->ip())) {
             throw new DomainError('POW_INVALID', 'بررسی امنیتی کامل نشد. دوباره تلاش کنید.', 422);
         }
+        // Identical answer for every number (no staff enumeration): limits, cooldowns and locks
+        // of the staff ceremony are applied but never revealed; unknown numbers get a decoy.
         $staff = StaffUser::query()->where('mobile', $mobile)->where('active', true)->first();
-        $challengeId = $staff ? $otp->request($mobile, $request->ip())['challenge_id'] : strtolower((string) Str::ulid());
-        if (! $staff) {
+        $state = ['challenge' => null, 'mobile' => $mobile, 'decoy' => true, 'tries' => 0, 'at' => now()->getTimestamp()];
+        if ($staff) {
+            try {
+                $state = ['challenge' => $otp->request($mobile, $request->ip(), 'staff')['challenge_id'], 'decoy' => false] + $state;
+            } catch (DomainError $e) {
+                TechLog::warning('admin', 'admin code not sent', ['code' => $e->codeName, 'ip' => $request->ip()]);
+                $previous = $request->session()->get('admin.otp');
+                if (is_array($previous) && ($previous['mobile'] ?? null) === $mobile && ! ($previous['decoy'] ?? true)) {
+                    $state = $previous; // keep the code that is still valid
+                }
+            }
+        } else {
             TechLog::warning('admin', 'admin login requested for a non-staff mobile', ['mobile' => TechLog::scrub($mobile), 'ip' => $request->ip()]);
         }
-        $request->session()->put('admin.otp', ['challenge' => $challengeId, 'mobile' => $mobile]);
+        $request->session()->put('admin.otp', $state);
 
         return response()->json(['ok' => true]);
     }
@@ -64,13 +77,37 @@ class AuthController extends Controller
         if (! is_array($state)) {
             throw new DomainError('OTP_EXPIRED', 'کد تازه بگیرید.', 422);
         }
-        $mobile = $otp->verify($state['challenge'], $data['code'], $request->ip());
+        if ($state['decoy'] ?? true) {
+            $this->decoyVerify($request, $state);
+        }
+        $mobile = $otp->verify($state['challenge'], $data['code'], $request->ip(), 'staff');
         $staff = StaffUser::query()->where('mobile', $mobile)->where('active', true)->first();
         if (! $staff || $mobile !== $state['mobile']) {
             throw new DomainError('OTP_WRONG', 'کد درست نیست.', 422);
         }
 
         return $this->signIn($request, $staff, 'otp');
+    }
+
+    /** Mirrors OtpService::verify outcomes for a number that never received a code. */
+    private function decoyVerify(Request $request, array $state): never
+    {
+        $cfg = config('talata.otp');
+        if (RateLimiter::tooManyAttempts('otp:verify:'.$request->ip(), $cfg['verify_per_ip_minute'])) {
+            throw new DomainError('OTP_VERIFY_RATE', 'تعداد تلاش زیاد است. یک دقیقه صبر کنید.', 429);
+        }
+        RateLimiter::hit('otp:verify:'.$request->ip(), 60);
+        if (now()->getTimestamp() - $state['at'] > $cfg['ttl_seconds'] || $state['tries'] >= $cfg['max_attempts']) {
+            throw new DomainError('OTP_EXPIRED', 'این کد دیگر معتبر نیست. کد تازه بگیرید.', 422);
+        }
+        $state['tries']++;
+        $request->session()->put('admin.otp', $state);
+        if ($state['tries'] >= $cfg['max_attempts']) {
+            throw new DomainError('OTP_LOCKED', 'تلاش‌های ناموفق زیاد شد. '.Digits::toPersian((string) $cfg['lockout_minutes']).' دقیقه دیگر دوباره امتحان کنید.', 429);
+        }
+        $left = $cfg['max_attempts'] - $state['tries'];
+
+        throw new DomainError('OTP_WRONG', 'کد درست نیست. یک بار دیگر به پیامک نگاه کنید ('.Digits::toPersian((string) $left).' تلاش دیگر).', 422, ['attempts_left' => $left]);
     }
 
     public function passkeyOptions(WebAuthnService $webauthn): JsonResponse
@@ -80,7 +117,7 @@ class AuthController extends Controller
 
     public function passkeyVerify(Request $request, WebAuthnService $webauthn): JsonResponse
     {
-        $data = $request->validate(['credential' => ['required', 'array']]);
+        $data = $request->validate(WebAuthnService::rules(false));
         try {
             $passkey = $webauthn->authenticate('staff', $data['credential'], fn ($pk) => StaffUser::query()->whereKey($pk->owner_id)->value('webauthn_handle'));
         } catch (WebAuthnException $e) {

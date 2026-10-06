@@ -18,7 +18,7 @@ final class FakeSmsGateway implements SmsGateway
         return 'fake';
     }
 
-    public function send(string $recipient, string $body): array
+    public function send(string $recipient, string $body, ?string $localId = null): array
     {
         $this->sent[] = ['to' => $recipient, 'body' => $body];
 
@@ -33,5 +33,15 @@ final class FakeSmsGateway implements SmsGateway
     public function status(string $providerId): string
     {
         return 'DELIVERED';
+    }
+
+    public function statusMany(array $providerIds): array
+    {
+        return array_combine($providerIds, array_map(fn ($id) => $this->status($id), $providerIds)) ?: [];
+    }
+
+    public function lookupLocal(string $localId): ?array
+    {
+        return null;
     }
 }

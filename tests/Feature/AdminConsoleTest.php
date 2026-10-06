@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Domain\DomainError;
+use App\Domain\Identity\OtpService;
 use App\Domain\Identity\ProofOfWork;
 use App\Domain\Sms\SmsGateway;
 use App\Models\AuditEvent;
@@ -126,5 +128,36 @@ class AdminConsoleTest extends TestCase
         $this->get('/admin')->assertOk();
         // A merchant passkey can never sign in to the console (separate owner type).
         $this->assertSame(0, Passkey::query()->where('owner_type', 'user')->count());
+    }
+
+    public function test_staff_and_unknown_numbers_get_identical_answers(): void
+    {
+        $staff = $this->staff();
+        $answers = [];
+        foreach ([$staff->mobile, '09128887766'] as $mobile) {
+            $this->flushSession();
+            $first = $this->postJson('/admin/api/otp/request', ['mobile' => $mobile] + $this->powPayload());
+            $again = $this->postJson('/admin/api/otp/request', ['mobile' => $mobile] + $this->powPayload()); // within cooldown
+            $wrong = $this->postJson('/admin/api/otp/verify', ['code' => '000000']);
+            $answers[] = [$first->status(), $first->json(), $again->status(), $again->json(), $wrong->status(), $wrong->json('code'), $wrong->json('attempts_left')];
+        }
+        $this->assertSame($answers[0], $answers[1]);
+        $this->assertSame([200, ['ok' => true], 200, ['ok' => true], 422, 'OTP_WRONG', 4], $answers[0]);
+    }
+
+    public function test_merchant_side_lockout_does_not_lock_staff_sign_in(): void
+    {
+        $staff = $this->staff();
+        // Attacker locks the number on the merchant login (5 wrong codes).
+        $c = app(OtpService::class)->request($staff->mobile, '10.0.0.9');
+        for ($i = 0; $i < 5; $i++) {
+            try {
+                app(OtpService::class)->verify($c['challenge_id'], '000000', '10.0.0.9');
+            } catch (DomainError) {
+            }
+        }
+        $this->travel(2)->minutes();
+        $this->signIn($staff); // staff ceremony has its own challenge, cooldown and lock
+        $this->get('/admin')->assertOk();
     }
 }

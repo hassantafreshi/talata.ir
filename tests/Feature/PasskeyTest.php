@@ -7,6 +7,7 @@ use App\Domain\Identity\WebAuthn\WebAuthnException;
 use App\Models\AuditEvent;
 use App\Models\Passkey;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Tests\Support\SoftAuthenticator;
 use Tests\TestCase;
 
@@ -126,5 +127,20 @@ class PasskeyTest extends TestCase
                 $this->addToAssertionCount(1);
             }
         }
+    }
+
+    public function test_malformed_credentials_are_rejected_cleanly(): void
+    {
+        $this->postJson('/api/auth/passkey/options')->assertOk();
+        $bad = [
+            ['rawId' => ['x'], 'type' => 'public-key', 'response' => []],
+            ['rawId' => 'abc', 'type' => 'public-key', 'response' => ['clientDataJSON' => ['a'], 'authenticatorData' => 'a', 'signature' => 'a']],
+            ['rawId' => 'abc', 'type' => 'public-key', 'response' => ['clientDataJSON' => SoftAuthenticator::b64('{"type":"webauthn.get","challenge":["x"],"origin":"http://localhost:8000"}'), 'authenticatorData' => 'AAAA', 'signature' => 'AAAA']],
+        ];
+        foreach ($bad as $credential) {
+            $this->postJson('/api/auth/passkey/options');
+            $this->postJson('/api/auth/passkey/verify', ['credential' => $credential])->assertStatus(422);
+        }
+        $this->assertSame(0, DB::connection('pgsql_log')->table('system_logs')->where('level', 'error')->count(), 'no error-level log rows from hostile input');
     }
 }

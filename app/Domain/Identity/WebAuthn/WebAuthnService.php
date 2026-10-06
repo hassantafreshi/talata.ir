@@ -51,6 +51,28 @@ final class WebAuthnService
         return [($u['scheme'] ?? 'https').'://'.($u['host'] ?? '').(isset($u['port']) ? ':'.$u['port'] : '')];
     }
 
+    /** Validation rules for the browser's credential JSON (shape and size limits; no arrays where strings are expected). */
+    public static function rules(bool $registration): array
+    {
+        $r = [
+            'credential' => ['required', 'array'],
+            'credential.type' => ['required', 'string', 'in:public-key'],
+            'credential.rawId' => ['required', 'string', 'max:700', 'regex:/^[A-Za-z0-9_-]+$/'],
+            'credential.response' => ['required', 'array'],
+            'credential.response.clientDataJSON' => ['required', 'string', 'max:4096', 'regex:/^[A-Za-z0-9_-]+$/'],
+        ];
+
+        return $registration ? $r + [
+            'credential.response.attestationObject' => ['required', 'string', 'max:16384', 'regex:/^[A-Za-z0-9_-]+$/'],
+            'credential.response.transports' => ['nullable', 'array', 'max:6'],
+            'credential.response.transports.*' => ['string', 'max:20'],
+        ] : $r + [
+            'credential.response.authenticatorData' => ['required', 'string', 'max:4096', 'regex:/^[A-Za-z0-9_-]+$/'],
+            'credential.response.signature' => ['required', 'string', 'max:2048', 'regex:/^[A-Za-z0-9_-]+$/'],
+            'credential.response.userHandle' => ['nullable', 'string', 'max:200', 'regex:/^[A-Za-z0-9_-]*$/'],
+        ];
+    }
+
     public static function b64(string $bin): string
     {
         return rtrim(strtr(base64_encode($bin), '+/', '-_'), '=');
@@ -110,6 +132,15 @@ final class WebAuthnService
 
     public function register(Model $owner, string $ownerType, array $credential, string $name): Passkey
     {
+        try {
+            return $this->doRegister($owner, $ownerType, $credential, $name);
+        } catch (\TypeError|\ValueError|\JsonException|\ErrorException $e) {
+            throw new WebAuthnException('Malformed credential');
+        }
+    }
+
+    private function doRegister(Model $owner, string $ownerType, array $credential, string $name): Passkey
+    {
         $state = $this->pullChallenge('register');
         if ($state['owner_type'] !== $ownerType || (string) $state['owner_id'] !== (string) $owner->getKey()) {
             throw new WebAuthnException('Challenge belongs to another account');
@@ -167,6 +198,15 @@ final class WebAuthnService
 
     /** Verifies an assertion and returns the matching passkey (counter updated). */
     public function authenticate(string $ownerType, array $credential, callable $handleOf): Passkey
+    {
+        try {
+            return $this->doAuthenticate($ownerType, $credential, $handleOf);
+        } catch (\TypeError|\ValueError|\JsonException|\ErrorException $e) {
+            throw new WebAuthnException('Malformed credential');
+        }
+    }
+
+    private function doAuthenticate(string $ownerType, array $credential, callable $handleOf): Passkey
     {
         $state = $this->pullChallenge('login');
         if (($state['owner_type'] ?? '') !== $ownerType || ($credential['type'] ?? '') !== 'public-key') {

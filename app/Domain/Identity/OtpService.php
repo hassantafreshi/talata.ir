@@ -23,7 +23,7 @@ final class OtpService
     public function __construct(private readonly SmsService $sms) {}
 
     /** @return array{challenge_id:string,resend_after_seconds:int} */
-    public function request(string $mobile, string $ip): array
+    public function request(string $mobile, string $ip, string $purpose = 'user'): array
     {
         $cfg = config('talata.otp');
 
@@ -32,13 +32,14 @@ final class OtpService
         // Serialize per mobile so parallel requests cannot all pass the cooldown, and count
         // hit-first (atomic increment) so parallel requests cannot all pass the rate limits.
         // Rejections are returned, not thrown, so the counted attempts are committed.
-        $result = DB::transaction(function () use ($mobile, $ip, $code, $cfg) {
-            DB::select('SELECT pg_advisory_xact_lock(hashtext(?))', ['otp:'.$mobile]);
+        $lockKey = self::lockKey($mobile, $purpose);
+        $result = DB::transaction(function () use ($mobile, $ip, $code, $cfg, $purpose, $lockKey) {
+            DB::select('SELECT pg_advisory_xact_lock(hashtext(?))', ['otp:'.$purpose.':'.$mobile]);
 
-            if (Cache::get('otp:lock:'.$mobile)) {
+            if (Cache::get($lockKey)) {
                 return new DomainError('OTP_LOCKED', 'به‌خاطر تلاش‌های ناموفق، ورود این شماره چند دقیقه قفل شد. کمی بعد دوباره امتحان کنید.', 429);
             }
-            $last = OtpChallenge::query()->where('mobile', $mobile)->latest('created_at')->first();
+            $last = OtpChallenge::query()->where('mobile', $mobile)->where('purpose', $purpose)->latest('created_at')->first();
             if ($last && $last->created_at->gt(now()->subSeconds($cfg['resend_cooldown_seconds']))) {
                 $wait = (int) max(1, $cfg['resend_cooldown_seconds'] - $last->created_at->diffInSeconds(now()));
 
@@ -57,7 +58,8 @@ final class OtpService
             }
 
             // Existing users have their own reserved budget so a flood of new numbers cannot lock shops out.
-            $existing = User::query()->where('mobile', $mobile)->exists();
+            // Staff numbers are known and trusted: they use the reserved pool, never the new-number pool.
+            $existing = $purpose === 'staff' || User::query()->where('mobile', $mobile)->exists();
             $budget = $existing ? $cfg['existing_users_daily_budget'] : $cfg['global_daily_budget'];
             $budgetKey = 'otp:budget:'.($existing ? 'existing:' : 'new:').now()->format('Ymd');
             Cache::add($budgetKey, 0, 90000);
@@ -67,9 +69,9 @@ final class OtpService
                 return new DomainError('OTP_BUDGET', 'ارسال کد موقتاً ممکن نیست. چند دقیقه دیگر دوباره امتحان کنید.', 503);
             }
 
-            OtpChallenge::query()->where('mobile', $mobile)->whereNull('consumed_at')->update(['consumed_at' => now()]);
+            OtpChallenge::query()->where('mobile', $mobile)->where('purpose', $purpose)->whereNull('consumed_at')->update(['consumed_at' => now()]);
             $c = OtpChallenge::create([
-                'mobile' => $mobile, 'code_hash' => 'pending', 'ip' => $ip,
+                'mobile' => $mobile, 'purpose' => $purpose, 'code_hash' => 'pending', 'ip' => $ip,
                 'expires_at' => now()->addSeconds($cfg['ttl_seconds']), 'created_at' => now(),
             ]);
             $c->code_hash = self::hash($c->id, $code);
@@ -89,7 +91,7 @@ final class OtpService
     }
 
     /** Returns the verified mobile, or throws. Attempts are counted atomically. */
-    public function verify(string $challengeId, string $code, string $ip): string
+    public function verify(string $challengeId, string $code, string $ip, string $purpose = 'user'): string
     {
         $cfg = config('talata.otp');
         if (RateLimiter::tooManyAttempts('otp:verify:'.$ip, $cfg['verify_per_ip_minute'])) {
@@ -104,9 +106,9 @@ final class OtpService
 
         // Decide inside the lock, commit, then throw: an exception inside the transaction would
         // roll back the attempt counter and lockout, leaving the code open to brute force.
-        $outcome = DB::transaction(function () use ($challengeId, $code, $cfg) {
-            $c = OtpChallenge::query()->whereKey($challengeId)->lockForUpdate()->first();
-            if ($c && Cache::get('otp:lock:'.$c->mobile)) {
+        $outcome = DB::transaction(function () use ($challengeId, $code, $cfg, $purpose) {
+            $c = OtpChallenge::query()->whereKey($challengeId)->where('purpose', $purpose)->lockForUpdate()->first();
+            if ($c && Cache::get(self::lockKey($c->mobile, $purpose))) {
                 return ['LOCKED'];
             }
             if (! $c || $c->consumed_at || $c->expires_at->isPast()) {
@@ -117,7 +119,7 @@ final class OtpService
                 if ($c->attempts >= $cfg['max_attempts']) {
                     $c->consumed_at = now();
                     $c->save();
-                    Cache::put('otp:lock:'.$c->mobile, true, $cfg['lockout_minutes'] * 60);
+                    Cache::put(self::lockKey($c->mobile, $purpose), true, $cfg['lockout_minutes'] * 60);
 
                     return ['LOCKED'];
                 }
@@ -141,6 +143,12 @@ final class OtpService
             'LOCKED' => throw new DomainError('OTP_LOCKED', 'تلاش‌های ناموفق زیاد شد. '.Digits::toPersian((string) $cfg['lockout_minutes']).' دقیقه دیگر دوباره امتحان کنید.', 429),
             default => throw new DomainError('OTP_WRONG', 'کد درست نیست. یک بار دیگر به پیامک نگاه کنید ('.Digits::toPersian((string) $outcome[1]).' تلاش دیگر).', 422, ['attempts_left' => $outcome[1]]),
         };
+    }
+
+    /** Merchant and staff ceremonies lock independently (a merchant-side attacker cannot lock staff out). */
+    public static function lockKey(string $mobile, string $purpose): string
+    {
+        return 'otp:lock:'.($purpose === 'user' ? '' : $purpose.':').$mobile;
     }
 
     public static function hash(string $challengeId, string $code): string

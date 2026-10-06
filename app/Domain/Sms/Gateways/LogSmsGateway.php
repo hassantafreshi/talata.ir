@@ -14,7 +14,7 @@ final class LogSmsGateway implements SmsGateway
         return 'log';
     }
 
-    public function send(string $recipient, string $body): array
+    public function send(string $recipient, string $body, ?string $localId = null): array
     {
         Log::channel('single')->info('[SMS:log driver] to '.$recipient.': '.$body);
 
@@ -29,5 +29,15 @@ final class LogSmsGateway implements SmsGateway
     public function status(string $providerId): string
     {
         return 'DELIVERED';
+    }
+
+    public function statusMany(array $providerIds): array
+    {
+        return array_combine($providerIds, array_map(fn ($id) => $this->status($id), $providerIds)) ?: [];
+    }
+
+    public function lookupLocal(string $localId): ?array
+    {
+        return null;
     }
 }
