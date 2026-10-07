@@ -48,6 +48,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->
 Route::middleware('throttle:public')->group(function () {
     Route::get('/r/{code}', ReferralController::class)->where('code', '[A-Za-z0-9-]{4,20}')->name('public.referral');
     Route::get('/v/{token}', [PublicInvoiceController::class, 'verify'])->name('public.verify');
+    Route::post('/v/{token}', [PublicInvoiceController::class, 'reveal'])->name('public.verify.reveal');
     Route::get('/i/{token}', [PublicInvoiceController::class, 'show'])->name('public.invoice');
     Route::get('/i/{token}/print', [PublicInvoiceController::class, 'print'])->name('public.invoice.print');
     Route::get('/logo/{tenant}/{version}', [PublicInvoiceController::class, 'logo'])->whereNumber('version')->name('public.logo');

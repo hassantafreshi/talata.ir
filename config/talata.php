@@ -177,6 +177,11 @@ return [
         'verify_per_minute' => 30,
         // Customer share links (/i/…) expire after this many days; null = never (verification links /v/ never expire).
         'share_ttl_days' => env('TALATA_SHARE_TTL_DAYS') ? (int) env('TALATA_SHARE_TTL_DAYS') : null,
+        // Buyer-details reveal on the verification page: the scanner proves they are the buyer by entering the
+        // buyer's mobile. At most this many DISTINCT numbers may be tried per invoice before it locks (anti-probe),
+        // and the attempt memory resets after this many minutes.
+        'reveal_max_numbers' => 3,
+        'reveal_window_minutes' => 1440,
     ],
 
     'customers' => [

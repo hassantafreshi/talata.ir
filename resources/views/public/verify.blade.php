@@ -27,5 +27,34 @@
     <h2 class="sr-only">اقلام</h2>
     @include('app.partials.invoice-summary')
 
-    <p class="xs muted">این بررسی فقط تطبیق برگه با رکورد ثبت‌شده در زرلیو است؛ تضمین تحویل کالا، عیار آزمایشگاهی، دریافت پول یا ثبت در سامانه مؤدیان نیست. اطلاعات خریدار برای حفظ حریم خصوصی نمایش داده نمی‌شود.</p>
+    @unless ($void)
+    <section class="band stack-sm" aria-label="خریدار">
+        <h2 class="h3">خریدار</h2>
+        @if (! $buyerOnFile)
+            <p class="small muted">برای این فاکتور نام خریدار ثبت نشده است.</p>
+        @elseif ($revealed)
+            <dl class="kv">
+                <div><dt>نام خریدار</dt><dd class="strong">{{ $buyerName }}</dd></div>
+                <div><dt>موبایل</dt><dd class="num ltr">{{ $buyerMobileMasked }}</dd></div>
+            </dl>
+            <p class="xs muted">این اطلاعات پس از تأیید شماره موبایل خریدار نمایش داده شد.</p>
+        @elseif ($gate['locked'])
+            <p class="notice err small">به‌دلیل چند تلاش ناموفق، نمایش اطلاعات خریدار برای این فاکتور موقتاً بسته شد. بعداً دوباره امتحان کنید یا از فروشنده بپرسید.</p>
+        @else
+            <p class="small">برای دیدن نام خریدار، شماره موبایل خریدارِ ثبت‌شده روی فاکتور را وارد کنید.</p>
+            <form class="stack-sm" method="post" action="{{ route('public.verify.reveal', request()->route('token')) }}" novalidate>
+                @csrf
+                <div class="field">
+                    <label for="rv-mobile" class="sr-only">موبایل خریدار</label>
+                    <div class="input-wrap ltr-input"><input id="rv-mobile" name="buyer_mobile" inputmode="tel" maxlength="14" placeholder="۰۹۱۲۳۴۵۶۷۸۹" autocomplete="off" required></div>
+                    @if (! empty($gate['error']))<div class="err" role="alert">{{ $gate['error'] }}</div>@endif
+                </div>
+                <button class="btn btn-gold block" type="submit">نمایش اطلاعات خریدار</button>
+                <p class="xs muted">هر فاکتور را فقط با {{ \App\Support\Digits::toPersian((string) config('talata.public.reveal_max_numbers')) }} شماره‌ی متفاوت می‌توان امتحان کرد (باقی‌مانده: {{ \App\Support\Digits::toPersian((string) $gate['remaining']) }}).</p>
+            </form>
+        @endif
+    </section>
+    @endunless
+
+    <p class="xs muted">این بررسی فقط تطبیق برگه با رکورد ثبت‌شده در زرلیو است؛ تضمین تحویل کالا، عیار آزمایشگاهی، دریافت پول یا ثبت در سامانه مؤدیان نیست. اطلاعات خریدار فقط برای کسی که شماره‌ی خریدار را بداند نمایش داده می‌شود.</p>
 </x-layouts.public>

@@ -160,4 +160,34 @@ class PublicPagesTest extends TestCase
         $page = $this->get($path)->assertOk()->assertSee('باطل‌شده و جایگزین‌شده');
         $page->assertDontSee($draftId)->assertDontSee('/v/', false);
     }
+
+    public function test_buyer_details_are_revealed_only_after_the_right_mobile_and_at_most_three_numbers(): void
+    {
+        $user = $this->merchant();
+        $invoice = Invoice::where('public_id', $this->issued($user, 'خانم آزمون'))->firstOrFail();
+        $path = parse_url(app(InvoiceService::class)->verifyUrl($invoice), PHP_URL_PATH);
+        auth()->logout();
+
+        // The plain verify page never shows the buyer; it offers the mobile gate instead.
+        $this->get($path)->assertOk()->assertDontSee('خانم آزمون')->assertSee('نمایش اطلاعات خریدار');
+
+        // Wrong numbers never reveal and count down the allowance; the same wrong number twice is one attempt.
+        $this->post($path, ['buyer_mobile' => '09120000001'])->assertOk()->assertDontSee('خانم آزمون')->assertSee('هم‌خوان نیست');
+        $this->post($path, ['buyer_mobile' => '09120000001'])->assertOk()->assertDontSee('خانم آزمون');
+        $this->post($path, ['buyer_mobile' => '09120000002'])->assertOk()->assertDontSee('خانم آزمون');
+        // A third distinct wrong number locks the gate; even the correct number no longer reveals.
+        $this->post($path, ['buyer_mobile' => '09120000003'])->assertOk();
+        $this->post($path, ['buyer_mobile' => '09351234567'])->assertOk()->assertDontSee('خانم آزمون')->assertSee('موقتاً بسته');
+    }
+
+    public function test_the_right_buyer_mobile_reveals_the_name(): void
+    {
+        $user = $this->merchant();
+        $invoice = Invoice::where('public_id', $this->issued($user, 'آقای خریدار'))->firstOrFail();
+        $path = parse_url(app(InvoiceService::class)->verifyUrl($invoice), PHP_URL_PATH);
+        auth()->logout();
+
+        // Any accepted Iranian form of the right number reveals the buyer's name (and a masked mobile).
+        $this->post($path, ['buyer_mobile' => '+989351234567'])->assertOk()->assertSee('آقای خریدار')->assertSee('0935•••4567');
+    }
 }
