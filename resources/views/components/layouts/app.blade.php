@@ -75,5 +75,6 @@
     @endforeach
 </nav>
 <div class="toasts" aria-live="polite"></div>
+<div data-install-prompt hidden></div>
 </body>
 </html>

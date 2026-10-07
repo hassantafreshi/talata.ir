@@ -9,6 +9,10 @@ import './lib/otp.js';
 // Lazy page modules: each page loads only its own code (weak-network budget).
 const pages = import.meta.glob('./pages/*.js');
 
+// Capture the Android/Chromium install prompt as early as possible: it can fire before the (lazily loaded)
+// install-prompt banner attaches its own listener, so stash it for the banner to use.
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); window.__bip = e; });
+
 function offlineBanner() {
   const el = document.querySelector('[data-offline-banner]');
   if (!el) return;
@@ -57,6 +61,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (document.querySelector('[data-jdp]')) import('./lib/datepicker.js').then((m) => m.initDatePickers());
   // The post-login fingerprint offer loads only on the page that actually shows the card.
   if (document.querySelector('[data-passkey-offer]')) import('./lib/passkey-offer.js').then((m) => m.default());
+  // «Add to home screen» hint, once the merchant is inside the app (logged-in shell only).
+  if (document.querySelector('[data-install-prompt]')) import('./lib/install-prompt.js').then((m) => m.default());
   flash();
   const page = document.body.dataset.page;
   const loader = page && pages[`./pages/${page}.js`];

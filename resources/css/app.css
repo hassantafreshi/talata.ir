@@ -122,7 +122,14 @@ h1.h2 { font-size: var(--t-fs-h2); line-height: var(--t-lh-tight); margin: 0; }
 .tabs a { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 52px; font-size: 11.5px; font-weight: 500; color: var(--t-muted-on-chrome); text-decoration: none; }
 .tabs a[aria-current="page"] { color: var(--t-gold-bright); }
 .topnav { display: none; }
+/* «Add to home screen» banner: floats above the mobile tab bar; a card on desktop. */
+.install-banner { position: fixed; inset-inline: 10px; bottom: calc(68px + env(safe-area-inset-bottom)); z-index: var(--t-z-nav); display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; background: var(--t-chrome); border: 1px solid var(--t-chrome-line); border-radius: var(--t-r-card, 14px); padding: 14px 16px; box-shadow: 0 6px 24px rgba(0,0,0,.28); }
+.install-banner .install-body { display: flex; flex-direction: column; gap: 4px; flex: 1 1 60%; min-width: 0; color: var(--t-text-on-chrome); }
+.install-banner .install-actions { display: flex; gap: 8px; align-items: center; flex: 0 0 auto; }
+.install-banner .install-steps { margin: 6px 0 0; padding-inline-start: 18px; display: flex; flex-direction: column; gap: 6px; }
+.install-banner .install-steps svg { vertical-align: middle; margin-inline: 2px; }
 @media (min-width: 1024px) {
+  .install-banner { inset-inline: auto; inset-inline-end: 24px; bottom: 24px; max-width: 420px; }
   .tabs { display: none; }
   .topnav { display: flex; gap: 4px; align-items: center; margin-inline-start: auto; }
   .topnav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: var(--t-r-pill); color: var(--t-text-on-chrome); text-decoration: none; font-weight: 500; font-size: 15px; }
