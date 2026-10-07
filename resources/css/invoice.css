@@ -14,7 +14,13 @@
 @media screen and (min-width: 821px) { .inv.po-landscape { width: 297mm; min-height: 210mm; } }
 .inv.t-small { font-size: 10pt; } .inv.t-large { font-size: 12.5pt; }
 .inv.d-compact td, .inv.d-compact th { padding: 3pt 5pt; }
-.inv .accent { color: #000; } .inv.a-gold_deep .accent { color: #8A5A00; } .inv.a-gold_deep th { background: #FBF6E8; }
+/* Accent colour (layout editor «رنگ»): shop name, header rule and a light tint on table headers. */
+.inv { --inv-accent: #111111; }
+.inv.a-gold_deep { --inv-accent: #8A5A00; } .inv.a-navy { --inv-accent: #1F3A5F; } .inv.a-emerald { --inv-accent: #0F5E46; }
+.inv.a-burgundy { --inv-accent: #7A1F2B; } .inv.a-brown { --inv-accent: #5B3A1E; }
+.inv .accent { color: var(--inv-accent); }
+.inv:not(.a-ink) th { background: #F4F1EA; background: color-mix(in srgb, var(--inv-accent) 10%, #fff); }
+.inv:not(.a-ink) .inv-head { border-bottom-color: var(--inv-accent); }
 .inv .num { font-variant-numeric: tabular-nums; }
 .inv .ltr { direction: ltr; unicode-bidi: isolate; }
 
@@ -102,6 +108,14 @@
 .inv-frame { background: #E6E2D8; border-radius: 14px; padding: 10px; overflow: hidden; container-type: inline-size; }
 .inv-frame.print .inv { transform-origin: top right; margin: 0; box-shadow: 0 6px 18px -10px rgba(0,0,0,.4); }
 .inv-frame.mobile { max-width: 400px; margin: 0 auto; }
+/* The A4 preview is always a true sheet (JS scales it to fit), whatever the viewport: undo the phone reflow. */
+.inv-frame.print .inv { width: 210mm; min-height: 297mm; max-width: none; padding: 14mm 14mm 12mm; font-size: 11pt; }
+.inv-frame.print .inv.po-landscape { width: 297mm; min-height: 210mm; }
+.inv-frame.print .inv.t-small { font-size: 10pt; } .inv-frame.print .inv.t-large { font-size: 12.5pt; }
+.inv-frame.print .inv-head { grid-template-columns: minmax(0, 1fr) 34mm; }
+.inv-frame.print .qr-box { width: 34mm; } .inv-frame.print .qr-box svg { width: 30mm; height: 30mm; }
+.inv-frame.print .inv-sum { grid-template-columns: 1fr 82mm; }
+.inv-frame.print .inv-split { grid-template-columns: 1fr 1fr; }
 @container (max-width: 520px) {
   .inv-frame.mobile .inv { width: 100%; min-height: 0; padding: 16px 12px; font-size: 10pt; }
   .inv-frame.mobile .inv-head { grid-template-columns: 1fr 30mm; }

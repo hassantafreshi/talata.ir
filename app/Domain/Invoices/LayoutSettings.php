@@ -15,6 +15,12 @@ final class LayoutSettings
 
     public const BLOCK_KINDS = ['shop_name', 'address', 'contact_primary', 'contact_mobile_extra', 'website', 'social', 'license_union', 'license_online'];
 
+    /** Print-safe accent presets (dark enough to read on white paper). «custom» uses typography.accent_hex. */
+    public const ACCENTS = ['ink' => '#111111', 'gold_deep' => '#8A5A00', 'navy' => '#1F3A5F', 'emerald' => '#0F5E46', 'burgundy' => '#7A1F2B', 'brown' => '#5B3A1E'];
+
+    /** WCAG contrast of the accent against white paper; below this a custom colour is refused. */
+    public const MIN_ACCENT_CONTRAST = 4.5;
+
     public const COLUMNS = ['row_no', 'name', 'description', 'weight_g', 'purity', 'weight_750', 'unit_rate', 'wage', 'profit', 'vat', 'amount'];
 
     public static function preset(string $id): array
@@ -82,7 +88,15 @@ final class LayoutSettings
             $t = $input['typography'];
             $out['typography']['text_size'] = in_array($t['text_size'] ?? '', ['normal', 'large'], true) ? $t['text_size'] : 'normal';
             $out['typography']['density'] = in_array($t['density'] ?? '', ['comfortable', 'compact'], true) ? $t['density'] : 'comfortable';
-            $out['typography']['accent'] = in_array($t['accent'] ?? '', ['ink', 'gold_deep'], true) ? $t['accent'] : 'ink';
+            $accent = (string) ($t['accent'] ?? '');
+            $hex = strtolower((string) ($t['accent_hex'] ?? ''));
+            if ($accent === 'custom' && self::readableOnWhite($hex)) {
+                $out['typography']['accent'] = 'custom';
+                $out['typography']['accent_hex'] = $hex;
+            } else {
+                $out['typography']['accent'] = array_key_exists($accent, self::ACCENTS) ? $accent : 'ink';
+                unset($out['typography']['accent_hex']);
+            }
         }
 
         if (isset($input['print'])) {
@@ -114,5 +128,33 @@ final class LayoutSettings
         }
 
         return array_values(array_intersect(self::COLUMNS, $cols));
+    }
+
+    /** The accent colour (#rrggbb) a layout prints with. */
+    public static function accentHex(array $settings): string
+    {
+        $t = $settings['typography'] ?? [];
+        if (($t['accent'] ?? '') === 'custom' && self::readableOnWhite((string) ($t['accent_hex'] ?? ''))) {
+            return strtolower($t['accent_hex']);
+        }
+
+        return self::ACCENTS[$t['accent'] ?? 'ink'] ?? self::ACCENTS['ink'];
+    }
+
+    /** #rrggbb with WCAG contrast ≥ MIN_ACCENT_CONTRAST against white (light colours vanish on paper). */
+    public static function readableOnWhite(string $hex): bool
+    {
+        if (! preg_match('/^#[0-9a-fA-F]{6}$/', $hex)) {
+            return false;
+        }
+        $lin = function (int $c) {
+            $c /= 255;
+
+            return $c <= 0.03928 ? $c / 12.92 : (($c + 0.055) / 1.055) ** 2.4;
+        };
+        [$r, $g, $b] = [hexdec(substr($hex, 1, 2)), hexdec(substr($hex, 3, 2)), hexdec(substr($hex, 5, 2))];
+        $l = 0.2126 * $lin($r) + 0.7152 * $lin($g) + 0.0722 * $lin($b);
+
+        return 1.05 / ($l + 0.05) >= self::MIN_ACCENT_CONTRAST;
     }
 }

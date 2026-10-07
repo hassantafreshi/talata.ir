@@ -193,6 +193,10 @@ class SettingsController extends BaseController
     {
         $this->ent()->assertCan($this->tenant(), 'invoice.customize', 'ویرایش ظاهر فاکتور در پلن پایه و حرفه‌ای است.');
         $data = $request->validate(['settings' => ['required', 'array'], 'version' => ['required', 'integer']]);
+        $t = $data['settings']['typography'] ?? [];
+        if (($t['accent'] ?? '') === 'custom' && ! LayoutSettings::readableOnWhite((string) ($t['accent_hex'] ?? ''))) {
+            throw new DomainError('ACCENT_TOO_LIGHT', 'این رنگ روی کاغذ سفید کم‌رنگ چاپ می‌شود و خوانا نیست. رنگ تیره‌تری انتخاب کنید.', 422, ['errors' => ['accent_hex' => ['رنگ تیره‌تری انتخاب کنید.']]]);
+        }
         $layout = DB::transaction(function () use ($data) {
             $layout = InvoiceLayout::query()->lockForUpdate()->firstOrFail();
             if ($layout->version !== (int) $data['version']) {

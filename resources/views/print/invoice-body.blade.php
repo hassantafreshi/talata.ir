@@ -25,8 +25,12 @@
     $classes = 'inv t-'.($t['text_size'] ?? 'normal').' d-'.($t['density'] ?? 'comfortable').' a-'.($t['accent'] ?? 'ink').(($t['dividers'] ?? true) ? '' : ' no-div')
         .' pm-'.(($L['print']['margins'] ?? 'normal') === 'narrow' ? 'narrow' : 'normal').' po-'.(($L['print']['orientation'] ?? 'portrait') === 'landscape' ? 'landscape' : 'portrait');
     $isDraft = ($v['status'] ?? '') === 'draft';
+    $accentHex = \App\Domain\Invoices\LayoutSettings::accentHex($L);
 @endphp
-<article class="{{ $classes }}" aria-label="فاکتور فروش {{ $v['number'] }}">
+{{-- Custom accent: CSS variable via a nonce'd rule (no inline style under the CSP); the layout editor sets it
+     with JS for previews fetched separately. Presets come from invoice.css classes. --}}
+@if (($t['accent'] ?? '') === 'custom')<style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">.inv[data-accent="{{ $accentHex }}"]{--inv-accent:{{ $accentHex }}}</style>@endif
+<article class="{{ $classes }}" data-accent="{{ $accentHex }}" aria-label="فاکتور فروش {{ $v['number'] }}">
     @if (! empty($sample))<span class="sample-stamp">پیش‌نمایش با داده نمونه</span>@endif
     @if (($v['status'] ?? '') === 'void')<div class="void-stamp" aria-hidden="true">باطل شد</div>@endif
 
