@@ -95,6 +95,9 @@ return [
         'max_copies_per_invoice' => 3,         // copies to other numbers the merchant typed
         'max_copy_recipients_per_send' => 3,
         'awaiting_credit_max_days' => 7,      // invoice SMS waiting for credit are sent when credit arrives within this window
+        // Non-production only: seed new shops with this much SMS credit (toman) so invoice SMS can be tested
+        // end-to-end without a purchase. Ignored in production; see TenantProvisioner.
+        'starter_credit_toman' => (int) env('TALATA_STARTER_SMS_CREDIT_TOMAN', 0),
         'resend_min_minutes' => 10,
         'per_recipient_per_tenant_daily' => 3,
         'per_recipient_global_free_daily' => 2,

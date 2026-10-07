@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use App\Domain\Market\QuoteService;
 use App\Models\PricingVersion;
+use App\Models\SmsCreditLot;
 use App\Models\TaxRule;
+use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 
 /** Production-safe baseline: pricing v1, sample tax rules, first quote fetch. No demo tenants here. */
@@ -29,5 +31,31 @@ class DatabaseSeeder extends Seeder
         ]);
 
         app(QuoteService::class)->refresh();
+
+        $this->seedStarterSmsCreditForExistingShops();
+    }
+
+    /**
+     * Non-production only: top up existing shops that have never received the test starter credit, so invoice
+     * SMS can be exercised on the test server without a purchase. Idempotent (a marker lot is created once per
+     * shop); a no-op in production and whenever TALATA_STARTER_SMS_CREDIT_TOMAN is unset.
+     */
+    private function seedStarterSmsCreditForExistingShops(): void
+    {
+        $toman = (int) config('talata.sms.starter_credit_toman');
+        if ($toman <= 0 || app()->isProduction()) {
+            return;
+        }
+        $note = 'اعتبار آزمایشی اولیه (محیط تست)';
+        Tenant::query()->each(function (Tenant $tenant) use ($toman, $note) {
+            $already = SmsCreditLot::withoutGlobalScope('tenant')->where('tenant_id', $tenant->id)->where('note', $note)->exists();
+            if ($already) {
+                return;
+            }
+            SmsCreditLot::withoutGlobalScope('tenant')->create([
+                'tenant_id' => $tenant->id, 'source' => 'PROVIDER_ADJUST', 'amount_irr' => (string) ($toman * 10), 'remaining_irr' => (string) ($toman * 10),
+                'carries_over' => true, 'expires_at' => null, 'plan_at_purchase' => 'free', 'note' => $note,
+            ]);
+        });
     }
 }
