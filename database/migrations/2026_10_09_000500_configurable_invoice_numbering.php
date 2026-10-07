@@ -29,7 +29,7 @@ return new class extends Migration
             $t->string('series', 10)->default('SALE');
             $t->string('period_key', 12)->nullable();
         });
-        DB::table('invoice_counters')->update(['period_key' => DB::raw('jalali_year::text')]);
+        DB::table('invoice_counters')->update(['period_key' => DB::raw('CAST(jalali_year AS VARCHAR(12))')]);
         Schema::table('invoice_counters', function (Blueprint $t) {
             $t->unsignedSmallInteger('jalali_year')->nullable()->change();
             $t->dropUnique(['tenant_id', 'jalali_year']);

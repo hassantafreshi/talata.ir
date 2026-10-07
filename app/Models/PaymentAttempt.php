@@ -12,7 +12,7 @@ class PaymentAttempt extends Model
 
     protected function casts(): array
     {
-        return ['raw_result_redacted' => 'array', 'next_reconcile_at' => 'datetime', 'callback_at' => 'datetime', 'verified_at' => 'datetime', 'amount_irr' => 'string'];
+        return ['raw_result_redacted' => 'array', 'next_reconcile_at' => 'datetime', 'callback_at' => 'datetime', 'verified_at' => 'datetime', 'amount_irr' => 'decimal:0'];
     }
 
     public function order(): BelongsTo

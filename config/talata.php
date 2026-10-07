@@ -119,6 +119,9 @@ return [
         // Technical assumption (master prompt §8): one 180 s refresh plus 60 s transport grace. docs/ASSUMPTIONS.md
         'stale_after_seconds' => (int) env('TALATA_QUOTE_STALE_AFTER_SECONDS', 240),
         'client_poll_seconds' => 180,
+        // Shared hosting without cron/scheduler: refresh when a price is read and the last fetch is older than
+        // the interval (single-flight). Test server only; production uses the scheduler (talata:quotes).
+        'refresh_on_read' => (bool) env('TALATA_QUOTES_REFRESH_ON_READ', false),
     ],
 
     'invoices' => [

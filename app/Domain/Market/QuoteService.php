@@ -148,8 +148,28 @@ final class QuoteService
         return $quote->fetched_at->lt(now()->subSeconds((int) config('talata.quotes.stale_after_seconds', 240))) ? 'STALE' : 'FRESH';
     }
 
+    /**
+     * Shared hosting without a scheduler (TALATA_QUOTES_REFRESH_ON_READ=true, test server only): a page or API
+     * call that reads prices refreshes them first when the last fetch is older than the 180 s interval. Still
+     * single-flight (refresh() holds a lock) and paused for one interval after a failed fetch.
+     */
+    public function refreshIfDue(): void
+    {
+        if (! config('talata.quotes.refresh_on_read')) {
+            return;
+        }
+        $interval = (int) config('talata.quotes.interval_seconds', 180);
+        $last = MarketQuote::query()->where('asset', 'GOLD_18_SELL')->max('fetched_at');
+        $lastError = Cache::get('talata.quotes.last_error');
+        if (($last && now()->subSeconds($interval)->lt($last)) || ($lastError && now()->subSeconds($interval)->lt($lastError))) {
+            return;
+        }
+        $this->refresh();
+    }
+
     public function latestDto(string $tz): array
     {
+        $this->refreshIfDue();
         $q = $this->latest();
 
         return [
@@ -167,6 +187,7 @@ final class QuoteService
 
     public function board(string $tz): array
     {
+        $this->refreshIfDue();
         $rows = [];
         foreach (self::ASSETS as $asset) {
             $q = $this->latest($asset);

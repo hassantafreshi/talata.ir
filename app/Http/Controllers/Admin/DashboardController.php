@@ -105,7 +105,7 @@ class DashboardController extends AdminController
                 ['label' => 'فروشگاه‌های رایگانِ رسیده به سقف فاکتور', 'count' => $directory->query(['plan' => 'free', 'quota' => 'at_cap'])->count(), 'url' => route('admin.tenants', ['plan' => 'free', 'quota' => 'at_cap'])],
                 ['label' => 'اعتبار پیامک رایگانِ رو به انقضا (۳ روز)', 'count' => SmsCreditLot::withoutGlobalScope('tenant')->where('remaining_irr', '>', 0)->whereBetween('expires_at', [now(), now()->addDays(3)])->count(), 'url' => route('admin.tenants')],
             ],
-            'techErrors' => DB::connection('pgsql_log')->table('system_logs')->where('created_at', '>=', $day)->whereIn('level', ['warning', 'error', 'critical', 'alert', 'emergency'])
+            'techErrors' => DB::connection(config('database.log_connection'))->table('system_logs')->where('created_at', '>=', $day)->whereIn('level', ['warning', 'error', 'critical', 'alert', 'emergency'])
                 ->selectRaw('service, level, count(*) c')->groupBy('service', 'level')->orderByDesc('c')->limit(8)->get(),
             'needsPasskey' => (bool) config('talata.admin.require_passkey') && ! Passkey::query()->where('owner_type', 'staff')->where('owner_id', $this->staff()->id)->exists(),
         ]);

@@ -38,7 +38,7 @@ class QuotesController extends AdminController
             'emergency' => $quotes->emergency(),
             'history' => $history,
             'staffNames' => StaffUser::query()->whereIn('id', $history->pluck('created_by_staff')->merge($history->pluck('cancelled_by_staff'))->filter())->pluck('name', 'id'),
-            'fetches' => DB::connection('pgsql_log')->table('system_logs')->where('service', 'quotes')->orderByDesc('id')->limit(15)->get(['created_at', 'level', 'message', 'context']),
+            'fetches' => DB::connection(config('database.log_connection'))->table('system_logs')->where('service', 'quotes')->orderByDesc('id')->limit(15)->get(['created_at', 'level', 'message', 'context']),
             'lastError' => Cache::get('talata.quotes.last_error'),
             'config' => config('talata.quotes'),
             'driver' => config('talata.drivers.quotes'),

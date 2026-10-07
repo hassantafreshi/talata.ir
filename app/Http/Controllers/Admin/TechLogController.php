@@ -15,7 +15,7 @@ class TechLogController extends Controller
 
     public function index(Request $request)
     {
-        $db = DB::connection('pgsql_log');
+        $db = DB::connection(config('database.log_connection'));
         $q = $db->table('system_logs')->orderByDesc('id');
         if ($s = $request->query('service')) {
             $q->where('service', $s);
@@ -27,7 +27,7 @@ class TechLogController extends Controller
             $q->where('request_id', strtolower($r));
         }
         if ($t = trim((string) $request->query('q'))) {
-            $q->where('message', 'ilike', '%'.addcslashes($t, '%_\\').'%');
+            $q->whereLike('message', '%'.addcslashes($t, '%_\\').'%');
         }
         if ($t = $request->query('tenant')) {
             $q->where('tenant_id', (int) $t);

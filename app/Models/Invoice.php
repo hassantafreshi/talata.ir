@@ -23,9 +23,9 @@ class Invoice extends Model
     {
         return [
             'snapshot' => 'array', 'rate_provenance' => 'array', 'verify_token' => 'encrypted', 'rate_fetched_at' => 'datetime', 'issued_at' => 'datetime', 'voided_at' => 'datetime',
-            'accepted_rate_irr' => 'string', 'accepted_buy_rate_irr' => 'string', 'gold_total_irr' => 'string', 'misc_total_irr' => 'string', 'payable_irr' => 'string',
-            'sales_total_irr' => 'string', 'gold_in_total_irr' => 'string', 'wage_irr' => 'string', 'profit_irr' => 'string', 'vat_irr' => 'string',
-            'gold_out_weight_750' => 'string', 'gold_in_weight_750' => 'string',
+            'accepted_rate_irr' => 'decimal:0', 'accepted_buy_rate_irr' => 'decimal:0', 'gold_total_irr' => 'decimal:0', 'misc_total_irr' => 'decimal:0', 'payable_irr' => 'decimal:0',
+            'sales_total_irr' => 'decimal:0', 'gold_in_total_irr' => 'decimal:0', 'wage_irr' => 'decimal:0', 'profit_irr' => 'decimal:0', 'vat_irr' => 'decimal:0',
+            'gold_out_weight_750' => 'decimal:3', 'gold_in_weight_750' => 'decimal:3',
         ];
     }
 

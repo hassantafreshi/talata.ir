@@ -13,6 +13,7 @@ use App\Models\Invoice;
 use App\Models\SmsMessage;
 use App\Models\SmsSetting;
 use App\Models\Tenant;
+use App\Support\DbLock;
 use App\Support\Digits;
 use App\Support\Money;
 use Brick\Math\BigInteger;
@@ -130,7 +131,7 @@ final class SmsService
             }
 
             // Serialize per recipient across tenants (global caps).
-            DB::select('SELECT pg_advisory_xact_lock(hashtext(?))', ['sms:'.$recipient]);
+            DbLock::key('sms:'.$recipient);
 
             $previous = SmsMessage::query()->where('invoice_id', $invoice->id)->where('purpose', 'INVOICE')->orderByDesc('id')->get();
             $last = $previous->first();
@@ -202,7 +203,7 @@ final class SmsService
 
                     continue;
                 }
-                DB::select('SELECT pg_advisory_xact_lock(hashtext(?))', ['sms:'.$mobile]);
+                DbLock::key('sms:'.$mobile);
                 $copies = SmsMessage::query()->where('invoice_id', $invoice->id)->where('purpose', 'INVOICE_COPY')->whereNotIn('status', ['CANCELLED', 'FAILED']);
                 if ((clone $copies)->where('recipient', $mobile)->exists()) {
                     $results[] = ['mobile' => $mobile, 'status' => 'SKIPPED', 'code' => 'SMS_ALREADY_SENT', 'message_fa' => 'این فاکتور قبلاً برای این شماره فرستاده شده است.'];

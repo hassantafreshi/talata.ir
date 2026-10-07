@@ -127,10 +127,19 @@ final class DashboardService
      */
     private function aggregate(int $tenantId, CarbonImmutable $start, CarbonImmutable $end, string $tz, string $unit): array
     {
-        $local = "(issued_at AT TIME ZONE 'UTC' AT TIME ZONE ?)";
-        $key = $unit === 'hour' ? "to_char({$local}, 'YYYY-MM-DD HH24')" : "to_char({$local}, 'YYYY-MM-DD')";
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            // Test server only: SQLite has no time zones, so the shop's current UTC offset is applied
+            // (Asia/Tehran has had no daylight saving since 2022, so this is exact there).
+            $offset = (int) round(CarbonImmutable::now($tz)->utcOffset());
+            $key = "strftime('".($unit === 'hour' ? '%Y-%m-%d %H' : '%Y-%m-%d')."', issued_at, '".($offset >= 0 ? '+' : '').$offset." minutes')";
+            $bindings = [];
+        } else {
+            $local = "(issued_at AT TIME ZONE 'UTC' AT TIME ZONE ?)";
+            $key = $unit === 'hour' ? "to_char({$local}, 'YYYY-MM-DD HH24')" : "to_char({$local}, 'YYYY-MM-DD')";
+            $bindings = [$tz];
+        }
         $rows = DB::table('invoices')
-            ->selectRaw("{$key} AS k, ".self::SUMS, [$tz])
+            ->selectRaw("{$key} AS k, ".self::SUMS, $bindings)
             ->where('tenant_id', $tenantId)->where('status', 'issued')
             ->where('issued_at', '>=', $start->utc())->where('issued_at', '<', $end->utc())
             ->groupBy('k')->get();
@@ -154,8 +163,8 @@ final class DashboardService
 
     /** Wage and profit in grams = amount ÷ the invoice's accepted 18K rate per gram (invoices without a rate add 0 g). */
     private const SUMS = 'COUNT(*) AS count, COALESCE(SUM(sales_total_irr),0) AS sales_irr, COALESCE(SUM(gold_out_weight_750),0) AS sales_g, '
-        .'COALESCE(SUM(wage_irr),0) AS wage_irr, COALESCE(SUM(CASE WHEN accepted_rate_irr > 0 THEN wage_irr / accepted_rate_irr ELSE 0 END),0) AS wage_g, '
-        .'COALESCE(SUM(profit_irr),0) AS profit_irr, COALESCE(SUM(CASE WHEN accepted_rate_irr > 0 THEN profit_irr / accepted_rate_irr ELSE 0 END),0) AS profit_g, '
+        .'COALESCE(SUM(wage_irr),0) AS wage_irr, COALESCE(SUM(CASE WHEN accepted_rate_irr > 0 THEN wage_irr * 1.0 / accepted_rate_irr ELSE 0 END),0) AS wage_g, '
+        .'COALESCE(SUM(profit_irr),0) AS profit_irr, COALESCE(SUM(CASE WHEN accepted_rate_irr > 0 THEN profit_irr * 1.0 / accepted_rate_irr ELSE 0 END),0) AS profit_g, '
         .'COALESCE(SUM(gold_in_total_irr),0) AS gold_in_irr, COALESCE(SUM(gold_in_weight_750),0) AS gold_in_g, COALESCE(SUM(vat_irr),0) AS vat_irr';
 
     /** @return array<string,BigDecimal> */

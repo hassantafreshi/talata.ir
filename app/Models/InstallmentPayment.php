@@ -14,6 +14,6 @@ class InstallmentPayment extends Model
 
     protected function casts(): array
     {
-        return ['allocations' => 'array', 'paid_on' => 'date', 'reversed_at' => 'datetime', 'amount_irr' => 'string'];
+        return ['allocations' => 'array', 'paid_on' => 'date', 'reversed_at' => 'datetime', 'amount_irr' => 'decimal:0'];
     }
 }

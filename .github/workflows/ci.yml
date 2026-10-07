@@ -38,7 +38,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: pdo_pgsql, gd, intl, bcmath
+          extensions: pdo_pgsql, pdo_sqlite, gd, intl, bcmath
           coverage: none
 
       - uses: actions/setup-node@v4
@@ -70,6 +70,9 @@ jobs:
       - name: PHP tests (PostgreSQL)
         run: php artisan test
 
+      - name: PHP tests (SQLite — shared-hosting test server mode)
+        run: touch database/testing.sqlite && vendor/bin/phpunit -c phpunit.sqlite.xml
+
       - name: Dependency audit
         run: composer audit --no-interaction && npm audit --omit=dev
 
@@ -79,3 +82,86 @@ jobs:
           name: bundle-report
           path: bundle-report.json
           if-no-files-found: ignore
+
+  # Test server on Hostinger shared hosting (docs/DEPLOYMENT.md). Runs only after green tests, only for the
+  # working branch, and only when the repository secrets below exist; otherwise it is skipped with a notice.
+  # Secrets: HOSTINGER_SSH_HOST, HOSTINGER_SSH_PORT, HOSTINGER_SSH_USER, HOSTINGER_SSH_PASSWORD, BRSAPI_KEY,
+  # KAVENEGAR_API_KEY. Nothing secret is written to the repository or printed.
+  deploy-test-server:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/claude/friendly-hopper-ntt0vl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: deploy-test-server
+      cancel-in-progress: false
+    env:
+      SITE: violet-leopard-846931.hostingersite.com
+      SSH_HOST: ${{ secrets.HOSTINGER_SSH_HOST }}
+      SSH_PORT: ${{ secrets.HOSTINGER_SSH_PORT }}
+      SSH_USER: ${{ secrets.HOSTINGER_SSH_USER }}
+      SSHPASS: ${{ secrets.HOSTINGER_SSH_PASSWORD }}
+      BRSAPI_KEY: ${{ secrets.BRSAPI_KEY }}
+      KAVENEGAR_API_KEY: ${{ secrets.KAVENEGAR_API_KEY }}
+    steps:
+      - name: Test server configured?
+        id: cfg
+        run: |
+          if [ -z "$SSH_HOST" ] || [ -z "$SSHPASS" ] || [ -z "$SSH_USER" ]; then
+            echo "::notice::Hostinger secrets are not set; test-server deploy skipped."
+            echo "go=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.go == 'true'
+
+      - uses: shivammathur/setup-php@v2
+        if: steps.cfg.outputs.go == 'true'
+        with:
+          php-version: '8.3'
+          extensions: pdo_sqlite, gd, intl, bcmath
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        if: steps.cfg.outputs.go == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Build release
+        if: steps.cfg.outputs.go == 'true'
+        run: |
+          composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress
+          npm ci && npm run build
+          tar czf "$RUNNER_TEMP/release.tgz" --exclude=./.git --exclude=./node_modules --exclude=./tests --exclude=./docs \
+            --exclude=./storage --exclude=./.env --exclude=./database/testing.sqlite .
+
+      - name: Upload and switch release
+        if: steps.cfg.outputs.go == 'true'
+        run: |
+          sudo apt-get install -y -qq sshpass > /dev/null
+          umask 077
+          {
+            [ -n "$BRSAPI_KEY" ] && echo "BRSAPI_KEY=$BRSAPI_KEY"
+            [ -n "$KAVENEGAR_API_KEY" ] && echo "KAVENEGAR_API_KEY=$KAVENEGAR_API_KEY"
+            echo "KAVENEGAR_SENDER=10007770000707"
+            echo "TEST_ADMIN_MOBILE=09396727215"
+            echo "APP_URL=https://$SITE"
+          } > "$RUNNER_TEMP/secrets.env"
+          DIR="domains/$SITE"
+          OPTS="-o StrictHostKeyChecking=accept-new -o ConnectTimeout=30"
+          sshpass -e scp $OPTS -P "${SSH_PORT:-22}" "$RUNNER_TEMP/release.tgz" scripts/deploy/hostinger-test.sh "$RUNNER_TEMP/secrets.env" "$SSH_USER@$SSH_HOST:$DIR/"
+          sshpass -e ssh $OPTS -p "${SSH_PORT:-22}" "$SSH_USER@$SSH_HOST" \
+            "bash \"$DIR/hostinger-test.sh\" \"$DIR\" \"\$HOME/$DIR/release.tgz\" \"${GITHUB_SHA::12}\" \"\$HOME/$DIR/secrets.env\"; rm -f \"$DIR/hostinger-test.sh\""
+          rm -f "$RUNNER_TEMP/secrets.env"
+
+      - name: Smoke test
+        if: steps.cfg.outputs.go == 'true'
+        run: |
+          for path in / /login /terms /mazneh; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://$SITE$path")
+            echo "$path $code"
+          done
+          curl -fsS "https://$SITE/" | grep -q 'زرلیو'

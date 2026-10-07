@@ -90,7 +90,7 @@ Artisan::command('talata:staff {mobile} {name} {--role=admin} {--deactivate}', f
 
 Artisan::command('talata:logs-prune', function () {
     $days = (int) config('talata.logs.tech_retention_days');
-    $n = DB::connection('pgsql_log')->table('system_logs')->where('created_at', '<', now()->subDays($days))->delete();
+    $n = DB::connection(config('database.log_connection'))->table('system_logs')->where('created_at', '<', now()->subDays($days))->delete();
     $this->info("deleted {$n} technical log rows older than {$days} days (activity log is append-only and kept)");
 })->purpose('Apply technical log retention');
 

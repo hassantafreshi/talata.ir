@@ -10,6 +10,6 @@ class AffiliatePayout extends Model
 
     protected function casts(): array
     {
-        return ['paid_at' => 'datetime', 'amount_irr' => 'string'];
+        return ['paid_at' => 'datetime', 'amount_irr' => 'decimal:0'];
     }
 }

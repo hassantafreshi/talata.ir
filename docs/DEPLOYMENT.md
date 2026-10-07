@@ -215,3 +215,14 @@ cron کاربر `www-data`:
 ## ۱۲. بازگشت (rollback)
 
 `git checkout <نسخه قبل>`، `composer install --no-dev`، `npm ci && npm run build`، cacheها، `php artisan queue:restart`. migrationها فقط اضافه‌کننده‌اند؛ `migrate:rollback` را فقط پس از بررسی `down()` و پشتیبان تازه اجرا کنید. فاکتورهای صادرشده snapshot دارند و با بازگشت کد تغییر نمی‌کنند.
+
+## ۱۳. سرور آزمایشی هاستینگر (shared hosting) — 2026-10-07
+
+برای آزمون دنیای واقعی پیش از سرور اصلی. **تولید همچنان PostgreSQL با زمان‌بند و صف است**؛ این حالت فقط برای آزمون است.
+
+- **پایگاه داده:** یک فایل SQLite داخل پوشه سایت (`~/domains/<دامنه>/zarlio/shared/database/zarlio-test.sqlite`) تا هاستینگر یا مالک با پاک‌کردن همان پوشه همه‌چیز را حذف کند. کد روی هر دو اجرا می‌شود: قفل‌های advisory فقط در PostgreSQL (`App\Support\DbLock`)؛ در SQLite تراکنش‌ها `IMMEDIATE` هستند و نویسنده‌ها پشت هم اجرا می‌شوند؛ ستون‌های اعشاری همیشه رشته دقیق خوانده می‌شوند؛ کل آزمون‌ها در CI روی هر دو اجرا می‌شود (`phpunit.sqlite.xml`). محدودیت: یک نویسنده در لحظه — برای تعداد کم کاربر آزمایشی کافی است، نه برای فروشگاه‌های واقعی.
+- **بدون کارگر و زمان‌بند دائمی:** `QUEUE_CONNECTION=sync` (پیامک در همان درخواست فرستاده می‌شود) و `TALATA_QUOTES_REFRESH_ON_READ=true` (نرخ وقتی خوانده می‌شود و بیش از ۱۸۰ ثانیه از دریافت قبلی گذشته، تازه می‌شود؛ تک‌اجرا). برای کارهای دوره‌ای (تطبیق پیامک و پرداخت، انقضای اعتبار، یادآوری قسط) در hPanel › Advanced › Cron Jobs یک کار هر دقیقه بسازید: `cd ~/domains/<دامنه>/zarlio/current && php artisan schedule:run`.
+- **چیدمان:** `zarlio/releases/<نسخه>`، `zarlio/current` → آخرین نسخه، `zarlio/shared/{.env,storage,database}`؛ `public_html` به `zarlio/current/public` پیوند می‌شود و نسخه اصلی آن با نام `public_html.before-zarlio` می‌ماند. حذف کامل: پوشه `zarlio` را پاک و `public_html.before-zarlio` را به `public_html` برگردانید.
+- **استقرار:** کار `deploy-test-server` در `.github/workflows/ci.yml`، فقط پس از سبزشدن آزمون‌ها و فقط وقتی secretهای مخزن تنظیم شده باشند: `HOSTINGER_SSH_HOST`، `HOSTINGER_SSH_PORT`، `HOSTINGER_SSH_USER`، `HOSTINGER_SSH_PASSWORD`، `BRSAPI_KEY`، `KAVENEGAR_API_KEY`. کلیدها فقط در `shared/.env` سرور (دسترسی ۶۰۰) نوشته می‌شوند، نه در مخزن و نه در خروجی. اسکریپت سرور: `scripts/deploy/hostinger-test.sh` (PHP 8.3+ لازم؛ نسخه را در hPanel › PHP انتخاب کنید). در پایان `talata:preflight --live` اجرا می‌شود و یک درخواست فقط‌خواندنی به BrsApi و کاوه‌نگار می‌فرستد (بدون ارسال پیامک) — همین نشان می‌دهد سرویس نرخ از IP سرور جواب می‌دهد یا نه.
+- **تنظیمات آزمایشی:** `APP_ENV=staging`، درگاه پرداخت `mock` با برچسب «آزمایشی» تا کد زرین‌پال برسد؛ خرید با کد تخفیف ۱۰۰٪ بدون بانک انجام می‌شود (مدیر › قیمت‌ها › کدهای تخفیف). مدیر سامانه: `TEST_ADMIN_MOBILE` (پیش‌فرض شماره پشتیبانی) با ورود پیامکی و سپس کلید عبور.
+- **سرویس نرخ:** `TALATA_QUOTE_DRIVER=brsapi` و `BRSAPI_KEY`. این سرویس یک نرخ ۱۸ عیار می‌دهد (به‌عنوان نرخ فروش/بازار)؛ نرخ «خرید از شما» ندارد و ساخته نمی‌شود («—»؛ طلای دریافتی با نرخ دستی).

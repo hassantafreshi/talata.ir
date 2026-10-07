@@ -15,7 +15,7 @@ class EmergencyRate extends Model
 
     protected function casts(): array
     {
-        return ['starts_at' => 'datetime', 'ends_at' => 'datetime', 'cancelled_at' => 'datetime', 'value_irr' => 'string'];
+        return ['starts_at' => 'datetime', 'ends_at' => 'datetime', 'cancelled_at' => 'datetime', 'value_irr' => 'decimal:0'];
     }
 
     public function scopeActive(Builder $q, string $asset = 'GOLD_18_SELL'): Builder

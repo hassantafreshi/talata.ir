@@ -13,6 +13,6 @@ class SmsCreditLot extends Model
 
     protected function casts(): array
     {
-        return ['carries_over' => 'boolean', 'expires_at' => 'datetime', 'amount_irr' => 'string', 'remaining_irr' => 'string'];
+        return ['carries_over' => 'boolean', 'expires_at' => 'datetime', 'amount_irr' => 'decimal:0', 'remaining_irr' => 'decimal:0'];
     }
 }

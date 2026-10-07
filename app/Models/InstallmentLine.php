@@ -15,7 +15,7 @@ class InstallmentLine extends Model
 
     protected function casts(): array
     {
-        return ['due_date' => 'date', 'amount_irr' => 'string', 'paid_irr' => 'string'];
+        return ['due_date' => 'date', 'amount_irr' => 'decimal:0', 'paid_irr' => 'decimal:0'];
     }
 
     public function agreement(): BelongsTo

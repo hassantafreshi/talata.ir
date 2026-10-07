@@ -7,6 +7,7 @@ use App\Domain\DomainError;
 use App\Domain\Sms\SmsService;
 use App\Models\OtpChallenge;
 use App\Models\User;
+use App\Support\DbLock;
 use App\Support\Digits;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,7 @@ final class OtpService
         // Rejections are returned, not thrown, so the counted attempts are committed.
         $lockKey = self::lockKey($mobile, $purpose);
         $result = DB::transaction(function () use ($mobile, $ip, $code, $cfg, $purpose, $lockKey) {
-            DB::select('SELECT pg_advisory_xact_lock(hashtext(?))', ['otp:'.$purpose.':'.$mobile]);
+            DbLock::key('otp:'.$purpose.':'.$mobile);
 
             if (Cache::get($lockKey)) {
                 return new DomainError('OTP_LOCKED', 'به‌خاطر تلاش‌های ناموفق، ورود این شماره چند دقیقه قفل شد. کمی بعد دوباره امتحان کنید.', 429);

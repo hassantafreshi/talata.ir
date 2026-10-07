@@ -27,7 +27,7 @@ class IntegrationsController extends AdminController
         $default = $gateways->default();
         $zp = config('talata.payments.zarinpal');
         $kv = config('services.kavenegar', []);
-        $lastSmsError = DB::connection('pgsql_log')->table('system_logs')->where('service', 'sms')->whereIn('level', ['warning', 'error'])
+        $lastSmsError = DB::connection(config('database.log_connection'))->table('system_logs')->where('service', 'sms')->whereIn('level', ['warning', 'error'])
             ->orderByDesc('id')->first(['created_at', 'message']);
         $assets = collect(QuoteService::ASSETS)->filter(fn ($a) => $quotes->feed($a))->count();
 

@@ -63,7 +63,7 @@ class PaymentsController extends AdminController
         $search = trim(Digits::toLatin((string) $request->query('q', '')));
         if ($search !== '') {
             $like = '%'.addcslashes($search, '%_\\').'%';
-            $q->where(fn ($w) => $w->where('public_ref', 'ilike', $like)
+            $q->where(fn ($w) => $w->whereLike('public_ref', $like)
                 ->orWhereIn('id', PaymentAttempt::query()->where('authority', $search)->orWhere('ref_id', $search)->select('order_id')));
         }
         $page = $q->paginate(25)->withQueryString();

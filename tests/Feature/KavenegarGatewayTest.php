@@ -102,7 +102,7 @@ class KavenegarGatewayTest extends TestCase
         $r = $this->gateway()->send('09121234567', 'x');
         $this->assertSame('UNKNOWN', $r['status']);
         $this->assertStringNotContainsString(self::KEY, $r['error']);
-        $logs = DB::connection('pgsql_log')->table('system_logs')->where('service', 'kavenegar')->get();
+        $logs = DB::connection(config('database.log_connection'))->table('system_logs')->where('service', 'kavenegar')->get();
         $this->assertNotEmpty($logs);
         foreach ($logs as $log) {
             $this->assertStringNotContainsString(self::KEY, $log->message.$log->context);

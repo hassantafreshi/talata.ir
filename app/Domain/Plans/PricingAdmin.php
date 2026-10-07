@@ -105,7 +105,9 @@ final class PricingAdmin
         $note = mb_substr(trim(strip_tags((string) ($input['note'] ?? ''))), 0, 250) ?: null;
 
         $version = DB::transaction(function () use ($next, $note, $staffId) {
-            DB::statement('LOCK TABLE pricing_versions IN SHARE ROW EXCLUSIVE MODE');
+            if (DB::connection()->getDriverName() === 'pgsql') {
+                DB::statement('LOCK TABLE pricing_versions IN SHARE ROW EXCLUSIVE MODE'); // SQLite: IMMEDIATE transactions already serialize
+            }
             $number = (int) PricingVersion::query()->max('version') + 1;
 
             return PricingVersion::create([

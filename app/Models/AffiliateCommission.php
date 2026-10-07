@@ -13,7 +13,7 @@ class AffiliateCommission extends Model
 
     protected function casts(): array
     {
-        return ['approve_after' => 'datetime', 'approved_at' => 'datetime', 'base_irr' => 'string', 'amount_irr' => 'string', 'percent' => 'string'];
+        return ['approve_after' => 'datetime', 'approved_at' => 'datetime', 'base_irr' => 'decimal:0', 'amount_irr' => 'decimal:0', 'percent' => 'decimal:2'];
     }
 
     public function referral(): BelongsTo

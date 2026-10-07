@@ -52,7 +52,7 @@ class InvoiceController extends BaseController
         }
         if ($s = trim((string) $request->query('q', ''))) {
             $s = Digits::toLatin($s);
-            $q->where(fn ($w) => $w->where('number', 'ilike', '%'.addcslashes($s, '%_\\').'%')->orWhere('buyer_name', 'ilike', '%'.addcslashes($s, '%_\\').'%')->orWhere('buyer_mobile', 'like', '%'.preg_replace('/\D/', '', $s).'%'));
+            $q->where(fn ($w) => $w->whereLike('number', '%'.addcslashes($s, '%_\\').'%')->orWhereLike('buyer_name', '%'.addcslashes($s, '%_\\').'%')->orWhere('buyer_mobile', 'like', '%'.preg_replace('/\D/', '', $s).'%'));
         }
 
         return $q->orderByRaw("CASE WHEN status = 'draft' THEN 0 ELSE 1 END")->orderByDesc('issued_at')->orderByDesc('updated_at');

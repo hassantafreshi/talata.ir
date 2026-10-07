@@ -15,7 +15,7 @@ class Affiliate extends Model
 
     protected function casts(): array
     {
-        return ['include_sms_credit' => 'boolean', 'commission_percent' => 'string', 'discount_percent' => 'string'];
+        return ['include_sms_credit' => 'boolean', 'commission_percent' => 'decimal:2', 'discount_percent' => 'decimal:2'];
     }
 
     public function user(): BelongsTo

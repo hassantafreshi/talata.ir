@@ -143,7 +143,7 @@ class PasskeyTest extends TestCase
             $this->postJson('/api/auth/passkey/options');
             $this->postJson('/api/auth/passkey/verify', ['credential' => $credential])->assertStatus(422);
         }
-        $this->assertSame(0, DB::connection('pgsql_log')->table('system_logs')->where('level', 'error')->count(), 'no error-level log rows from hostile input');
+        $this->assertSame(0, DB::connection(config('database.log_connection'))->table('system_logs')->where('level', 'error')->count(), 'no error-level log rows from hostile input');
     }
 
     public function test_login_challenge_expires(): void

@@ -31,7 +31,7 @@ final class TenantDirectory
 
     public const PERIOD_FA = ['soon' => 'پایان تا ۷ روز', 'expired' => 'تمام‌شده در ۳۰ روز اخیر'];
 
-    private const PLAN_SQL = "coalesce((select s.plan_code from subscriptions s where s.tenant_id = tenants.id and s.status = 'active' and s.starts_at <= now() and s.ends_at > now() order by s.ends_at desc limit 1), 'free')";
+    private const PLAN_SQL = "coalesce((select s.plan_code from subscriptions s where s.tenant_id = tenants.id and s.status = 'active' and s.starts_at <= CURRENT_TIMESTAMP and s.ends_at > CURRENT_TIMESTAMP order by s.ends_at desc limit 1), 'free')";
 
     public function __construct(private readonly CommercialConfig $config) {}
 
@@ -44,7 +44,7 @@ final class TenantDirectory
             $mobile = Mobile::normalize($s);
             $q->where(function ($w) use ($s, $like, $mobile) {
                 $w->where('tenants.public_id', strtolower($s))
-                    ->orWhereIn('tenants.id', ShopProfile::withoutGlobalScope('tenant')->where('name', 'ilike', $like)->select('tenant_id'))
+                    ->orWhereIn('tenants.id', ShopProfile::withoutGlobalScope('tenant')->whereLike('name', $like)->select('tenant_id'))
                     ->orWhereIn('tenants.id', BillingOrder::withoutGlobalScope('tenant')->where('public_ref', strtoupper($s))->select('tenant_id'));
                 if ($mobile) {
                     $w->orWhereIn('tenants.id', ShopProfile::withoutGlobalScope('tenant')->where('business_mobile', $mobile)->select('tenant_id'));

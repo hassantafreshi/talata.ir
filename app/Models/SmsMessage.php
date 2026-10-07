@@ -18,7 +18,7 @@ class SmsMessage extends Model
 
     protected function casts(): array
     {
-        return ['sent_at' => 'datetime', 'delivered_at' => 'datetime', 'cost_irr' => 'string', 'payload' => 'encrypted:array'];
+        return ['sent_at' => 'datetime', 'delivered_at' => 'datetime', 'cost_irr' => 'decimal:0', 'payload' => 'encrypted:array'];
     }
 
     public function scopeForTenant(Builder $q, int $tenantId): Builder

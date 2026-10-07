@@ -6,6 +6,7 @@ use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Models\StaffUser;
 use App\Models\TaxRule;
+use App\Support\DbLock;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -42,7 +43,7 @@ final class TaxRuleAdmin
         }
 
         return DB::transaction(function () use ($category, $ratePercent, $effectiveFrom, $reference, $expertConfirmed) {
-            DB::select('SELECT pg_advisory_xact_lock(?)', [crc32('tax_rules:'.$category)]);
+            DbLock::key('tax_rules:'.$category);
             $version = (int) TaxRule::query()->where('category', $category)->max('version') + 1;
             $rule = TaxRule::query()->create([
                 'category' => $category, 'version' => $version, 'rate_percent' => $ratePercent, 'base' => self::SCHEDULABLE[$category],

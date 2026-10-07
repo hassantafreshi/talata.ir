@@ -21,6 +21,7 @@ use App\Models\StaffUser;
 use App\Models\Subscription;
 use App\Models\TaxRule;
 use App\Support\Jalali;
+use Brick\Math\BigDecimal;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -226,7 +227,7 @@ class AdminOpsTest extends TestCase
 
         $res = $this->postJson('/admin/api/tax-rules', ['category' => 'GOLD_SERVICES', 'rate_percent' => '۹', 'effective_from' => $date, 'reference' => 'بخشنامه نمونه شماره ۱', 'idempotency_key' => $this->key()])->assertCreated();
         $rule = TaxRule::query()->findOrFail($res->json('id'));
-        $this->assertSame([2, '9.0000', true], [$rule->version, (string) $rule->rate_percent, $rule->is_sample]);
+        $this->assertSame([2, '9.0000', true], [$rule->version, (string) BigDecimal::of($rule->rate_percent)->toScale(4), $rule->is_sample]);
         $rules = app(TaxRules::class);
         $this->assertSame(1, $rules->for('GOLD_SERVICES', now())->version);
         $this->assertSame(2, $rules->for('GOLD_SERVICES', now()->addDays(3))->version);

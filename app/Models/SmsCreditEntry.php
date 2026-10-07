@@ -16,6 +16,6 @@ class SmsCreditEntry extends Model
 
     protected function casts(): array
     {
-        return ['created_at' => 'datetime', 'amount_irr' => 'string'];
+        return ['created_at' => 'datetime', 'amount_irr' => 'decimal:0', 'per_segment_irr' => 'decimal:0'];
     }
 }

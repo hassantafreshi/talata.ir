@@ -3,6 +3,7 @@
 namespace App\Domain\Identity\WebAuthn;
 
 use App\Models\Passkey;
+use App\Support\DbLock;
 use App\Support\Tokens;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Database\Eloquent\Model;
@@ -164,7 +165,7 @@ final class WebAuthnService
         $id = self::b64($rawId);
 
         return DB::transaction(function () use ($owner, $ownerType, $id, $key, $auth, $name, $credential) {
-            DB::select('SELECT pg_advisory_xact_lock(hashtext(?))', ['passkeys:'.$ownerType.':'.$owner->getKey()]);
+            DbLock::key('passkeys:'.$ownerType.':'.$owner->getKey());
             $count = Passkey::query()->where('owner_type', $ownerType)->where('owner_id', $owner->getKey())->count();
             if ($count >= self::MAX_PER_OWNER) {
                 throw new WebAuthnException('Too many passkeys');

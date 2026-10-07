@@ -30,7 +30,7 @@ class CustomerController extends BaseController
 
         if ($s = trim((string) $request->query('q', ''))) {
             $digits = preg_replace('/\D/', '', Digits::toLatin($s));
-            $q->where(fn ($w) => $w->where('name', 'ilike', '%'.addcslashes($s, '%_\\').'%')->when($digits !== '', fn ($w) => $w->orWhere('mobile', 'like', '%'.$digits.'%')));
+            $q->where(fn ($w) => $w->whereLike('name', '%'.addcslashes($s, '%_\\').'%')->when($digits !== '', fn ($w) => $w->orWhere('mobile', 'like', '%'.$digits.'%')));
         }
 
         // Balance filter (installments are Professional-only, so the balance is always 0 on other plans).

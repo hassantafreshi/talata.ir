@@ -58,7 +58,7 @@ class AdminConsoleTest extends TestCase
     {
         $this->postJson('/admin/api/otp/request', ['mobile' => '09129999999'] + $this->powPayload())->assertOk()->assertJson(['ok' => true]);
         $this->assertSame([], app(SmsGateway::class)->sent);
-        $this->assertTrue(DB::connection('pgsql_log')->table('system_logs')->where('service', 'admin')->exists());
+        $this->assertTrue(DB::connection(config('database.log_connection'))->table('system_logs')->where('service', 'admin')->exists());
     }
 
     public function test_staff_sign_in_and_view_logs_per_user_and_service(): void

@@ -19,6 +19,9 @@ return [
 
     'default' => env('DB_CONNECTION', 'sqlite'),
 
+    // Connection for technical logs (system_logs).
+    'log_connection' => env('DB_LOG_CONNECTION', 'pgsql_log'),
+
     /*
     |--------------------------------------------------------------------------
     | Database Connections
@@ -38,10 +41,13 @@ return [
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
-            'journal_mode' => null,
-            'synchronous' => null,
-            'transaction_mode' => 'DEFERRED',
+            // SQLite is for the shared-hosting TEST server only (docs/DEPLOYMENT.md): one writer at a time, every
+            // transaction takes the write lock at its start (IMMEDIATE), so the row locks and advisory locks
+            // PostgreSQL uses are not needed there. Production stays on PostgreSQL.
+            'busy_timeout' => (int) env('DB_BUSY_TIMEOUT', 15000),
+            'journal_mode' => env('DB_JOURNAL_MODE', 'wal'),
+            'synchronous' => 'normal',
+            'transaction_mode' => env('DB_TRANSACTION_MODE', 'IMMEDIATE'),
         ],
 
         'mysql' => [
@@ -100,6 +106,7 @@ return [
         ],
 
         // Same database, separate connection: log writes commit independently of request transactions.
+        // (SQLite test server: DB_LOG_CONNECTION=sqlite — one writer, so logs share the main connection.)
         'pgsql_log' => [
             'driver' => 'pgsql',
             'url' => env('DB_URL'),

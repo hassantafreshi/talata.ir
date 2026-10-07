@@ -15,6 +15,6 @@ class MarketQuote extends Model
 
     protected function casts(): array
     {
-        return ['is_demo' => 'boolean', 'quote_time' => 'datetime', 'fetched_at' => 'datetime'];
+        return ['is_demo' => 'boolean', 'quote_time' => 'datetime', 'fetched_at' => 'datetime', 'change_vs_previous_pct' => 'decimal:4', 'value' => 'decimal:6'];
     }
 }

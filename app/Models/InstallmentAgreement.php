@@ -16,7 +16,7 @@ class InstallmentAgreement extends Model
 
     protected function casts(): array
     {
-        return ['reminders_enabled' => 'boolean', 'principal_irr' => 'string', 'down_payment_irr' => 'string'];
+        return ['reminders_enabled' => 'boolean', 'principal_irr' => 'decimal:0', 'down_payment_irr' => 'decimal:0'];
     }
 
     public function lines(): HasMany

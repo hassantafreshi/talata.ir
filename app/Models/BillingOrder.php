@@ -23,7 +23,7 @@ class BillingOrder extends Model
     {
         return [
             'price_snapshot' => 'array', 'return_to' => 'array', 'expires_at' => 'datetime', 'paid_at' => 'datetime', 'fulfilled_at' => 'datetime',
-            'subtotal_irr' => 'string', 'vat_irr' => 'string', 'amount_irr' => 'string',
+            'subtotal_irr' => 'decimal:0', 'vat_irr' => 'decimal:0', 'amount_irr' => 'decimal:0', 'discount_irr' => 'decimal:0', 'list_subtotal_irr' => 'decimal:0', 'vat_rate_percent' => 'decimal:4',
         ];
     }
 

@@ -33,7 +33,7 @@ final class DatabaseLogHandler extends AbstractProcessingHandler
                     'file' => str_replace(base_path().'/', '', $e->getFile()).':'.$e->getLine(),
                     'trace' => array_slice(array_map(fn ($f) => ($f['class'] ?? '').($f['type'] ?? '').($f['function'] ?? '').' '.str_replace(base_path().'/', '', $f['file'] ?? '').':'.($f['line'] ?? ''), $e->getTrace()), 0, 12)];
             }
-            DB::connection('pgsql_log')->table('system_logs')->insert([
+            DB::connection(config('database.log_connection'))->table('system_logs')->insert([
                 'created_at' => $record->datetime->format('Y-m-d H:i:s.uP'),
                 'level' => strtolower($record->level->getName()),
                 'service' => mb_substr(preg_replace('/[^a-z0-9_.-]/i', '', $service) ?: 'app', 0, 30),

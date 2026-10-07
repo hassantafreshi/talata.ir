@@ -12,6 +12,7 @@ use App\Models\BillingOrder;
 use App\Models\Membership;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\DbLock;
 use App\Support\Digits;
 use App\Support\TechLog;
 use Brick\Math\BigDecimal;
@@ -87,7 +88,7 @@ final class AffiliateService
     public function attach(Affiliate $affiliate, Tenant $tenant, string $source, ?int $exceptOrderId = null): ?AffiliateReferral
     {
         return DB::transaction(function () use ($affiliate, $tenant, $source, $exceptOrderId) {
-            DB::select('SELECT pg_advisory_xact_lock(hashtext(?))', ['affiliate-referral:'.$tenant->id]);
+            DbLock::key('affiliate-referral:'.$tenant->id);
             $existing = $this->referralFor($tenant);
             if ($existing) {
                 return $existing->affiliate_id === $affiliate->id ? $existing : null; // attribution never changes

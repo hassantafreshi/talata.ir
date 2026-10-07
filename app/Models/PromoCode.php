@@ -11,6 +11,6 @@ class PromoCode extends Model
 
     protected function casts(): array
     {
-        return ['products' => 'array', 'expires_at' => 'datetime', 'active' => 'boolean', 'percent' => 'string'];
+        return ['products' => 'array', 'expires_at' => 'datetime', 'active' => 'boolean', 'percent' => 'decimal:2'];
     }
 }

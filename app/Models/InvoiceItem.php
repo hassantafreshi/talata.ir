@@ -16,6 +16,6 @@ class InvoiceItem extends Model
 
     protected function casts(): array
     {
-        return ['item_attributes' => 'array', 'computed' => 'array'];
+        return ['item_attributes' => 'array', 'computed' => 'array', 'discount_irr' => 'decimal:0', 'manual_total_irr' => 'decimal:0', 'net_weight_g' => 'decimal:6', 'profit_percent' => 'decimal:4', 'purity_ppt' => 'decimal:3', 'row_total_irr' => 'decimal:0', 'wage_percent' => 'decimal:4'];
     }
 }

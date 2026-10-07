@@ -76,6 +76,8 @@ class Preflight extends Command
                 $this->kavenegarKey();
             }
         }
+        $driver = (string) config('database.default');
+        $this->check($driver === 'pgsql' ? 'ok' : ($prod ? 'fail' : 'warn'), 'DB_CONNECTION', $driver === 'pgsql' ? 'pgsql' : $driver.': test server only (one writer at a time); production needs PostgreSQL');
         $quotes = (string) config('talata.drivers.quotes');
         $this->check($quotes === 'demo' ? 'warn' : 'ok', 'TALATA_QUOTE_DRIVER', $quotes === 'demo' ? 'demo numbers (labelled «نمونه») until a real provider is connected' : $quotes);
         if ($quotes === 'brsapi') {

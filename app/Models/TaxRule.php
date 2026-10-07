@@ -10,6 +10,6 @@ class TaxRule extends Model
 
     protected function casts(): array
     {
-        return ['effective_from' => 'datetime', 'effective_to' => 'datetime', 'is_sample' => 'boolean'];
+        return ['effective_from' => 'datetime', 'effective_to' => 'datetime', 'is_sample' => 'boolean', 'rate_percent' => 'decimal:4'];
     }
 }
