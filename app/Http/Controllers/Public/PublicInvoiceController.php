@@ -103,7 +103,7 @@ class PublicInvoiceController extends Controller
 
     private function shared(string $token): ?Invoice
     {
-        if (! Tokens::isWellFormed($token)) {
+        if (! Tokens::isShareToken($token)) {
             return null;
         }
         $share = InvoiceShare::withoutGlobalScope('tenant')->where('token_hash', Tokens::hash($token))->whereNull('revoked_at')

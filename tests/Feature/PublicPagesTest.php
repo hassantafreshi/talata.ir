@@ -9,6 +9,8 @@ use App\Domain\Market\QuoteService;
 use App\Models\AuditEvent;
 use App\Models\Invoice;
 use App\Models\Membership;
+use App\Support\Tokens;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /** Public token pages: headers, what they show, link revoke/expiry (docs/INVOICE_DELIVERY_AND_VERIFICATION.md). */
@@ -189,5 +191,25 @@ class PublicPagesTest extends TestCase
 
         // Any accepted Iranian form of the right number reveals the buyer's name (and a masked mobile).
         $this->post($path, ['buyer_mobile' => '+989351234567'])->assertOk()->assertSee('آقای خریدار')->assertSee('0935•••4567');
+    }
+
+    public function test_share_links_are_short_codes_and_old_long_links_keep_working(): void
+    {
+        $user = $this->merchant();
+        $id = $this->issued($user);
+        $url = $this->api('POST', "/api/invoices/{$id}/share")->assertOk()->json('url');
+        // «/i/» + 14 letters/digits (owner decision): short enough to keep the invoice SMS small.
+        $this->assertMatchesRegularExpression('#/i/[A-Za-z0-9]{14}$#', $url);
+        auth()->logout();
+        $this->get(parse_url($url, PHP_URL_PATH))->assertOk()->assertSee('خانم آزمون');
+
+        // A link sent before short codes (43-character token) still opens the same invoice.
+        $invoice = Invoice::where('public_id', $id)->firstOrFail();
+        $old = Tokens::make();
+        DB::table('invoice_shares')->insert(['tenant_id' => $invoice->tenant_id, 'invoice_id' => $invoice->id, 'token' => encrypt($old, false), 'token_hash' => Tokens::hash($old), 'created_at' => now(), 'updated_at' => now()]);
+        $this->get('/i/'.$old)->assertOk()->assertSee('خانم آزمون');
+        // Anything else is just «not found».
+        $this->get('/i/ABC')->assertNotFound();
+        $this->get('/i/'.str_repeat('Z', 14))->assertNotFound();
     }
 }

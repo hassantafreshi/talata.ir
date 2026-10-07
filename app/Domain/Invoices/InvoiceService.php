@@ -426,7 +426,7 @@ final class InvoiceService
             }
             $this->entitlements->assertQuota($tenant, 'links_per_month');
             $ttl = config('talata.public.share_ttl_days');
-            $share = InvoiceShare::create(['invoice_id' => $invoice->id, 'token' => $st = Tokens::make(), 'token_hash' => Tokens::hash($st), 'created_by' => $user->id,
+            $share = InvoiceShare::create(['invoice_id' => $invoice->id, 'token' => $st = Tokens::shareCode(), 'token_hash' => Tokens::hash($st), 'created_by' => $user->id,
                 'expires_at' => $ttl ? now()->addDays((int) $ttl) : null]);
             Audit::record('invoice.share_created', $invoice);
 

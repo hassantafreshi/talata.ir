@@ -16,6 +16,7 @@ use App\Models\Tenant;
 use App\Support\DbLock;
 use App\Support\Digits;
 use App\Support\Money;
+use App\Support\Tokens;
 use Brick\Math\BigInteger;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -77,10 +78,10 @@ final class SmsService
         return SmsTemplate::DEFAULT;
     }
 
-    /** Same length as a real share link (32-byte token = 43 base64url chars), so the review counts real segments. */
+    /** Same length as a real share link (Tokens::shareCode), so the review counts real segments. */
     public static function linkPlaceholder(): string
     {
-        return config('talata.public_url').'/i/'.str_repeat('•', 43);
+        return config('talata.public_url').'/i/'.str_repeat('•', Tokens::SHARE_CODE_LENGTH);
     }
 
     public function previewFor(Invoice $invoice, Tenant $tenant, ?string $link = null): array
