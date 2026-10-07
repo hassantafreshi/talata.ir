@@ -72,7 +72,7 @@ cd "$REL"
 "$PHP" artisan db:seed --force   # idempotent baseline: pricing v1, sample tax rules, first quote fetch
 ADMIN_MOBILE="$(grep '^TEST_ADMIN_MOBILE=' "$ENVF" | cut -d= -f2- || true)"
 [ -n "$ADMIN_MOBILE" ] && "$PHP" artisan talata:staff "$ADMIN_MOBILE" "مدیر سامانه" --role=admin || true
-"$PHP" artisan storage:link --relative 2>/dev/null || true
+"$PHP" artisan storage:link 2>/dev/null || true
 "$PHP" artisan config:cache && "$PHP" artisan route:cache && "$PHP" artisan view:cache
 
 ln -sfn "$REL" "$APP/current"
