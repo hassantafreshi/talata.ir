@@ -68,6 +68,26 @@ final class KavenegarSmsGateway implements SmsGateway
         return 'UNKNOWN';
     }
 
+    /**
+     * Kavenegar's own delivery code and Persian status text per message id (diagnostics only; read-only).
+     *
+     * @return array<string, array{status:int, text:string}>
+     */
+    public function rawStatus(array $providerIds): array
+    {
+        $out = [];
+        foreach (array_chunk(array_values(array_unique(array_filter($providerIds))), 200) as $chunk) {
+            $r = $this->request('sms/status.json', ['messageid' => implode(',', $chunk)], 'status');
+            foreach ((array) ($r['json']['entries'] ?? []) as $e) {
+                if (isset($e['messageid'])) {
+                    $out[(string) $e['messageid']] = ['status' => (int) ($e['status'] ?? 100), 'text' => (string) ($e['statustext'] ?? '')];
+                }
+            }
+        }
+
+        return $out;
+    }
+
     public function statusMany(array $providerIds): array
     {
         $out = [];

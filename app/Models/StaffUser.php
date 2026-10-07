@@ -28,7 +28,7 @@ class StaffUser extends Authenticatable
         'system.manage' => ['label' => 'اجرای دوباره کارهای ناموفق صف', 'roles' => ['ops']],
         'logs.tech' => ['label' => 'لاگ فنی', 'roles' => ['ops']],
         'affiliates.manage' => ['label' => 'همکاری در فروش (تغییر و واریز)', 'roles' => ['finance']],
-        'staff.manage' => ['label' => 'کارکنان و نقش‌ها', 'roles' => []],
+        'staff.manage' => ['label' => 'کارکنان و نقش‌ها (فقط مالک سرویس)', 'roles' => []],
         'settings.manage' => ['label' => 'تنظیمات سرویس (مثلاً شماره پشتیبانی)', 'roles' => []],
     ];
 
@@ -46,11 +46,20 @@ class StaffUser extends Authenticatable
         return $this->role === 'admin';
     }
 
+    /** The service owner (config talata.admin.owner_mobile): the only one who may add staff or change roles. */
+    public function isOwner(): bool
+    {
+        return $this->isAdmin() && $this->active && (string) $this->mobile === (string) config('talata.admin.owner_mobile');
+    }
+
     /** Named allows() (not can()) so it never collides with Laravel's authorization helper. */
     public function allows(string $permission): bool
     {
         if (! $this->active) {
             return false;
+        }
+        if ($permission === 'staff.manage') {
+            return $this->isOwner();
         }
 
         return $this->isAdmin() || in_array($this->role, self::PERMISSIONS[$permission]['roles'] ?? [], true);

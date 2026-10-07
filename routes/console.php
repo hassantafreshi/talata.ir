@@ -79,6 +79,13 @@ Artisan::command('talata:staff {mobile} {name} {--role=admin} {--deactivate}', f
 
         return 1;
     }
+    // Only the service owner may hold the admin role from the command line; everyone else is added by the owner
+    // in the console (staff.manage is owner-only), so no other number can become an admin on its own.
+    if ($this->option('role') === 'admin' && ! $this->option('deactivate') && $mobile !== (string) config('talata.admin.owner_mobile')) {
+        $this->error('Only the service owner (TALATA_ADMIN_OWNER_MOBILE) can be made admin here; the owner adds other staff in the console.');
+
+        return 1;
+    }
     $staff = StaffUser::query()->updateOrCreate(['mobile' => $mobile], [
         'name' => (string) $this->argument('name'), 'role' => $this->option('role'), 'active' => ! $this->option('deactivate'),
     ]);

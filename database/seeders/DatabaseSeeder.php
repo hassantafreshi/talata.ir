@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Domain\Market\QuoteService;
 use App\Models\PricingVersion;
+use App\Models\PromoCode;
 use App\Models\SmsCreditLot;
 use App\Models\TaxRule;
 use App\Models\Tenant;
@@ -28,6 +29,13 @@ class DatabaseSeeder extends Seeder
         TaxRule::query()->firstOrCreate(['category' => 'MISC', 'version' => 1], [
             'rate_percent' => '0', 'base' => 'NONE', 'effective_from' => '2025-03-21 00:00:00', 'status' => 'active', 'is_sample' => true,
             'source_reference' => 'قیمت ردیف متفرقه نهایی است؛ مالیات جدا محاسبه نمی‌شود',
+        ]);
+
+        // Owner's own test code (owner request 2026-10-07): 100% off plan purchases, usable only by the owner's
+        // login mobile, any number of times. Created once; deactivate or change it in the admin console.
+        PromoCode::query()->firstOrCreate(['code' => 'HTDC00'], [
+            'percent' => '100', 'products' => ['PLAN'], 'max_uses' => null, 'expires_at' => null, 'active' => true,
+            'allowed_mobile' => '09396727215', 'once_per_shop' => false, 'note' => 'کد آزمایشی مالک — فقط شماره ۰۹۳۹۶۷۲۷۲۱۵',
         ]);
 
         app(QuoteService::class)->refresh();

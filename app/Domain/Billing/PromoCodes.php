@@ -41,15 +41,19 @@ final class PromoCodes
             ->whereNotIn('status', ['FAILED', 'EXPIRED'])->count();
     }
 
-    /** Discount in IRR for this shop, product and pre-VAT subtotal; throws a merchant-readable reason. */
-    public function discount(PromoCode $promo, Tenant $tenant, string $product, string $subtotalIrr): string
+    /**
+     * Discount in IRR for this shop, product and pre-VAT subtotal; throws a merchant-readable reason.
+     * $buyerMobile: login mobile of the person paying (checked against a code limited to one person).
+     */
+    public function discount(PromoCode $promo, Tenant $tenant, string $product, string $subtotalIrr, ?string $buyerMobile = null): string
     {
         $reason = match (true) {
             ! $promo->active => 'این کد تخفیف غیرفعال شده است.',
+            $promo->allowed_mobile !== null && $promo->allowed_mobile !== $buyerMobile => 'این کد تخفیف برای حساب شما نیست.',
             $promo->expires_at && $promo->expires_at->isPast() => 'مهلت این کد تخفیف تمام شده است.',
             ! in_array($product, (array) $promo->products, true) => 'این کد برای '.(self::PRODUCTS[$product] ?? 'این خرید').' نیست.',
             $promo->max_uses !== null && $this->used($promo) >= $promo->max_uses => 'ظرفیت این کد تخفیف تمام شده است.',
-            $this->used($promo, $tenant->id) > 0 => 'این فروشگاه قبلاً از این کد استفاده کرده است.',
+            $promo->once_per_shop && $this->used($promo, $tenant->id) > 0 => 'این فروشگاه قبلاً از این کد استفاده کرده است.',
             default => null,
         };
         if ($reason) {

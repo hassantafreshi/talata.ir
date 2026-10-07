@@ -87,7 +87,7 @@ class BillingController extends BaseController
         $tenant = $this->tenant();
         $list = (string) BigInteger::of((string) $config->plan($data['plan'])['price_toman'][$data['period']])->multipliedBy(10);
         if ($promo = $promos->find($data['code'] ?? null)) {
-            $discount = $promos->discount($promo, $tenant, 'PLAN', $list);
+            $discount = $promos->discount($promo, $tenant, 'PLAN', $list, $request->user()->mobile);
             $sub = (string) BigInteger::of($list)->minus($discount);
             $vat = Money::vat($sub, $config->vatRatePercent());
 

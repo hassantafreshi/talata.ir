@@ -94,7 +94,7 @@
             <tbody>
             @forelse ($promos as $p)
                 <tr>
-                    <td class="mono">{{ $p->code }}</td><td class="n">{{ fa(rtrim(rtrim($p->percent, '0'), '.')) }}٪</td>
+                    <td class="mono">{{ $p->code }}@if($p->allowed_mobile)<div class="xs muted">فقط شماره {{ \App\Support\Mobile::display($p->allowed_mobile) }}{{ $p->once_per_shop ? '' : ' · قابل استفاده چندباره' }}</div>@endif</td><td class="n">{{ fa(rtrim(rtrim($p->percent, '0'), '.')) }}٪</td>
                     <td class="small">{{ collect($p->products)->map(fn ($x) => \App\Domain\Billing\PromoCodes::PRODUCTS[$x] ?? $x)->implode('، ') }}</td>
                     <td class="n">{{ fa($promoUses[$p->id] ?? 0) }}{{ $p->max_uses ? ' از '.fa($p->max_uses) : '' }}</td>
                     <td>{{ $p->expires_at ? jdate($p->expires_at) : '—' }}</td>

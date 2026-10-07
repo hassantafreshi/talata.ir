@@ -109,7 +109,7 @@ final class BillingService
         // Either comes off the pre-VAT price.
         $promo = $this->promos->find($input['discount_code'] ?? null);
         if ($promo) {
-            $discount = $this->promos->discount($promo, $tenant, $product, $listSubtotal);
+            $discount = $this->promos->discount($promo, $tenant, $product, $listSubtotal, $user->mobile);
             $snapshot['discount'] = ['code' => $promo->code, 'percent' => $promo->percent, 'irr' => $discount, 'kind' => 'PROMO'];
             $affiliateFields = ['list_subtotal_irr' => $listSubtotal, 'discount_irr' => $discount, 'affiliate_id' => null, 'discount_code' => $promo->code, 'promo_code_id' => $promo->id];
         } else {
@@ -128,7 +128,7 @@ final class BillingService
         return DB::transaction(function () use ($tenant, $user, $product, $order, $subtotal, $vatRate, $vat, $amount, $snapshot, $returnTo, $key, $affiliateFields, $promo, $listSubtotal) {
             if ($promo) {
                 // Use limits are checked again under the code's row lock (two shops racing for the last use).
-                $this->promos->discount(PromoCode::query()->lockForUpdate()->findOrFail($promo->id), $tenant, $product, $listSubtotal);
+                $this->promos->discount(PromoCode::query()->lockForUpdate()->findOrFail($promo->id), $tenant, $product, $listSubtotal, $user->mobile);
             }
             $billing = BillingOrder::create($order + $affiliateFields + [
                 'public_ref' => 'TL-'.($product === 'PLAN' ? 'PLAN' : 'SMS').'-'.Jalali::year(now(), $tenant->timezone).'-'.strtoupper(Str::random(6)),

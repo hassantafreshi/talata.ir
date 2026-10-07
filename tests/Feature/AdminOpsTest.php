@@ -249,6 +249,7 @@ class AdminOpsTest extends TestCase
     public function test_staff_management_never_locks_the_console_out(): void
     {
         $admin = $this->staff();
+        config(['talata.admin.owner_mobile' => $admin->mobile]); // only the service owner manages staff
         $this->postJson('/admin/api/staff', ['name' => 'پشتیبان تازه', 'mobile' => '۰۹۱۲۳۳۳۴۴۵۵', 'role' => 'support'])->assertCreated();
         $new = StaffUser::query()->where('mobile', '09123334455')->firstOrFail();
         $this->postJson('/admin/api/staff', ['name' => 'تکراری', 'mobile' => '09123334455', 'role' => 'support'])->assertStatus(422)->assertJsonPath('code', 'STAFF_EXISTS');
@@ -290,8 +291,8 @@ class AdminOpsTest extends TestCase
         $this->asStaff($staff, 0, 'passkey');
         $this->get('/admin/payments')->assertOk();
 
-        // Lost device: another admin resets the keys (reason, fresh sign-in, audit).
-        $this->staff();
+        // Lost device: the service owner resets the keys (reason, fresh sign-in, audit).
+        config(['talata.admin.owner_mobile' => $this->staff()->mobile]);
         $this->postJson("/admin/api/staff/{$staff->id}/reset-passkeys", ['reason' => 'گوشی همکار گم شد'])->assertOk();
         $this->assertSame(0, Passkey::query()->where('owner_type', 'staff')->where('owner_id', $staff->id)->count());
     }
@@ -353,5 +354,23 @@ class AdminOpsTest extends TestCase
         SmsTemplate::assertSafeToSend(SmsTemplate::DEFAULT, 'طلافروشی دادگستری', '1405-0001', true);
         $this->expectException(DomainError::class);
         SmsTemplate::assertSafeToSend(SmsTemplate::DEFAULT, 'طلافروشی دادگستری', '1405-0001', false);
+    }
+
+    public function test_only_the_service_owner_can_add_staff_or_grant_admin(): void
+    {
+        $owner = $this->staff();
+        config(['talata.admin.owner_mobile' => $owner->mobile]);
+        $this->postJson('/admin/api/staff', ['name' => 'مدیر دوم', 'mobile' => '09124445566', 'role' => 'admin'])->assertCreated();
+        $second = StaffUser::query()->where('mobile', '09124445566')->firstOrFail();
+
+        // Another admin runs the console but cannot add anyone, change roles or reset keys.
+        $this->asStaff($second);
+        $this->postJson('/admin/api/staff', ['name' => 'نفوذی', 'mobile' => '09127778899', 'role' => 'admin'])->assertForbidden();
+        $this->putJson("/admin/api/staff/{$owner->id}", ['name' => $owner->name, 'role' => 'support', 'active' => true])->assertForbidden();
+        $this->assertFalse(StaffUser::query()->where('mobile', '09127778899')->exists());
+
+        // From the command line, only the owner's number may be made admin.
+        $this->artisan('talata:staff', ['mobile' => '09127778899', 'name' => 'x', '--role' => 'admin'])->assertExitCode(1);
+        $this->artisan('talata:staff', ['mobile' => $owner->mobile, 'name' => 'مالک', '--role' => 'admin'])->assertExitCode(0);
     }
 }

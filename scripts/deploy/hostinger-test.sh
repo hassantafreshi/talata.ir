@@ -92,4 +92,7 @@ echo "--- preflight (live, read-only) ---"
 "$PHP" artisan talata:preflight --live || true
 echo "--- passkey events (last 48h, redacted) ---"
 "$PHP" artisan talata:passkey-report || true
+echo "--- SMS (last 48h; operator status, read-only) ---"
+"$PHP" artisan talata:sms-reconcile || true
+"$PHP" artisan talata:sms-report || true
 echo "deployed $RID"

@@ -45,6 +45,9 @@ return [
         'allowed_ips' => env('TALATA_ADMIN_ALLOWED_IPS'),   // comma list; empty = any IP (OTP/passkey still required)
         // Staff must add a passkey before using anything but the dashboard and «حساب من» (A-00).
         'require_passkey' => (bool) env('TALATA_ADMIN_REQUIRE_PASSKEY', true),
+        // Service owner (owner decision 2026-10-07): the first admin, and the only person who may add staff or
+        // change roles. Other admins run the console but cannot grant access to anyone.
+        'owner_mobile' => env('TALATA_ADMIN_OWNER_MOBILE', '09396727215'),
     ],
 
     // Affiliate program (همکاری در فروش). Assumptions documented in docs/AFFILIATE_PROGRAM.md.
