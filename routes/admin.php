@@ -94,6 +94,7 @@ Route::middleware('staff')->group(function () {
     });
     Route::get('/system', [SystemController::class, 'index'])->name('system');
     Route::post('/api/settings/support', [IntegrationsController::class, 'saveSupport'])->middleware(['staff:settings.manage,fresh', 'throttle:20,1'])->name('settings.support');
+    Route::post('/api/settings/sms-blocked-words', [IntegrationsController::class, 'saveBlockedWords'])->middleware(['staff:settings.manage,fresh', 'throttle:20,1'])->name('settings.sms_blocked_words');
     Route::post('/api/system/failed-jobs/{uuid}/retry', [SystemController::class, 'retry'])->middleware(['staff:system.manage', 'throttle:20,1'])->name('system.retry');
     Route::get('/account', [AccountController::class, 'show'])->name('account');
     Route::post('/api/account/passkeys/options', [AccountController::class, 'options'])->middleware('throttle:20,1')->name('account.passkeys.options');

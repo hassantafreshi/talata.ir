@@ -13,6 +13,19 @@
             @endif
         </section>
         <section class="action-card stack-sm">
+            <h3>کلمات ممنوع در متن پیامک فروشگاه‌ها</h3>
+            <p class="small">متن سفارشی پیامک فاکتور با دشنام، توهین یا عبارت سیاسی/حساس ذخیره نمی‌شود. فهرست داخلی: {{ fa($builtinBlocked) }} عبارت. عبارت‌های بیشتر را اینجا اضافه کنید (هر خط یکی؛ کل‌کلمه و بدون حساسیت به ی/ک و نیم‌فاصله).</p>
+            @if ($canSettings)
+                <form class="stack-sm" data-action="{{ route('admin.settings.sms_blocked_words') }}" data-idem data-reload data-confirm="فهرست کلمات ممنوع ذخیره شود؟">
+                    <div class="field"><label for="bw">کلمات اضافه</label><textarea id="bw" name="words" rows="5" maxlength="5000">{{ implode("\n", $blockedWords) }}</textarea></div>
+                    <div class="field"><label for="bwr">دلیل</label><textarea id="bwr" name="reason" required minlength="5" maxlength="250"></textarea></div>
+                    <button class="btn btn-dark sm" type="submit">ذخیره</button>
+                </form>
+            @else
+                <p class="xs muted">{{ $blockedWords ? fa(count($blockedWords)).' عبارت اضافه' : 'عبارت اضافه‌ای ثبت نشده است.' }}</p>
+            @endif
+        </section>
+        <section class="action-card stack-sm">
             <h3>درگاه پرداخت</h3>
             <p class="status-row"><span class="mono">{{ $payment['driver'] }}</span>
                 @if($payment['is_mock'])<span class="badge warn">آزمایشی (Mock)</span>@else<span class="badge ok">واقعی</span>@endif

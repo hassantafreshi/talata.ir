@@ -12,6 +12,7 @@ use App\Jobs\SendSms;
 use App\Models\AuditEvent;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\PlatformSetting;
 use App\Models\ShopProfile;
 use App\Models\SmsCreditLot;
 use App\Models\SmsMessage;
@@ -389,5 +390,19 @@ class SmsAbuseTest extends TestCase
         $this->assertSame('FAILED', $message->status);
         $this->assertStringContainsString('not an Iranian mobile', $message->last_error);
         $this->assertNull($message->payload);
+    }
+
+    public function test_custom_sms_text_refuses_profanity_insults_and_political_phrases_but_not_ordinary_words(): void
+    {
+        $this->actingAs($this->merchant('basic'));
+        foreach (['ای احمق فاکتور {invoice_number} {invoice_link}', 'مرگ بر کسی؛ فاکتور {invoice_number} {invoice_link}', 'ک ث ا ف ت {invoice_number} {invoice_link}', 'فاکتور {invoice_number} shit {invoice_link}'] as $bad) {
+            $this->api('PUT', '/api/settings/sms-template', ['template' => $bad])->assertStatus(422)->assertJsonPath('code', 'TEMPLATE_BLOCKED_WORD');
+        }
+        // Whole words only: «عکس» is not «کس», a street name is not a slogan.
+        $this->api('PUT', '/api/settings/sms-template', ['template' => '{shop_name}: عکس و فاکتور {invoice_number} آماده است؛ خیابان انقلاب منتظر شماییم. {invoice_link}'])->assertOk();
+
+        // Words the owner adds in the admin console apply at once.
+        PlatformSetting::put('sms.blocked_words', ['حراج ویژه'], null);
+        $this->api('PUT', '/api/settings/sms-template', ['template' => 'حراج‌ویژه! فاکتور {invoice_number} {invoice_link}'])->assertStatus(422)->assertJsonPath('code', 'TEMPLATE_BLOCKED_WORD');
     }
 }

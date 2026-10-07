@@ -42,6 +42,10 @@ final class SmsTemplate
         if (self::containsLinkOrPhone($plain)) {
             throw new DomainError('TEMPLATE_FORBIDDEN_CONTENT', 'در متن پیامک لینک یا شماره تلفن دیگری مجاز نیست.');
         }
+        if ($hit = ContentFilter::firstHit($plain)) {
+            $why = ['profanity' => 'دشنام', 'insult' => 'توهین', 'political' => 'سیاسی یا حساس', 'custom' => 'ممنوع'][$hit['kind']];
+            throw new DomainError('TEMPLATE_BLOCKED_WORD', "متن پیامک عبارت نامناسب ({$why}) دارد: «{$hit['word']}». آن را حذف کنید؛ پیامک از خط زرلیو فرستاده می‌شود.", 422, ['errors' => ['template' => ["عبارت «{$hit['word']}» مجاز نیست."]]]);
+        }
         if (self::looksLikeImpersonation($plain)) {
             throw new DomainError('TEMPLATE_IMPERSONATION', 'متن پیامک نباید شبیه پیام بانک، سامانه دولتی، جایزه یا کد تأیید باشد.');
         }

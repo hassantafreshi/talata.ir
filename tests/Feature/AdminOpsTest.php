@@ -7,6 +7,7 @@ use App\Domain\DomainError;
 use App\Domain\Market\QuoteService;
 use App\Domain\Plans\CommercialConfig;
 use App\Domain\Plans\Entitlements;
+use App\Domain\Sms\ContentFilter;
 use App\Domain\Sms\SmsCredit;
 use App\Domain\Sms\SmsTemplate;
 use App\Domain\Tax\TaxRules;
@@ -372,5 +373,15 @@ class AdminOpsTest extends TestCase
         // From the command line, only the owner's number may be made admin.
         $this->artisan('talata:staff', ['mobile' => '09127778899', 'name' => 'x', '--role' => 'admin'])->assertExitCode(1);
         $this->artisan('talata:staff', ['mobile' => $owner->mobile, 'name' => 'مالک', '--role' => 'admin'])->assertExitCode(0);
+    }
+
+    public function test_admins_with_settings_permission_extend_the_sms_blocked_words(): void
+    {
+        $this->staff();
+        $this->postJson('/admin/api/settings/sms-blocked-words', ['words' => "حراج ویژه\nتخفیف باورنکردنی، حراج ویژه", 'reason' => 'شکایت مشتریان از پیامک تبلیغاتی', 'idempotency_key' => 'adm-bw000001'])->assertOk()->assertJsonPath('count', 2);
+        $this->assertSame(['حراج ویژه', 'تخفیف باورنکردنی'], ContentFilter::extraWords());
+        $this->get('/admin/integrations')->assertOk()->assertSee('کلمات ممنوع در متن پیامک');
+        $this->staff('support');
+        $this->postJson('/admin/api/settings/sms-blocked-words', ['words' => 'x', 'reason' => 'آزمایش دسترسی', 'idempotency_key' => 'adm-bw000002'])->assertForbidden();
     }
 }
