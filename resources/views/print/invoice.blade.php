@@ -7,6 +7,10 @@
 <meta name="referrer" content="no-referrer">
 <title>فاکتور {{ $v['number'] }} · {{ $v['shop']['name'] }}</title>
 @vite(['resources/js/print.js'])
+@php($P = $v['layout']['print'] ?? [])
+{{-- Page size/margins for THIS invoice's snapshot. A plain @page (not CSS named pages, which made Chromium push
+     the QR and table onto a second landscape page). --}}
+<style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">@media print { @page { size: A4 {{ ($P['orientation'] ?? 'portrait') === 'landscape' ? 'landscape' : 'portrait' }}; margin: {{ ($P['margins'] ?? 'normal') === 'narrow' ? '6mm' : '12mm 12mm 10mm' }}; } }</style>
 </head>
 <body class="print-page">
 <div class="print-tools">

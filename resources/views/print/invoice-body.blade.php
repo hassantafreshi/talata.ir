@@ -106,16 +106,16 @@
     @else
         <div class="table-scroll">
             <table class="{{ count($cols) >= 9 ? 'cols-many' : '' }}">
-                <thead><tr>@foreach ($cols as $c)<th class="{{ in_array($c, $numeric, true) ? 'n' : '' }}" scope="col">{{ $colLabels[$c] }}</th>@endforeach</tr></thead>
+                <thead><tr>@foreach ($cols as $c)<th class="c-{{ $c }} {{ in_array($c, $numeric, true) ? 'n' : '' }}" scope="col">{{ $colLabels[$c] }}</th>@endforeach</tr></thead>
                 <tbody>
                     @foreach ($v['rows'] as $r)
                         <tr class="{{ ($r['direction'] ?? 'OUT') === 'IN' ? 'row-in' : '' }}">
                             @foreach ($cols as $c)
                                 @switch($c)
-                                    @case('row_no')<td class="n">{{ $r['no'] }}</td>@break
-                                    @case('name')<td>@if(($r['direction'] ?? 'OUT') === 'IN')<span class="in-tag">دریافتی</span> @endif{{ $r['name'] }}@if(! in_array('description', $cols, true) && $r['description'])<span class="desc">{{ $r['description'] }}</span>@endif
+                                    @case('row_no')<td class="c-row_no n">{{ $r['no'] }}</td>@break
+                                    @case('name')<td class="c-name">@if(($r['direction'] ?? 'OUT') === 'IN')<span class="in-tag">دریافتی</span> @endif{{ $r['name'] }}@if(! in_array('description', $cols, true) && $r['description'])<span class="desc">{{ $r['description'] }}</span>@endif
                                         @if(! empty($r['deduction_percent']) || ! empty($r['assay_ref']))<span class="desc">@if(! empty($r['deduction_percent']))کسر ذوب/ناخالصی {{ $r['deduction_percent'] }} ({{ $r['deduction_fa'] }} تومان)@endif @if(! empty($r['assay_ref'])) · برگه عیارسنجی {{ $r['assay_ref'] }}@endif</span>@endif</td>@break
-                                    @case('description')<td>{{ $r['description'] ?: '—' }}</td>@break
+                                    @case('description')<td class="c-description">{{ $r['description'] ?: '—' }}</td>@break
                                     @case('weight_g')<td class="n">{{ in_array($r['type'], ['GOLD', 'GOLD_IN'], true) ? $r['weight'] : '—' }}</td>@break
                                     @case('purity')<td>{{ ($v['has_gold_in'] ?? false) ? ($r['purity_short'] ?? $r['purity']) : $r['purity'] }}</td>@break
                                     @case('weight_750')<td class="n">{{ $r['weight_750'] ?? '—' }}</td>@break
@@ -154,7 +154,7 @@
     <section class="inv-sum">
         <div class="inv-notes">
             @if ($L['summary']['public_note']['visible'] ?? false)<p>{{ $L['summary']['public_note']['text'] }}</p>@endif
-            <p>مبالغ به تومان است. @if($v['has_gold'])مالیات بر ارزش افزوده فقط روی اجرت و سود محاسبه شده است.@endif @if($v['has_gold_in'] ?? false)<br>ردیف‌های «دریافتی» طلایی است که مشتری به‌جای پول داده و از مبلغ فاکتور کسر شده است؛ وزن ۷۵۰ یعنی وزن معادل طلای ۱۸ عیار.@endif @if($v['tax_sample'])<br>نرخ مالیات نمونه است و تأیید مشاور مالیاتی لازم است.@endif</p>
+            <p>مبالغ به تومان است. @if($v['has_gold'])مالیات بر ارزش افزوده فقط روی اجرت و سود محاسبه شده است.@endif @if($v['has_gold_in'] ?? false)<br>ردیف‌های «دریافتی» طلایی است که مشتری به‌جای پول داده و از مبلغ فاکتور کسر شده است؛ وزن ۷۵۰ یعنی وزن معادل طلای ۱۸ عیار.@endif</p>
             @if ($v['issuer'])<p>صادرکننده: {{ $v['issuer'] }}</p>@endif
         </div>
         <div>

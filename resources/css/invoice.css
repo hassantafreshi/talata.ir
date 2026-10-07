@@ -9,6 +9,9 @@
 
 .inv { box-sizing: border-box; width: 210mm; max-width: 100%; min-height: 297mm; margin: 0 auto 24px; background: #fff; padding: 14mm 14mm 12mm; font-size: 11pt; line-height: 1.55; direction: rtl; position: relative; font-family: Vazirmatn, Tahoma, sans-serif; color: #000; }
 .inv * { box-sizing: border-box; }
+/* A4 landscape (29.7 × 21 cm), the default since 2026-10-07 (owner request). Screen sheet only: print uses
+   @page (below) and phones reflow, so neither may inherit this fixed width. */
+@media screen and (min-width: 821px) { .inv.po-landscape { width: 297mm; min-height: 210mm; } }
 .inv.t-small { font-size: 10pt; } .inv.t-large { font-size: 12.5pt; }
 .inv.d-compact td, .inv.d-compact th { padding: 3pt 5pt; }
 .inv .accent { color: #000; } .inv.a-gold_deep .accent { color: #8A5A00; } .inv.a-gold_deep th { background: #FBF6E8; }
@@ -36,6 +39,11 @@
 .inv th { font-weight: 700; background: #F0EDE6; font-size: .9em; }
 .inv td.n, .inv th.n { text-align: left; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .inv td .desc { display: block; font-size: .85em; color: #333; }
+/* «شرح کالا» gets the room: numbers stay on one line, the description column takes what is left. */
+.inv th.c-name, .inv td.c-name { width: 32%; min-width: 45mm; }
+.inv th.c-description, .inv td.c-description { width: 22%; min-width: 35mm; }
+.inv th.c-row_no, .inv td.c-row_no { width: 1%; }
+.inv td.c-name, .inv td.c-description { overflow-wrap: anywhere; }
 /* Many columns (e.g. Tahesab-style with gold received): tighter cells so A4 width is never exceeded. */
 .inv table.cols-many { font-size: .8em; }
 .inv table.cols-many th, .inv table.cols-many td { padding: 3pt 3pt; }
@@ -80,14 +88,8 @@
 }
 @media print {
   /* Real page margins: with margin 0, page 2+ of a long invoice printed flush to the paper edge. */
+  /* Default; the print view adds a nonce'd @page with the invoice's own orientation and margins. */
   @page { size: A4 portrait; margin: 12mm 12mm 10mm; }
-  /* Layout editor «چاپ» settings, via named pages (no inline styles under the CSP). */
-  @page narrow { size: A4 portrait; margin: 6mm; }
-  @page land { size: A4 landscape; margin: 12mm 12mm 10mm; }
-  @page land-narrow { size: A4 landscape; margin: 6mm; }
-  .inv.pm-narrow { page: narrow; }
-  .inv.po-landscape { page: land; }
-  .inv.po-landscape.pm-narrow { page: land-narrow; }
   .print-page { background: #fff; }
   .print-tools { display: none !important; }
   .inv { margin: 0; width: auto; min-height: 0; box-shadow: none; padding: 0; }

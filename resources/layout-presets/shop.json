@@ -21,6 +21,6 @@
     "signature_box": true
   },
   "typography": {"text_size": "normal", "density": "comfortable", "accent": "gold_deep", "section_spacing": "normal", "dividers": true},
-  "print": {"paper": "A4", "orientation": "portrait", "margins": "normal", "repeat_header": true, "repeat_footer": true},
+  "print": {"paper": "A4", "orientation": "landscape", "margins": "normal", "repeat_header": true, "repeat_footer": true},
   "version": 0
 }

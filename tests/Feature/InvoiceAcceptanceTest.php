@@ -105,7 +105,9 @@ class InvoiceAcceptanceTest extends TestCase
         $this->assertSame(route('invoices.review', $d->json('draft_id')), $next);
         $this->issueNow($d->json('draft_id'), $s->json('version'))->assertCreated();
         // No landline: the invoice shows the business mobile as the contact number.
-        $this->get('/invoices/'.$d->json('draft_id').'/print')->assertOk()->assertSee('۰۹۱۲ ۱۱۱ ۲۲۳۳');
+        // A4 landscape by default (owner 2026-10-07), the description column marked for width, no sample-tax note.
+        $this->get('/invoices/'.$d->json('draft_id').'/print')->assertOk()->assertSee('۰۹۱۲ ۱۱۱ ۲۲۳۳')
+            ->assertSee('size: A4 landscape', false)->assertSee('class="c-name"', false)->assertDontSee('نرخ مالیات نمونه');
     }
 
     public function test_issued_invoices_cannot_be_edited_or_deleted_and_an_sms_issue_replays_once(): void

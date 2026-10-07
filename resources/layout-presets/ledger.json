@@ -20,6 +20,6 @@
     "signature_box": true
   },
   "typography": {"text_size": "normal", "density": "compact", "accent": "ink", "section_spacing": "normal", "dividers": true},
-  "print": {"paper": "A4", "orientation": "portrait", "margins": "narrow", "repeat_header": true, "repeat_footer": false},
+  "print": {"paper": "A4", "orientation": "landscape", "margins": "narrow", "repeat_header": true, "repeat_footer": false},
   "version": 0
 }

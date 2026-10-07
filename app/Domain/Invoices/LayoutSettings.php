@@ -86,7 +86,7 @@ final class LayoutSettings
         }
 
         if (isset($input['print'])) {
-            $out['print']['orientation'] = in_array($input['print']['orientation'] ?? '', ['portrait', 'landscape'], true) ? $input['print']['orientation'] : 'portrait';
+            $out['print']['orientation'] = in_array($input['print']['orientation'] ?? '', ['portrait', 'landscape'], true) ? $input['print']['orientation'] : 'landscape';
             $out['print']['margins'] = in_array($input['print']['margins'] ?? '', ['narrow', 'normal'], true) ? $input['print']['margins'] : 'normal';
         }
 
