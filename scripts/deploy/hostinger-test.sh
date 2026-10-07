@@ -90,4 +90,6 @@ ls -1dt "$APP/releases"/*/ | tail -n +4 | xargs -r rm -rf
 
 echo "--- preflight (live, read-only) ---"
 "$PHP" artisan talata:preflight --live || true
+echo "--- passkey events (last 48h, redacted) ---"
+"$PHP" artisan talata:passkey-report || true
 echo "deployed $RID"
