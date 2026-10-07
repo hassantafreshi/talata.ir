@@ -4,6 +4,7 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:   # manual run (Actions › CI › Run workflow), e.g. after adding the test-server secrets
 
 permissions:
   contents: read
@@ -89,7 +90,7 @@ jobs:
   # KAVENEGAR_API_KEY. Nothing secret is written to the repository or printed.
   deploy-test-server:
     needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/claude/friendly-hopper-ntt0vl'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/claude/friendly-hopper-ntt0vl'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency:
@@ -107,6 +108,14 @@ jobs:
       - name: Test server configured?
         id: cfg
         run: |
+          # Names and shapes only — values are never printed.
+          chk() { if [ -n "$2" ]; then echo "secret $1: set (${#2} chars)"; else echo "secret $1: MISSING"; fi; }
+          chk HOSTINGER_SSH_HOST "$SSH_HOST"; chk HOSTINGER_SSH_PORT "$SSH_PORT"; chk HOSTINGER_SSH_USER "$SSH_USER"
+          chk HOSTINGER_SSH_PASSWORD "$SSHPASS"; chk BRSAPI_KEY "$BRSAPI_KEY"; chk KAVENEGAR_API_KEY "$KAVENEGAR_API_KEY"
+          [ -n "$SSH_HOST" ] && ! printf '%s' "$SSH_HOST" | grep -Eq '^[A-Za-z0-9.-]+$' && echo "::warning::HOSTINGER_SSH_HOST has spaces or odd characters (expected 185.212.71.141)"
+          [ -n "$SSH_PORT" ] && ! printf '%s' "$SSH_PORT" | grep -Eq '^[0-9]{2,5}$' && echo "::warning::HOSTINGER_SSH_PORT must be digits only (expected 65002)"
+          [ -n "$SSH_USER" ] && ! printf '%s' "$SSH_USER" | grep -Eq '^[a-z0-9_]+$' && echo "::warning::HOSTINGER_SSH_USER has spaces or odd characters (expected u912604790)"
+          [ -n "$SSHPASS" ] && [ "$SSHPASS" != "$(printf '%s' "$SSHPASS" | xargs -0)" ] && echo "::warning::HOSTINGER_SSH_PASSWORD starts or ends with a space/newline — paste it again"
           if [ -z "$SSH_HOST" ] || [ -z "$SSHPASS" ] || [ -z "$SSH_USER" ]; then
             echo "::notice::Hostinger secrets are not set; test-server deploy skipped."
             echo "go=false" >> "$GITHUB_OUTPUT"
