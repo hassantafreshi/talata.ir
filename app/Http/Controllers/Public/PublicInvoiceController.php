@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Public;
 
 use App\Domain\Invoices\InvoicePresenter;
 use App\Domain\Invoices\Qr;
+use App\Domain\Invoices\SharePreview;
+use App\Domain\Plans\Entitlements;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\InvoiceShare;
@@ -119,9 +121,46 @@ class PublicInvoiceController extends Controller
             return $this->headers(response()->view('public.verify-invalid', ['share' => true], 404));
         }
 
+        $v = InvoicePresenter::present($invoice, true);
+
         return $this->headers(response()->view('public.invoice', [
-            'v' => InvoicePresenter::present($invoice, true), 'verifyUrl' => config('talata.public_url').'/v/'.$invoice->verify_token, 'token' => $token,
+            'v' => $v, 'verifyUrl' => config('talata.public_url').'/v/'.$invoice->verify_token, 'token' => $token,
+            'og' => $this->linkPreview($invoice, $v, $token),
         ]));
+    }
+
+    /**
+     * Link-preview meta (og:*) for messengers: shop name and «فاکتور فروش», never buyer data or amounts. Shops with
+     * branding (invoice.shop_logo — Basic/Professional) get their own card; others the Zarlio service card.
+     */
+    private function linkPreview(Invoice $invoice, array $v, string $token): array
+    {
+        $tenant = Tenant::query()->find($invoice->tenant_id);
+        $branded = $tenant && app(Entitlements::class)->can($tenant, 'invoice.shop_logo');
+        $shop = ['name' => $v['shop']['name'] ?? '', 'contact_primary' => $v['shop']['contact_primary'] ?? '', 'logo' => $invoice->snapshot['shop']['logo'] ?? null];
+        try {
+            $image = app(SharePreview::class)->urlFor($tenant->public_id, $shop, $branded);
+        } catch (\Throwable $e) {
+            report($e);
+            $image = rtrim((string) config('talata.public_url'), '/').SharePreview::STATIC_CARD;
+        }
+
+        return [
+            'title' => 'فاکتور فروش · '.$shop['name'],
+            'description' => $branded ? 'فاکتور شما از '.$shop['name'].' صادر شد. برای دیدن جزئیات و بررسی اصالت، لینک را باز کنید.' : 'فاکتور شما از '.$shop['name'].' با زرلیو صادر شد. برای دیدن جزئیات و بررسی اصالت، لینک را باز کنید.',
+            'image' => $image, 'url' => rtrim((string) config('talata.public_url'), '/').'/i/'.$token,
+        ];
+    }
+
+    public function preview(string $tenant, string $hash)
+    {
+        $path = "og/{$tenant}/{$hash}.png";
+        abort_unless(Storage::disk('local')->exists($path), 404);
+
+        return response(Storage::disk('local')->get($path), 200, [
+            'Content-Type' => 'image/png', 'Cache-Control' => 'public, max-age=604800', 'X-Content-Type-Options' => 'nosniff',
+            'Content-Security-Policy' => "default-src 'none'",
+        ]);
     }
 
     public function print(string $token)

@@ -55,6 +55,7 @@ Route::middleware('throttle:public')->group(function () {
     Route::get('/i/{token}', [PublicInvoiceController::class, 'show'])->name('public.invoice');
     Route::get('/i/{token}/print', [PublicInvoiceController::class, 'print'])->name('public.invoice.print');
     Route::get('/logo/{tenant}/{version}', [PublicInvoiceController::class, 'logo'])->whereNumber('version')->name('public.logo');
+    Route::get('/og/{tenant}/{hash}.png', [PublicInvoiceController::class, 'preview'])->where(['tenant' => '[0-9a-z]{26}', 'hash' => '[0-9a-f]{20}'])->name('public.og');
 });
 Route::match(['get', 'post'], '/pay/callback/{gateway}', [PaymentReturnController::class, 'callback'])->middleware('throttle:60,1')->name('pay.callback');
 Route::get('/pay/result/{order}', [PaymentReturnController::class, 'show'])->middleware('throttle:60,1')->name('pay.result');

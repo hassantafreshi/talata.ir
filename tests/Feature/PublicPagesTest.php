@@ -11,6 +11,7 @@ use App\Models\Invoice;
 use App\Models\Membership;
 use App\Support\Tokens;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /** Public token pages: headers, what they show, link revoke/expiry (docs/INVOICE_DELIVERY_AND_VERIFICATION.md). */
@@ -211,5 +212,27 @@ class PublicPagesTest extends TestCase
         // Anything else is just «not found».
         $this->get('/i/ABC')->assertNotFound();
         $this->get('/i/'.str_repeat('Z', 14))->assertNotFound();
+    }
+
+    public function test_shared_links_carry_a_link_preview_branded_only_for_shops_with_branding(): void
+    {
+        Storage::fake('local');
+        // Free: the static Zarlio card; shop name in the title; never the buyer.
+        $free = $this->merchant('free');
+        $id = $this->issued($free, 'خانم پنهان');
+        $path = parse_url($this->api('POST', "/api/invoices/{$id}/share")->assertOk()->json('url'), PHP_URL_PATH);
+        auth()->logout();
+        $page = $this->get($path)->assertOk()->assertSee('og:image', false)->assertSee('/og/zarlio-invoice.png', false)->assertSee('og:title', false);
+        $this->assertStringNotContainsString('خانم پنهان', implode("\n", array_filter(explode("\n", $page->getContent()), fn ($l) => str_contains($l, 'og:') || str_contains($l, 'name="description"'))));
+
+        // Basic: a card made for the shop (logo/monogram, name, phone), served from our own route.
+        $basic = $this->merchant('basic');
+        $id = $this->issued($basic);
+        $path = parse_url($this->actingAs($basic)->api('POST', "/api/invoices/{$id}/share")->assertOk()->json('url'), PHP_URL_PATH);
+        auth()->logout();
+        preg_match('#property="og:image" content="([^"]+)"#', $this->get($path)->assertOk()->getContent(), $m);
+        $this->assertMatchesRegularExpression('#/og/[0-9a-z]{26}/[0-9a-f]{20}\.png$#', $m[1]);
+        $img = $this->get(parse_url($m[1], PHP_URL_PATH))->assertOk()->assertHeader('Content-Type', 'image/png');
+        $this->assertSame([1200, 630], array_slice(getimagesizefromstring($img->getContent()), 0, 2));
     }
 }

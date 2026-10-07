@@ -1,4 +1,4 @@
-<x-layouts.public :scripts="false" :title="'فاکتور '.$v['number'].' · '.$v['shop']['name']">
+<x-layouts.public :scripts="false" :title="'فاکتور '.$v['number'].' · '.$v['shop']['name']" :og="$og ?? null">
     <section class="band stack-sm">
         <div class="between"><strong>{{ $v['shop']['name'] }}</strong>@if($v['status'] === 'void')<span class="badge err">باطل‌شده</span>@else<span class="badge ok">قطعی</span>@endif</div>
         <span class="small">{{ $v['shop']['address'] }}</span>
