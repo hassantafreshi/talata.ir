@@ -29,6 +29,7 @@ class StaffUser extends Authenticatable
         'logs.tech' => ['label' => 'لاگ فنی', 'roles' => ['ops']],
         'affiliates.manage' => ['label' => 'همکاری در فروش (تغییر و واریز)', 'roles' => ['finance']],
         'staff.manage' => ['label' => 'کارکنان و نقش‌ها', 'roles' => []],
+        'settings.manage' => ['label' => 'تنظیمات سرویس (مثلاً شماره پشتیبانی)', 'roles' => []],
     ];
 
     protected $fillable = ['mobile', 'name', 'role', 'active', 'last_login_at', 'webauthn_handle'];

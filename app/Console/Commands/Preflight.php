@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Domain\Billing\PaymentGateways;
+use App\Domain\Market\QuoteProvider;
 use App\Domain\Sms\Gateways\KavenegarSmsGateway;
 use App\Domain\Sms\SmsGateway;
 use App\Models\StaffUser;
@@ -77,6 +78,18 @@ class Preflight extends Command
         }
         $quotes = (string) config('talata.drivers.quotes');
         $this->check($quotes === 'demo' ? 'warn' : 'ok', 'TALATA_QUOTE_DRIVER', $quotes === 'demo' ? 'demo numbers (labelled «نمونه») until a real provider is connected' : $quotes);
+        if ($quotes === 'brsapi') {
+            $this->check(config('services.brsapi.key') ? 'ok' : 'fail', 'BRSAPI_KEY', config('services.brsapi.key') ? 'set' : 'missing');
+            if ($this->option('live') && config('services.brsapi.key')) {
+                // One read-only request: shows whether this server's IP can reach the feed and what 18K reads now.
+                try {
+                    $q = app(QuoteProvider::class)->fetch();
+                    $this->check('ok', 'BrsApi (live)', '18K = '.$q['GOLD_18_SELL']['value'].' '.$q['GOLD_18_SELL']['unit'].'; assets: '.implode(', ', array_keys($q)));
+                } catch (Throwable $e) {
+                    $this->check('fail', 'BrsApi (live)', mb_substr($e->getMessage(), 0, 160));
+                }
+            }
+        }
         $this->check(config('talata.webauthn.rp_id') ? 'ok' : 'warn', 'TALATA_WEBAUTHN_RP_ID', config('talata.webauthn.rp_id') ?: 'unset: falls back to the APP_URL host');
         $this->check(config('talata.admin.require_passkey') ? 'ok' : 'fail', 'TALATA_ADMIN_REQUIRE_PASSKEY', config('talata.admin.require_passkey') ? 'staff must add a passkey' : 'off: the admin console accepts SMS-only sign-in');
         $this->check(config('talata.payments.mock_allowed_in_production') ? 'fail' : 'ok', 'TALATA_ALLOW_MOCK_PAYMENTS_IN_PRODUCTION', 'must be false');

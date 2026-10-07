@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Domain\Billing\Gateways\ZarinpalGateway;
 use App\Domain\Billing\PaymentGateway;
 use App\Domain\Billing\PaymentGateways;
+use App\Domain\Market\BrsApiQuoteProvider;
 use App\Domain\Market\DemoQuoteProvider;
 use App\Domain\Market\QuoteProvider;
 use App\Domain\Plans\CommercialConfig;
@@ -33,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(QuoteProvider::class, fn () => match (config('talata.drivers.quotes')) {
             'demo' => new DemoQuoteProvider,
+            'brsapi' => new BrsApiQuoteProvider((string) config('services.brsapi.key'), (string) config('services.brsapi.url'), (int) config('services.brsapi.timeout', 10)),
             default => throw new RuntimeException('Unknown quote driver'),
         });
 

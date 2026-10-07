@@ -14,6 +14,13 @@ return [
     |
     */
 
+    // Gold/currency price feed (TALATA_QUOTE_DRIVER=brsapi). Fetched centrally every 180 s, never from the browser.
+    'brsapi' => [
+        'key' => env('BRSAPI_KEY', ''),
+        'url' => env('BRSAPI_URL', 'https://api.brsapi.ir/Market/Gold_Currency.php'),
+        'timeout' => (int) env('BRSAPI_TIMEOUT', 10),
+    ],
+
     // SMS provider for login codes, invoice SMS and reminders (TALATA_SMS_DRIVER=kavenegar).
     'kavenegar' => [
         'api_key' => env('KAVENEGAR_API_KEY', ''),

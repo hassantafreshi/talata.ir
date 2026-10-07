@@ -532,3 +532,10 @@ html:has(body[data-page="items"]), html:has(body[data-page="review"]) { scroll-p
 .switch input:checked + span::after { inset-inline-start: 23px; }
 .switch input:focus-visible + span { outline: var(--t-focus-ring); outline-offset: var(--t-focus-offset); }
 .switch input:disabled + span { opacity: .6; }
+/* zarlio.ir public pages (first simple version). */
+.site-mark { display: inline-flex; color: var(--t-gold-bright); }
+.site-list { margin: 0; padding-inline-start: 18px; display: flex; flex-direction: column; gap: 8px; line-height: var(--t-lh-normal); }
+.site-plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--t-sp-3); }
+.site-doc h2 { font-size: var(--t-fs-md); margin: 12px 0 0; }
+.site-doc p { line-height: var(--t-lh-normal); margin: 0; }
+.site-footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--t-line); display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center; }

@@ -2,6 +2,17 @@
 <x-layouts.admin title="اتصال‌ها" page="admin-ops" description="درگاه پرداخت، ارائه‌دهنده پیامک و سرویس نرخ. کلیدها فقط در تنظیمات سرور (env) هستند و این صفحه هیچ‌وقت مقدارشان را نشان نمی‌دهد.">
     <div class="pricing-grid">
         <section class="action-card stack-sm">
+            <h3>شماره پشتیبانی</h3>
+            <p class="small">نمایش به فروشنده‌ها (صفحه تنظیمات، صفحه‌های عمومی و پیام‌هایی که به پشتیبانی ارجاع می‌دهند): <strong class="num ltr">{{ $supportPhone ? fa($supportPhone) : '—' }}</strong></p>
+            @if ($canSettings)
+                <form class="stack-sm" data-action="{{ route('admin.settings.support') }}" data-idem data-reload data-confirm="شماره پشتیبانی «{phone}» شود؟">
+                    <div class="field"><label for="sp">شماره</label><input id="sp" name="phone" class="ltr-input" inputmode="tel" maxlength="20" value="{{ $supportPhone }}"></div>
+                    <div class="field"><label for="spr">دلیل</label><textarea id="spr" name="reason" required minlength="5" maxlength="250"></textarea></div>
+                    <button class="btn btn-dark sm" type="submit">ذخیره</button>
+                </form>
+            @endif
+        </section>
+        <section class="action-card stack-sm">
             <h3>درگاه پرداخت</h3>
             <p class="status-row"><span class="mono">{{ $payment['driver'] }}</span>
                 @if($payment['is_mock'])<span class="badge warn">آزمایشی (Mock)</span>@else<span class="badge ok">واقعی</span>@endif

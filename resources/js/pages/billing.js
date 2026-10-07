@@ -91,6 +91,7 @@ export default function () {
     el.querySelector('[data-p]').textContent = btn.dataset.periodBtn === 'yearly' ? 'سالانه (۱۲ ماه)' : 'ماهانه';
     el.querySelector('[data-a]').textContent = block.querySelector('[data-f="total"]').textContent.trim();
     const go = el.querySelector('[data-go]');
+    if (/^[۰0]$/.test(el.querySelector('[data-a]').textContent)) go.textContent = 'فعال‌سازی بدون پرداخت'; // 100% discount: no bank
     // On failure the sheet stays open with the reason under the button (order() adds it).
     go.addEventListener('click', () => order({ product: 'PLAN', plan: btn.dataset.buyPlan, period: btn.dataset.periodBtn, discount_code: appliedCode || null }, go));
     go.focus();
@@ -115,7 +116,7 @@ export default function () {
   form.addEventListener('change', draw);
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    order({ product: 'SMS_CREDIT', pack_amount_toman: form.pack.value, return_to: boot.return ? { route: 'invoice', id: boot.return } : null }, form.querySelector('[type=submit]'));
+    order({ product: 'SMS_CREDIT', pack_amount_toman: form.pack.value, discount_code: form.discount_code?.value.trim() || null, return_to: boot.return ? { route: 'invoice', id: boot.return } : null }, form.querySelector('[type=submit]'));
   });
   draw();
 }

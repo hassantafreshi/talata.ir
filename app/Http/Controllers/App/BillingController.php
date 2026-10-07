@@ -5,6 +5,7 @@ namespace App\Http\Controllers\App;
 use App\Domain\Affiliate\AffiliateService;
 use App\Domain\Billing\BillingService;
 use App\Domain\Billing\PaymentGateway;
+use App\Domain\Billing\PromoCodes;
 use App\Domain\Plans\CommercialConfig;
 use App\Domain\Sms\SmsCredit;
 use App\Models\AffiliateReferral;
@@ -80,11 +81,23 @@ class BillingController extends BaseController
     }
 
     /** Live price with an affiliate discount code (display only; the order is priced again on the server). */
-    public function discount(Request $request, AffiliateService $affiliates, CommercialConfig $config)
+    public function discount(Request $request, AffiliateService $affiliates, CommercialConfig $config, PromoCodes $promos)
     {
         $data = $request->validate(['code' => ['nullable', 'string', 'max:30'], 'plan' => ['required', 'in:basic,professional'], 'period' => ['required', 'in:monthly,yearly']]);
         $tenant = $this->tenant();
         $list = (string) BigInteger::of((string) $config->plan($data['plan'])['price_toman'][$data['period']])->multipliedBy(10);
+        if ($promo = $promos->find($data['code'] ?? null)) {
+            $discount = $promos->discount($promo, $tenant, 'PLAN', $list);
+            $sub = (string) BigInteger::of($list)->minus($discount);
+            $vat = Money::vat($sub, $config->vatRatePercent());
+
+            return response()->json([
+                'code' => $promo->code, 'applied' => true,
+                'message_fa' => 'کد '.$promo->code.' اعمال شد: '.Digits::percent($promo->percent).'٪ تخفیف.'.($sub === '0' ? ' مبلغی برای پرداخت نمی‌ماند و بدون رفتن به بانک فعال می‌شود.' : ''),
+                'list_fa' => Money::toman($list), 'discount_fa' => Money::toman($discount), 'subtotal_fa' => Money::toman($sub),
+                'vat_fa' => Money::toman($vat), 'total_fa' => Money::toman((string) BigInteger::of($sub)->plus($vat)),
+            ]);
+        }
         [$affiliate, $discount, $code] = $affiliates->quote($tenant, 'PLAN', $list, $data['code'] ?? null);
         $sub = (string) BigInteger::of($list)->minus($discount);
         $vat = Money::vat($sub, $config->vatRatePercent());

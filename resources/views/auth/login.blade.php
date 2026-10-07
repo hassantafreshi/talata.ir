@@ -21,4 +21,5 @@
         </button>
         <p class="hint center">اگر قبلاً روی همین گوشی فعال کرده‌اید. اثر انگشت روی گوشی شما می‌ماند و به زرلیو فرستاده نمی‌شود.</p>
     </section>
+    <p class="xs center muted"><a href="{{ route('site.terms') }}">قوانین و مقررات</a> · <a href="{{ route('site.privacy') }}">حریم خصوصی</a></p>
 </x-layouts.guest>

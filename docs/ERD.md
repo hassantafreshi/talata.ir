@@ -18,6 +18,7 @@ erDiagram
     users ||--o{ affiliates : "user_id"
     affiliates ||--o{ billing_orders : "affiliate_id"
     users ||--o{ billing_orders : "created_by"
+    promo_codes ||--o{ billing_orders : "promo_code_id"
     tenants ||--o{ billing_orders : "tenant_id"
     users ||--o{ customers : "created_by"
     tenants ||--o{ customers : "tenant_id"
@@ -54,6 +55,8 @@ erDiagram
     tenants ||--o{ memberships : "tenant_id"
     users ||--o{ memberships : "user_id"
     billing_orders ||--o{ payment_attempts : "order_id"
+    staff_users ||--o{ platform_settings : "updated_by"
+    staff_users ||--o{ promo_codes : "created_by"
     users ||--o{ settings_backups : "created_by"
     tenants ||--o{ settings_backups : "tenant_id"
     staff_users ||--o{ shop_profiles : "name_approved_by"
@@ -108,6 +111,7 @@ erDiagram
         bigint created_by FK
         character status
         bigint affiliate_id FK
+        bigint promo_code_id FK
     }
     customers {
         bigint id PK
@@ -206,9 +210,16 @@ erDiagram
         bigint order_id FK
         character status
     }
+    platform_settings {
+        bigint updated_by FK
+    }
     pricing_versions {
         bigint id PK
         character status
+    }
+    promo_codes {
+        bigint id PK
+        bigint created_by FK
     }
     settings_backups {
         bigint id PK

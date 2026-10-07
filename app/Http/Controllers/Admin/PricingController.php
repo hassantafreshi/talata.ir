@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Domain\Plans\CommercialConfig;
 use App\Domain\Plans\PricingAdmin;
 use App\Http\Controllers\Controller;
+use App\Models\BillingOrder;
 use App\Models\PricingVersion;
+use App\Models\PromoCode;
 use App\Models\StaffUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,6 +28,8 @@ class PricingController extends Controller
             'authors' => StaffUser::query()->whereIn('id', $history->pluck('created_by_staff')->filter())->pluck('name', 'id'),
             'vat' => app(CommercialConfig::class)->vatRatePercent(),
             'canEdit' => (bool) Auth::guard('staff')->user()?->allows('pricing.manage'),
+            'promos' => PromoCode::query()->latest('id')->limit(50)->get(),
+            'promoUses' => BillingOrder::withoutGlobalScope('tenant')->whereNotNull('promo_code_id')->whereNotIn('status', ['FAILED', 'EXPIRED'])->selectRaw('promo_code_id, count(*) as n')->groupBy('promo_code_id')->pluck('n', 'promo_code_id'),
         ]);
     }
 

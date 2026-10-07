@@ -1,0 +1,16 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+/** Staff-made discount code (service-wide, not tenant data). */
+class PromoCode extends Model
+{
+    protected $fillable = ['code', 'percent', 'products', 'max_uses', 'expires_at', 'active', 'note', 'created_by'];
+
+    protected function casts(): array
+    {
+        return ['products' => 'array', 'expires_at' => 'datetime', 'active' => 'boolean', 'percent' => 'string'];
+    }
+}

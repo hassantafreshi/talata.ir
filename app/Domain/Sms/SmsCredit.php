@@ -95,12 +95,14 @@ final class SmsCredit
             [, $end] = Jalali::monthBounds(now(), $tenant->timezone);
             $expires = $end;
         }
+        // Credit = the pack bought (pre-VAT list amount); a discount code lowers what is paid, not the credit.
+        $amount = (string) ($order->list_subtotal_irr ?: $order->subtotal_irr);
         $lot = SmsCreditLot::withoutGlobalScope('tenant')->create([
             'tenant_id' => $order->tenant_id, 'source' => 'PURCHASE', 'source_order_id' => $order->id,
-            'amount_irr' => $order->subtotal_irr, 'remaining_irr' => $order->subtotal_irr,
+            'amount_irr' => $amount, 'remaining_irr' => $amount,
             'carries_over' => $carriesOver, 'expires_at' => $expires, 'plan_at_purchase' => $planCode,
         ]);
-        $this->entry($order->tenant_id, $lot->id, 'CREDIT', $order->subtotal_irr, null);
+        $this->entry($order->tenant_id, $lot->id, 'CREDIT', $amount, null);
 
         return $lot;
     }

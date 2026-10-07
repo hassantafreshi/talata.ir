@@ -15,6 +15,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceLayout;
 use App\Models\Membership;
 use App\Models\Passkey;
+use App\Models\PlatformSetting;
 use App\Models\ShopProfile;
 use App\Models\SmsSetting;
 use App\Models\Tenant;
@@ -84,7 +85,7 @@ class SettingsController extends BaseController
         } elseif (SmsTemplate::impersonatesAuthority($name) && ! $this->tenant()->profile?->isNameApproved($name)) {
             // Any real shop name is fine; only names that read like a bank, a government body, an operator or
             // Zarlio are refused, because the name goes out in SMS from our line. Staff can approve a real one.
-            $support = config('talata.support.phone');
+            $support = PlatformSetting::supportPhone();
             $errors['name'] = ['این نام شبیه نام بانک، سازمان دولتی، اپراتور یا زرلیو است و ممکن است در پیامک برای کلاهبرداری استفاده شود. اگر نام واقعی فروشگاه شماست، از پشتیبانی زرلیو بخواهید پس از دیدن مجوز کسب آن را تأیید کند'.($support ? ' (تلفن پشتیبانی: '.Digits::toPersian($support).')' : '').'.'];
         }
         $mobileRaw = trim((string) ($data['business_mobile'] ?? ''));

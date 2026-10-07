@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\IntegrationsController;
 use App\Http\Controllers\Admin\PaymentsController;
 use App\Http\Controllers\Admin\PricingController;
+use App\Http\Controllers\Admin\PromoCodesController;
 use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SmsController;
 use App\Http\Controllers\Admin\StaffController;
@@ -90,6 +91,7 @@ Route::middleware('staff')->group(function () {
         Route::post('/api/staff/{staff}/reset-passkeys', [StaffController::class, 'resetPasskeys'])->whereNumber('staff')->name('staff.passkeys.reset');
     });
     Route::get('/system', [SystemController::class, 'index'])->name('system');
+    Route::post('/api/settings/support', [IntegrationsController::class, 'saveSupport'])->middleware(['staff:settings.manage,fresh', 'throttle:20,1'])->name('settings.support');
     Route::post('/api/system/failed-jobs/{uuid}/retry', [SystemController::class, 'retry'])->middleware(['staff:system.manage', 'throttle:20,1'])->name('system.retry');
     Route::get('/account', [AccountController::class, 'show'])->name('account');
     Route::post('/api/account/passkeys/options', [AccountController::class, 'options'])->middleware('throttle:20,1')->name('account.passkeys.options');
@@ -102,6 +104,8 @@ Route::middleware('staff')->group(function () {
     Route::middleware(['staff:pricing.manage,fresh', 'throttle:20,1'])->group(function () {
         Route::post('/api/pricing', [PricingController::class, 'publish'])->name('pricing.publish');
         Route::post('/api/pricing/{version}/restore', [PricingController::class, 'restore'])->whereNumber('version')->name('pricing.restore');
+        Route::post('/api/promo-codes', [PromoCodesController::class, 'store'])->name('promo.store');
+        Route::post('/api/promo-codes/{promo}/deactivate', [PromoCodesController::class, 'deactivate'])->whereNumber('promo')->name('promo.deactivate');
     });
 
     // Affiliate program (همکاری در فروش): support can view, only admins change anything.

@@ -66,4 +66,46 @@
         @endforeach
         </tbody>
     </table></div>
+
+    <section class="stack-sm" aria-labelledby="promo-h">
+        <h2 id="promo-h">کدهای تخفیف سرویس</h2>
+        <p class="small muted">جدا از کد معرف همکاران. درصد از مبلغ بدون مالیات کم می‌شود؛ هر فروشگاه هر کد را یک بار. کد ۱۰۰٪ خرید را بدون رفتن به بانک کامل می‌کند (مناسب آزمایش پیش از اتصال درگاه).</p>
+        @if ($canEdit)
+            <details class="action-card">
+                <summary><h3>ساخت کد تخفیف</h3></summary>
+                <form class="stack-sm" data-action="{{ route('admin.promo.store') }}" data-idem data-reload data-confirm="کد {code} با {percent}٪ تخفیف ساخته شود؟">
+                    <div class="form-grid">
+                        <div class="field"><label for="pc">کد (حرف و رقم انگلیسی)</label><input id="pc" name="code" required maxlength="20" class="ltr-input" placeholder="TEST100"></div>
+                        <div class="field"><label for="pp">درصد تخفیف</label><input id="pp" name="percent" required inputmode="decimal" class="ltr-input" value="100"></div>
+                        <fieldset class="field"><legend class="label">برای</legend>
+                            <label class="check"><input type="checkbox" name="product_plan" checked> خرید پلن</label>
+                            <label class="check"><input type="checkbox" name="product_sms"> شارژ پیامک</label></fieldset>
+                        <div class="field"><label for="pm">حداکثر دفعات (خالی = نامحدود)</label><input id="pm" name="max_uses" inputmode="numeric" class="ltr-input" value="20"></div>
+                        <div class="field"><label for="pd">اعتبار (روز؛ خالی = همیشه)</label><input id="pd" name="days" inputmode="numeric" class="ltr-input" value="30"></div>
+                        <div class="field"><label for="pn">یادداشت</label><input id="pn" name="note" maxlength="200"></div>
+                        <div class="field wide"><label for="pr">دلیل</label><textarea id="pr" name="reason" required minlength="5" maxlength="250"></textarea></div>
+                    </div>
+                    <button class="btn btn-dark" type="submit">ساخت کد</button>
+                </form>
+            </details>
+        @endif
+        <div class="table-wrap"><table class="data">
+            <thead><tr><th>کد</th><th>درصد</th><th>برای</th><th>استفاده</th><th>تا</th><th>وضعیت</th><th>یادداشت</th>@if($canEdit)<th></th>@endif</tr></thead>
+            <tbody>
+            @forelse ($promos as $p)
+                <tr>
+                    <td class="mono">{{ $p->code }}</td><td class="n">{{ fa(rtrim(rtrim($p->percent, '0'), '.')) }}٪</td>
+                    <td class="small">{{ collect($p->products)->map(fn ($x) => \App\Domain\Billing\PromoCodes::PRODUCTS[$x] ?? $x)->implode('، ') }}</td>
+                    <td class="n">{{ fa($promoUses[$p->id] ?? 0) }}{{ $p->max_uses ? ' از '.fa($p->max_uses) : '' }}</td>
+                    <td>{{ $p->expires_at ? jdate($p->expires_at) : '—' }}</td>
+                    <td>@if($p->active && (! $p->expires_at || $p->expires_at->isFuture()))<span class="badge ok">فعال</span>@else<span class="badge off">غیرفعال</span>@endif</td>
+                    <td class="small">{{ $p->note }}</td>
+                    @if($canEdit)<td>@if($p->active)<form data-action="{{ route('admin.promo.deactivate', $p->id) }}" data-reload data-confirm="کد {{ $p->code }} غیرفعال شود؟" class="cluster"><input name="reason" required minlength="5" maxlength="250" placeholder="دلیل" aria-label="دلیل غیرفعال کردن"><button class="btn sm btn-line" type="submit">غیرفعال</button></form>@endif</td>@endif
+                </tr>
+            @empty
+                <tr><td colspan="8" class="muted">هنوز کدی ساخته نشده است.</td></tr>
+            @endforelse
+            </tbody>
+        </table></div>
+    </section>
 </x-layouts.admin>

@@ -12,7 +12,7 @@ For future implementation requests, read:
 6. `docs/INVOICE_CUSTOMIZATION.md` for mandatory business profile, contact fallback, two preset invoices and novice-friendly layout editing on Basic AND Professional.
 7. `docs/PLANS_AND_QUOTAS.md` (owner plan prices, quotas and SMS credit: Free 50 invoices and 50 new customers per month, current-month history only, 5 free SMS per year; prepaid per-segment SMS credit 850/500/350 toman), `docs/MAZNEH_AND_CALCULATOR.md` (quote board and golden calculator) and `docs/PAYMENTS_AND_SMS_CREDIT.md` (online plan purchase and SMS top-up via a gateway adapter, bank-return result page, credit ledger) and `docs/ROADMAP_V2_BUSINESS_TYPES.md` (v2: silver/coin/melted-gold business types, multi-type on Professional, product-photo attachments; Phase 1 prepares the infrastructure).
 8. `docs/design/README.md` and `docs/design/UI_APPROVED_DECISIONS.md` for the Stage A proposal status, owner-stated UI requirements and which design decisions are actually approved (brand spelling: زرلیو / Zarlio).
-9. `docs/design/UI_BUILD_SPEC.md`, `docs/design/tokens/`, `docs/design/invoice-templates/` and `docs/design/contracts/` for the UI build contract, design tokens, invoice layout schema/presets and frontend adapter/calculation contracts (proposed; palette 1 and logo concept 1 are working defaults, not approvals).
+9. `docs/design/UI_BUILD_SPEC.md`, `docs/design/tokens/`, `docs/design/invoice-templates/` and `docs/design/contracts/` for the UI build contract, design tokens, invoice layout schema/presets and frontend adapter/calculation contracts (palette 1 «midnight_gold», the Vazirmatn font and the refined two-ingot Z logo were APPROVED by the owner on 2026-10-07; see `UI_APPROVED_DECISIONS.md`).
 10. `docs/AFFILIATE_PROGRAM.md` for the affiliate program (codes, referral links, commissions, affiliate and admin panels).
 11. `docs/SETTINGS_BACKUPS.md` for settings backups (last 50 per shop, Basic/Pro, per-section restore by owner or admin).
 12. `docs/INVOICE_NUMBERING.md` for configurable invoice numbering (presets, reset periods, start number; display numbers with `invno()`).
@@ -44,10 +44,10 @@ For future implementation requests, read:
 - Gold feed refreshes centrally every 180 seconds. New-invoice entry shows the current 18K price prominently with شروع immediately below; Start captures the displayed accepted rate, and background updates never silently reprice the transaction.
 - No full accounting, inventory, silver, coin, melted-gold, product photos, Modian integration, or commerce in Phase 1; but build the v2-ready infrastructure listed in `docs/ROADMAP_V2_BUSINESS_TYPES.md` (business-type registry, pricing-policy registry, per-category tax rules, typed item attributes, sale/purchase direction, item asset table).
 - Existing specification assumptions must be documented and configurable, not presented as discovered business facts.
-- UI toolkit, design skill and visual direction are PENDING OWNER SELECTION.
+- Visual direction APPROVED by the owner on 2026-10-07: colors (palette 1), fonts (Vazirmatn) and the refined Zarlio logo, as in the wireframe/app. The UI keeps its own CSS/JS (no third-party toolkit).
 - Do not default to shadcn, a generic SaaS dashboard, or an unrelated React/Next stack.
-- No third-party design skill or library installation until selected. Reading public documentation is allowed.
-- UI execution follows the prepared rapid implementation prompt. The owner explicitly requires the overall draft and colors/logo to be approved before detailed production UI. Propose a concrete review package first; after approval proceed without repeated per-page confirmation. Backend foundations, domain logic, tests and neutral UX flows can proceed under a future implementation request.
+- No third-party UI library installation unless the owner asks for one. Reading public documentation is allowed.
+- UI execution follows the prepared rapid implementation prompt. The overall draft and colors/logo were approved on 2026-10-07, so detailed production UI proceeds without repeated per-page confirmation. Backend foundations, domain logic, tests and neutral UX flows can proceed under a future implementation request.
 - Never claim legal certification, live integration, usability testing, or passed checks without evidence.
 
 Record progress and decisions so subsequent sessions continue rather than restart.

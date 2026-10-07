@@ -1,4 +1,5 @@
 import { post } from '../lib/http.js';
+import { wireAdminActions } from '../lib/admin-forms.js';
 import { busy, toast, fieldErrors } from '../lib/ui.js';
 import { toLatin } from '../lib/digits.js';
 
@@ -7,6 +8,7 @@ const fmt = new Intl.NumberFormat('fa-IR');
 const num = (v) => { const s = toLatin(String(v)).replace(/[,٬\s]/g, ''); return /^\d{1,12}$/.test(s) ? Number(s) : null; };
 
 export default function () {
+  wireAdminActions(); // discount-code forms
   const boot = JSON.parse(document.getElementById('boot').textContent);
   const vat = Number(boot.vat);
   const form = document.querySelector('[data-pricing-form]');

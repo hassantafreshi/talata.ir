@@ -21,10 +21,13 @@ use App\Http\Controllers\Public\MockGatewayController;
 use App\Http\Controllers\Public\PaymentReturnController;
 use App\Http\Controllers\Public\PublicInvoiceController;
 use App\Http\Controllers\Public\ReferralController;
+use App\Http\Controllers\SiteController;
 use App\Tenancy\TenantContext;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect()->route(auth()->check() ? 'home' : 'login'));
+Route::get('/', [SiteController::class, 'home'])->name('site.home');
+Route::get('/terms', [SiteController::class, 'terms'])->name('site.terms');
+Route::get('/privacy', [SiteController::class, 'privacy'])->name('site.privacy');
 
 // ---------- guest: mobile + OTP ----------
 Route::middleware('guest')->group(function () {

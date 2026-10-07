@@ -31,7 +31,9 @@
                 <div><dt><strong>قابل پرداخت</strong></dt><dd class="num"><strong data-total></strong></dd></div>
                 <div><dt>تقریباً</dt><dd class="num" data-count></dd></div>
             </dl>
-            <button class="btn btn-gold block" type="submit" data-busy-text="انتقال به درگاه…" data-pay-label>پرداخت و شارژ</button>
+            <div class="field"><label for="sdc">کد تخفیف (اختیاری)</label><div class="input-wrap ltr-input"><input id="sdc" name="discount_code" maxlength="20" autocomplete="off"></div><div class="err"></div>
+                <p class="hint">با کد ۱۰۰٪ اعتبار بدون رفتن به بانک اضافه می‌شود.</p></div>
+            <button class="btn btn-gold block" type="submit" data-busy-text="در حال ثبت…" data-pay-label>پرداخت و شارژ</button>
             <p class="xs muted">اعتبار برابر مبلغ بدون مالیات است. اگر پرداخت ناموفق باشد و مبلغی کم شده باشد، طبق قوانین بانک حداکثر تا ۷۲ ساعت برمی‌گردد.</p>
         </form>
     @else

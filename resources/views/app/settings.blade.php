@@ -129,4 +129,7 @@
         <p class="small">وارد شده با <span class="num ltr">{{ \App\Support\Mobile::display($user->mobile) }}</span></p>
         <form method="post" action="{{ route('logout') }}">@csrf<button class="btn btn-line block" type="submit">خروج از حساب</button></form>
     </section>
+    @if ($support = \App\Models\PlatformSetting::supportPhone())
+        <p class="small center">پشتیبانی زرلیو: <a class="num ltr" dir="ltr" href="tel:{{ $support }}">{{ fa($support) }}</a> · <a href="{{ route('site.terms') }}">قوانین</a> · <a href="{{ route('site.privacy') }}">حریم خصوصی</a></p>
+    @endif
 </x-layouts.app>

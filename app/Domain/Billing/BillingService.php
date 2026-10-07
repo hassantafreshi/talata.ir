@@ -11,6 +11,7 @@ use App\Domain\Sms\SmsCredit;
 use App\Domain\Sms\SmsService;
 use App\Models\BillingOrder;
 use App\Models\PaymentAttempt;
+use App\Models\PromoCode;
 use App\Models\StaffUser;
 use App\Models\Subscription;
 use App\Models\Tenant;
@@ -48,6 +49,7 @@ final class BillingService
         private readonly Entitlements $entitlements,
         private readonly SmsCredit $credit,
         private readonly AffiliateService $affiliates,
+        private readonly PromoCodes $promos,
     ) {}
 
     /** @return array{order:BillingOrder,redirect:array} */
@@ -103,25 +105,46 @@ final class BillingService
         }
 
         $listSubtotal = (string) BigInteger::of($subtotalToman)->multipliedBy(10);
-        // Affiliate discount (first plan purchase of a referred shop) comes off the pre-VAT price.
-        [$affiliate, $discount, $code] = $this->affiliates->quote($tenant, $product, $listSubtotal, $input['discount_code'] ?? null);
-        $subtotal = (string) BigInteger::of($listSubtotal)->minus($discount);
-        if ($discount !== '0') {
-            $snapshot['discount'] = ['code' => $code, 'percent' => $affiliate->discount_percent, 'irr' => $discount];
+        // A staff discount code wins; otherwise the affiliate discount (first plan purchase of a referred shop).
+        // Either comes off the pre-VAT price.
+        $promo = $this->promos->find($input['discount_code'] ?? null);
+        if ($promo) {
+            $discount = $this->promos->discount($promo, $tenant, $product, $listSubtotal);
+            $snapshot['discount'] = ['code' => $promo->code, 'percent' => $promo->percent, 'irr' => $discount, 'kind' => 'PROMO'];
+            $affiliateFields = ['list_subtotal_irr' => $listSubtotal, 'discount_irr' => $discount, 'affiliate_id' => null, 'discount_code' => $promo->code, 'promo_code_id' => $promo->id];
+        } else {
+            [$affiliate, $discount, $code] = $this->affiliates->quote($tenant, $product, $listSubtotal, $input['discount_code'] ?? null);
+            if ($discount !== '0') {
+                $snapshot['discount'] = ['code' => $code, 'percent' => $affiliate->discount_percent, 'irr' => $discount];
+            }
+            $affiliateFields = ['list_subtotal_irr' => $listSubtotal, 'discount_irr' => $discount, 'affiliate_id' => $affiliate?->id, 'discount_code' => $code];
         }
-        $affiliateFields = ['list_subtotal_irr' => $listSubtotal, 'discount_irr' => $discount, 'affiliate_id' => $affiliate?->id, 'discount_code' => $code];
+        $subtotal = (string) BigInteger::of($listSubtotal)->minus($discount);
         $vatRate = $this->config->vatRatePercent();
         $vat = Money::vat($subtotal, $vatRate);
         $amount = (string) BigInteger::of($subtotal)->plus($vat);
         $returnTo = $this->sanitizeReturnTo($input['return_to'] ?? null);
 
-        return DB::transaction(function () use ($tenant, $user, $product, $order, $subtotal, $vatRate, $vat, $amount, $snapshot, $returnTo, $key, $affiliateFields) {
+        return DB::transaction(function () use ($tenant, $user, $product, $order, $subtotal, $vatRate, $vat, $amount, $snapshot, $returnTo, $key, $affiliateFields, $promo, $listSubtotal) {
+            if ($promo) {
+                // Use limits are checked again under the code's row lock (two shops racing for the last use).
+                $this->promos->discount(PromoCode::query()->lockForUpdate()->findOrFail($promo->id), $tenant, $product, $listSubtotal);
+            }
             $billing = BillingOrder::create($order + $affiliateFields + [
                 'public_ref' => 'TL-'.($product === 'PLAN' ? 'PLAN' : 'SMS').'-'.Jalali::year(now(), $tenant->timezone).'-'.strtoupper(Str::random(6)),
                 'created_by' => $user->id, 'product' => $product, 'subtotal_irr' => $subtotal, 'vat_rate_percent' => $vatRate,
                 'vat_irr' => $vat, 'amount_irr' => $amount, 'price_snapshot' => $snapshot, 'return_to' => $returnTo,
                 'status' => 'AWAITING_PAYMENT', 'idempotency_key' => $key, 'expires_at' => now()->addMinutes(config('talata.payments.order_expiry_minutes')),
             ]);
+            if ($amount === '0') {
+                // Fully discounted (e.g. a 100% test code): nothing to pay, so no bank. Same idempotent fulfilment.
+                $billing->forceFill(['status' => 'PAID', 'paid_at' => now(), 'channel' => 'FREE', 'expires_at' => now()])->save();
+                PaymentAttempt::create(['order_id' => $billing->id, 'gateway' => 'free', 'authority' => 'F'.strtolower((string) Str::ulid()), 'amount_irr' => '0', 'status' => 'PAID', 'verified_at' => now()]);
+                Audit::record('billing.free_order', $billing, ['product' => $product, 'code' => $billing->discount_code]);
+                $this->fulfil($billing);
+
+                return ['order' => $billing->fresh(), 'redirect' => ['url' => route('pay.result', [$billing->public_id, 's' => $this->resultSignature($billing)]), 'method' => 'GET', 'fields' => []]];
+            }
             $gateway = $this->gateways->default();
             try {
                 $redirect = $gateway->request($billing->public_ref, $amount, route('pay.callback', $gateway->code()), $user->mobile);
