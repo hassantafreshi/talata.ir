@@ -1,12 +1,25 @@
 @php
     $socials = collect($profile->socials ?? [])->keyBy('network');
-    $boot = ['return' => $return, 'logo_url' => $profile->logo_path ? route('public.logo', [app(\App\Tenancy\TenantContext::class)->tenant()->public_id, $profile->logo_version]) : null];
+    $boot = ['return' => $return, 'logo_url' => $profile->logo_path ? route('public.logo', [app(\App\Tenancy\TenantContext::class)->tenant()->public_id, $profile->logo_version]) : null, 'home' => route('home')];
 @endphp
 <x-layouts.app title="اطلاعات کسب‌وکار" page="business" :back="route('settings')">
     <script type="application/json" id="boot">@json($boot)</script>
     @if ($welcome || $return)
         <div class="notice info">پیش از اولین صدور، نام فروشگاه، موبایل کسب‌وکار و نشانی لازم است. این اطلاعات روی فاکتور و صفحه بررسی اصالت می‌آید.</div>
     @endif
+
+    <section class="band stack-sm" aria-labelledby="logo-h">
+        <h2 id="logo-h">لوگو</h2>
+        @unless ($canLogo)
+            <p class="notice info small">در پلن رایگان لوگو در پروفایل ذخیره می‌شود اما روی فاکتور چاپ نمی‌شود؛ با پلن پایه یا حرفه‌ای روی فاکتورهای بعدی می‌آید. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></p>
+        @endunless
+            <img class="logo-preview {{ $profile->logo_path ? '' : 'hidden' }}" data-logo-img src="{{ $boot['logo_url'] }}" alt="لوگوی فعلی">
+            <label class="btn btn-line block" for="logo-file">انتخاب تصویر لوگو</label>
+            <input id="logo-file" class="sr-only" type="file" accept="image/png,image/jpeg,image/webp" data-logo-file>
+            <button type="button" class="btn btn-link sm {{ $profile->logo_path ? '' : 'hidden' }}" data-logo-delete>حذف لوگو</button>
+            <p class="xs muted">PNG، JPG یا WebP، حداکثر ۱ مگابایت. تصویر روی سرور دوباره ساخته می‌شود و اطلاعات پنهان آن حذف می‌شود. فاکتورهای قبلی لوگوی زمان صدور را نگه می‌دارند.</p>
+    </section>
+
     <form class="stack" method="post" action="{{ route('api.settings.business') }}" data-business novalidate>
         @csrf
         <section class="band stack-sm">
@@ -31,16 +44,4 @@
         </section>
         <button class="btn btn-gold block" type="submit" data-busy-text="در حال ذخیره…">{{ $return ? 'ذخیره و بازگشت به صدور' : 'ذخیره' }}</button>
     </form>
-
-    <section class="band stack-sm" aria-labelledby="logo-h">
-        <h2 id="logo-h">لوگو</h2>
-        @unless ($canLogo)
-            <p class="notice info small">در پلن رایگان لوگو در پروفایل ذخیره می‌شود اما روی فاکتور چاپ نمی‌شود؛ با پلن پایه یا حرفه‌ای روی فاکتورهای بعدی می‌آید. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></p>
-        @endunless
-            <img class="logo-preview {{ $profile->logo_path ? '' : 'hidden' }}" data-logo-img src="{{ $boot['logo_url'] }}" alt="لوگوی فعلی">
-            <label class="btn btn-line block" for="logo-file">انتخاب تصویر لوگو</label>
-            <input id="logo-file" class="sr-only" type="file" accept="image/png,image/jpeg,image/webp" data-logo-file>
-            <button type="button" class="btn btn-link sm {{ $profile->logo_path ? '' : 'hidden' }}" data-logo-delete>حذف لوگو</button>
-            <p class="xs muted">PNG، JPG یا WebP، حداکثر ۱ مگابایت. تصویر روی سرور دوباره ساخته می‌شود و اطلاعات پنهان آن حذف می‌شود. فاکتورهای قبلی لوگوی زمان صدور را نگه می‌دارند.</p>
-    </section>
 </x-layouts.app>

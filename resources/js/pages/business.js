@@ -17,7 +17,11 @@ export default function () {
     busy(btn);
     const res = await post('/api/settings/business', data);
     busy(btn, false);
-    if (res.ok) { if (res.data.next) { location.href = res.data.next; return; } toast('ذخیره شد.'); return; }
+    if (res.ok) {
+      toast('ذخیره شد.');
+      setTimeout(() => { location.href = res.data.next || boot.home; }, 900);
+      return;
+    }
     if (res.errors) fieldErrors(form, res.errors); else toast(res.message, { kind: 'error' });
   });
 
