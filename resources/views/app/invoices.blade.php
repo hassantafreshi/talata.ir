@@ -1,4 +1,9 @@
 <x-layouts.app title="فاکتورها" page="invoices">
+    @php($canIssue = app(\App\Tenancy\TenantContext::class)->membership()?->can('invoice.issue'))
+    @if ($canIssue)
+        {{-- On mobile the bottom bar has no «فاکتور جدید»; this is the way to start one from the list. --}}
+        <a href="{{ route('invoices.new') }}" class="btn btn-gold block mobile-only">+ فاکتور جدید</a>
+    @endif
     @if ($quota['limit'] !== null)
         <div class="band stack-sm">
             <div class="between small"><span>فاکتورهای این ماه</span><span class="num">{{ fa($quota['used']) }} از {{ fa($quota['limit']) }}</span></div>

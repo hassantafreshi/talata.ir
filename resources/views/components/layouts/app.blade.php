@@ -1,8 +1,10 @@
 @props(['title' => null, 'page' => '', 'back' => null, 'badge' => null])
 @php
+    // Mobile bottom bar. «فاکتور جدید» is intentionally NOT here (it crowds the bar): on mobile it appears as a
+    // button at the top of the invoices list instead. «خانه» takes the member to their landing screen.
     $nav = [
-        ['invoices.new', 'فاکتور جدید', '<path d="M12 5v14M5 12h14"/>', ['invoices.new', 'invoices.items', 'invoices.review', 'invoices.issued']],
-        ['invoices.index', 'فاکتورها', '<path d="M6 3h9l5 5v13H6z"/><path d="M9 12h7M9 16h7"/>', ['invoices.index', 'invoices.show']],
+        ['home', 'خانه', '<path d="M3 11l9-8 9 8"/><path d="M6 10v10h12V10"/>', []],
+        ['invoices.index', 'فاکتورها', '<path d="M6 3h9l5 5v13H6z"/><path d="M9 12h7M9 16h7"/>', ['invoices.index', 'invoices.show', 'invoices.new', 'invoices.items', 'invoices.review', 'invoices.issued']],
         ['mazneh', 'مظنه', '<path d="M3 17l5-6 4 4 5-7 4 5"/>', ['mazneh']],
         ['calculator', 'ماشین‌حساب', '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h3M13 12h3M8 16h3M13 16h3"/>', ['calculator']],
         ['settings', 'بیشتر', '<path d="M4 7h16M4 12h16M4 17h16"/>', ['settings*', 'customers*', 'dashboard']],
