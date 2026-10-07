@@ -167,7 +167,7 @@ return [
 
     // Zarlio support contact shown to merchants when staff help is needed (e.g. approving a shop name).
     'support' => [
-        'phone' => env('TALATA_SUPPORT_PHONE', '09396727215'), // owner 2026-10-07; admin console value wins
+        'phone' => env('TALATA_SUPPORT_PHONE') ?: '09396727215', // owner 2026-10-07; admin console value wins
     ],
 
     'public' => [
