@@ -18,7 +18,9 @@ class DatabaseSeeder extends Seeder
         $payload = json_decode(file_get_contents(__DIR__.'/data/plans-pricing.json'), true);
         unset($payload['$comment']);
         PricingVersion::query()->firstOrCreate(['version' => 1], [
-            'payload' => $payload, 'effective_from' => now()->subDay(), 'status' => 'published',
+            // Fixed past start (like the tax rules): «now − 1 day» made tests that travel to a fixed date fail
+            // depending on the time of day they ran.
+            'payload' => $payload, 'effective_from' => '2025-03-21 00:00:00', 'status' => 'published',
             'note' => 'Seed from docs/PLANS_AND_QUOTAS.md (Basic monthly and Basic caps pending owner confirmation).',
         ]);
 
