@@ -209,4 +209,15 @@ class TenantsController extends AdminController
 
         return response()->json(['message_fa' => 'تعلیق برداشته شد.']);
     }
+
+    public function approveShopName(Request $request, Tenant $tenant, ShopAdmin $shops, AdminActions $actions): JsonResponse
+    {
+        $data = $request->validate(['name' => ['required', 'string', 'max:120'], 'idempotency_key' => ['required', 'string']]);
+        $reason = $this->reason($request);
+        $result = $actions->once($this->staff(), 'tenant.shop_name_approved', $data['idempotency_key'], $tenant->id, function () use ($shops, $tenant, $data, $reason) {
+            return ['name' => $shops->approveShopName($tenant, $this->staff(), $data['name'], $reason)->name];
+        });
+
+        return response()->json($result + ['message_fa' => 'نام فروشگاه ثبت و تأیید شد.'], 201);
+    }
 }

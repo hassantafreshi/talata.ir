@@ -264,7 +264,7 @@ final class InstallmentService
                 }
                 $shop = $tenant->profile?->name ?: 'فروشگاه';
                 // Names saved before a stricter check must not reach customers as a link or a bank-like sender.
-                if (SmsTemplate::containsLinkOrPhone($shop) || SmsTemplate::looksLikeImpersonation($shop)) {
+                if (SmsTemplate::containsLinkOrPhone($shop) || (SmsTemplate::impersonatesAuthority($shop) && ! $tenant->profile?->isNameApproved($shop))) {
                     TechLog::warning('sms', 'reminder skipped: unsafe shop name', ['tenant_id' => $tenant->id]);
 
                     return;

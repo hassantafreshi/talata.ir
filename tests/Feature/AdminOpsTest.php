@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Domain\Billing\Gateways\MockGateway;
+use App\Domain\DomainError;
 use App\Domain\Market\QuoteService;
 use App\Domain\Plans\CommercialConfig;
 use App\Domain\Plans\Entitlements;
 use App\Domain\Sms\SmsCredit;
+use App\Domain\Sms\SmsTemplate;
 use App\Domain\Tax\TaxRules;
 use App\Models\AdminAction;
 use App\Models\AuditEvent;
@@ -323,5 +325,32 @@ class AdminOpsTest extends TestCase
         $this->assertStringContainsString('طلافروشی آزمون', $csv);
         $this->staff('ops');
         $this->get('/admin/tenants/export.csv')->assertForbidden();
+    }
+
+    public function test_staff_can_approve_a_real_shop_name_that_reads_like_an_authority(): void
+    {
+        $merchant = $this->merchant('basic');
+        $tenant = $this->tenantOf($merchant);
+        $base = ['business_mobile' => '09121112233', 'address' => 'تهران، خیابان دادگستری'];
+        $this->actingAs($merchant)->api('POST', '/api/settings/business', ['name' => 'طلافروشی دادگستری'] + $base)->assertStatus(422);
+
+        $this->staff('support');
+        $this->postJson("/admin/api/tenants/{$tenant->id}/shop-name", ['name' => 'طلافروشی دادگستری', 'reason' => 'مجوز کسب ۱۲۳ دیده شد', 'idempotency_key' => $this->key()])->assertForbidden();
+        $admin = $this->staff();
+        $this->postJson("/admin/api/tenants/{$tenant->id}/shop-name", ['name' => 'بانک ملت t.me/x', 'reason' => 'آزمون لینک', 'idempotency_key' => $this->key()])->assertStatus(422);
+        $key = $this->key();
+        $this->postJson("/admin/api/tenants/{$tenant->id}/shop-name", ['name' => 'طلافروشی دادگستری', 'reason' => 'مجوز کسب ۱۲۳ دیده شد', 'idempotency_key' => $key])->assertCreated();
+        $this->postJson("/admin/api/tenants/{$tenant->id}/shop-name", ['name' => 'طلافروشی دادگستری', 'reason' => 'مجوز کسب ۱۲۳ دیده شد', 'idempotency_key' => $key])->assertCreated(); // replay
+        $this->assertSame(1, AuditEvent::query()->where('event', 'tenant.shop_name_approved')->where('staff_id', $admin->id)->count());
+
+        // The approved name now saves with the rest of the profile and goes out in SMS; any other flagged name still fails.
+        $this->actingAs($merchant)->api('POST', '/api/settings/business', ['name' => 'طلافروشی دادگستری', 'landline' => '02112345678'] + $base)->assertOk();
+        $this->api('POST', '/api/settings/business', ['name' => 'طلافروشی دادگستری مرکزی'] + $base)->assertStatus(422);
+        $profile = ShopProfile::withoutGlobalScope('tenant')->where('tenant_id', $tenant->id)->firstOrFail();
+        $this->assertTrue($profile->isNameApproved('طلافروشی دادگستری'));
+        $this->assertSame('طلافروشی دادگستری', $profile->name);
+        SmsTemplate::assertSafeToSend(SmsTemplate::DEFAULT, 'طلافروشی دادگستری', '1405-0001', true);
+        $this->expectException(DomainError::class);
+        SmsTemplate::assertSafeToSend(SmsTemplate::DEFAULT, 'طلافروشی دادگستری', '1405-0001', false);
     }
 }

@@ -35,7 +35,7 @@ Status (2026-10-06): merchant web app and service admin console v1 implemented i
 
 ## Implementation progress (2026-10-06)
 
-Evidence: `php artisan test` (221 tests / 2273 assertions on PostgreSQL, 2026-10-11), `npm run test:js`, Playwright mobile journey with screenshots in `docs/screenshots/app/`. Security controls and fixed findings: `docs/SECURITY.md`. Frontend decision: `docs/adr/0001-blade-ajax-frontend.md`.
+Evidence: `php artisan test` (254 tests / 2454 assertions on PostgreSQL, 2026-10-07), `npm run test:js`, Playwright mobile journey with screenshots in `docs/screenshots/app/`. Security controls and fixed findings: `docs/SECURITY.md`. Frontend decision: `docs/adr/0001-blade-ajax-frontend.md`.
 
 - [x] Mobile OTP login with proof-of-work, layered limits, global budget, lockout (Passkey not yet).
 - [x] Tenancy fail-closed scope, ULID public ids, per-route permissions, member removal kills sessions.
@@ -69,6 +69,8 @@ Evidence: `php artisan test` (221 tests / 2273 assertions on PostgreSQL, 2026-10
 - [x] Customer list shows and filters by outstanding installment balance (همه / مانده قسط دارند / تسویه‌شده), Professional-only (`tests/Feature/CustomerBalanceTest.php`).
 - [x] Over-quota sheet adapts its title, reassurance and actions to the limit that was hit (`tests/js/quota-panel.test.mjs`).
 - [x] Security revocation of an invoice's QR verification code (docs/INVOICE_DELIVERY_AND_VERIFICATION.md): separate action for members who may void, reason required, audited `invoice.verification_revoked`; the merchant is told that every sheet printed so far will read «لغوشده» and to print a fresh one; the invoice itself is unchanged (`tests/Feature/PublicPagesTest.php`).
+- [x] Shop names (owner request 2026-10-07: «اسم مغازه هر چیزی می‌تواند باشد»): any real name is accepted («آفتاب»، «عدالت»، «ثنا»، «سپه»، «دولت‌آبادی»…); only links/phone numbers and names that present the sender as a bank, government/judicial body, Shaparak, a mobile operator or Zarlio are refused, after normalising spaces/half-spaces/diacritics/Arabic letters/Latin; staff can approve a genuine exception (`tenants.manage`, reason, idempotency, audit) (`SmsAbuseTest::test_ordinary_shop_names_are_not_mistaken_for_impersonation`, `AdminOpsTest::test_staff_can_approve_a_real_shop_name_that_reads_like_an_authority`).
+- [x] Automatic invoice SMS after issuance with a per-shop switch (default on), «صدور بدون پیامک» for one invoice, never blocks issuance; issued page «اشتراک‌گذاری» (native share sheet, copy fallback) and «ارسال پیامک» sheet: resend to customer (never in flight/unknown, confirmation after delivery) and up to 3 other numbers parsed from any +98/0098/98/09/9 form, glued or separated (`InvoiceSmsDeliveryTest`, `tests/Unit/MobileExtractTest.php` + `tests/js/mobiles.test.mjs` on shared vectors; browser-checked, screenshots 76–81).
 - [ ] Independent penetration test and owner approval of visual direction.
 
 ## M0 — Foundations

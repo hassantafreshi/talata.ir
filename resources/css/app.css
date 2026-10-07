@@ -504,3 +504,31 @@ html:has(body[data-page="items"]), html:has(body[data-page="review"]) { scroll-p
 
 /* Post-login fingerprint offer card. */
 .passkey-offer { margin: 0 0 var(--t-sp-4); }
+
+/* Issued invoice: «اشتراک‌گذاری» and «ارسال پیامک» side by side; the SMS sheet's options and number chips. */
+.action-pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--t-sp-3); }
+.action-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 118px; padding: 14px 10px; border-radius: var(--t-r-band); background: var(--t-chrome); color: var(--t-text-on-chrome); border: 0; font: inherit; text-align: center; text-decoration: none; cursor: pointer; box-shadow: var(--t-shadow-sticky); }
+.action-tile svg { color: var(--t-gold-bright); }
+.action-tile .t { font-size: var(--t-fs-md); font-weight: 700; }
+.action-tile .s { font-size: var(--t-fs-xs); color: var(--t-muted-on-chrome); }
+.action-tile:active { transform: scale(.98); }
+.action-tile:focus-visible { outline: var(--t-focus-ring); outline-offset: var(--t-focus-offset); }
+.action-tile[aria-busy="true"] { opacity: .7; }
+.sms-bubble { align-self: flex-start; max-width: 92%; background: var(--t-band); border-radius: 18px 18px 18px 4px; padding: 10px 14px; font-size: var(--t-fs-sm); line-height: var(--t-lh-normal); overflow-wrap: anywhere; }
+.sms-option { border: 1px solid var(--t-line); border-radius: var(--t-r-band); padding: 12px; background: var(--t-surface); }
+.opt-head { display: flex; align-items: center; gap: 10px; }
+.opt-head .grow { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.opt-icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--t-band); color: var(--t-gold-deep); flex: none; }
+.chip.ok { background: var(--t-success-bg); color: var(--t-success-fg); cursor: default; }
+.chip.bad { background: var(--t-error-bg); color: var(--t-error-fg); cursor: default; }
+.copies { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: var(--t-fs-sm); }
+.copies li { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+/* On/off switch (checkbox role="switch"): 52×32, big enough to tap. */
+.switch { position: relative; display: inline-flex; width: 52px; height: 32px; flex: none; cursor: pointer; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.switch span { position: absolute; inset: 0; border-radius: 99px; background: var(--t-control-track); transition: background .15s; }
+.switch span::after { content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 26px; height: 26px; border-radius: 50%; background: var(--t-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: inset-inline-start .15s; }
+.switch input:checked + span { background: var(--t-gold-action); }
+.switch input:checked + span::after { inset-inline-start: 23px; }
+.switch input:focus-visible + span { outline: var(--t-focus-ring); outline-offset: var(--t-focus-offset); }
+.switch input:disabled + span { opacity: .6; }

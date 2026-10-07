@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\RateLimiter;
  */
 class SmsController extends AdminController
 {
-    public const PURPOSE_FA = ['OTP' => 'کد ورود', 'INVOICE' => 'فاکتور', 'REMINDER' => 'یادآوری قسط', 'TEST' => 'آزمایشی'];
+    public const PURPOSE_FA = ['OTP' => 'کد ورود', 'INVOICE' => 'فاکتور', 'INVOICE_COPY' => 'فاکتور (شماره دیگر)', 'REMINDER' => 'یادآوری قسط', 'TEST' => 'آزمایشی'];
 
     public const CHARGE_FA = ['OPERATIONAL' => 'هزینه سرویس', 'FREE_YEARLY' => 'رایگان سالانه', 'CREDIT' => 'اعتبار فروشگاه', 'NONE' => '—'];
 

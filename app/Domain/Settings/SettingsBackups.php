@@ -29,6 +29,7 @@ final class SettingsBackups
         'logo' => 'لوگو',
         'layout' => 'ظاهر فاکتور',
         'sms_template' => 'متن پیامک فاکتور',
+        'sms_auto' => 'ارسال خودکار پیامک فاکتور',
         'numbering' => 'شماره‌گذاری فاکتور',
     ];
 
@@ -58,6 +59,7 @@ final class SettingsBackups
             'logo' => $profile?->logo_path ? ['path' => $profile->logo_path, 'version' => $profile->logo_version] : null,
             'layout' => $layout?->settings,
             'sms_template' => SmsSetting::query()->value('invoice_template'),
+            'sms_auto' => SmsSetting::autoSend(),
             'numbering' => TenantSetting::query()->where('key', Numbering::KEY)->value('value'),
         ];
     }
@@ -124,6 +126,8 @@ final class SettingsBackups
                     'logo' => $profile ? $this->restoreLogo($profile, $p['logo'] ?? null) : null,
                     'layout' => $this->restoreLayout($p['layout'] ?? null),
                     'sms_template' => SmsSetting::query()->updateOrCreate([], ['invoice_template' => $p['sms_template'] ?? null]),
+                    // Backups older than this setting have no value for it: leave it as it is.
+                    'sms_auto' => array_key_exists('sms_auto', $p) ? SmsSetting::query()->updateOrCreate([], ['auto_send_invoice' => (bool) $p['sms_auto']]) : null,
                     'numbering' => $this->restoreNumbering($p['numbering'] ?? null),
                 };
             }

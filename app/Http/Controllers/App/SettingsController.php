@@ -40,6 +40,7 @@ class SettingsController extends BaseController
             'summary' => $ent->summary($tenant),
             'balanceFa' => Money::toman(app(SmsCredit::class)->balance($tenant->id)),
             'perSegmentFa' => Money::toman($ent->smsPerSegmentIrr($tenant)),
+            'smsAuto' => SmsSetting::autoSend(),
             'membership' => $this->membership(),
             'user' => auth()->user(),
             'affiliate' => Affiliate::query()->where('user_id', auth()->id())->first(),
@@ -80,9 +81,11 @@ class SettingsController extends BaseController
         } elseif (SmsTemplate::containsLinkOrPhone($name)) {
             // The shop name is sent inside invoice SMS; links or numbers in it would turn SMS into spam.
             $errors['name'] = ['در نام فروشگاه لینک یا شماره تلفن مجاز نیست.'];
-        } elseif (SmsTemplate::looksLikeImpersonation($name)) {
-            // The name is sent in invoice SMS; bank/government/prize wording would enable phishing.
-            $errors['name'] = ['نام فروشگاه نباید شبیه نام بانک، سامانه دولتی یا پیام جایزه باشد. اگر نام واقعی فروشگاه شماست، با پشتیبانی تماس بگیرید.'];
+        } elseif (SmsTemplate::impersonatesAuthority($name) && ! $this->tenant()->profile?->isNameApproved($name)) {
+            // Any real shop name is fine; only names that read like a bank, a government body, an operator or
+            // Zarlio are refused, because the name goes out in SMS from our line. Staff can approve a real one.
+            $support = config('talata.support.phone');
+            $errors['name'] = ['این نام شبیه نام بانک، سازمان دولتی، اپراتور یا زرلیو است و ممکن است در پیامک برای کلاهبرداری استفاده شود. اگر نام واقعی فروشگاه شماست، از پشتیبانی زرلیو بخواهید پس از دیدن مجوز کسب آن را تأیید کند'.($support ? ' (تلفن پشتیبانی: '.Digits::toPersian($support).')' : '').'.'];
         }
         $mobileRaw = trim((string) ($data['business_mobile'] ?? ''));
         $mobile = $mobileRaw === '' ? null : Mobile::normalize($mobileRaw);
@@ -219,7 +222,22 @@ class SettingsController extends BaseController
         $tenant = $this->tenant();
         $can = $this->ent()->can($tenant, 'sms.template_edit');
 
-        return view('app.sms-template', ['template' => SmsSetting::query()->value('invoice_template') ?: SmsTemplate::DEFAULT, 'canEdit' => $can, 'default' => SmsTemplate::DEFAULT]);
+        return view('app.sms-template', [
+            'template' => SmsSetting::query()->value('invoice_template') ?: SmsTemplate::DEFAULT, 'canEdit' => $can, 'default' => SmsTemplate::DEFAULT,
+            'autoSend' => SmsSetting::autoSend(), 'canSms' => $this->ent()->can($tenant, 'invoice.sms_share'),
+        ]);
+    }
+
+    /** «ارسال خودکار پیامک فاکتور» on/off — every plan that can send invoice SMS. */
+    public function saveSmsAuto(Request $request)
+    {
+        $data = $request->validate(['enabled' => ['required', 'boolean']]);
+        $enabled = (bool) $data['enabled'];
+        SmsSetting::query()->updateOrCreate([], ['auto_send_invoice' => $enabled]);
+        Audit::record('sms.auto_send_changed', null, ['enabled' => $enabled]);
+        app(SettingsBackups::class)->capture($this->tenant(), 'sms_template');
+
+        return response()->json(['ok' => true, 'enabled' => $enabled]);
     }
 
     public function saveSmsTemplate(Request $request)

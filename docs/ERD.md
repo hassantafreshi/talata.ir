@@ -56,6 +56,7 @@ erDiagram
     billing_orders ||--o{ payment_attempts : "order_id"
     users ||--o{ settings_backups : "created_by"
     tenants ||--o{ settings_backups : "tenant_id"
+    staff_users ||--o{ shop_profiles : "name_approved_by"
     tenants ||--o{ shop_profiles : "tenant_id"
     sms_credit_lots ||--o{ sms_credit_entries : "lot_id"
     sms_messages ||--o{ sms_credit_entries : "sms_message_id"
@@ -217,6 +218,7 @@ erDiagram
     shop_profiles {
         bigint id PK
         bigint tenant_id FK
+        bigint name_approved_by FK
     }
     sms_credit_entries {
         bigint id PK

@@ -8,6 +8,7 @@ use App\Domain\Market\QuoteService;
 use App\Domain\Sms\SmsService;
 use App\Domain\Tax\TaxRules;
 use App\Models\Invoice;
+use App\Models\SmsSetting;
 use App\Support\Mobile;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
@@ -110,6 +111,7 @@ class InvoiceDraftController extends BaseController
             'links' => $links,
             'customersQuota' => $this->ent()->quota($tenant, 'new_customers_per_month'),
             'canSms' => $this->ent()->can($tenant, 'invoice.sms_share'),
+            'autoSms' => SmsSetting::autoSend(),
             'profileComplete' => (bool) $tenant->profile?->isComplete(),
             'buyerMobile' => $invoice->buyer_mobile ? Mobile::display($invoice->buyer_mobile) : '',
         ]);
@@ -118,7 +120,7 @@ class InvoiceDraftController extends BaseController
     public function issue(Request $request, Invoice $invoice)
     {
         $data = $request->validate([
-            'mode' => ['required', 'in:ISSUE_ONLY,ISSUE_AND_SMS'],
+            'mode' => ['required', 'in:ISSUE_ONLY,ISSUE_AND_SMS,AUTO'],
             'version' => ['required', 'integer'],
             'idempotency_key' => ['required', 'string', 'max:64'],
             'buyer' => ['nullable', 'array'],

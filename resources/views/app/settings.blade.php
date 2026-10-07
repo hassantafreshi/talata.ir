@@ -41,7 +41,7 @@
             <a class="list-item" href="{{ route('settings.business') }}"><span class="body"><strong>اطلاعات کسب‌وکار</strong><span class="sub">{{ $profile?->isComplete() ? $profile->name : 'ناقص؛ پیش از اولین صدور کامل کنید' }}</span></span>@unless($profile?->isComplete())<span class="badge warn">ناقص</span>@endunless<span aria-hidden="true">‹</span></a>
             <a class="list-item" href="{{ route('settings.appearance') }}"><span class="body"><strong>ظاهر فاکتور</strong><span class="sub">قالب، لوگو، ستون‌ها و پیش‌نمایش چاپ</span></span><span aria-hidden="true">‹</span></a>
             <a class="list-item" href="{{ route('settings.numbering') }}"><span class="body"><strong>شماره‌گذاری فاکتور</strong><span class="sub">شکل شماره، شروع از عدد دلخواه، سالانه/ماهانه/پیوسته</span></span><span aria-hidden="true">‹</span></a>
-            <a class="list-item" href="{{ route('settings.sms_template') }}"><span class="body"><strong>متن پیامک فاکتور</strong></span><span aria-hidden="true">‹</span></a>
+            <a class="list-item" href="{{ route('settings.sms_template') }}"><span class="body"><strong>پیامک فاکتور</strong><span class="sub">ارسال خودکار: {{ $smsAuto ? 'روشن' : 'خاموش' }} · متن پیامک</span></span><span aria-hidden="true">‹</span></a>
         @endif
         @if ($isOwner)
             <a class="list-item" href="{{ route('settings.backups') }}"><span class="body"><strong>پشتیبان تنظیمات</strong><span class="sub">۵۰ تغییر آخر تنظیمات؛ بازگرداندن با یک لمس</span></span><span aria-hidden="true">‹</span></a>

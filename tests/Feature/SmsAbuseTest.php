@@ -8,6 +8,7 @@ use App\Domain\Sms\SmsCredit;
 use App\Domain\Sms\SmsGateway;
 use App\Domain\Sms\SmsService;
 use App\Domain\Sms\SmsTemplate;
+use App\Models\AuditEvent;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\ShopProfile;
@@ -72,11 +73,29 @@ class SmsAbuseTest extends TestCase
         $this->assertSame(5, $this->sent());
     }
 
-    public function test_initial_send_is_idempotent_and_resend_only_after_failure(): void
+    public function test_initial_send_is_idempotent_and_a_resend_after_success_needs_a_pause_and_confirmation(): void
     {
         $user = $this->merchant();
         $inv = $this->issueTo($user, '09350000001');
-        $this->api('POST', "/api/invoices/{$inv['id']}/sms")->assertStatus(409)->assertJsonPath('code', 'SMS_ALREADY_SENT');
+        // Right after the first one: never a second SMS within the cooldown.
+        $this->api('POST', "/api/invoices/{$inv['id']}/sms")->assertStatus(429)->assertJsonPath('code', 'SMS_RESEND_COOLDOWN');
+        $this->travel(11)->minutes();
+        // Delivered already: a resend is charged again, so it needs an explicit «yes».
+        $this->api('POST', "/api/invoices/{$inv['id']}/sms")->assertStatus(409)->assertJsonPath('code', 'SMS_CONFIRM_RESEND');
+        $this->assertSame(1, $this->sent());
+        $this->api('POST', "/api/invoices/{$inv['id']}/sms", ['confirm' => true])->assertOk();
+        $this->assertSame(2, $this->sent());
+        $this->assertSame(1, AuditEvent::query()->where('event', 'sms.resend_queued')->count());
+    }
+
+    public function test_no_resend_while_the_previous_sms_is_still_on_its_way(): void
+    {
+        $user = $this->merchant('basic');
+        $this->credit($user, 100000);
+        $inv = $this->issueTo($user, '09350000001');
+        SmsMessage::query()->update(['status' => 'SENDING']);
+        $this->travel(11)->minutes();
+        $this->api('POST', "/api/invoices/{$inv['id']}/sms", ['confirm' => true])->assertStatus(409)->assertJsonPath('code', 'SMS_IN_PROGRESS');
         $this->assertSame(1, $this->sent());
     }
 
@@ -317,11 +336,37 @@ class SmsAbuseTest extends TestCase
 
     public function test_ordinary_shop_names_are_not_mistaken_for_impersonation(): void
     {
-        foreach (['طلای آفتاب', 'گالری قرمز', 'جواهری دوام', 'طلای استثنایی', 'طلافروشی مفتاح', 'زرگری قهوه‌ای'] as $name) {
-            $this->assertFalse(SmsTemplate::looksLikeImpersonation($name), $name);
+        // Real shops are called almost anything: words that phishing also uses are fine on their own.
+        $ordinary = [
+            'آفتاب', 'طلای آفتاب', 'طلا و جواهر آفتاب‌طلایی', 'گالری قرمز', 'جواهری دوام', 'طلای استثنایی', 'طلافروشی مفتاح',
+            'زرگری قهوه‌ای', 'طلای ثنا', 'جواهری عدالت', 'طلافروشی دولت‌آبادی', 'گالری برنده', 'طلای سپه', 'جواهری ملت',
+            'طلای سامان', 'زرگری پارسیان', 'طلا و جواهر مهر', 'طلافروشی پلیس‌آباد', 'جواهری بانکی', 'طلای رمزی', 'طلای پشتیبان',
+            'گالری هشدار', 'طلای سهامی', 'طلافروشی جایزه', 'طلای مالیاتی‌زاده', 'Aftab Gold', 'Saman Jewelry', 'طلای قوه',
+            'طلای ۲۴ عیار', 'جواهری «آفتاب»', 'آفتاب طلا (شعبه ۲)',
+        ];
+        foreach ($ordinary as $name) {
+            $this->assertFalse(SmsTemplate::impersonatesAuthority($name), $name);
         }
-        foreach (['پلیس فتا', 'فتا', 'سامانه ثنا', 'ثنا', 'رمز پویا', 'وام فوری', 'بانکملت', 'قوه قضاییه', 'mellatbank'] as $name) {
-            $this->assertTrue(SmsTemplate::looksLikeImpersonation($name), $name);
+        // Only names that present the sender as a bank, an authority, an operator or Zarlio are refused,
+        // however they are spelled (half-space, no space, Arabic letters, diacritics, Latin).
+        $impersonating = [
+            'بانک ملت', 'بانکملت', 'بانك ملي', 'بانک‌ملی', 'طلای بانک صادرات', 'بانک مرکزی', 'پلیس فتا', 'پلیس‌فتا', 'سامانه ثنا',
+            'سهام عدالت', 'قوه قضائیه', 'قوه قضاییه', 'دادگستری', 'سازمان امور مالیاتی', 'ابلاغیه', 'شاپرک', 'همراه اول', 'ایرانسل',
+            'زرلیو', 'پشتیبانی زرلیو', 'کد تأیید', 'رمز پویا', 'mellatbank', 'Bank Melli', 'Zarlio Gold', 'shaparak',
+        ];
+        foreach ($impersonating as $name) {
+            $this->assertTrue(SmsTemplate::impersonatesAuthority($name), $name);
         }
+
+        // Through the settings form: an ordinary name with a «phishing» word saves, sends, and reminds.
+        $user = $this->merchant('basic');
+        $this->credit($user, 100000);
+        $this->actingAs($user);
+        $base = ['business_mobile' => '09121112233', 'address' => 'تهران'];
+        $this->api('POST', '/api/settings/business', ['name' => 'طلای آفتاب'] + $base)->assertOk();
+        $this->api('POST', '/api/settings/business', ['name' => 'جواهری عدالت'] + $base)->assertOk();
+        $issued = $this->issueTo($user, '09351234567');
+        $this->assertNotSame('NOT_SENT', $issued['sms']['status'] ?? null);
+        $this->api('POST', '/api/settings/business', ['name' => 'بانک ملت'] + $base)->assertStatus(422)->assertJsonStructure(['errors' => ['name']]);
     }
 }

@@ -25,6 +25,19 @@ export default function () {
   };
   form.template.addEventListener('input', draw);
   form.querySelector('[data-reset]')?.addEventListener('click', () => { form.template.value = boot.default; draw(); });
+  // «ارسال خودکار پیامک فاکتور»: saved as soon as it is switched; back to the old state if saving fails.
+  const auto = document.querySelector('[data-sms-auto]');
+  const autoText = document.querySelector('[data-sms-auto-text]');
+  auto?.addEventListener('change', async () => {
+    const enabled = auto.checked;
+    auto.disabled = true;
+    const res = await put('/api/settings/sms-auto', { enabled });
+    auto.disabled = false;
+    if (!res.ok) { auto.checked = !enabled; toast(res.message, { kind: 'error' }); return; }
+    autoText.textContent = enabled ? autoText.dataset.on : autoText.dataset.off;
+    toast(enabled ? 'ارسال خودکار پیامک روشن شد.' : 'ارسال خودکار پیامک خاموش شد.');
+  });
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = form.querySelector('[type=submit]');

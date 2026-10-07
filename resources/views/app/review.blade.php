@@ -3,7 +3,7 @@
         'id' => $invoice->public_id, 'version' => $invoice->version,
         'issue_url' => route('api.drafts.issue', $invoice), 'items_url' => route('invoices.items', $invoice),
         'business_url' => route('settings.business', ['return' => $invoice->public_id]),
-        'can_sms' => $canSms, 'profile_complete' => $profileComplete,
+        'can_sms' => $canSms, 'auto_sms' => $canSms && $autoSms, 'links_out' => $linksOut ?? false, 'profile_complete' => $profileComplete,
     ];
     // SMS step facts (what will happen, decided before the merchant taps): link quota and credit.
     $linksOut = $canSms && $links['limit'] !== null && $links['remaining'] === 0;
@@ -97,7 +97,7 @@
                 @if ($linksOut)
                     <div class="notice warn">لینک‌های فاکتور این ماه تمام شده است؛ ارسال پیامکی ممکن نیست، اما «فقط صدور» و چاپ همیشه آزاد است. سهمیه از {{ $links['resets_at_fa'] }} دوباره پر می‌شود. <a href="{{ route('settings.plan') }}">ارتقای پلن</a></div>
                 @elseif ($creditShort)
-                    <div class="notice warn">اعتبار پیامک کافی نیست (هزینه {{ toman($sms['cost_irr']) }}، موجودی {{ toman($sms['balance_irr']) }} تومان). اگر «صدور و ارسال پیامکی» را بزنید، فاکتور صادر می‌شود و پیامک پس از خرید اعتبار خودکار ارسال می‌شود.</div>
+                    <div class="notice warn">اعتبار پیامک کافی نیست (هزینه {{ toman($sms['cost_irr']) }}، موجودی {{ toman($sms['balance_irr']) }} تومان). فاکتور صادر می‌شود و پیامک پس از خرید اعتبار خودکار ارسال می‌شود.</div>
                 @endif
                 <a class="small" href="{{ route('settings.sms', ['return' => $invoice->public_id]) }}">خرید پیامک بیشتر</a>
             </section>
@@ -108,9 +108,18 @@
                 <span data-issue-unknown-text></span>
                 <button class="btn sm btn-dark" type="button" data-issue-retry>بررسی دوباره</button>
             </div>
-            @if ($canSms)
-                <button class="btn {{ $smsPrimary ? 'btn-gold lg' : 'btn-line' }} block" type="submit" value="ISSUE_AND_SMS" data-mode="ISSUE_AND_SMS" data-busy-text="در حال صدور…" @disabled($linksOut)>صدور و ارسال پیامکی</button>
-                <button class="btn {{ $smsPrimary ? 'btn-line' : 'btn-gold lg' }} block" type="submit" value="ISSUE_ONLY" data-mode="ISSUE_ONLY" data-busy-text="در حال صدور…">فقط صدور (بدون پیامک)</button>
+            @if ($canSms && $autoSms)
+                {{-- «ارسال خودکار پیامک» is on: the main button issues and, when a mobile is entered, sends by itself. --}}
+                <button class="btn btn-gold lg block" type="submit" value="AUTO" data-mode="AUTO" data-busy-text="در حال صدور…">صدور فاکتور</button>
+                <p class="xs center" data-auto-hint aria-live="polite"
+                   data-with="{{ $linksOut ? 'لینک‌های این ماه تمام شده؛ این بار پیامک فرستاده نمی‌شود.' : 'پس از صدور، پیامک فاکتور خودکار برای مشتری فرستاده می‌شود.' }}"
+                   data-without="موبایل مشتری را بنویسید تا پیامک فاکتور خودکار فرستاده شود."></p>
+                <button class="btn btn-line block" type="submit" value="ISSUE_ONLY" data-mode="ISSUE_ONLY" data-busy-text="در حال صدور…">صدور بدون پیامک (فقط این بار)</button>
+                <p class="xs muted center">ارسال خودکار پیامک روشن است. <a href="{{ route('settings.sms_template') }}">تغییر در تنظیمات</a></p>
+            @elseif ($canSms)
+                <button class="btn {{ $smsPrimary ? 'btn-line' : 'btn-gold lg' }} block" type="submit" value="ISSUE_ONLY" data-mode="ISSUE_ONLY" data-busy-text="در حال صدور…">صدور فاکتور</button>
+                <button class="btn {{ $smsPrimary ? 'btn-gold' : 'btn-line' }} block" type="submit" value="ISSUE_AND_SMS" data-mode="ISSUE_AND_SMS" data-busy-text="در حال صدور…" @disabled($linksOut)>صدور و ارسال پیامکی</button>
+                <p class="xs muted center">ارسال خودکار پیامک خاموش است. <a href="{{ route('settings.sms_template') }}">روشن کردن در تنظیمات</a></p>
             @else
                 <button class="btn btn-gold block lg" type="submit" value="ISSUE_ONLY" data-mode="ISSUE_ONLY" data-busy-text="در حال صدور…">صدور فاکتور</button>
                 <p class="xs muted center">ارسال پیامکی در این پلن فعال نیست. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></p>

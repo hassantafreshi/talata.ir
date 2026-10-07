@@ -60,22 +60,20 @@ final class SmsTemplate
     }
 
     /**
-     * Shop names travel inside SMS under our sender line. Block wording that impersonates banks,
-     * government or prize/verification messages (common Iranian SMS phishing patterns).
+     * Strict wording check for the merchant-written SMS TEMPLATE text (never for shop names): a template that
+     * talks about banks, blocked accounts, prizes or verification codes reads like phishing from our line.
+     * Distinctive words match anywhere, so glued spellings («بانکملت») are caught too.
      */
-    /** Distinctive words: matched anywhere, so glued spellings («بانکملت») are caught too. */
     public const PHISHING_WORDS = [
         'بانک', 'شاپرک', 'سامانه', 'دولت', 'یارانه', 'عدالت', 'سهام', 'پلیس', 'ابلاغ', 'دادگستری',
         'مالیات', 'مسدود', 'اخطار', 'هشدار', 'برنده', 'جایزه', 'قرعه', 'کد تایید', 'کد تأیید', 'پشتیبانی',
         'همراه اول', 'ایرانسل', 'رایتل', 'زرلیو',
     ];
 
-    /**
-     * Short words that also occur inside ordinary shop names («آفتاب» contains فتا, «قرمز» رمز, «دوام» وام,
-     * «استثنایی» ثنا): matched only as whole words.
-     */
+    /** Short template words that also occur inside ordinary words («آفتاب» فتا, «قرمز» رمز): whole words only. */
     public const PHISHING_WHOLE_WORDS = ['فتا', 'ثنا', 'رمز', 'وام', 'قوه'];
 
+    /** Template text only — see impersonatesAuthority() for shop names. */
     public static function looksLikeImpersonation(string $text): bool
     {
         $t = str_replace(["\u{200C}", 'ي', 'ك'], [' ', 'ی', 'ک'], mb_strtolower($text));
@@ -99,6 +97,63 @@ final class SmsTemplate
         return (bool) preg_match('/\b(sana|support|verify|code|otp)\b/iu', $t);
     }
 
+    /** Banks whose names, after «بانک», make a shop name read like the bank itself. */
+    public const BANK_NAMES = [
+        'ملی', 'ملت', 'صادرات', 'تجارت', 'سپه', 'کشاورزی', 'مسکن', 'رفاه', 'پاسارگاد', 'پارسیان', 'سامان',
+        'اقتصاد نوین', 'آینده', 'شهر', 'دی', 'سینا', 'کارآفرین', 'مرکزی', 'رسالت', 'قرض الحسنه', 'توسعه',
+        'صنعت و معدن', 'گردشگری', 'خاورمیانه', 'ایران زمین', 'سرمایه', 'حکمت', 'انصار', 'قوامین', 'مهر', 'کوثر',
+    ];
+
+    /**
+     * Names of authorities, payment networks and operators that SMS phishing imitates — and our own brand.
+     * Matched after normalisation (spaces, half-spaces, diacritics, Arabic letters), so «پلیس‌فتا» and
+     * «بانکملت» are caught; single ordinary words («آفتاب», «عدالت», «ثنا», «سپه», «ملت») are not.
+     */
+    public const AUTHORITY_PHRASES = [
+        'پلیس فتا', 'پلیس سایبری', 'سامانه ثنا', 'سامانه عدالت', 'سامانه ابلاغ', 'سامانه یارانه', 'سامانه سجام',
+        'سهام عدالت', 'قوه قضاییه', 'دادگستری', 'دادستانی', 'امور مالیاتی', 'اداره مالیات', 'ابلاغیه', 'اخطاریه',
+        'احضاریه', 'یارانه', 'شاپرک', 'کد تایید', 'رمز پویا', 'رمز دوم', 'رمز یکبار', 'همراه اول', 'ایرانسل',
+        'رایتل', 'زرلیو', 'پست بانک', 'بانک مرکزی',
+    ];
+
+    /** Latin spellings, matched on the same normalised text (spaces removed). */
+    public const AUTHORITY_LATIN = '/(bank(melli|mellat|saderat|tejarat|sepah|keshavarzi|maskan|refah|pasargad|parsian|saman|markazi|ayandeh|shahr|sina)|(melli|mellat|saderat|tejarat|sepah|keshavarzi|maskan|refah|pasargad|parsian|saman|markazi|ayandeh|sina)bank|shaparak|zarlio|adliran|sahamedalat|fatapolice|policefata|cyberpolice|irancell|rightel|hamrahaval)/';
+
+    /** One spelling for matching: lower case, Persian letters, no diacritics, spaces, half-spaces or punctuation. */
+    public static function normalizeForMatch(string $text): string
+    {
+        $t = mb_strtolower(Digits::toLatin($text));
+        $t = strtr($t, ['ي' => 'ی', 'ى' => 'ی', 'ئ' => 'ی', 'ك' => 'ک', 'أ' => 'ا', 'إ' => 'ا', 'آ' => 'ا', 'ة' => 'ه', 'ۀ' => 'ه', 'ؤ' => 'و']);
+        $t = preg_replace('/[\x{064B}-\x{065F}\x{0670}\x{0640}]/u', '', $t) ?? $t;   // diacritics, hamza marks, tatweel
+
+        return preg_replace('/[^\p{L}\p{N}]+/u', '', $t) ?? $t;                       // spaces, ZWNJ, punctuation
+    }
+
+    /**
+     * Shop names may be anything a real shop is called. The only names refused are ones that present the
+     * sender as a bank, a government body, a payment network, a mobile operator or Zarlio itself — the senders
+     * Iranian SMS phishing imitates. A real shop caught by this can have its name approved by Zarlio staff.
+     */
+    public static function impersonatesAuthority(string $name): bool
+    {
+        $n = self::normalizeForMatch($name);
+        if ($n === '') {
+            return false;
+        }
+        foreach (self::AUTHORITY_PHRASES as $phrase) {
+            if (str_contains($n, self::normalizeForMatch($phrase))) {
+                return true;
+            }
+        }
+        foreach (self::BANK_NAMES as $bank) {
+            if (str_contains($n, self::normalizeForMatch('بانک '.$bank))) {
+                return true;
+            }
+        }
+
+        return (bool) preg_match(self::AUTHORITY_LATIN, $n);
+    }
+
     /**
      * Iranian phone-number shapes once separators are removed (mobile 09…/9…/98…, or a landline with area
      * code). Used for invoice numbers inside SMS: a number styled «۰۹۱۲-۳۴۵۶۷۸۹» must never go out.
@@ -116,10 +171,14 @@ final class SmsTemplate
      * (each can pass alone and still combine into a link or a bank-like text). Numbers and the trusted link are
      * neutralised; the invoice number is checked separately for phone-number shapes.
      */
-    public static function assertSafeToSend(string $template, string $shopName, string $invoiceNumber): void
+    public static function assertSafeToSend(string $template, string $shopName, string $invoiceNumber, bool $nameApproved = false): void
     {
         $probe = self::render($template, ['shop_name' => $shopName, 'invoice_number' => 'N', 'amount' => 'A', 'invoice_link' => ' ']);
-        if (self::containsLinkOrPhone($probe) || self::looksLikeImpersonation($probe) || self::looksLikePhoneNumber($invoiceNumber)) {
+        $templateText = str_replace(self::PLACEHOLDERS, ' ', $template);
+        $impersonates = self::looksLikeImpersonation($templateText)
+            || (! $nameApproved && self::impersonatesAuthority($probe))
+            || ($nameApproved && self::impersonatesAuthority($templateText));
+        if (self::containsLinkOrPhone($probe) || $impersonates || self::looksLikePhoneNumber($invoiceNumber)) {
             throw new DomainError('SMS_CONTENT_BLOCKED', 'متن این پیامک مجاز نیست: شبیه لینک، شماره تلفن یا پیام بانک و سامانه می‌شود. نام فروشگاه، متن پیامک یا شیوه شماره‌گذاری را اصلاح کنید.', 422);
         }
     }

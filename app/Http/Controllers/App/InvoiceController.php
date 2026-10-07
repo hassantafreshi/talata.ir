@@ -13,6 +13,7 @@ use App\Models\InvoiceShare;
 use App\Models\SmsMessage;
 use App\Support\Digits;
 use App\Support\Jalali;
+use App\Support\Mobile;
 use App\Support\Money;
 use Illuminate\Http\Request;
 
@@ -120,7 +121,8 @@ class InvoiceController extends BaseController
     {
         $tenant = $this->tenant();
         $share = InvoiceShare::query()->where('invoice_id', $invoice->id)->whereNull('revoked_at')->first();
-        $sms = SmsMessage::query()->where('invoice_id', $invoice->id)->orderByDesc('id')->first();
+        $sms = $invoice->smsMessages()->first();
+        $shareUrl = $share ? $this->invoices->shareUrl($share) : null;
 
         return [
             'invoice' => $invoice,
@@ -128,20 +130,23 @@ class InvoiceController extends BaseController
             'qr' => Qr::svg($this->invoices->verifyUrl($invoice)),
             'verifyUrl' => $this->invoices->verifyUrl($invoice),
             'share' => $share,
-            'shareUrl' => $share ? $this->invoices->shareUrl($share) : null,
+            'shareUrl' => $shareUrl,
             'sms' => $sms,
             'smsStatus' => $sms ? self::SMS_STATUS_FA[$sms->status] : null,
             'links' => $this->ent()->quota($tenant, 'links_per_month'),
             'balanceFa' => Money::toman(app(SmsCredit::class)->balance($tenant->id)),
             'replacement' => $invoice->replacement(),
             'canVoid' => $this->membership()->can('invoice.void'),
+            'canSms' => $this->ent()->can($tenant, 'invoice.sms_share'),
+            'smsPreview' => $invoice->isIssued() ? app(SmsService::class)->previewFor($invoice, $tenant, $shareUrl) : null,
+            'copies' => $invoice->smsCopies()->limit(10)->get(),
         ];
     }
 
     public function status(Invoice $invoice)
     {
         $this->load($invoice);
-        $sms = SmsMessage::query()->where('invoice_id', $invoice->id)->orderByDesc('id')->first();
+        $sms = $invoice->smsMessages()->first();
 
         return response()->json([
             'status' => $invoice->status,
@@ -181,10 +186,44 @@ class InvoiceController extends BaseController
     {
         $this->load($invoice);
         $share = $this->invoices->ensureShare($invoice, $this->tenant(), $request->user());
-        $message = $sms->queueInvoiceSms($this->tenant(), $invoice, $this->invoices->shareUrl($share), $request->user()->id, true);
+        $message = $sms->queueInvoiceSms($this->tenant(), $invoice, $this->invoices->shareUrl($share), $request->user()->id, true, $request->boolean('confirm'));
         [$label, $kind] = self::SMS_STATUS_FA[$message->status];
 
         return response()->json(['status' => $message->status, 'label_fa' => $label, 'kind' => $kind, 'buy_url' => $message->status === 'AWAITING_CREDIT' ? route('settings.sms', ['return' => $invoice->public_id]) : null]);
+    }
+
+    /**
+     * «ارسال به شماره دیگر»: the merchant types one or more numbers in any form (Mobile::extractAll); the
+     * server parses again and sends the same invoice SMS to each. Leftover text that is not a mobile is an
+     * error, so a mistyped digit is never silently dropped.
+     */
+    public function smsCopies(Request $request, Invoice $invoice, SmsService $sms)
+    {
+        $data = $request->validate(['mobiles' => ['required', 'string', 'max:300'], 'idempotency_key' => ['required', 'string', 'max:64']]);
+        $this->load($invoice);
+        if (! $invoice->isIssued()) {
+            throw new DomainError('SMS_INVOICE_NOT_ISSUED', 'فقط برای فاکتور قطعی و باطل‌نشده می‌توان پیامک فرستاد.');
+        }
+        [$mobiles, $invalid] = Mobile::extractAll($data['mobiles']);
+        if ($invalid) {
+            $bad = implode('، ', array_map(fn ($f) => Digits::toPersian($f), array_slice($invalid, 0, 3)));
+            throw new DomainError('MOBILES_INVALID', "این بخش شماره موبایل درست نیست: {$bad}", 422, ['errors' => ['mobiles' => ["این بخش شماره موبایل درست نیست: {$bad}"]]]);
+        }
+        if (! $mobiles) {
+            throw new DomainError('MOBILES_INVALID', 'شماره موبایل پیدا نشد. مثال: ۰۹۱۲۳۴۵۶۷۸۹', 422, ['errors' => ['mobiles' => ['شماره موبایل پیدا نشد. مثال: ۰۹۱۲۳۴۵۶۷۸۹']]]);
+        }
+        $share = $this->invoices->ensureShare($invoice, $this->tenant(), $request->user());
+        $results = $sms->queueInvoiceCopies($this->tenant(), $invoice, $this->invoices->shareUrl($share), $request->user()->id, $mobiles, $data['idempotency_key']);
+
+        return response()->json([
+            'results' => array_map(function ($r) {
+                [$label, $kind] = self::SMS_STATUS_FA[$r['status']] ?? [$r['status'] === 'SKIPPED' ? 'فرستاده نشد' : 'ارسال نشد', $r['status'] === 'SKIPPED' ? 'off' : 'err'];
+
+                return $r + ['mobile_fa' => Mobile::display($r['mobile']), 'label_fa' => $label, 'kind' => $kind];
+            }, $results),
+            'queued' => count(array_filter($results, fn ($r) => ! in_array($r['status'], ['SKIPPED', 'NOT_SENT', 'CANCELLED'], true))),
+            'buy_url' => route('settings.sms', ['return' => $invoice->public_id]),
+        ]);
     }
 
     public function void(Request $request, Invoice $invoice)

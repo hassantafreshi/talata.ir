@@ -27,6 +27,54 @@ final class Mobile
         return preg_match(self::PATTERN, $value) ? $value : null;
     }
 
+    /**
+     * Every Iranian mobile in free text: +98 9…, 0098 9…, 98 9…, 09… or 9… with exactly the right number of
+     * digits, Persian/Arabic digits, any separators — or none: «0912123456709351234567» is two numbers.
+     * Separators are dropped and the digit stream is read left to right, longest valid form first.
+     * Returns [unique normalised 09… numbers in order, leftover fragments that are not a mobile].
+     * Mirrored by resources/js/lib/mobiles.js; shared examples in tests/fixtures/mobile-extract-vectors.json.
+     *
+     * @return array{0: list<string>, 1: list<string>}
+     */
+    public static function extractAll(?string $raw): array
+    {
+        $stream = preg_replace('/[^0-9+]/', '', Digits::toLatin((string) $raw)) ?? '';
+        $found = [];
+        $invalid = [];
+        $junk = '';
+        $n = strlen($stream);
+        $i = 0;
+        while ($i < $n) {
+            $match = null;
+            foreach ([['+98', 13], ['0098', 14], ['09', 11], ['98', 12], ['9', 10]] as [$prefix, $len]) {
+                if (substr($stream, $i, strlen($prefix)) !== $prefix || $i + $len > $n) {
+                    continue;
+                }
+                $candidate = '0'.substr($stream, $i + $len - 10, 10);
+                if (preg_match(self::PATTERN, $candidate) && ! str_contains(substr($stream, $i + 1, $len - 1), '+')) {
+                    $match = [$candidate, $len];
+                    break;
+                }
+            }
+            if ($match === null) {
+                $junk .= $stream[$i++];
+
+                continue;
+            }
+            if ($junk !== '') {
+                $invalid[] = $junk;
+                $junk = '';
+            }
+            $found[$match[0]] = true;
+            $i += $match[1];
+        }
+        if ($junk !== '') {
+            $invalid[] = $junk;
+        }
+
+        return [array_keys($found), $invalid];
+    }
+
     public static function mask(?string $mobile): string
     {
         if (! $mobile || strlen($mobile) !== 11) {

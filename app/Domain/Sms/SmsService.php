@@ -109,26 +109,21 @@ final class SmsService
     }
 
     /**
-     * Queues the invoice SMS (initial or resend). Returns the message, which may be in
-     * AWAITING_CREDIT when neither free allowance nor credit covers it.
+     * Queues the invoice SMS to the customer (initial or resend). Returns the message, which may be in
+     * AWAITING_CREDIT when neither free allowance nor credit covers it. A resend is refused while the previous
+     * one is still on its way or its outcome is unknown (it could arrive twice); after a delivered one it needs
+     * $confirmed, because it is charged again.
      */
-    public function queueInvoiceSms(Tenant $tenant, Invoice $invoice, string $link, ?int $userId, bool $isResend): SmsMessage
+    public function queueInvoiceSms(Tenant $tenant, Invoice $invoice, string $link, ?int $userId, bool $isResend, bool $confirmed = false): SmsMessage
     {
-        return DB::transaction(function () use ($tenant, $invoice, $link, $userId, $isResend) {
+        return DB::transaction(function () use ($tenant, $invoice, $link, $userId, $isResend, $confirmed) {
             Tenant::query()->whereKey($tenant->id)->lockForUpdate()->first();
             $invoice = Invoice::query()->whereKey($invoice->id)->lockForUpdate()->firstOrFail();
             $cfg = config('talata.sms');
-
-            $this->entitlements->assertCan($tenant, 'invoice.sms_share', 'ارسال پیامک فاکتور در این پلن فعال نیست.');
-            if (! $invoice->isIssued()) {
-                throw new DomainError('SMS_INVOICE_NOT_ISSUED', 'فقط برای فاکتور قطعی و باطل‌نشده می‌توان پیامک فرستاد.');
-            }
+            $this->assertInvoiceSendable($tenant, $invoice);
             $recipient = $invoice->buyer_mobile;
             if (! $recipient) {
                 throw new DomainError('SMS_NO_RECIPIENT', 'شماره موبایل مشتری روی این فاکتور ثبت نشده است.');
-            }
-            if ($cfg['requires_complete_profile'] && ! $tenant->profile?->isComplete()) {
-                throw new DomainError('PROFILE_INCOMPLETE', 'ابتدا اطلاعات کسب‌وکار را کامل کنید.');
             }
             if ($invoice->customer_id && Customer::query()->whereKey($invoice->customer_id)->value('sms_opt_out')) {
                 throw new DomainError('SMS_OPTED_OUT', 'این مشتری دریافت پیامک را غیرفعال کرده است.');
@@ -138,16 +133,16 @@ final class SmsService
             DB::select('SELECT pg_advisory_xact_lock(hashtext(?))', ['sms:'.$recipient]);
 
             $previous = SmsMessage::query()->where('invoice_id', $invoice->id)->where('purpose', 'INVOICE')->orderByDesc('id')->get();
+            $last = $previous->first();
+            if ($last && ! $isResend) {
+                return $last; // idempotent initial send
+            }
             if ($previous->where('status', '!=', 'CANCELLED')->count() >= $cfg['max_sends_per_invoice']) {
                 throw new DomainError('SMS_INVOICE_LIMIT', 'برای این فاکتور بیشتر از '.Digits::toPersian((string) $cfg['max_sends_per_invoice']).' بار نمی‌توان پیامک فرستاد. لینک را کپی کنید.', 429);
             }
-            $last = $previous->first();
             if ($last) {
-                if (! $isResend) {
-                    return $last; // idempotent initial send
-                }
-                if (in_array($last->status, ['QUEUED', 'SENDING', 'SENT', 'DELIVERED'], true)) {
-                    throw new DomainError('SMS_ALREADY_SENT', 'پیامک این فاکتور ارسال شده یا در صف است؛ ارسال دوباره فقط پس از ناموفق‌شدن ممکن است.', 409);
+                if (in_array($last->status, ['QUEUED', 'SENDING'], true)) {
+                    throw new DomainError('SMS_IN_PROGRESS', 'پیامک قبلی هنوز در حال ارسال است. چند لحظه بعد وضعیت آن را ببینید.', 409);
                 }
                 // Outcome not known yet: a resend could reach the customer twice. Reconciliation settles it
                 // (delivered, or failed and refunded within about 30 minutes); then a resend is allowed.
@@ -155,63 +150,154 @@ final class SmsService
                     throw new DomainError('SMS_STATUS_UNKNOWN', 'وضعیت پیامک قبلی هنوز روشن نیست. تا روشن شدن آن (حداکثر حدود ۳۰ دقیقه) ارسال دوباره ممکن نیست تا پیامک تکراری نرود.', 409);
                 }
                 if ($last->status !== 'AWAITING_CREDIT' && $last->created_at->gt(now()->subMinutes($cfg['resend_min_minutes']))) {
-                    throw new DomainError('SMS_RESEND_COOLDOWN', 'ارسال دوباره تا '.Digits::toPersian((string) $cfg['resend_min_minutes']).' دقیقه پس از تلاش قبلی ممکن نیست.', 429);
+                    throw new DomainError('SMS_RESEND_COOLDOWN', 'ارسال دوباره تا '.Digits::toPersian((string) $cfg['resend_min_minutes']).' دقیقه پس از پیامک قبلی ممکن نیست.', 429);
+                }
+                if (in_array($last->status, ['SENT', 'DELIVERED'], true) && ! $confirmed) {
+                    throw new DomainError('SMS_CONFIRM_RESEND', 'پیامک قبلی برای مشتری فرستاده شده است. دوباره بفرستیم؟ هزینه آن دوباره حساب می‌شود.', 409);
                 }
                 if ($last->status === 'AWAITING_CREDIT') {
                     $last->update(['status' => 'CANCELLED', 'last_error' => 'superseded']);
                 }
             }
 
-            $active = fn ($q) => $q->whereNotIn('status', ['CANCELLED', 'AWAITING_CREDIT', 'FAILED']);
-            // Tenant-wide caps also count failed attempts: invalid-number sends must not be free to repeat.
-            $attempted = fn ($q) => $q->whereNotIn('status', ['CANCELLED', 'AWAITING_CREDIT']);
-            $recipientToday = SmsMessage::query()->forTenant($tenant->id)->where('recipient', $recipient)->where('created_at', '>=', now()->subDay())->where($active)->count();
-            if ($recipientToday >= $cfg['per_recipient_per_tenant_daily']) {
-                throw new DomainError('SMS_RECIPIENT_DAILY', 'به این شماره امروز به اندازه کافی پیامک فرستاده شده است. فردا دوباره امتحان کنید.', 429);
+            return $this->queueOne($tenant, $invoice, $recipient, 'INVOICE', 'inv:'.$invoice->id.':'.($previous->count() + 1), $link, $userId,
+                $isResend ? 'sms.resend_queued' : 'sms.queued', true);
+        });
+    }
+
+    /**
+     * Copies of the invoice SMS to other numbers the merchant typed (a family member, a second phone). Same
+     * text, link, caps and charging as the customer SMS; never waits for credit (the merchant is right there).
+     * At most max_copy_recipients_per_send numbers per request and max_copies_per_invoice per invoice; a number
+     * that already has a copy on its way or delivered is skipped. $requestKey makes a double tap a replay.
+     *
+     * @param  list<string>  $mobiles  normalised 09… numbers (Mobile::extractAll)
+     * @return list<array{mobile: string, status: string, code?: string, message_fa?: string}>
+     */
+    public function queueInvoiceCopies(Tenant $tenant, Invoice $invoice, string $link, ?int $userId, array $mobiles, string $requestKey): array
+    {
+        return DB::transaction(function () use ($tenant, $invoice, $link, $userId, $mobiles, $requestKey) {
+            Tenant::query()->whereKey($tenant->id)->lockForUpdate()->first();
+            $invoice = Invoice::query()->whereKey($invoice->id)->lockForUpdate()->firstOrFail();
+            $cfg = config('talata.sms');
+            $this->assertInvoiceSendable($tenant, $invoice);
+            $mobiles = array_values(array_unique(array_filter($mobiles)));
+            if (! $mobiles) {
+                throw new DomainError('SMS_NO_RECIPIENT', 'شماره موبایلی وارد نشده است.', 422);
             }
-            $planCode = $this->entitlements->planCode($tenant);
-            $tenantHour = SmsMessage::query()->forTenant($tenant->id)->where('purpose', '!=', 'OTP')->where('created_at', '>=', now()->subHour())->where($attempted)->count();
-            $tenantDay = SmsMessage::query()->forTenant($tenant->id)->where('purpose', '!=', 'OTP')->where('created_at', '>=', now()->subDay())->where($attempted)->count();
-            if ($tenantHour >= $cfg['tenant_hourly_cap'] || $tenantDay >= ($cfg['tenant_daily_cap'][$planCode] ?? 0)) {
-                throw new DomainError('SMS_TENANT_RATE', 'سقف ارسال پیامک این فروشگاه در این بازه پر شده است. کمی بعد دوباره امتحان کنید.', 429);
+            if (count($mobiles) > $cfg['max_copy_recipients_per_send']) {
+                throw new DomainError('SMS_TOO_MANY_RECIPIENTS', 'هر بار حداکثر '.Digits::toPersian((string) $cfg['max_copy_recipients_per_send']).' شماره.', 422);
             }
 
-            SmsTemplate::assertSafeToSend($this->templateFor($tenant), (string) ($invoice->snapshot['shop']['name'] ?? $tenant->profile?->name ?? ''), Digits::invoiceNumber($invoice->number));
-            $preview = $this->previewFor($invoice, $tenant, $link);
-            $message = new SmsMessage([
-                'tenant_id' => $tenant->id, 'purpose' => 'INVOICE', 'invoice_id' => $invoice->id, 'recipient' => $recipient,
-                'body' => $preview['body'], 'segments' => $preview['segments'], 'cost_irr' => '0', 'charge_source' => 'NONE',
-                'status' => 'QUEUED', 'requested_by' => $userId,
-                'idempotency_key' => 'inv:'.$invoice->id.':'.($previous->count() + 1),
-            ]);
+            $results = [];
+            foreach ($mobiles as $mobile) {
+                $key = 'copy:'.$invoice->id.':'.substr(hash('sha256', $requestKey.'|'.$mobile), 0, 40);
+                if ($replay = SmsMessage::query()->where('idempotency_key', $key)->first()) {
+                    $results[] = ['mobile' => $mobile, 'status' => $replay->status];
 
-            $useFree = $preview['free_remaining'] > 0 && $preview['segments'] <= 2;
-            if ($useFree) {
-                $freeToday = SmsMessage::query()->forTenant($tenant->id)->where('charge_source', 'FREE_YEARLY')->where('created_at', '>=', now()->subDay())->where($active)->count();
-                $freeRecipient = SmsMessage::query()->where('recipient', $recipient)->where('charge_source', 'FREE_YEARLY')->where('created_at', '>=', now()->subDay())->where($active)->count();
-                $useFree = $freeToday < $cfg['free_yearly_per_tenant_daily'] && $freeRecipient < $cfg['per_recipient_global_free_daily'];
-            }
+                    continue;
+                }
+                if ($mobile === $invoice->buyer_mobile) {
+                    $results[] = ['mobile' => $mobile, 'status' => 'SKIPPED', 'code' => 'SMS_IS_CUSTOMER', 'message_fa' => 'این شماره خود مشتری است؛ «ارسال دوباره به مشتری» را بزنید.'];
 
-            if ($useFree) {
-                $message->charge_source = 'FREE_YEARLY';
-                $message->save();
-            } else {
-                $message->charge_source = 'CREDIT';
-                $message->cost_irr = $preview['cost_irr'];
-                $message->save();
-                if (! $this->credit->reserve($tenant->id, $preview['cost_irr'], $message)) {
-                    $message->update(['status' => 'AWAITING_CREDIT', 'cost_irr' => '0', 'charge_source' => 'NONE']);
-                    Audit::record('sms.awaiting_credit', $invoice, ['message' => $message->public_id], $tenant->id);
+                    continue;
+                }
+                DB::select('SELECT pg_advisory_xact_lock(hashtext(?))', ['sms:'.$mobile]);
+                $copies = SmsMessage::query()->where('invoice_id', $invoice->id)->where('purpose', 'INVOICE_COPY')->whereNotIn('status', ['CANCELLED', 'FAILED']);
+                if ((clone $copies)->where('recipient', $mobile)->exists()) {
+                    $results[] = ['mobile' => $mobile, 'status' => 'SKIPPED', 'code' => 'SMS_ALREADY_SENT', 'message_fa' => 'این فاکتور قبلاً برای این شماره فرستاده شده است.'];
 
-                    return $message;
+                    continue;
+                }
+                if ($copies->count() >= $cfg['max_copies_per_invoice']) {
+                    $results[] = ['mobile' => $mobile, 'status' => 'NOT_SENT', 'code' => 'SMS_COPY_LIMIT', 'message_fa' => 'برای هر فاکتور حداکثر '.Digits::toPersian((string) $cfg['max_copies_per_invoice']).' شماره دیگر. لینک را کپی کنید.'];
+
+                    continue;
+                }
+                try {
+                    $m = $this->queueOne($tenant, $invoice, $mobile, 'INVOICE_COPY', $key, $link, $userId, 'sms.copy_queued', false);
+                    $results[] = $m->status === 'CANCELLED'
+                        ? ['mobile' => $mobile, 'status' => 'NOT_SENT', 'code' => 'SMS_NO_CREDIT', 'message_fa' => 'اعتبار پیامک کافی نیست. ابتدا اعتبار پیامک بخرید.']
+                        : ['mobile' => $mobile, 'status' => $m->status];
+                } catch (DomainError $e) {
+                    $results[] = ['mobile' => $mobile, 'status' => 'NOT_SENT', 'code' => $e->codeName, 'message_fa' => $e->messageFa];
                 }
             }
 
-            Audit::record($isResend ? 'sms.resend_queued' : 'sms.queued', $invoice, ['message' => $message->public_id, 'charge' => $message->charge_source, 'segments' => $message->segments], $tenant->id);
-            SendSms::dispatch($message->id)->afterCommit();
-
-            return $message;
+            return $results;
         });
+    }
+
+    private function assertInvoiceSendable(Tenant $tenant, Invoice $invoice): void
+    {
+        $this->entitlements->assertCan($tenant, 'invoice.sms_share', 'ارسال پیامک فاکتور در این پلن فعال نیست.');
+        if (! $invoice->isIssued()) {
+            throw new DomainError('SMS_INVOICE_NOT_ISSUED', 'فقط برای فاکتور قطعی و باطل‌نشده می‌توان پیامک فرستاد.');
+        }
+        if (config('talata.sms.requires_complete_profile') && ! $tenant->profile?->isComplete()) {
+            throw new DomainError('PROFILE_INCOMPLETE', 'ابتدا اطلاعات کسب‌وکار را کامل کنید.');
+        }
+    }
+
+    /**
+     * Caps, content check, charging and dispatch shared by the customer SMS and its copies. Only DomainErrors
+     * before any write, so a caller may catch one and continue in the same transaction.
+     */
+    private function queueOne(Tenant $tenant, Invoice $invoice, string $recipient, string $purpose, string $key, string $link, ?int $userId, string $auditEvent, bool $awaitCredit): SmsMessage
+    {
+        $cfg = config('talata.sms');
+        $active = fn ($q) => $q->whereNotIn('status', ['CANCELLED', 'AWAITING_CREDIT', 'FAILED']);
+        // Tenant-wide caps also count failed attempts: invalid-number sends must not be free to repeat.
+        $attempted = fn ($q) => $q->whereNotIn('status', ['CANCELLED', 'AWAITING_CREDIT']);
+        $recipientToday = SmsMessage::query()->forTenant($tenant->id)->where('recipient', $recipient)->where('created_at', '>=', now()->subDay())->where($active)->count();
+        if ($recipientToday >= $cfg['per_recipient_per_tenant_daily']) {
+            throw new DomainError('SMS_RECIPIENT_DAILY', 'به این شماره امروز به اندازه کافی پیامک فرستاده شده است. فردا دوباره امتحان کنید.', 429);
+        }
+        $planCode = $this->entitlements->planCode($tenant);
+        $tenantHour = SmsMessage::query()->forTenant($tenant->id)->where('purpose', '!=', 'OTP')->where('created_at', '>=', now()->subHour())->where($attempted)->count();
+        $tenantDay = SmsMessage::query()->forTenant($tenant->id)->where('purpose', '!=', 'OTP')->where('created_at', '>=', now()->subDay())->where($attempted)->count();
+        if ($tenantHour >= $cfg['tenant_hourly_cap'] || $tenantDay >= ($cfg['tenant_daily_cap'][$planCode] ?? 0)) {
+            throw new DomainError('SMS_TENANT_RATE', 'سقف ارسال پیامک این فروشگاه در این بازه پر شده است. کمی بعد دوباره امتحان کنید.', 429);
+        }
+
+        $shopName = (string) ($invoice->snapshot['shop']['name'] ?? $tenant->profile?->name ?? '');
+        SmsTemplate::assertSafeToSend($this->templateFor($tenant), $shopName, Digits::invoiceNumber($invoice->number), (bool) $tenant->profile?->isNameApproved($shopName));
+        $preview = $this->previewFor($invoice, $tenant, $link);
+
+        $useFree = $preview['free_remaining'] > 0 && $preview['segments'] <= 2;
+        if ($useFree) {
+            $freeToday = SmsMessage::query()->forTenant($tenant->id)->where('charge_source', 'FREE_YEARLY')->where('created_at', '>=', now()->subDay())->where($active)->count();
+            $freeRecipient = SmsMessage::query()->where('recipient', $recipient)->where('charge_source', 'FREE_YEARLY')->where('created_at', '>=', now()->subDay())->where($active)->count();
+            $useFree = $freeToday < $cfg['free_yearly_per_tenant_daily'] && $freeRecipient < $cfg['per_recipient_global_free_daily'];
+        }
+        if (! $useFree && ! $awaitCredit && BigInteger::of($this->credit->balance($tenant->id))->isLessThan($preview['cost_irr'])) {
+            throw new DomainError('SMS_NO_CREDIT', 'اعتبار پیامک کافی نیست (هزینه هر پیامک '.Money::toman($preview['cost_irr']).' تومان). ابتدا اعتبار پیامک بخرید.', 409);
+        }
+
+        $message = new SmsMessage([
+            'tenant_id' => $tenant->id, 'purpose' => $purpose, 'invoice_id' => $invoice->id, 'recipient' => $recipient,
+            'body' => $preview['body'], 'segments' => $preview['segments'], 'cost_irr' => '0', 'charge_source' => 'NONE',
+            'status' => 'QUEUED', 'requested_by' => $userId, 'idempotency_key' => $key,
+        ]);
+        if ($useFree) {
+            $message->charge_source = 'FREE_YEARLY';
+            $message->save();
+        } else {
+            $message->charge_source = 'CREDIT';
+            $message->cost_irr = $preview['cost_irr'];
+            $message->save();
+            if (! $this->credit->reserve($tenant->id, $preview['cost_irr'], $message)) {
+                $message->update(['status' => $awaitCredit ? 'AWAITING_CREDIT' : 'CANCELLED', 'cost_irr' => '0', 'charge_source' => 'NONE', 'last_error' => $awaitCredit ? null : 'no credit']);
+                Audit::record($awaitCredit ? 'sms.awaiting_credit' : 'sms.no_credit', $invoice, ['message' => $message->public_id], $tenant->id);
+
+                return $message;
+            }
+        }
+
+        Audit::record($auditEvent, $invoice, ['message' => $message->public_id, 'charge' => $message->charge_source, 'segments' => $message->segments], $tenant->id);
+        SendSms::dispatch($message->id)->afterCommit();
+
+        return $message;
     }
 
     public function queueReminder(Tenant $tenant, InstallmentLine $line, string $body, string $recipient, string $kind): ?SmsMessage

@@ -52,7 +52,8 @@ class InvoiceFlowTest extends TestCase
         $this->actingAs($user)->get('/invoices/new')->assertOk()->assertSee('شروع');
         [$id, $version] = $this->draft($user);
         $this->get("/invoices/{$id}/items")->assertOk()->assertSee('افزودن ردیف');
-        $this->get("/invoices/{$id}/review")->assertOk()->assertSee('صدور و ارسال پیامکی')->assertSee('فقط صدور');
+        // «ارسال خودکار پیامک» is on by default: one main «صدور فاکتور» button, with «صدور بدون پیامک» beside it.
+        $this->get("/invoices/{$id}/review")->assertOk()->assertSee('صدور فاکتور')->assertSee('صدور بدون پیامک')->assertSee('ارسال خودکار پیامک روشن است');
 
         $issued = $this->issue($user, $id, $version, 'ISSUE_AND_SMS')->assertCreated();
         $this->assertSame('ISSUED', $issued->json('status'));

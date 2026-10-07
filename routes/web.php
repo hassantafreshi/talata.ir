@@ -115,6 +115,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
             Route::post('/invoices/drafts/{invoice}/issue', [InvoiceDraftController::class, 'issue'])->middleware('throttle:issue')->name('api.drafts.issue');
             Route::post('/invoices/{invoice}/share', [InvoiceController::class, 'share'])->middleware('throttle:30,1')->name('api.invoices.share');
             Route::post('/invoices/{invoice}/sms', [InvoiceController::class, 'resendSms'])->middleware('throttle:10,1')->name('api.invoices.sms');
+            Route::post('/invoices/{invoice}/sms/copies', [InvoiceController::class, 'smsCopies'])->middleware('throttle:10,1')->name('api.invoices.sms.copies');
             Route::get('/invoices/{invoice}/status', [InvoiceController::class, 'status'])->name('api.invoices.status');
         });
         Route::middleware('perm:invoice.void')->group(function () {
@@ -144,6 +145,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
             Route::post('/settings/appearance/preview', [SettingsController::class, 'previewAppearance'])->middleware('throttle:60,1')->name('api.settings.appearance.preview');
             Route::put('/settings/numbering', [SettingsController::class, 'saveNumbering'])->middleware('throttle:20,1')->name('api.settings.numbering');
             Route::put('/settings/sms-template', [SettingsController::class, 'saveSmsTemplate'])->middleware('throttle:20,1')->name('api.settings.sms_template');
+            Route::put('/settings/sms-auto', [SettingsController::class, 'saveSmsAuto'])->middleware('throttle:20,1')->name('api.settings.sms_auto');
         });
         Route::middleware('perm:billing.manage')->group(function () {
             Route::post('/billing/discount', [BillingController::class, 'discount'])->middleware('throttle:'.config('talata.affiliate.validate_per_minute').',1')->name('api.billing.discount');

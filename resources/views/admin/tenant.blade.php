@@ -167,6 +167,19 @@
                     </form>
                 </details>
                 <details class="action-card">
+                    <summary><h3>تأیید نام فروشگاه</h3></summary>
+                    <form class="stack-sm" data-action="{{ route('admin.tenant.shop_name', $tenant->id) }}" data-idem data-reload
+                          data-confirm="نام «{name}» برای این فروشگاه ثبت و تأیید شود؟">
+                        <p class="small muted">برای فروشگاهی که نام واقعی‌اش شبیه نام بانک، سازمان یا اپراتور است و ثبت آن رد شده. پیش از تأیید، مجوز کسب را ببینید. لینک و شماره تلفن هیچ‌وقت مجاز نیست. اگر فروشنده نام را تغییر دهد، تأیید دوباره لازم است.</p>
+                        @if ($profile?->name_approved_at)<p class="xs"><span class="badge ok">تأییدشده</span> {{ jdate($profile->name_approved_at, true) }}</p>@endif
+                        <div class="form-grid">
+                            <div class="field wide"><label for="sn">نام فروشگاه</label><input id="sn" name="name" required maxlength="60" value="{{ $profile?->name }}"></div>
+                            <div class="field wide"><label for="snr">دلیل (مثلاً شماره مجوز کسب)</label><textarea id="snr" name="reason" required minlength="5" maxlength="250"></textarea></div>
+                        </div>
+                        <button class="btn btn-dark" type="submit">ثبت و تأیید نام</button>
+                    </form>
+                </details>
+                <details class="action-card">
                     <summary><h3>قابلیت ویژه (موقت)</h3></summary>
                     <form class="stack-sm" data-action="{{ route('admin.tenant.override', $tenant->id) }}" data-idem data-reload
                           data-confirm="«{key}» برای این فروشگاه {enabled} شود به مدت {days}؟">

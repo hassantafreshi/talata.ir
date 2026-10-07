@@ -39,9 +39,15 @@ class Invoice extends Model
         return $this->hasMany(InvoiceShare::class);
     }
 
+    /** SMS to the invoice's customer (copies to other numbers are smsCopies). */
     public function smsMessages(): HasMany
     {
-        return $this->hasMany(SmsMessage::class)->orderByDesc('id');
+        return $this->hasMany(SmsMessage::class)->where('purpose', 'INVOICE')->orderByDesc('id');
+    }
+
+    public function smsCopies(): HasMany
+    {
+        return $this->hasMany(SmsMessage::class)->where('purpose', 'INVOICE_COPY')->orderByDesc('id');
     }
 
     public function customer(): BelongsTo

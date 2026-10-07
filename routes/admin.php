@@ -42,6 +42,7 @@ Route::middleware('staff')->group(function () {
         Route::post('/api/tenants/{tenant:id}/sms-credit', [TenantsController::class, 'credit'])->name('tenant.credit');
         Route::post('/api/tenants/{tenant:id}/overrides', [TenantsController::class, 'override'])->name('tenant.override');
         Route::post('/api/tenants/{tenant:id}/overrides/{override}/end', [TenantsController::class, 'endOverride'])->name('tenant.override.end');
+        Route::post('/api/tenants/{tenant:id}/shop-name', [TenantsController::class, 'approveShopName'])->name('tenant.shop_name');
     });
     Route::middleware(['staff:tenants.suspend,fresh', 'throttle:30,1'])->whereNumber('tenant')->group(function () {
         Route::post('/api/tenants/{tenant:id}/suspend', [TenantsController::class, 'suspend'])->name('tenant.suspend');

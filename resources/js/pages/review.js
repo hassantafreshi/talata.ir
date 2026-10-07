@@ -26,7 +26,12 @@ export default function () {
     }
   } catch {}
   const smsTo = document.querySelector('[data-sms-to]');
-  const showTo = () => { if (smsTo) smsTo.textContent = form.buyer_mobile.value.trim() || '—'; };
+  const autoHint = document.querySelector('[data-auto-hint]');
+  const showTo = () => {
+    const typed = form.buyer_mobile.value.trim();
+    if (smsTo) smsTo.textContent = typed || '—';
+    if (autoHint) autoHint.textContent = typed ? autoHint.dataset.with : autoHint.dataset.without;
+  };
   form.buyer_mobile.addEventListener('input', showTo);
   showTo();
 
@@ -41,7 +46,7 @@ export default function () {
     const mode = button.dataset.mode;
     const mobileRaw = toLatin(form.buyer_mobile.value).replace(/[\s-]/g, '').replace(/^\+98/, '0').replace(/^98(?=9)/, '0');
     if (mobileRaw && !MOBILE_RE.test(mobileRaw)) { fieldErrors(form, { buyer_mobile: 'شماره موبایل درست نیست. مثال: ۰۹۱۲۳۴۵۶۷۸۹' }); return; }
-    if (mode === 'ISSUE_AND_SMS' && !mobileRaw) { fieldErrors(form, { buyer_mobile: 'برای ارسال پیامکی، موبایل مشتری را وارد کنید یا «فقط صدور» را بزنید.' }); return; }
+    if (mode === 'ISSUE_AND_SMS' && !mobileRaw) { fieldErrors(form, { buyer_mobile: 'برای ارسال پیامکی، موبایل مشتری را وارد کنید یا «صدور فاکتور» را بزنید.' }); return; }
     if (!boot.profile_complete) {
       try { sessionStorage.setItem(stash, JSON.stringify({ name: form.buyer_name.value.trim(), mobile: form.buyer_mobile.value.trim(), save: !!form.save_customer?.checked })); } catch {}
       location.href = boot.business_url;

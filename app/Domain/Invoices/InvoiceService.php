@@ -18,6 +18,7 @@ use App\Models\InvoiceShare;
 use App\Models\InvoiceVerificationRevocation;
 use App\Models\MarketQuote;
 use App\Models\SmsMessage;
+use App\Models\SmsSetting;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Support\Jalali;
@@ -246,7 +247,9 @@ final class InvoiceService
         if (! preg_match('/^[A-Za-z0-9._:-]{8,64}$/', $key)) {
             throw new DomainError('IDEMPOTENCY_KEY', 'درخواست نامعتبر است. صفحه را دوباره باز کنید.', 422);
         }
-        $mode = ($input['mode'] ?? '') === 'ISSUE_AND_SMS' ? 'ISSUE_AND_SMS' : 'ISSUE_ONLY';
+        // AUTO (the review's main button): the shop's «ارسال خودکار پیامک» setting decides, resolved below.
+        $mode = in_array($input['mode'] ?? '', ['ISSUE_AND_SMS', 'AUTO'], true) ? $input['mode'] : 'ISSUE_ONLY';
+        $autoSkipped = null;
 
         $existing = Invoice::query()->where('issue_key', $key)->first();
         if ($existing) {
@@ -259,7 +262,7 @@ final class InvoiceService
             return ['invoice' => $existing, 'replayed' => true];
         }
 
-        $invoice = DB::transaction(function () use ($draft, $tenant, $user, $input, $key, $mode) {
+        $invoice = DB::transaction(function () use ($draft, $tenant, $user, $input, $key, &$mode, &$autoSkipped) {
             Tenant::query()->whereKey($tenant->id)->lockForUpdate()->first();
             $invoice = Invoice::query()->whereKey($draft->id)->lockForUpdate()->firstOrFail();
             if (! $invoice->isDraft()) {
@@ -280,6 +283,21 @@ final class InvoiceService
             $buyerMobile = $rawMobile === '' ? null : Mobile::normalize($rawMobile);
             if ($rawMobile !== '' && ! $buyerMobile) {
                 throw new DomainError('BUYER_MOBILE_INVALID', 'شماره موبایل مشتری درست نیست.', 422, ['errors' => ['buyer_mobile' => ['شماره موبایل مشتری درست نیست.']]]);
+            }
+            if ($mode === 'AUTO') {
+                // Automatic sending never blocks issuance: no mobile, setting off, no SMS in the plan or no link
+                // left this month simply means «issue only» (the last two are told to the merchant).
+                $mode = 'ISSUE_ONLY';
+                if ($buyerMobile && SmsSetting::autoSend()) {
+                    $hasShare = InvoiceShare::query()->where('invoice_id', $invoice->id)->whereNull('revoked_at')->exists();
+                    if (! $this->entitlements->can($tenant, 'invoice.sms_share')) {
+                        $autoSkipped = 'ارسال پیامک در این پلن فعال نیست.';
+                    } elseif (! $hasShare && $this->entitlements->quota($tenant, 'links_per_month')['remaining'] === 0) {
+                        $autoSkipped = 'لینک‌های فاکتور این ماه تمام شده؛ پیامک خودکار فرستاده نشد. چاپ و بارکد بررسی همیشه کار می‌کند.';
+                    } else {
+                        $mode = 'ISSUE_AND_SMS';
+                    }
+                }
             }
             if ($mode === 'ISSUE_AND_SMS') {
                 if (! $buyerMobile) {
@@ -337,7 +355,7 @@ final class InvoiceService
             return $invoice;
         });
 
-        $sms = null;
+        $sms = $autoSkipped ? new DomainError('SMS_AUTO_SKIPPED', $autoSkipped) : null;
         if ($mode === 'ISSUE_AND_SMS') {
             try {
                 $share = $this->ensureShare($invoice, $tenant, $user);

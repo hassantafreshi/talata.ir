@@ -120,6 +120,8 @@ Sticky footer: «جمع فاکتور ({n} ردیف)» + total + «مرور فا�
 
 **Data:** `POST /api/invoices/drafts/{id}/issue {mode, buyer, save_customer, review_fingerprint, idempotency_key}` → `ISSUED {invoice_id}` | `REVIEW_REQUIRED {reason, new_rate?|missing_profile?}` | error.
 
+**Update 2026-10-07 (owner):** with «ارسال خودکار پیامک فاکتور» on (default) the main button is «صدور فاکتور» (`mode=AUTO`: sends the SMS by itself when a mobile is entered; hint under the button), plus «صدور بدون پیامک (فقط این بار)»; with it off, «صدور فاکتور» issues only and «صدور و ارسال پیامکی» is explicit. Automatic sending never blocks issuance (no mobile / links exhausted → issued, reason shown).
+
 **States:** ready, buyer mobile missing for SMS mode (inline error, «فقط صدور» still enabled), invalid mobile, profile incomplete (redirect to M-13 with return), rate changed (sheet from M-05 §1), SMS credit empty (M-19 case 4 sheet: «خرید پیامک» / «فقط صدور»), link quota exhausted (SMS mode disabled with explanation; issue-only enabled), customer quota exhausted (checkbox disabled), issuing (both buttons disabled, spinner), unknown result after network loss («در حال بررسی نتیجه…» then retry with same key), issued → M-08.
 
 ## M-08 Issued result
@@ -128,6 +130,8 @@ Sticky footer: «جمع فاکتور ({n} ردیف)» + total + «مرور فا�
 | --- | --- |
 | Route | `/invoices/{id}/issued` |
 | Boards | `Issued`, `DesktopIssued` |
+
+**Update 2026-10-07 (owner):** under print/new invoice, two large tiles side by side: «اشتراک‌گذاری» (native share sheet with the invoice link, link made on first tap, copy fallback) and «ارسال پیامک» (customer SMS status badge). «ارسال پیامک» opens a sheet: SMS preview with segments and cost; card «مشتری» with «ارسال دوباره به مشتری» (refused while in flight/unknown, confirmation after a delivered one, 10-minute gap, max 3); card «ارسال به شماره دیگر» with one textarea that accepts one or more mobiles in any form (09…, 9…, +98, 0098, 98, Persian digits, separators or none — glued numbers are split), live green/red chips, button «ارسال به {n} شماره», max 3 per request and 3 per invoice, per-number results. Below: collapsible «لینک فاکتور» (copy, deactivate).
 
 **Layout:** success band with check icon, «فاکتور {number} صادر شد», amount, buyer/date/time, «نرخ و مبلغ‌ها از این لحظه ثابت‌اند»; status list: «فاکتور — قطعی», «پیامک به {mobile} — در صف ارسال / ارسال شد / تحویل شد / ناموفق / نامشخص», «لینک اشتراک — ساخته شد · {remaining} از {limit} باقی‌مانده»; note about SMS independence + «مانده اعتبار پیامک ≈ {n} بخش · خرید پیامک»; QR band with sample QR, text «همین QR بالای سمت چپ نسخه چاپی هم هست…» and link «بررسی این فاکتور»; action grid: «چاپ», «کپی لینک فاکتور», «ارسال دوباره (پس از نتیجه)» (enabled on FAILED/UNKNOWN resolved or after top-up), «فاکتور جدید».
 

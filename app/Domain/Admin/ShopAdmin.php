@@ -5,7 +5,9 @@ namespace App\Domain\Admin;
 use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Domain\Plans\Entitlements;
+use App\Domain\Sms\SmsTemplate;
 use App\Models\FeatureOverride;
+use App\Models\ShopProfile;
 use App\Models\StaffUser;
 use App\Models\Tenant;
 use Carbon\CarbonImmutable;
@@ -86,5 +88,35 @@ final class ShopAdmin
     {
         return FeatureOverride::withoutGlobalScope('tenant')->where('tenant_id', $tenant->id)->where('key', $key)
             ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()));
+    }
+
+    /**
+     * Sets and approves a shop name that reads like a bank/authority (SmsTemplate::impersonatesAuthority) after
+     * staff checked the shop's licence. Links and phone numbers are never allowed, approved or not. Changing the
+     * name later needs a new approval.
+     */
+    public function approveShopName(Tenant $tenant, StaffUser $staff, string $name, string $reason): ShopProfile
+    {
+        $name = trim(preg_replace('/\s+/u', ' ', strip_tags($name)) ?? '');
+        if ($name === '' || mb_strlen($name) > 60) {
+            throw new DomainError('VALIDATION', 'نام فروشگاه را (حداکثر ۶۰ حرف) وارد کنید.', 422, ['errors' => ['name' => ['نام فروشگاه را وارد کنید.']]]);
+        }
+        if (SmsTemplate::containsLinkOrPhone($name)) {
+            throw new DomainError('VALIDATION', 'لینک یا شماره تلفن در نام فروشگاه حتی با تأیید هم مجاز نیست.', 422, ['errors' => ['name' => ['لینک یا شماره تلفن مجاز نیست.']]]);
+        }
+
+        return DB::transaction(function () use ($tenant, $staff, $name, $reason) {
+            $profile = ShopProfile::withoutGlobalScope('tenant')->where('tenant_id', $tenant->id)->lockForUpdate()->first();
+            if (! $profile) {
+                throw new DomainError('NO_PROFILE', 'این فروشگاه هنوز اطلاعات کسب‌وکار ثبت نکرده است.', 409);
+            }
+            $old = $profile->name;
+            $profile->forceFill([
+                'name' => $name, 'name_approved_hash' => ShopProfile::nameHash($name), 'name_approved_at' => now(), 'name_approved_by' => $staff->id,
+            ])->save();
+            Audit::record('tenant.shop_name_approved', $profile, ['from' => $old, 'to' => $name, 'reason' => $reason, 'flagged' => SmsTemplate::impersonatesAuthority($name)], $tenant->id, 'staff');
+
+            return $profile;
+        });
     }
 }

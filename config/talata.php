@@ -91,7 +91,9 @@ return [
     ],
 
     'sms' => [
-        'max_sends_per_invoice' => 3,
+        'max_sends_per_invoice' => 3,          // to the customer (initial + resends)
+        'max_copies_per_invoice' => 3,         // copies to other numbers the merchant typed
+        'max_copy_recipients_per_send' => 3,
         'awaiting_credit_max_days' => 7,      // invoice SMS waiting for credit are sent when credit arrives within this window
         'resend_min_minutes' => 10,
         'per_recipient_per_tenant_daily' => 3,
@@ -158,6 +160,11 @@ return [
         'logo_max_kb' => 1024,
         'logo_min_px' => 200,
         'logo_max_px' => 4000,
+    ],
+
+    // Zarlio support contact shown to merchants when staff help is needed (e.g. approving a shop name).
+    'support' => [
+        'phone' => env('TALATA_SUPPORT_PHONE'),
     ],
 
     'public' => [
