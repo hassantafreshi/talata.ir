@@ -138,21 +138,13 @@ async function passkeys() {
     return;
   }
   add.classList.remove('hidden');
-  const options = webauthn.prepared('/api/passkeys/options');
-  options.warm();
-  add.addEventListener('click', async () => {
-    busy(add);
-    try {
-      const opts = await options.take();
-      if (!opts.ok) {
-        if (opts.code === 'REAUTH_REQUIRED') { toast(opts.message, { kind: 'error', timeout: 9000, action: { label: 'ورود دوباره', onClick: () => logoutTo() } }); return; }
-        toast(opts.message, { kind: 'error' }); return;
-      }
-      let credential;
-      try { credential = await webauthn.create(opts.data); } catch (e) { webauthn.report('/api/webauthn/report', 'register', e); toast(webauthn.errorMessage(e), { kind: 'error', timeout: 9000 }); return; }
-      const res = await post('/api/passkeys', { credential });
-      if (res.ok) { webauthn.rememberId('user', credential.rawId); toast('ورود با اثر انگشت فعال شد.'); setTimeout(() => location.reload(), 700); } else toast(res.message, { kind: 'error', timeout: 9000 });
-    } finally { busy(add, false); options.warm(); }
+  webauthn.enroll(add, {
+    optionsUrl: '/api/passkeys/options', storeUrl: '/api/passkeys', scope: 'user', reportUrl: '/api/webauthn/report', stage: 'register', toast, busy,
+    onOptionsError: (opts) => {
+      if (opts.code === 'REAUTH_REQUIRED') toast(opts.message, { kind: 'error', timeout: 9000, action: { label: 'ورود دوباره', onClick: () => logoutTo() } });
+      else toast(opts.message, { kind: 'error' });
+    },
+    onDone: () => { toast('ورود با اثر انگشت فعال شد.'); setTimeout(() => location.reload(), 700); },
   });
 }
 

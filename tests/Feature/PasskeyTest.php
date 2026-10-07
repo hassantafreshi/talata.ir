@@ -228,4 +228,13 @@ class PasskeyTest extends TestCase
         $this->assertCount(2, $rows);
         $this->assertStringContainsString('NotAllowedError', (string) $rows->first()->context);
     }
+
+    public function test_a_device_only_key_can_be_requested_when_a_synced_passkey_cannot_be_saved(): void
+    {
+        $this->actingAs($this->merchant())->withSession(['auth_at' => now()->getTimestamp()]);
+        $this->postJson('/api/passkeys/options')->assertOk()->assertJsonPath('authenticatorSelection.residentKey', 'preferred');
+        $this->postJson('/api/passkeys/options', ['device_bound' => 1])->assertOk()
+            ->assertJsonPath('authenticatorSelection.residentKey', 'discouraged')
+            ->assertJsonPath('authenticatorSelection.userVerification', 'required');
+    }
 }

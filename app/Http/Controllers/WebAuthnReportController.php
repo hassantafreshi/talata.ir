@@ -16,7 +16,7 @@ class WebAuthnReportController extends Controller
     public function __invoke(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'stage' => ['required', 'string', 'in:register,register-offer,login,login-hinted'],
+            'stage' => ['required', 'string', 'in:register,register-offer,register-device,register-offer-device,login,login-hinted'],
             'name' => ['required', 'string', 'max:60', 'regex:/^[A-Za-z]+$/'],
             'message' => ['nullable', 'string', 'max:300'],
             'in_app' => ['nullable', 'boolean'],

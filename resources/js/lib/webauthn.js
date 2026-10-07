@@ -36,10 +36,10 @@ export function rememberId(scope, id) {
  * server's 3-minute challenge is about to expire). Call warm() again after each attempt — never during one, or
  * the server would replace the challenge the pending credential was made for.
  */
-export function prepared(url, maxAgeMs = 150000) {
+export function prepared(url, body = undefined, maxAgeMs = 150000) {
   let pending = null;
   let at = 0;
-  const warm = () => { at = Date.now(); pending = post(url); pending.catch(() => {}); return pending; };
+  const warm = () => { at = Date.now(); pending = post(url, body); pending.catch(() => {}); return pending; };
   return {
     warm,
     take() {
@@ -49,6 +49,57 @@ export function prepared(url, maxAgeMs = 150000) {
       return p;
     },
   };
+}
+
+export const isAndroid = (ua = navigator.userAgent || '') => /Android/i.test(ua);
+
+/**
+ * Turn on fingerprint sign-in from a button (settings, post-login card, admin account). First try a synced
+ * passkey; if an Android phone refuses right after the fingerprint (NotAllowedError — typically Google Password
+ * Manager could not save it), offer one more tap that keeps the key only on this phone.
+ * @param {HTMLElement} button
+ * @param {{optionsUrl:string, storeUrl:string, scope:'user'|'staff', reportUrl:string, stage:string,
+ *          onOptionsError?:(res:object)=>void, onDone:(res:object)=>void, toast:Function, busy:Function}} cfg
+ */
+export function enroll(button, cfg) {
+  const synced = prepared(cfg.optionsUrl);
+  const device = prepared(cfg.optionsUrl, { device_bound: 1 });
+  let mode = 'synced'; // which options are warmed: only ONE challenge lives in the session at a time
+  const current = () => (mode === 'device' ? device : synced);
+  current().warm();
+
+  const attempt = async (useDevice) => {
+    if (useDevice !== (mode === 'device')) { mode = useDevice ? 'device' : 'synced'; current().warm(); }
+    cfg.busy(button);
+    let next = mode;
+    try {
+      const opts = await current().take();
+      if (!opts.ok) { (cfg.onOptionsError || ((r) => cfg.toast(r.message, { kind: 'error' })))(opts); return; }
+      let credential;
+      try { credential = await create(opts.data); } catch (e) {
+        report(cfg.reportUrl, cfg.stage + (mode === 'device' ? '-device' : ''), e);
+        if (mode === 'synced' && e?.name === 'NotAllowedError' && isAndroid() && !inAppBrowser()) {
+          next = 'device';
+          cfg.toast('گوشی کلید را ذخیره نکرد (معمولاً وقتی ذخیره در حساب گوگل ممکن نیست). یک بار دیگر بزنید تا کلید فقط روی همین گوشی ساخته شود.', {
+            kind: 'error', timeout: 20000, action: { label: 'فعال‌سازی روی همین گوشی', onClick: () => attempt(true) },
+          });
+        } else {
+          cfg.toast(errorMessage(e), { kind: 'error', timeout: 9000 });
+        }
+        return;
+      }
+      const res = await post(cfg.storeUrl, { credential });
+      if (res.ok) { rememberId(cfg.scope, credential.rawId); cfg.onDone(res); return; }
+      cfg.toast(res.message, { kind: 'error', timeout: 9000 });
+    } finally {
+      cfg.busy(button, false);
+      // Re-arm for the next tap (after the attempt, never during it: one challenge per session).
+      mode = next;
+      if (button.isConnected) current().warm();
+    }
+  };
+  button.addEventListener('click', () => attempt(mode === 'device'));
+  return { attempt };
 }
 
 export async function create(o) {

@@ -112,8 +112,14 @@ final class WebAuthnService
 
     // ---------------------------------------------------------------- registration
 
-    /** Options for navigator.credentials.create(). $owner is a User or StaffUser. */
-    public function registrationOptions(Model $owner, string $ownerType, string $displayName): array
+    /**
+     * Options for navigator.credentials.create(). $owner is a User or StaffUser.
+     * $deviceBound: ask for a key kept only on this phone (residentKey «discouraged») instead of a synced passkey.
+     * On Android, Chrome saves synced passkeys in Google Password Manager; when that save fails (e.g. Google
+     * services unreachable) the browser answers NotAllowedError right after the fingerprint. A device-bound key
+     * needs no Google account sync; it is not discoverable, so sign-in names it (ids remembered on the device).
+     */
+    public function registrationOptions(Model $owner, string $ownerType, string $displayName, bool $deviceBound = false): array
     {
         $handle = $this->handleFor($owner);
         $exclude = Passkey::query()->where('owner_type', $ownerType)->where('owner_id', $owner->getKey())->pluck('credential_id')
@@ -126,7 +132,7 @@ final class WebAuthnService
             'pubKeyCredParams' => [['type' => 'public-key', 'alg' => CoseKey::ES256], ['type' => 'public-key', 'alg' => CoseKey::RS256]],
             'timeout' => 120000,
             'attestation' => 'none',
-            'authenticatorSelection' => ['authenticatorAttachment' => 'platform', 'residentKey' => 'preferred', 'requireResidentKey' => false, 'userVerification' => 'required'],
+            'authenticatorSelection' => ['authenticatorAttachment' => 'platform', 'residentKey' => $deviceBound ? 'discouraged' : 'preferred', 'requireResidentKey' => false, 'userVerification' => 'required'],
             'excludeCredentials' => $exclude,
         ];
     }

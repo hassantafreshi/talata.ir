@@ -51,7 +51,7 @@ class AccountController extends Controller
         $this->requireRecentLogin($request);
         $this->requirePasskeySession($request);
 
-        return response()->json($webauthn->registrationOptions($this->staff(), 'staff', $this->staff()->name));
+        return response()->json($webauthn->registrationOptions($this->staff(), 'staff', $this->staff()->name, $request->boolean('device_bound')));
     }
 
     public function store(Request $request, WebAuthnService $webauthn): JsonResponse

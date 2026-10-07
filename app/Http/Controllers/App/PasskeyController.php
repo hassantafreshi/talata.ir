@@ -29,7 +29,7 @@ class PasskeyController extends BaseController
         $this->requireRecentLogin($request);
         $user = $request->user();
 
-        return response()->json($webauthn->registrationOptions($user, 'user', Mobile::display($user->mobile)));
+        return response()->json($webauthn->registrationOptions($user, 'user', Mobile::display($user->mobile), $request->boolean('device_bound')));
     }
 
     public function store(Request $request, WebAuthnService $webauthn): JsonResponse
