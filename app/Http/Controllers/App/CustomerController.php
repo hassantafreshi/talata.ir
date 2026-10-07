@@ -30,7 +30,7 @@ class CustomerController extends BaseController
 
         if ($s = trim((string) $request->query('q', ''))) {
             $digits = preg_replace('/\D/', '', Digits::toLatin($s));
-            $q->where(fn ($w) => $w->whereLike('name', '%'.addcslashes($s, '%_\\').'%')->when($digits !== '', fn ($w) => $w->orWhere('mobile', 'like', '%'.$digits.'%')));
+            $q->where(fn ($w) => $w->whereLike('name', '%'.addcslashes($s, '%_\\').'%')->when($digits !== '', fn ($w) => $w->orWhere('mobile', 'like', '%'.$digits.'%'))->when(strlen($digits) >= 3, fn ($w) => $w->orWhere('national_id', 'like', $digits.'%')));
         }
 
         // Balance filter (installments are Professional-only, so the balance is always 0 on other plans).
@@ -68,7 +68,7 @@ class CustomerController extends BaseController
     {
         $page = $this->query($request)->limit(8)->get();
 
-        return response()->json(['items' => $page->map(fn (Customer $c) => ['id' => $c->public_id, 'name' => $c->name, 'mobile' => $c->mobile, 'mobile_fa' => Mobile::display($c->mobile)])]);
+        return response()->json(['items' => $page->map(fn (Customer $c) => ['id' => $c->public_id, 'name' => $c->name, 'mobile' => $c->mobile, 'mobile_fa' => Mobile::display($c->mobile), 'national_id' => $c->national_id])]);
     }
 
     public function show(Customer $customer)
@@ -93,7 +93,7 @@ class CustomerController extends BaseController
 
     public function store(Request $request)
     {
-        $data = $request->validate(['name' => ['nullable', 'string', 'max:120'], 'mobile' => ['nullable', 'string', 'max:20'], 'note' => ['nullable', 'string', 'max:250']]);
+        $data = $request->validate(['name' => ['nullable', 'string', 'max:120'], 'mobile' => ['nullable', 'string', 'max:20'], 'national_id' => ['nullable', 'string', 'max:20'], 'note' => ['nullable', 'string', 'max:250']]);
         $customer = $this->customers->create($this->tenant(), $request->user(), $data);
 
         return response()->json(['id' => $customer->public_id, 'next' => route('customers.show', $customer)], 201);
@@ -101,7 +101,7 @@ class CustomerController extends BaseController
 
     public function update(Request $request, Customer $customer)
     {
-        $data = $request->validate(['name' => ['nullable', 'string', 'max:120'], 'mobile' => ['nullable', 'string', 'max:20'], 'note' => ['nullable', 'string', 'max:250'], 'sms_opt_out' => ['nullable', 'boolean']]);
+        $data = $request->validate(['name' => ['nullable', 'string', 'max:120'], 'mobile' => ['nullable', 'string', 'max:20'], 'national_id' => ['nullable', 'string', 'max:20'], 'note' => ['nullable', 'string', 'max:250'], 'sms_opt_out' => ['nullable', 'boolean']]);
         $this->customers->update($customer, $data);
 
         return response()->json(['ok' => true]);

@@ -2,6 +2,7 @@ import { post, idempotencyKey } from '../lib/http.js';
 import { toast, busy, fieldErrors } from '../lib/ui.js';
 import { toLatin } from '../lib/digits.js';
 import { showQuota } from '../lib/quota.js';
+import customerPicker from '../lib/customer-picker.js';
 
 const MOBILE_RE = /^09(0[0-5]|1\d|2[0-2]|3\d|41|9\d)\d{7}$/;
 
@@ -34,6 +35,7 @@ export default function () {
   };
   form.buyer_mobile.addEventListener('input', showTo);
   showTo();
+  customerPicker({ nameInput: form.buyer_name, mobileInput: form.buyer_mobile, nidInput: form.buyer_national_id, saveBox: form.save_customer });
 
   let retry = () => { if (lastButton) form.requestSubmit(lastButton); };
   document.querySelector('[data-issue-retry]')?.addEventListener('click', () => retry());
@@ -59,7 +61,7 @@ export default function () {
     busy(button, true);
     const res = await post(boot.issue_url, {
       mode, version: boot.version, idempotency_key: key,
-      buyer: { name: form.buyer_name.value.trim(), mobile: mobileRaw },
+      buyer: { name: form.buyer_name.value.trim(), mobile: mobileRaw, national_id: toLatin(form.buyer_national_id?.value || '').trim() },
       save_customer: form.save_customer?.checked || false,
     }, { timeout: 30000 });
 
@@ -83,6 +85,7 @@ export default function () {
         unknown.classList.remove('hidden'); return;
       case 'ROWS_INVALID': location.href = boot.items_url; return;
       case 'BUYER_MOBILE_INVALID': case 'BUYER_MOBILE_REQUIRED': fieldErrors(form, { buyer_mobile: res.message }); return;
+      case 'BUYER_NATIONAL_ID_INVALID': case 'DUPLICATE_NATIONAL_ID': fieldErrors(form, { buyer_national_id: res.message }); return;
       case 'NETWORK': case 'OFFLINE':
         // Unknown outcome: stays on screen until resolved; retrying uses the same key, so never a duplicate.
         unknown.querySelector('[data-issue-unknown-text]').textContent = `${res.message} معلوم نیست فاکتور صادر شد یا نه. «بررسی دوباره» را بزنید؛ فاکتور تکراری صادر نمی‌شود.`;

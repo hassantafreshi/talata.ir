@@ -3,6 +3,7 @@
 namespace App\Domain\Invoices;
 
 use App\Domain\Audit\Audit;
+use App\Domain\Customers\CustomerService;
 use App\Domain\DomainError;
 use App\Domain\Market\QuoteService;
 use App\Domain\Plans\CommercialConfig;
@@ -24,6 +25,7 @@ use App\Models\User;
 use App\Support\Jalali;
 use App\Support\Mobile;
 use App\Support\Money;
+use App\Support\NationalId;
 use App\Support\Tokens;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
@@ -284,6 +286,12 @@ final class InvoiceService
             if ($rawMobile !== '' && ! $buyerMobile) {
                 throw new DomainError('BUYER_MOBILE_INVALID', 'شماره موبایل مشتری درست نیست.', 422, ['errors' => ['buyer_mobile' => ['شماره موبایل مشتری درست نیست.']]]);
             }
+            // Optional national ID (کد ملی), checksum-validated.
+            $rawNid = trim((string) ($input['buyer']['national_id'] ?? $invoice->buyer_national_id ?? ''));
+            $buyerNid = $rawNid === '' ? null : NationalId::normalize($rawNid);
+            if ($rawNid !== '' && ! $buyerNid) {
+                throw new DomainError('BUYER_NATIONAL_ID_INVALID', 'کد ملی مشتری درست نیست.', 422, ['errors' => ['buyer_national_id' => ['کد ملی درست نیست (۱۰ رقم).']]]);
+            }
             if ($mode === 'AUTO') {
                 // Automatic sending never blocks issuance: no mobile, setting off, no SMS in the plan or no link
                 // left this month simply means «issue only» (the last two are told to the merchant).
@@ -319,12 +327,21 @@ final class InvoiceService
                 throw new DomainError('ROWS_INVALID', 'بعضی ردیف‌ها کامل یا درست نیستند. آن‌ها را اصلاح کنید.', 422);
             }
 
+            // One mobile is one person (unique per shop): a known customer completes what the form left empty.
             $customerId = $invoice->customer_id;
-            if ($buyerMobile) {
-                $customer = Customer::query()->where('mobile', $buyerMobile)->first();
-                if (! $customer && ! empty($input['save_customer'])) {
+            if ($buyerMobile || $buyerNid) {
+                $customer = $buyerMobile ? Customer::query()->where('mobile', $buyerMobile)->first() : Customer::query()->where('national_id', $buyerNid)->first();
+                if ($customer) {
+                    $buyerName = $buyerName ?: $customer->name;
+                    $buyerNid ??= $customer->national_id;
+                    if ($buyerNid && ! $customer->national_id && ! Customer::query()->where('national_id', $buyerNid)->exists()) {
+                        $customer->update(['national_id' => $buyerNid]);
+                    }
+                } elseif ($buyerMobile && ! empty($input['save_customer'])) {
                     $this->entitlements->assertQuota($tenant, 'new_customers_per_month');
-                    $customer = Customer::create(['name' => $buyerName ?: 'مشتری', 'mobile' => $buyerMobile, 'created_by' => $user->id]);
+                    $customers = app(CustomerService::class);
+                    $customers->assertNationalIdFree($buyerNid, null);
+                    $customer = Customer::create(['name' => $buyerName ?: 'مشتری', 'mobile' => $buyerMobile, 'national_id' => $buyerNid, 'created_by' => $user->id]);
                     Audit::record('customer.created', $customer, ['via' => 'invoice']);
                 }
                 $customerId = $customer?->id;
@@ -340,7 +357,7 @@ final class InvoiceService
 
             $invoice->forceFill([
                 'status' => 'issued', 'number' => $num['number'], 'jalali_year' => $num['jalali_year'], 'seq' => $num['seq'],
-                'buyer_name' => $buyerName, 'buyer_mobile' => $buyerMobile, 'customer_id' => $customerId,
+                'buyer_name' => $buyerName, 'buyer_mobile' => $buyerMobile, 'buyer_national_id' => $buyerNid, 'customer_id' => $customerId,
                 'gold_total_irr' => $priced['gold_total'], 'misc_total_irr' => $priced['misc_total'], 'payable_irr' => $priced['payable'],
                 // Denormalized report columns (dashboard); the snapshot below stays the legal record.
                 'sales_total_irr' => $priced['sales_total'], 'gold_in_total_irr' => $priced['gold_in_total'],
@@ -390,7 +407,7 @@ final class InvoiceService
                 'license_union' => $profile->license_union, 'license_online' => $profile->license_online,
                 'logo' => $canLogo && $profile->logo_path ? ['tenant' => $tenant->public_id, 'version' => $profile->logo_version] : null,
             ],
-            'buyer' => ['name' => $invoice->buyer_name, 'mobile' => $invoice->buyer_mobile],
+            'buyer' => ['name' => $invoice->buyer_name, 'mobile' => $invoice->buyer_mobile, 'national_id' => $invoice->buyer_national_id],
             'rate' => [
                 'mode' => $invoice->rate_mode, 'value_irr' => $invoice->accepted_rate_irr, 'buy_value_irr' => $invoice->accepted_buy_rate_irr,
                 'fetched_at' => $invoice->rate_fetched_at?->toIso8601String(), 'manual_reason' => $invoice->rate_manual_reason,

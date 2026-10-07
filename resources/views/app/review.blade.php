@@ -70,9 +70,11 @@
         <section class="band stack-sm" aria-labelledby="buyer-h">
             <h2 id="buyer-h">مشتری</h2>
             <div class="field"><label for="buyer-name">نام خریدار (اختیاری)</label><div class="input-wrap"><input id="buyer-name" name="buyer_name" maxlength="80" value="{{ $invoice->buyer_name }}" autocomplete="off"></div><div class="err"></div>
-                <p class="hint">روی فاکتور چاپ می‌شود.</p></div>
+                <p class="hint">روی فاکتور چاپ می‌شود. چند حرف بنویسید تا مشتریان ثبت‌شده پیشنهاد شوند.</p></div>
             <div class="field"><label for="buyer-mobile">موبایل مشتری</label><div class="input-wrap ltr-input"><input id="buyer-mobile" name="buyer_mobile" inputmode="tel" maxlength="14" value="{{ $buyerMobile }}" placeholder="۰۹۱۲ ۳۴۵ ۶۷۸۹" autocomplete="off" data-digits></div><div class="err"></div>
                 <p class="hint">برای ارسال پیامکی لازم است. مشتری نیازی به ثبت‌نام ندارد.</p></div>
+            <div class="field"><label for="buyer-nid">کد ملی (اختیاری)</label><div class="input-wrap ltr-input"><input id="buyer-nid" name="buyer_national_id" inputmode="numeric" maxlength="12" value="{{ $invoice->buyer_national_id ? fa($invoice->buyer_national_id) : '' }}" autocomplete="off" data-digits></div><div class="err"></div>
+                <p class="hint">روی فاکتور چاپی می‌آید؛ در لینک و صفحه بررسی اصالت نمایش داده نمی‌شود.</p></div>
             <label class="check"><input type="checkbox" name="save_customer" value="1" @disabled($customersQuota['remaining'] === 0)> ذخیره در فهرست مشتریان
                 @if ($customersQuota['limit'] !== null)<span class="xs muted">({{ fa($customersQuota['remaining']) }} مشتری جدید دیگر در این ماه)</span>@endif</label>
         </section>

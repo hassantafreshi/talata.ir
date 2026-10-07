@@ -61,6 +61,7 @@
     <div class="inv-buyer">
         <span>خریدار: <strong>{{ $v['buyer_name'] ?: '—' }}</strong></span>
         @if ($v['buyer_mobile'])<span>موبایل: <span class="num ltr">{{ $v['buyer_mobile'] }}</span></span>@endif
+        @if (! empty($v['buyer_national_id']))<span>کد ملی: <span class="num ltr">{{ $v['buyer_national_id'] }}</span></span>@endif
         @if ($v['rate_fa'])<span>نرخ هر گرم طلای ۱۸ عیار: <span class="num">{{ $v['rate_fa'] }}</span> تومان @if($v['rate_manual'])(نرخ دستی)@elseif($v['rate_emergency'] ?? false)(نرخ اعلامی زرلیو)@endif</span>@endif
     </div>
 

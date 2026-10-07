@@ -70,6 +70,8 @@ final class InvoicePresenter
             'shop' => $shop + ['contact_primary' => Digits::toPersian($shop['landline'] ?: Mobile::display($shop['business_mobile'])), 'mobile_display' => Mobile::display($shop['business_mobile'])],
             'buyer_name' => $s['buyer']['name'],
             'buyer_mobile' => $public ? Digits::toPersian(Mobile::mask($s['buyer']['mobile'])) : Mobile::display($s['buyer']['mobile']),
+            // National ID is sensitive: printed by the shop, never on public link/verification pages.
+            'buyer_national_id' => $public || empty($s['buyer']['national_id']) ? null : Digits::toPersian($s['buyer']['national_id']),
             'rate_fa' => $s['rate']['value_irr'] ? Money::toman($s['rate']['value_irr']) : null,
             'rate_time_fa' => $s['rate']['fetched_at'] ? Jalali::time(CarbonImmutable::parse($s['rate']['fetched_at']), $tz) : null,
             'rate_manual' => $s['rate']['mode'] === 'MANUAL',

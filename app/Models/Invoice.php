@@ -14,7 +14,7 @@ class Invoice extends Model
 
     protected $fillable = [
         'status', 'direction', 'version', 'rate_mode', 'accepted_rate_irr', 'accepted_buy_rate_irr', 'rate_fetched_at', 'rate_manual_reason', 'rate_source', 'rate_provenance',
-        'buyer_name', 'buyer_mobile', 'customer_id', 'replaces_invoice_id', 'created_by',
+        'buyer_name', 'buyer_mobile', 'buyer_national_id', 'customer_id', 'replaces_invoice_id', 'created_by',
     ];
 
     protected $hidden = ['verify_token', 'verify_token_hash', 'issue_key'];

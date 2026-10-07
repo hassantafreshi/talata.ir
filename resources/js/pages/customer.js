@@ -7,7 +7,7 @@ export default function () {
   const boot = JSON.parse(document.getElementById('boot').textContent);
 
   document.querySelector('[data-edit]')?.addEventListener('click', () => customerSheet({
-    url: `/api/customers/${boot.id}`, method: put, title: 'ویرایش مشتری', values: { name: boot.name, mobile: boot.mobile, note: boot.note },
+    url: `/api/customers/${boot.id}`, method: put, title: 'ویرایش مشتری', values: { name: boot.name, mobile: boot.mobile, national_id: boot.national_id, note: boot.note },
     onSaved: () => location.reload(),
   }));
 

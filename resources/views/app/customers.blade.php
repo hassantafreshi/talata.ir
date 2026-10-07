@@ -51,6 +51,7 @@
         <form method="post" class="stack" data-customer-form novalidate>
             <div class="field"><label for="cu-name">نام</label><div class="input-wrap"><input id="cu-name" name="name" maxlength="80" required></div><div class="err"></div></div>
             <div class="field"><label for="cu-mobile">موبایل (اختیاری)</label><div class="input-wrap ltr-input"><input id="cu-mobile" name="mobile" inputmode="tel" maxlength="14" data-digits></div><div class="err"></div></div>
+            <div class="field"><label for="cu-nid">کد ملی (اختیاری)</label><div class="input-wrap ltr-input"><input id="cu-nid" name="national_id" inputmode="numeric" maxlength="12" data-digits></div><div class="err"></div></div>
             <div class="field"><label for="cu-note">یادداشت داخلی (اختیاری)</label><div class="input-wrap"><input id="cu-note" name="note" maxlength="250"></div><div class="err"></div><p class="hint">فقط برای شما؛ روی فاکتور نمی‌آید.</p></div>
             <button class="btn btn-gold block" type="submit" data-busy-text="در حال ذخیره…">ذخیره</button>
         </form>

@@ -11,7 +11,7 @@ class Customer extends Model
 {
     use BelongsToTenant, HasPublicId;
 
-    protected $fillable = ['name', 'mobile', 'note', 'sms_opt_out', 'created_by'];
+    protected $fillable = ['name', 'mobile', 'national_id', 'note', 'sms_opt_out', 'created_by'];
 
     protected function casts(): array
     {

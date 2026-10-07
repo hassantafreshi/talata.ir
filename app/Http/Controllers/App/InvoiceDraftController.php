@@ -126,6 +126,7 @@ class InvoiceDraftController extends BaseController
             'buyer' => ['nullable', 'array'],
             'buyer.name' => ['nullable', 'string', 'max:120'],
             'buyer.mobile' => ['nullable', 'string', 'max:20'],
+            'buyer.national_id' => ['nullable', 'string', 'max:20'],
             'save_customer' => ['nullable', 'boolean'],
         ]);
         $this->assertOwnDraft($invoice);

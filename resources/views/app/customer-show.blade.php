@@ -3,12 +3,13 @@
     $todayJ = jymd();
 @endphp
 <x-layouts.app :title="$customer->name" page="customer" :back="route('customers.index')">
-    @php $bootData = ['id' => $customer->public_id, 'name' => $customer->name, 'mobile' => $customer->mobile ? \App\Support\Mobile::display($customer->mobile) : '', 'note' => $customer->note]; @endphp
+    @php $bootData = ['id' => $customer->public_id, 'name' => $customer->name, 'mobile' => $customer->mobile ? \App\Support\Mobile::display($customer->mobile) : '', 'note' => $customer->note, 'national_id' => $customer->national_id]; @endphp
     <script type="application/json" id="boot">@json($bootData)</script>
     <section class="band stack-sm">
         <div class="between"><h2>{{ $customer->name }}</h2>@if($canManage)<button type="button" class="btn btn-link sm" data-edit>ویرایش</button>@endif</div>
         <dl class="kv">
             <div><dt>موبایل</dt><dd class="num ltr">{{ $customer->mobile ? \App\Support\Mobile::display($customer->mobile) : '—' }}</dd></div>
+            @if ($customer->national_id)<div><dt>کد ملی</dt><dd class="num ltr">{{ fa($customer->national_id) }}</dd></div>@endif
             @if ($customer->note)<div><dt>یادداشت داخلی</dt><dd>{{ $customer->note }}</dd></div>@endif
             <div><dt>ثبت</dt><dd class="num">{{ jdate($customer->created_at) }}</dd></div>
         </dl>
@@ -90,6 +91,7 @@
         <form method="post" class="stack" data-customer-form novalidate>
             <div class="field"><label for="cu-name">نام</label><div class="input-wrap"><input id="cu-name" name="name" maxlength="80" required></div><div class="err"></div></div>
             <div class="field"><label for="cu-mobile">موبایل (اختیاری)</label><div class="input-wrap ltr-input"><input id="cu-mobile" name="mobile" inputmode="tel" maxlength="14" data-digits></div><div class="err"></div></div>
+            <div class="field"><label for="cu-nid">کد ملی (اختیاری)</label><div class="input-wrap ltr-input"><input id="cu-nid" name="national_id" inputmode="numeric" maxlength="12" data-digits></div><div class="err"></div></div>
             <div class="field"><label for="cu-note">یادداشت داخلی (اختیاری)</label><div class="input-wrap"><input id="cu-note" name="note" maxlength="250"></div><div class="err"></div></div>
             <button class="btn btn-gold block" type="submit" data-busy-text="در حال ذخیره…">ذخیره</button>
         </form>

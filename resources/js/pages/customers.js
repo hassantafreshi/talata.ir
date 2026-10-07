@@ -13,7 +13,7 @@ export function customerSheet({ url, method = post, title = 'مشتری جدید
     e.preventDefault();
     const btn = form.querySelector('[type=submit]');
     busy(btn);
-    const res = await method(url, { name: form.name.value.trim(), mobile: toLatin(form.mobile.value), note: form.note.value.trim() });
+    const res = await method(url, { name: form.name.value.trim(), mobile: toLatin(form.mobile.value), national_id: toLatin(form.national_id?.value || ''), note: form.note.value.trim() });
     busy(btn, false);
     if (res.ok) { close(); onSaved(res.data); return; }
     if (res.code === 'DUPLICATE_CUSTOMER') {
