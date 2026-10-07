@@ -158,6 +158,10 @@ jobs:
             echo "KAVENEGAR_SENDER=10007770000707"
             echo "TEST_ADMIN_MOBILE=09396727215"
             echo "APP_URL=https://$SITE"
+            # Test server only: staff may use the console after an SMS login while passkeys are being tested
+            # on real phones (production keeps TALATA_ADMIN_REQUIRE_PASSKEY=true).
+            echo "TALATA_ADMIN_REQUIRE_PASSKEY=false"
+            echo "TALATA_STARTER_SMS_CREDIT_TOMAN=50000"
           } > "$RUNNER_TEMP/secrets.env"
           DIR="domains/$SITE"
           OPTS="-o StrictHostKeyChecking=accept-new -o ConnectTimeout=30"

@@ -26,17 +26,20 @@ export default async function passkeyOffer() {
   card.querySelector('[data-passkey-offer-dismiss]').addEventListener('click', () => dismiss(true));
 
   const add = card.querySelector('[data-passkey-offer-add]');
+  // Fetched before the tap so the fingerprint prompt follows it at once (required on iPhone).
+  const options = webauthn.prepared('/api/passkeys/options');
+  options.warm();
   add.addEventListener('click', async () => {
     busy(add);
     try {
-      const opts = await post('/api/passkeys/options');
+      const opts = await options.take();
       if (!opts.ok) { toast(opts.message, { kind: 'error' }); return; }
       let credential;
       try { credential = await webauthn.create(opts.data); }
-      catch (e) { toast(webauthn.errorMessage(e), { kind: 'error' }); return; }
+      catch (e) { webauthn.report('/api/webauthn/report', 'register-offer', e); toast(webauthn.errorMessage(e), { kind: 'error', timeout: 9000 }); return; }
       const res = await post('/api/passkeys', { credential });
-      if (res.ok) { toast('ورود با اثر انگشت فعال شد. دفعه بعد با اثر انگشت وارد شوید.'); dismiss(true); }
-      else toast(res.message, { kind: 'error' });
-    } finally { busy(add, false); }
+      if (res.ok) { webauthn.rememberId('user', credential.rawId); toast('ورود با اثر انگشت فعال شد. دفعه بعد با اثر انگشت وارد شوید.'); dismiss(true); }
+      else toast(res.message, { kind: 'error', timeout: 9000 });
+    } finally { busy(add, false); if (card.isConnected) options.warm(); }
   });
 }

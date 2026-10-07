@@ -42,7 +42,7 @@ class PasskeyController extends BaseController
             TechLog::warning('auth', 'passkey registration rejected', ['reason' => $e->getMessage()]);
 
             throw new DomainError('PASSKEY_REGISTER_FAILED', $e->getMessage() === 'Too many passkeys'
-                ? 'حداکثر ۱۰ دستگاه برای ورود با اثر انگشت.' : 'فعال‌سازی انجام نشد. دوباره امتحان کنید.', 422);
+                ? 'حداکثر ۱۰ دستگاه برای ورود با اثر انگشت.' : 'فعال‌سازی انجام نشد. دوباره امتحان کنید. (کد: '.$e->reasonCode().')', 422, ['reason' => $e->reasonCode()]);
         }
         Audit::record('passkey.registered', $request->user(), ['passkey' => $passkey->id, 'name' => $passkey->name]);
 

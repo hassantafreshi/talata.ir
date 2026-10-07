@@ -5,16 +5,19 @@ import * as webauthn from '../lib/webauthn.js';
 export default function () {
   const add = document.querySelector('[data-passkey-add]');
   if (!webauthn.supported()) add.disabled = true;
+  // Fetched before the tap so the fingerprint prompt follows it at once (required on iPhone).
+  const options = webauthn.prepared('/admin/api/account/passkeys/options');
+  if (webauthn.supported()) options.warm();
   add.addEventListener('click', async () => {
     busy(add);
     try {
-      const opts = await post('/admin/api/account/passkeys/options');
+      const opts = await options.take();
       if (!opts.ok) { toast(opts.message, { kind: 'error' }); return; }
       let credential;
-      try { credential = await webauthn.create(opts.data); } catch (e) { toast(webauthn.errorMessage(e), { kind: 'error' }); return; }
+      try { credential = await webauthn.create(opts.data); } catch (e) { webauthn.report('/admin/api/webauthn/report', 'register', e); toast(webauthn.errorMessage(e), { kind: 'error', timeout: 9000 }); return; }
       const res = await post('/admin/api/account/passkeys', { credential });
-      if (res.ok) location.reload(); else toast(res.message, { kind: 'error' });
-    } finally { busy(add, false); }
+      if (res.ok) { webauthn.rememberId('staff', credential.rawId); location.reload(); } else toast(res.message, { kind: 'error', timeout: 9000 });
+    } finally { busy(add, false); options.warm(); }
   });
   document.querySelector('[data-passkey-list]').addEventListener('click', async (e) => {
     const b = e.target.closest('[data-passkey-remove]');

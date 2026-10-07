@@ -8,6 +8,7 @@ use App\Domain\Identity\WebAuthn\WebAuthnException;
 use App\Domain\Identity\WebAuthn\WebAuthnService;
 use App\Http\Controllers\Controller;
 use App\Models\Passkey;
+use App\Support\TechLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -60,8 +61,10 @@ class AccountController extends Controller
         $data = $request->validate(WebAuthnService::rules(true));
         try {
             $pk = $webauthn->register($this->staff(), 'staff', $data['credential'], 'کلید مدیر');
-        } catch (WebAuthnException) {
-            throw new DomainError('PASSKEY_REGISTER_FAILED', 'فعال‌سازی انجام نشد.', 422);
+        } catch (WebAuthnException $e) {
+            TechLog::warning('admin', 'admin passkey registration rejected', ['reason' => $e->getMessage()]);
+
+            throw new DomainError('PASSKEY_REGISTER_FAILED', 'فعال‌سازی انجام نشد. (کد: '.$e->reasonCode().')', 422, ['reason' => $e->reasonCode()]);
         }
         Audit::record('admin.passkey_registered', $this->staff(), ['passkey' => $pk->id], null, 'staff');
 

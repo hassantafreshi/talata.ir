@@ -30,23 +30,37 @@ async function passkeyLogin() {
   if (!box || !(window.PublicKeyCredential && navigator.credentials && window.isSecureContext)) return;
   box.classList.remove('hidden');
   const btn = box.querySelector('[data-passkey-btn]');
-  btn.addEventListener('click', async () => {
+  // The helper module and the challenge are fetched once the page is idle (not with the first render), so the
+  // fingerprint prompt can open right inside the tap — iPhone/Safari refuses it after a network wait.
+  let webauthn = null;
+  let options = null;
+  const ready = import('../lib/webauthn.js').then((m) => { webauthn = m; options = m.prepared('/api/auth/passkey/options'); return m; });
+  const warmUp = () => ready.then(() => options.warm()).catch(() => {});
+  if ('requestIdleCallback' in window) requestIdleCallback(warmUp, { timeout: 2500 }); else setTimeout(warmUp, 800);
+
+  const attempt = async (useHints) => {
     busy(btn);
     try {
-      // Options and helper module in parallel: the browser prompt follows the tap as closely as before.
-      let opts, webauthn;
-      try {
-        [opts, webauthn] = await Promise.all([post('/api/auth/passkey/options'), import('../lib/webauthn.js')]);
-      } catch {
+      try { if (!webauthn) await ready; } catch {
         toast('بخشی از صفحه دریافت نشد. اینترنت را بررسی کنید و دوباره بزنید، یا با کد پیامکی وارد شوید.', { kind: 'error', timeout: 9000 });
         return;
       }
+      const opts = await options.take();
       if (!opts.ok) { toast(opts.message, { kind: 'error' }); return; }
+      const hints = useHints ? webauthn.knownIds('user') : [];
       let credential;
-      try { credential = await webauthn.get(opts.data); } catch (e) { toast(webauthn.errorMessage(e), { kind: 'error' }); return; }
+      try { credential = await webauthn.get(opts.data, hints); } catch (e) {
+        webauthn.report('/api/webauthn/report', hints.length ? 'login-hinted' : 'login', e);
+        // Named keys from this phone not found (e.g. the passkey now lives in another device's keychain):
+        // one more try that lets the phone offer any passkey it has for this site.
+        const retry = hints.length && e?.name === 'NotAllowedError' ? { label: 'تلاش دوباره', onClick: () => attempt(false) } : null;
+        toast(webauthn.errorMessage(e), { kind: 'error', timeout: 12000, action: retry });
+        return;
+      }
       const res = await post('/api/auth/passkey/verify', { credential });
-      if (res.ok) { location.href = res.data.next; return; }
-      toast(res.message, { kind: 'error', timeout: 8000 });
-    } finally { busy(btn, false); }
-  });
+      if (res.ok) { webauthn.rememberId('user', credential.rawId); location.href = res.data.next; return; }
+      toast(res.message, { kind: 'error', timeout: 9000 });
+    } finally { busy(btn, false); options?.warm(); }
+  };
+  btn.addEventListener('click', () => attempt(true));
 }

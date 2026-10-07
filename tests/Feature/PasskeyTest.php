@@ -78,8 +78,8 @@ class PasskeyTest extends TestCase
         auth()->logout();
         $this->postJson('/api/auth/passkey/options');
         $this->postJson('/api/auth/passkey/verify', ['credential' => $signed])->assertStatus(422)->assertJsonPath('code', 'PASSKEY_FAILED');
-        // Phishing origin.
-        $this->login($device, 'https://talata-login.example')->assertStatus(422);
+        // Phishing origin — and the answer names which check failed, so a phone screenshot is enough for support.
+        $this->login($device, 'https://talata-login.example')->assertStatus(422)->assertJsonPath('reason', 'ORIGIN');
         // Counter that does not increase (cloned key): same value as the last accepted login.
         $device->counter = Passkey::query()->value('sign_count');
         $this->login($device, null, false)->assertStatus(422);
@@ -90,7 +90,7 @@ class PasskeyTest extends TestCase
     public function test_user_verification_is_required(): void
     {
         $user = $this->merchant();
-        $this->enroll($user, $this->device(0x01))->assertStatus(422)->assertJsonPath('code', 'PASSKEY_REGISTER_FAILED');
+        $this->enroll($user, $this->device(0x01))->assertStatus(422)->assertJsonPath('code', 'PASSKEY_REGISTER_FAILED')->assertJsonPath('reason', 'UV');
         $this->assertSame(0, Passkey::query()->count());
     }
 
@@ -214,5 +214,18 @@ class PasskeyTest extends TestCase
         Membership::query()->where('user_id', $user->id)->update(['status' => 'removed']);
         $this->login($device)->assertStatus(422)->assertJsonPath('code', 'PASSKEY_FAILED');
         $this->assertGuest();
+    }
+
+    public function test_browser_side_failures_are_recorded_for_support_without_credential_data(): void
+    {
+        // Login page (guest) and admin login both report; only the error name/message are accepted.
+        $this->postJson('/api/webauthn/report', ['stage' => 'login', 'name' => 'NotAllowedError', 'message' => 'The operation either timed out or was not allowed.', 'in_app' => false])->assertOk();
+        $this->postJson('/admin/api/webauthn/report', ['stage' => 'register', 'name' => 'SecurityError', 'message' => 'x'])->assertOk();
+        $this->postJson('/api/webauthn/report', ['stage' => 'steal', 'name' => 'X'])->assertStatus(422);
+        $this->postJson('/api/webauthn/report', ['stage' => 'login', 'name' => '<script>'])->assertStatus(422);
+
+        $rows = DB::connection(config('database.log_connection'))->table('system_logs')->where('message', 'passkey browser error')->get();
+        $this->assertCount(2, $rows);
+        $this->assertStringContainsString('NotAllowedError', (string) $rows->first()->context);
     }
 }

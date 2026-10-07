@@ -22,6 +22,7 @@ use App\Http\Controllers\Public\PaymentReturnController;
 use App\Http\Controllers\Public\PublicInvoiceController;
 use App\Http\Controllers\Public\ReferralController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\WebAuthnReportController;
 use App\Tenancy\TenantContext;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +44,8 @@ Route::middleware('guest')->group(function () {
     });
 });
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
+// Browser-side passkey failures (login page and signed-in settings alike), for the technical log.
+Route::post('/api/webauthn/report', WebAuthnReportController::class)->middleware('throttle:10,1')->name('webauthn.report');
 
 // ---------- public (no login) ----------
 Route::middleware('throttle:public')->group(function () {

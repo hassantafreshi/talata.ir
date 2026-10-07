@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\SystemController;
 use App\Http\Controllers\Admin\TaxController;
 use App\Http\Controllers\Admin\TechLogController;
 use App\Http\Controllers\Admin\TenantsController;
+use App\Http\Controllers\WebAuthnReportController;
 use Illuminate\Support\Facades\Route;
 
 // Loaded with the `admin` middleware group (own session cookie scoped to /admin), prefix /admin, names admin.*.
@@ -26,6 +27,7 @@ Route::middleware('throttle:20,1')->group(function () {
     Route::post('/api/otp/verify', [AuthController::class, 'verifyOtp'])->name('otp.verify');
     Route::post('/api/passkey/options', [AuthController::class, 'passkeyOptions'])->name('passkey.options');
     Route::post('/api/passkey/verify', [AuthController::class, 'passkeyVerify'])->name('passkey.verify');
+    Route::post('/api/webauthn/report', WebAuthnReportController::class)->name('webauthn.report');
 });
 
 Route::middleware('staff')->group(function () {

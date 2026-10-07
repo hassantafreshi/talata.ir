@@ -124,28 +124,35 @@ function mobileChange() {
 async function passkeys() {
   const add = document.querySelector('[data-passkey-add]');
   if (!add) return;
-  if (await webauthn.platformAvailable()) add.classList.remove('hidden');
-  else document.querySelector('[data-passkey-unsupported]').classList.remove('hidden');
-  add.addEventListener('click', async () => {
-    busy(add);
-    try {
-      const opts = await post('/api/passkeys/options');
-      if (!opts.ok) {
-        if (opts.code === 'REAUTH_REQUIRED') { toast(opts.message, { kind: 'error', timeout: 9000, action: { label: 'ورود دوباره', onClick: () => logoutTo() } }); return; }
-        toast(opts.message, { kind: 'error' }); return;
-      }
-      let credential;
-      try { credential = await webauthn.create(opts.data); } catch (e) { toast(webauthn.errorMessage(e), { kind: 'error' }); return; }
-      const res = await post('/api/passkeys', { credential });
-      if (res.ok) { toast('ورود با اثر انگشت فعال شد.'); setTimeout(() => location.reload(), 700); } else toast(res.message, { kind: 'error' });
-    } finally { busy(add, false); }
-  });
   document.querySelector('[data-passkey-list]')?.addEventListener('click', async (e) => {
     const b = e.target.closest('[data-passkey-remove]');
     if (!b || !confirm('ورود با اثر انگشت روی این دستگاه حذف شود؟')) return;
     const res = await (await import('../lib/http.js')).del(`/api/passkeys/${b.dataset.passkeyRemove}`);
     // A removed key often means a lost phone: offer to end that phone's sessions too.
     if (res.ok) { b.closest('li').remove(); toast('حذف شد. اگر این گوشی گم شده، از دستگاه‌های دیگر هم خارج شوید.', { timeout: 12000, action: { label: 'خروج از دستگاه‌های دیگر', onClick: () => signOutOthers(document.querySelector('[data-sign-out-others]')) } }); } else toast(res.message, { kind: 'error' });
+  });
+  if (!(await webauthn.platformAvailable())) {
+    const note = document.querySelector('[data-passkey-unsupported]');
+    if (webauthn.inAppBrowser()) note.textContent = 'این مرورگرِ داخل برنامه (مثل تلگرام) از اثر انگشت پشتیبانی نمی‌کند. سایت را در Chrome یا Safari باز کنید.';
+    note.classList.remove('hidden');
+    return;
+  }
+  add.classList.remove('hidden');
+  const options = webauthn.prepared('/api/passkeys/options');
+  options.warm();
+  add.addEventListener('click', async () => {
+    busy(add);
+    try {
+      const opts = await options.take();
+      if (!opts.ok) {
+        if (opts.code === 'REAUTH_REQUIRED') { toast(opts.message, { kind: 'error', timeout: 9000, action: { label: 'ورود دوباره', onClick: () => logoutTo() } }); return; }
+        toast(opts.message, { kind: 'error' }); return;
+      }
+      let credential;
+      try { credential = await webauthn.create(opts.data); } catch (e) { webauthn.report('/api/webauthn/report', 'register', e); toast(webauthn.errorMessage(e), { kind: 'error', timeout: 9000 }); return; }
+      const res = await post('/api/passkeys', { credential });
+      if (res.ok) { webauthn.rememberId('user', credential.rawId); toast('ورود با اثر انگشت فعال شد.'); setTimeout(() => location.reload(), 700); } else toast(res.message, { kind: 'error', timeout: 9000 });
+    } finally { busy(add, false); options.warm(); }
   });
 }
 

@@ -1,4 +1,6 @@
 // WebAuthn helpers: JSON options from the server ⇄ browser credential API (base64url fields).
+import { post } from './http.js';
+
 const b64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const unb64 = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), (c) => c.charCodeAt(0));
 
@@ -10,6 +12,43 @@ export function supported() {
 export async function platformAvailable() {
   if (!supported()) return false;
   try { return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(); } catch { return false; }
+}
+
+/** In-app browsers (Telegram, Instagram, WhatsApp …) usually have no WebAuthn; the fix is «open in Chrome/Safari». */
+export function inAppBrowser(ua = navigator.userAgent || '') {
+  return /Telegram|Instagram|FBAN|FBAV|WhatsApp|; wv\)|Line\//i.test(ua);
+}
+
+// Credential ids enrolled or used on THIS device, so sign-in can name them. Some Android authenticators save a
+// key that is not "discoverable": an empty allow-list (no account hint, by design) would never find it.
+const idsKey = (scope) => `zarlio.pk.${scope}`;
+export function knownIds(scope) {
+  try { return JSON.parse(localStorage.getItem(idsKey(scope)) || '[]').filter((s) => typeof s === 'string' && /^[A-Za-z0-9_-]{8,700}$/.test(s)); } catch { return []; }
+}
+export function rememberId(scope, id) {
+  try { localStorage.setItem(idsKey(scope), JSON.stringify([id, ...knownIds(scope).filter((x) => x !== id)].slice(0, 10))); } catch {}
+}
+
+/**
+ * Ceremony options fetched BEFORE the tap. iPhone/Safari only lets a page call the fingerprint prompt right after
+ * a tap; a network round trip in between (slow connections) uses that up and the prompt is refused as
+ * «cancelled / not allowed». warm() fetches ahead; take() hands over a ready answer (refetching only if the
+ * server's 3-minute challenge is about to expire). Call warm() again after each attempt — never during one, or
+ * the server would replace the challenge the pending credential was made for.
+ */
+export function prepared(url, maxAgeMs = 150000) {
+  let pending = null;
+  let at = 0;
+  const warm = () => { at = Date.now(); pending = post(url); pending.catch(() => {}); return pending; };
+  return {
+    warm,
+    take() {
+      if (!pending || Date.now() - at > maxAgeMs) warm();
+      const p = pending;
+      pending = null;
+      return p;
+    },
+  };
 }
 
 export async function create(o) {
@@ -26,9 +65,13 @@ export async function create(o) {
   };
 }
 
-export async function get(o) {
+/** $hints: credential ids known on this device (knownIds); empty = any discoverable passkey for this site. */
+export async function get(o, hints = []) {
+  const allow = (o.allowCredentials && o.allowCredentials.length)
+    ? o.allowCredentials
+    : hints.map((id) => ({ type: 'public-key', id, transports: ['internal', 'hybrid'] }));
   const cred = await navigator.credentials.get({ publicKey: {
-    ...o, challenge: unb64(o.challenge), allowCredentials: (o.allowCredentials || []).map((c) => ({ ...c, id: unb64(c.id) })),
+    ...o, challenge: unb64(o.challenge), allowCredentials: allow.map((c) => ({ ...c, id: unb64(c.id) })),
   } });
   return {
     id: cred.id, rawId: b64(cred.rawId), type: cred.type,
@@ -39,10 +82,23 @@ export async function get(o) {
   };
 }
 
-/** Persian message for a browser-side WebAuthn error (user cancelled, timeout, not allowed …). */
+/**
+ * Tells the server why the browser refused (name and message only — no credential data), so failures on real
+ * phones show up in the technical log. Never throws; never blocks the page.
+ */
+export function report(url, stage, e) {
+  try {
+    post(url, { stage, name: String(e?.name || 'Error').slice(0, 60), message: String(e?.message || '').slice(0, 300), in_app: inAppBrowser() }).catch(() => {});
+  } catch {}
+}
+
+/** Persian message for a browser-side WebAuthn error, with the browser's error name for support. */
 export function errorMessage(e) {
-  if (e && (e.name === 'NotAllowedError' || e.name === 'AbortError')) return 'لغو شد یا زمان آن تمام شد. دوباره امتحان کنید.';
+  const code = e && e.name ? ` (${e.name})` : '';
+  if (inAppBrowser()) return 'این مرورگرِ داخل برنامه از اثر انگشت پشتیبانی نمی‌کند. سایت را در Chrome یا Safari باز کنید.';
+  if (e && (e.name === 'NotAllowedError' || e.name === 'AbortError')) return `لغو شد یا زمان آن تمام شد. دوباره بزنید و اثر انگشت را بلافاصله تأیید کنید.${code}`;
   if (e && e.name === 'InvalidStateError') return 'اثر انگشت این دستگاه قبلاً فعال شده است.';
-  if (e && e.name === 'SecurityError') return 'این صفحه برای ورود با اثر انگشت امن نیست (HTTPS لازم است).';
-  return 'دستگاه شما ورود با اثر انگشت را پشتیبانی نکرد. با کد پیامکی وارد شوید.';
+  if (e && e.name === 'SecurityError') return `آدرس این صفحه با تنظیمات امنیتی سایت جور نیست (HTTPS و دامنه درست لازم است).${code}`;
+  if (e && e.name === 'NotSupportedError') return `این دستگاه نوع کلید لازم را پشتیبانی نمی‌کند. با کد پیامکی وارد شوید.${code}`;
+  return `دستگاه شما ورود با اثر انگشت را انجام نداد. با کد پیامکی وارد شوید.${code}`;
 }

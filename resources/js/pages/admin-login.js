@@ -29,16 +29,27 @@ export default function () {
     if (res.ok) location.href = res.data.next; else fieldErrors(codeForm, { code: res.message });
   });
   const pk = document.querySelector('[data-admin-passkey]');
-  if (webauthn.supported()) pk.classList.remove('hidden');
-  pk.addEventListener('click', async () => {
+  if (!webauthn.supported()) return;
+  pk.classList.remove('hidden');
+  // Fetched before the tap so the fingerprint prompt follows it at once (required on iPhone).
+  const options = webauthn.prepared('/admin/api/passkey/options');
+  options.warm();
+  const attempt = async (useHints) => {
     busy(pk);
     try {
-      const opts = await post('/admin/api/passkey/options');
+      const opts = await options.take();
       if (!opts.ok) { toast(opts.message, { kind: 'error' }); return; }
+      const hints = useHints ? webauthn.knownIds('staff') : [];
       let credential;
-      try { credential = await webauthn.get(opts.data); } catch (err) { toast(webauthn.errorMessage(err), { kind: 'error' }); return; }
+      try { credential = await webauthn.get(opts.data, hints); } catch (err) {
+        webauthn.report('/admin/api/webauthn/report', hints.length ? 'login-hinted' : 'login', err);
+        const retry = hints.length && err?.name === 'NotAllowedError' ? { label: 'تلاش دوباره', onClick: () => attempt(false) } : null;
+        toast(webauthn.errorMessage(err), { kind: 'error', timeout: 12000, action: retry });
+        return;
+      }
       const res = await post('/admin/api/passkey/verify', { credential });
-      if (res.ok) location.href = res.data.next; else toast(res.message, { kind: 'error' });
-    } finally { busy(pk, false); }
-  });
+      if (res.ok) { webauthn.rememberId('staff', credential.rawId); location.href = res.data.next; } else toast(res.message, { kind: 'error', timeout: 9000 });
+    } finally { busy(pk, false); options.warm(); }
+  };
+  pk.addEventListener('click', () => attempt(true));
 }

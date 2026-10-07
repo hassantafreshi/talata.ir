@@ -32,7 +32,7 @@ class PasskeyLoginController extends Controller
             TechLog::warning('auth', 'passkey login rejected', ['reason' => $e->getMessage(), 'ip' => $request->ip()]);
             Audit::record('auth.passkey_failed', null, ['reason' => $e->getMessage()], null, 'system');
 
-            throw new DomainError('PASSKEY_FAILED', 'ورود با اثر انگشت انجام نشد. دوباره امتحان کنید یا با کد پیامکی وارد شوید.', 422);
+            throw new DomainError('PASSKEY_FAILED', 'ورود با اثر انگشت انجام نشد. دوباره امتحان کنید یا با کد پیامکی وارد شوید. (کد: '.$e->reasonCode().')', 422, ['reason' => $e->reasonCode()]);
         }
         $user = User::query()->findOrFail($passkey->owner_id);
         if (! Membership::query()->where('user_id', $user->id)->where('status', 'active')->exists()) {

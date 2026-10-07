@@ -128,11 +128,11 @@ class AuthController extends Controller
         } catch (WebAuthnException $e) {
             TechLog::warning('admin', 'admin passkey login rejected', ['reason' => $e->getMessage(), 'ip' => $request->ip()]);
 
-            throw new DomainError('PASSKEY_FAILED', 'ورود انجام نشد.', 422);
+            throw new DomainError('PASSKEY_FAILED', 'ورود انجام نشد. (کد: '.$e->reasonCode().')', 422, ['reason' => $e->reasonCode()]);
         }
         $staff = StaffUser::query()->whereKey($passkey->owner_id)->where('active', true)->first();
         if (! $staff) {
-            throw new DomainError('PASSKEY_FAILED', 'ورود انجام نشد.', 422);
+            throw new DomainError('PASSKEY_FAILED', 'ورود انجام نشد. (کد: '.$e->reasonCode().')', 422, ['reason' => $e->reasonCode()]);
         }
 
         return $this->signIn($request, $staff, 'passkey');
