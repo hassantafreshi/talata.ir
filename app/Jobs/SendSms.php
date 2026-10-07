@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Domain\Sms\SmsGateway;
 use App\Domain\Sms\SmsService;
 use App\Models\SmsMessage;
+use App\Support\Mobile;
 use App\Support\TechLog;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -31,6 +32,19 @@ class SendSms implements ShouldQueue
         }
         $message = SmsMessage::query()->findOrFail($this->messageId);
         $message->forceFill(['provider' => $gateway->name()])->save();
+        // Owner requirement: never send to a non-Iranian number, under any circumstance. Every path that
+        // queues a message already normalizes through Mobile::normalize()/extractAll() (09… only), so this
+        // can only trip on a bug or a direct database write — it is the gateway's last line of defense and
+        // runs before any provider call, so no SMS can leave for a foreign number even then.
+        if (! Mobile::isIranian($message->recipient)) {
+            $service->applyOutcome($message, 'FAILED', null, 'blocked: recipient is not an Iranian mobile number');
+            TechLog::error('sms', 'blocked a non-Iranian recipient before send', [
+                'message' => $message->public_id, 'tenant_id' => $message->tenant_id, 'purpose' => $message->purpose,
+            ]);
+            DB::table('sms_messages')->where('id', $message->id)->update(['payload' => null]);
+
+            return;
+        }
         try {
             if ($message->purpose === 'OTP') {
                 $code = (string) ($message->payload['code'] ?? '');

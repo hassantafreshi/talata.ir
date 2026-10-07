@@ -75,6 +75,12 @@ final class Mobile
         return [array_keys($found), $invalid];
     }
 
+    /** True only for an already-normalized 09… Iranian mobile (no parsing: the exact stored/queued value). */
+    public static function isIranian(?string $mobile): bool
+    {
+        return $mobile !== null && preg_match(self::PATTERN, $mobile) === 1;
+    }
+
     public static function mask(?string $mobile): string
     {
         if (! $mobile || strlen($mobile) !== 11) {

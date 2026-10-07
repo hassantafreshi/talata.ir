@@ -8,6 +8,7 @@ use App\Domain\Sms\SmsCredit;
 use App\Domain\Sms\SmsGateway;
 use App\Domain\Sms\SmsService;
 use App\Domain\Sms\SmsTemplate;
+use App\Jobs\SendSms;
 use App\Models\AuditEvent;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -368,5 +369,25 @@ class SmsAbuseTest extends TestCase
         $issued = $this->issueTo($user, '09351234567');
         $this->assertNotSame('NOT_SENT', $issued['sms']['status'] ?? null);
         $this->api('POST', '/api/settings/business', ['name' => 'بانک ملت'] + $base)->assertStatus(422)->assertJsonStructure(['errors' => ['name']]);
+    }
+
+    public function test_the_gateway_never_sends_to_a_non_iranian_number_even_if_a_bad_row_gets_queued(): void
+    {
+        // Every normal path normalizes to 09… before a message is ever created; this simulates a bug or a
+        // direct database write reaching the queue anyway. SendSms is the last line of defense: it must
+        // refuse before calling the provider, whatever the purpose or how the row got there.
+        $message = SmsMessage::create([
+            'tenant_id' => null, 'purpose' => 'OTP', 'recipient' => '00000000000', 'body' => 'x', 'segments' => 1,
+            'cost_irr' => '0', 'charge_source' => 'OPERATIONAL', 'status' => 'QUEUED', 'idempotency_key' => 'blk-'.bin2hex(random_bytes(8)),
+            'payload' => ['code' => '123456', 'kind' => 'login'],
+        ]);
+
+        SendSms::dispatchSync($message->id);
+
+        $this->assertSame(0, $this->sent());
+        $message->refresh();
+        $this->assertSame('FAILED', $message->status);
+        $this->assertStringContainsString('not an Iranian mobile', $message->last_error);
+        $this->assertNull($message->payload);
     }
 }
