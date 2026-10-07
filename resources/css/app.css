@@ -303,6 +303,12 @@ table.t td.n, table.t th.n { text-align: left; font-variant-numeric: tabular-num
 
 /* Page additions: plans, quotes board, previews */
 .hero .price.sm { font-size: 28px; }
+/* مظنه card: one full-width line for the sell price; scales down on narrow phones instead of overflowing. */
+.mz-sell { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.mz-price { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; max-width: 100%; }
+.mz-price .price { font-size: clamp(30px, 11vw, 48px); }
+.mz-buy { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--t-chrome-line); padding-top: 10px; }
+.mz-buy .strong { font-size: 20px; color: var(--t-text-on-chrome); }
 .band.em, .plan-card.em { background: var(--t-band-emphasis); outline: 2px solid var(--t-gold-action); }
 .price-sm { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .tiles.plans { display: grid; gap: var(--t-sp-4); grid-template-columns: 1fr; }

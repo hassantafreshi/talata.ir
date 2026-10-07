@@ -9,11 +9,20 @@
 
     <section class="hero stack-sm" aria-labelledby="g18">
         <div class="between"><span class="label" id="g18">طلای ۱۸ عیار (هر گرم)</span>@if($board['is_demo'])<span class="badge dark">عدد نمونه</span>@endif</div>
-        <div class="grid-2">
-            <div><span class="small">خرید از شما</span><div class="price sm num" data-asset="GOLD_18_BUY">{{ $r['GOLD_18_BUY']['display_fa'] ?? '—' }}</div><span class="xs" data-chg="GOLD_18_BUY">{{ $chg($r['GOLD_18_BUY']) }}</span></div>
-            <div><span class="small">فروش به مشتری · مبنای فاکتور</span> <span class="badge warn" data-emergency @if(! $r['GOLD_18_SELL']['is_emergency']) hidden @endif>نرخ اعلامی زرلیو (دستی)</span><div class="price sm num" data-asset="GOLD_18_SELL">{{ $r['GOLD_18_SELL']['display_fa'] ?? '—' }}</div><span class="xs" data-chg="GOLD_18_SELL">{{ $chg($r['GOLD_18_SELL']) }}</span></div>
+        {{-- Mobile-first: the invoice-basis price on its own line (long numbers never squeeze), buy price as a
+             compact secondary row shown only when the feed has one. --}}
+        <div class="mz-sell">
+            <span class="small">فروش به مشتری · مبنای فاکتور</span>
+            <span class="badge warn" data-emergency @if(! $r['GOLD_18_SELL']['is_emergency']) hidden @endif>نرخ اعلامی زرلیو (دستی)</span>
+            <div class="mz-price"><span class="price num" data-asset="GOLD_18_SELL">{{ $r['GOLD_18_SELL']['display_fa'] ?? '—' }}</span> <span class="unit">تومان</span></div>
+            <span class="xs" data-chg="GOLD_18_SELL">{{ $chg($r['GOLD_18_SELL']) }}</span>
         </div>
-        <div class="meta">اختلاف خرید و فروش: <span class="num" data-spread>{{ $board['spread_fa'] ?? '—' }}</span> تومان · واحد: تومان / گرم</div>
+        @php($hasBuy = isset($r['GOLD_18_BUY']['display_fa']))
+        <div class="mz-buy" data-buy-row @unless($hasBuy) hidden @endunless>
+            <span><span class="small">خرید از شما</span> <span class="xs" data-chg="GOLD_18_BUY">{{ $chg($r['GOLD_18_BUY']) }}</span></span>
+            <span class="nowrap"><span class="num strong" data-asset="GOLD_18_BUY">{{ $r['GOLD_18_BUY']['display_fa'] ?? '—' }}</span> <span class="unit">تومان</span></span>
+        </div>
+        <div class="meta">@if($hasBuy)<span data-spread-wrap>اختلاف خرید و فروش: <span class="num" data-spread>{{ $board['spread_fa'] ?? '—' }}</span> تومان · </span>@endif واحد: تومان / گرم</div>
         @if ($tenantContext->membership()?->can('invoice.issue'))<a class="btn btn-gold block" href="{{ route('invoices.new') }}">شروع فاکتور با نرخ فروش</a>@endif
     </section>
 

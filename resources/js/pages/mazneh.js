@@ -14,7 +14,10 @@ export default function () {
     }
     const em = document.querySelector('[data-emergency]');
     if (em) em.hidden = !b.rows.GOLD_18_SELL?.is_emergency;
-    document.querySelector('[data-spread]').textContent = b.spread_fa ?? '—';
+    const spread = document.querySelector('[data-spread]');
+    if (spread) spread.textContent = b.spread_fa ?? '—';
+    const buyRow = document.querySelector('[data-buy-row]');
+    if (buyRow) buyRow.hidden = !b.rows.GOLD_18_BUY?.display_fa;
     document.querySelector('[data-time]').textContent = b.fetched_at_fa ?? '—';
     const [kind, label] = navigator.onLine ? (BADGE[b.freshness] || ['off', '—']) : ['off', 'آفلاین'];
     badge.className = `badge ${kind}`; badge.textContent = label;
