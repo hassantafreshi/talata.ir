@@ -5,16 +5,19 @@ namespace App\Domain\Sms;
 use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Domain\Invoices\Numbering;
+use App\Domain\Invoices\ProformaService;
 use App\Domain\Plans\Entitlements;
 use App\Jobs\SendSms;
 use App\Models\Customer;
 use App\Models\InstallmentLine;
 use App\Models\Invoice;
+use App\Models\Proforma;
 use App\Models\SmsMessage;
 use App\Models\SmsSetting;
 use App\Models\Tenant;
 use App\Support\DbLock;
 use App\Support\Digits;
+use App\Support\Mobile;
 use App\Support\Money;
 use App\Support\Tokens;
 use Brick\Math\BigInteger;
@@ -39,6 +42,9 @@ final class SmsService
     /** Login OTP: operational budget, never tenant credit. Limits are enforced by OtpService before this. */
     public static function otpBody(string $code, string $kind = 'login'): string
     {
+        if ($kind === 'proforma') {
+            return "کد تأیید پیش‌فاکتور: {$code}\nبا وارد کردن این کد، خرید را تأیید می‌کنید. این کد را به کسی ندهید.";
+        }
         if ($kind === 'mobile_change') {
             return "کد تغییر شماره ورود زرلیو: {$code}\nاگر خودتان درخواست نکرده‌اید، این کد را به هیچ‌کس ندهید.";
         }
@@ -49,7 +55,11 @@ final class SmsService
     /** OTP purposes (OtpService) → SMS wording kind. */
     public static function otpKind(string $purpose): string
     {
-        return in_array($purpose, ['mch_old', 'mch_new'], true) ? 'mobile_change' : 'login';
+        return match (true) {
+            in_array($purpose, ['mch_old', 'mch_new'], true) => 'mobile_change',
+            $purpose === 'proforma' => 'proforma',
+            default => 'login',
+        };
     }
 
     public function queueOtp(string $mobile, string $code, string $challengeId, string $purpose = 'user'): SmsMessage
@@ -245,7 +255,7 @@ final class SmsService
      * Caps, content check, charging and dispatch shared by the customer SMS and its copies. Only DomainErrors
      * before any write, so a caller may catch one and continue in the same transaction.
      */
-    private function queueOne(Tenant $tenant, Invoice $invoice, string $recipient, string $purpose, string $key, string $link, ?int $userId, string $auditEvent, bool $awaitCredit): SmsMessage
+    private function queueOne(Tenant $tenant, Invoice $invoice, string $recipient, string $purpose, string $key, string $link, ?int $userId, string $auditEvent, bool $awaitCredit, ?array $preview = null): SmsMessage
     {
         $cfg = config('talata.sms');
         $active = fn ($q) => $q->whereNotIn('status', ['CANCELLED', 'AWAITING_CREDIT', 'FAILED']);
@@ -262,9 +272,11 @@ final class SmsService
             throw new DomainError('SMS_TENANT_RATE', 'سقف ارسال پیامک این فروشگاه در این بازه پر شده است. کمی بعد دوباره امتحان کنید.', 429);
         }
 
-        $shopName = (string) ($invoice->snapshot['shop']['name'] ?? $tenant->profile?->name ?? '');
-        SmsTemplate::assertSafeToSend($this->templateFor($tenant), $shopName, Digits::invoiceNumber($invoice->number), (bool) $tenant->profile?->isNameApproved($shopName));
-        $preview = $this->previewFor($invoice, $tenant, $link);
+        if ($preview === null) {
+            $shopName = (string) ($invoice->snapshot['shop']['name'] ?? $tenant->profile?->name ?? '');
+            SmsTemplate::assertSafeToSend($this->templateFor($tenant), $shopName, Digits::invoiceNumber($invoice->number), (bool) $tenant->profile?->isNameApproved($shopName));
+            $preview = $this->previewFor($invoice, $tenant, $link);
+        }
 
         $useFree = $preview['free_remaining'] > 0 && $preview['segments'] <= 2;
         if ($useFree) {
@@ -300,6 +312,29 @@ final class SmsService
         SendSms::dispatch($message->id)->afterCommit();
 
         return $message;
+    }
+
+    /**
+     * پیش‌فاکتور SMS to the customer: shop, amount, how long it is valid and the confirmation link. Charged like
+     * the invoice SMS (free yearly allowance, then credit); waits for credit only if the shop asks for that.
+     */
+    public function queueProformaSms(Tenant $tenant, Invoice $invoice, Proforma $proforma, string $link, ?int $userId, int $attempt): SmsMessage
+    {
+        return DB::transaction(function () use ($tenant, $invoice, $proforma, $link, $userId, $attempt) {
+            Tenant::query()->whereKey($tenant->id)->lockForUpdate()->first();
+            $this->entitlements->assertCan($tenant, 'invoice.sms_share', 'ارسال پیامک در این پلن فعال نیست. لینک پیش‌فاکتور را با «اشتراک‌گذاری» بفرستید.');
+            if (! Mobile::isIranian($proforma->buyer_mobile)) {
+                throw new DomainError('SMS_NO_RECIPIENT', 'شماره موبایل مشتری درست نیست.');
+            }
+            DbLock::key('sms:'.$proforma->buyer_mobile);
+            $body = ProformaService::smsBody($proforma, $link, $tenant->timezone);
+            $segments = Segments::count($body);
+            $perSegment = $this->entitlements->smsPerSegmentIrr($tenant);
+            $preview = ['body' => $body, 'segments' => $segments, 'cost_irr' => (string) BigInteger::of($perSegment)->multipliedBy($segments),
+                'free_remaining' => $this->entitlements->freeSmsRemaining($tenant)];
+
+            return $this->queueOne($tenant, $invoice, $proforma->buyer_mobile, 'PROFORMA', 'pf:'.$proforma->id.':'.$attempt, $link, $userId, 'sms.proforma_queued', false, $preview);
+        });
     }
 
     public function queueReminder(Tenant $tenant, InstallmentLine $line, string $body, string $recipient, string $kind): ?SmsMessage

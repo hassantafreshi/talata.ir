@@ -37,6 +37,39 @@ export default function () {
   showTo();
   customerPicker({ nameInput: form.buyer_name, mobileInput: form.buyer_mobile, nidInput: form.buyer_national_id, saveBox: form.save_customer });
 
+  // پیش‌فاکتور: same buyer fields; the customer confirms with their mobile, so it is required here.
+  const pfBtn = document.querySelector('[data-proforma]');
+  pfBtn?.addEventListener('click', async () => {
+    if (inFlight) return;
+    const mobileRaw = toLatin(form.buyer_mobile.value).replace(/[\s-]/g, '').replace(/^\+98/, '0').replace(/^98(?=9)/, '0');
+    if (!MOBILE_RE.test(mobileRaw)) {
+      fieldErrors(form, { buyer_mobile: 'برای پیش‌فاکتور، موبایل مشتری لازم است؛ مشتری با همین شماره خرید را تأیید می‌کند.' });
+      form.buyer_mobile.focus();
+      return;
+    }
+    if (!boot.profile_complete) { location.href = boot.business_url; return; }
+    fieldErrors(form, null);
+    inFlight = true;
+    busy(pfBtn, true);
+    const res = await post(boot.proforma_url, {
+      version: boot.version, hours: Number(form.querySelector('[name="pf_hours"]:checked')?.value || 24),
+      send_sms: !!form.pf_sms?.checked, buyer: { name: form.buyer_name.value.trim(), mobile: mobileRaw },
+    }, { timeout: 30000 });
+    inFlight = false;
+    busy(pfBtn, false);
+    if (res.ok) {
+      if (res.data.sms?.status === 'NOT_SENT') sessionStorage.setItem('pf-sms-note', res.data.sms.message_fa);
+      location.replace(res.data.next);
+      return;
+    }
+    if (res.code === 'PROFILE_INCOMPLETE') { location.href = boot.business_url; return; }
+    if (res.code === 'ROWS_INVALID') { location.href = boot.items_url; return; }
+    if (res.code === 'REVIEW_REQUIRED' || res.code === 'NOT_DRAFT') { toast(res.message, { kind: 'error', timeout: 12000, action: { label: 'بارگذاری دوباره', onClick: () => location.reload() } }); return; }
+    if (res.code === 'BUYER_MOBILE_REQUIRED') { fieldErrors(form, { buyer_mobile: res.message }); return; }
+    if (res.code?.startsWith('QUOTA_') || res.code?.startsWith('CAPABILITY_')) { showQuota(res); return; }
+    toast(res.message, { kind: 'error' });
+  });
+
   let retry = () => { if (lastButton) form.requestSubmit(lastButton); };
   document.querySelector('[data-issue-retry]')?.addEventListener('click', () => retry());
 

@@ -650,3 +650,28 @@ body[data-page="appearance"] .main { max-width: 1400px; }
 .attn-text { color: var(--t-ink); font-weight: 600; }
 @media (prefers-reduced-motion: no-preference) { .field.attn .input-wrap { animation: attn-pulse 1s ease-out 2; } }
 @keyframes attn-pulse { 0% { box-shadow: 0 0 0 0 var(--t-gold-bright); } 100% { box-shadow: 0 0 0 6px transparent; } }
+
+/* پیش‌فاکتور (shop page and the customer's link) */
+.pf-hero .pf-deadline { margin: 0; color: var(--t-gold-bright); line-height: 1.7; }
+.pf-hero.pf-ok { background: #0F3D2E; }
+.pf-hero.pf-void { background: #4A1414; }
+.pf-hero .badge.pf-pulse { animation: none; }
+@media (prefers-reduced-motion: no-preference) { .pf-hero .badge.pf-pulse { animation: pf-pulse 1.6s ease-in-out infinite; } }
+@keyframes pf-pulse { 50% { box-shadow: 0 0 0 6px rgba(224, 180, 76, .25); } }
+.pf-doc { position: relative; display: flex; flex-direction: column; gap: var(--t-sp-3); }
+.pf-doc.is-void > :not(.pf-stamp) { opacity: .55; filter: grayscale(.6); }
+.pf-stamp { position: absolute; z-index: 2; top: 140px; left: 50%; transform: translateX(-50%) rotate(-18deg); border: 5px double #B3261E; color: #B3261E; background: rgba(255, 255, 255, .82);
+  font-size: clamp(40px, 13vw, 76px); font-weight: 900; line-height: 1.2; padding: 4px 22px; border-radius: 10px; white-space: nowrap; pointer-events: none; }
+.pf-confirm { border: 2px solid var(--t-gold-bright); scroll-margin-top: 12px; }
+.pf-steps { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; counter-reset: pf; font-size: 13px; }
+.pf-steps li { flex: 1; counter-increment: pf; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; color: var(--t-muted); }
+.pf-steps li::before { content: counter(pf); display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border-radius: 50%; background: var(--t-control-track); font-weight: 700; }
+.pf-steps li.done::before { content: "✓"; background: #0F5E46; color: #fff; }
+.pf-steps li.now { color: var(--t-ink); font-weight: 700; }
+.pf-steps li.now::before { background: var(--t-gold-bright); color: #121417; }
+.pf-offer summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; min-height: 48px; }
+.pf-offer summary::-webkit-details-marker { display: none; }
+.pf-offer summary::after { content: "‹"; margin-inline-start: auto; font-size: 20px; color: var(--t-muted); transition: transform .15s; }
+.pf-offer details[open] summary::after { transform: rotate(-90deg); }
+.pf-offer-body { padding-top: 8px; }
+.stack-xs { display: flex; flex-direction: column; gap: 2px; }

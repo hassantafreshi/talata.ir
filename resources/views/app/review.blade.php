@@ -3,6 +3,7 @@
         'id' => $invoice->public_id, 'version' => $invoice->version,
         'issue_url' => route('api.drafts.issue', $invoice), 'items_url' => route('invoices.items', $invoice),
         'business_url' => route('settings.business', ['return' => $invoice->public_id]),
+        'proforma_url' => route('api.proformas.send', $invoice),
         'can_sms' => $canSms, 'auto_sms' => $canSms && $autoSms, 'links_out' => $linksOut ?? false, 'profile_complete' => $profileComplete,
     ];
     // SMS step facts (what will happen, decided before the merchant taps): link quota and credit.
@@ -104,6 +105,30 @@
                 <a class="small" href="{{ route('settings.sms', ['return' => $invoice->public_id]) }}">خرید پیامک بیشتر</a>
             </section>
         @endif
+
+        {{-- پیش‌فاکتور: the customer confirms first (mobile + SMS code), then the sales invoice is issued. --}}
+        <section class="band pf-offer" aria-labelledby="pf-h">
+            <details>
+                <summary><span class="stack-xs"><strong id="pf-h">ارسال پیش‌فاکتور برای تأیید مشتری</strong><span class="xs muted">به‌جای صدور فوری: مشتری لینک را باز می‌کند و با موبایل و کد پیامکی تأیید می‌کند؛ سپس فاکتور فروش صادر می‌شود.</span></span></summary>
+                <div class="stack-sm pf-offer-body">
+                    <fieldset class="field"><legend class="label">مدت اعتبار پیش‌فاکتور</legend>
+                        <div class="chips" role="radiogroup" aria-label="مدت اعتبار">
+                            @foreach (\App\Domain\Invoices\ProformaService::HOURS as $h)
+                                <label class="chip"><input type="radio" name="pf_hours" value="{{ $h }}" @checked($h === $proformaHours)>{{ \App\Domain\Invoices\ProformaService::hoursFa($h) }}@if($h === 24) (پیش‌فرض)@endif</label>
+                            @endforeach
+                        </div>
+                        <p class="hint">اگر مشتری تا این مدت تأیید نکند، پیش‌فاکتور خودکار ابطال می‌شود. قیمت‌ها تا پایان مهلت ثابت می‌ماند.</p>
+                    </fieldset>
+                    @if ($canSms)
+                        <label class="check"><input type="checkbox" name="pf_sms" value="1" checked> ارسال پیامک پیش‌فاکتور (با مهلت تأیید و لینک) به موبایل مشتری</label>
+                    @else
+                        <p class="xs muted">ارسال پیامکی در این پلن فعال نیست؛ پس از ساخت، لینک را با «اشتراک‌گذاری» بفرستید.</p>
+                    @endif
+                    <button class="btn btn-dark block" type="button" data-proforma data-busy-text="در حال ارسال…">ارسال پیش‌فاکتور</button>
+                    <p class="xs muted">موبایل مشتری (بالا) لازم است. تا تأیید مشتری یا پایان مهلت، این پیش‌نویس قفل می‌شود.</p>
+                </div>
+            </details>
+        </section>
 
         <div class="sticky-bar stack-sm">
             <div class="notice err hidden" data-issue-unknown role="alert">

@@ -12,6 +12,7 @@ use App\Http\Controllers\App\InvoiceDraftController;
 use App\Http\Controllers\App\MaznehController;
 use App\Http\Controllers\App\PasskeyController;
 use App\Http\Controllers\App\ProductController;
+use App\Http\Controllers\App\ProformaController;
 use App\Http\Controllers\App\QuoteController;
 use App\Http\Controllers\App\SecurityController;
 use App\Http\Controllers\App\SettingsController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\Auth\PasskeyLoginController;
 use App\Http\Controllers\Public\MockGatewayController;
 use App\Http\Controllers\Public\PaymentReturnController;
 use App\Http\Controllers\Public\PublicInvoiceController;
+use App\Http\Controllers\Public\PublicProformaController;
 use App\Http\Controllers\Public\ReferralController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\WebAuthnReportController;
@@ -55,6 +57,10 @@ Route::middleware('throttle:public')->group(function () {
     Route::post('/v/{token}', [PublicInvoiceController::class, 'reveal'])->name('public.verify.reveal');
     Route::get('/i/{token}', [PublicInvoiceController::class, 'show'])->name('public.invoice');
     Route::get('/i/{token}/print', [PublicInvoiceController::class, 'print'])->name('public.invoice.print');
+    // پیش‌فاکتور: the customer opens, then confirms with their mobile and an SMS code (docs/PROFORMA.md).
+    Route::get('/p/{token}', [PublicProformaController::class, 'show'])->name('public.proforma');
+    Route::post('/p/{token}/code', [PublicProformaController::class, 'code'])->middleware('throttle:10,1')->name('public.proforma.code');
+    Route::post('/p/{token}/confirm', [PublicProformaController::class, 'confirm'])->middleware('throttle:20,1')->name('public.proforma.confirm');
     Route::get('/logo/{tenant}/{version}', [PublicInvoiceController::class, 'logo'])->whereNumber('version')->name('public.logo');
     Route::get('/og/{tenant}/{hash}.png', [PublicInvoiceController::class, 'preview'])->where(['tenant' => '[0-9a-z]{26}', 'hash' => '[0-9a-f]{20}'])->name('public.og');
 });
@@ -71,6 +77,9 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     Route::get('/invoices/new', [InvoiceDraftController::class, 'start'])->middleware('perm:invoice.issue')->name('invoices.new');
     Route::get('/invoices', [InvoiceController::class, 'index'])->middleware('perm:invoices.view')->name('invoices.index');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('/proformas', [ProformaController::class, 'index'])->middleware('perm:invoice.issue')->name('proformas.index');
+    Route::get('/proformas/{proforma}', [ProformaController::class, 'show'])->middleware('perm:invoice.issue')->name('proformas.show');
+    Route::get('/proformas/{proforma}/print', [ProformaController::class, 'print'])->middleware('perm:invoice.issue')->name('proformas.print');
     Route::get('/invoices/{invoice}/items', [InvoiceDraftController::class, 'items'])->middleware('perm:invoice.issue')->name('invoices.items');
     Route::get('/invoices/{invoice}/review', [InvoiceDraftController::class, 'review'])->middleware('perm:invoice.issue')->name('invoices.review');
     Route::get('/invoices/{invoice}/issued', [InvoiceController::class, 'issued'])->name('invoices.issued');
@@ -126,6 +135,10 @@ Route::middleware(['auth', 'tenant'])->group(function () {
             Route::post('/invoices/{invoice}/sms', [InvoiceController::class, 'resendSms'])->middleware('throttle:10,1')->name('api.invoices.sms');
             Route::post('/invoices/{invoice}/sms/copies', [InvoiceController::class, 'smsCopies'])->middleware('throttle:10,1')->name('api.invoices.sms.copies');
             Route::get('/invoices/{invoice}/status', [InvoiceController::class, 'status'])->name('api.invoices.status');
+            Route::post('/invoices/drafts/{invoice}/proforma', [ProformaController::class, 'send'])->middleware('throttle:issue')->name('api.proformas.send');
+            Route::post('/proformas/{proforma}/sms', [ProformaController::class, 'sms'])->middleware('throttle:10,1')->name('api.proformas.sms');
+            Route::post('/proformas/{proforma}/cancel', [ProformaController::class, 'cancel'])->middleware('throttle:20,1')->name('api.proformas.cancel');
+            Route::post('/proformas/{proforma}/issue', [ProformaController::class, 'issue'])->middleware('throttle:issue')->name('api.proformas.issue');
             Route::get('/products', [ProductController::class, 'index'])->name('api.products');
             Route::get('/products/names', [ProductController::class, 'names'])->name('api.products.names');
             Route::delete('/products/{product}', [ProductController::class, 'destroy'])->middleware('throttle:60,1')->name('api.products.destroy');

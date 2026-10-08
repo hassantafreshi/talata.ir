@@ -25,14 +25,17 @@
     $classes = 'inv t-'.($t['text_size'] ?? 'normal').' d-'.($t['density'] ?? 'comfortable').' a-'.($t['accent'] ?? 'ink').(($t['dividers'] ?? true) ? '' : ' no-div')
         .' pm-'.(($L['print']['margins'] ?? 'normal') === 'narrow' ? 'narrow' : 'normal').' po-'.(($L['print']['orientation'] ?? 'portrait') === 'landscape' ? 'landscape' : 'portrait');
     $isDraft = ($v['status'] ?? '') === 'draft';
+    $isProforma = ($v['doc'] ?? '') === 'proforma';
+    $pfClosed = $isProforma && in_array($v['state'] ?? '', ['EXPIRED', 'CANCELLED'], true);
     $accentHex = \App\Domain\Invoices\LayoutSettings::accentHex($L);
 @endphp
 {{-- Custom accent: CSS variable via a nonce'd rule (no inline style under the CSP); the layout editor sets it
      with JS for previews fetched separately. Presets come from invoice.css classes. --}}
 @if (($t['accent'] ?? '') === 'custom')<style nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">.inv[data-accent="{{ $accentHex }}"]{--inv-accent:{{ $accentHex }}}</style>@endif
-<article class="{{ $classes }}" data-accent="{{ $accentHex }}" aria-label="فاکتور فروش {{ $v['number'] }}">
+<article class="{{ $classes }}" data-accent="{{ $accentHex }}" aria-label="{{ $isProforma ? 'پیش‌فاکتور' : 'فاکتور فروش' }} {{ $v['number'] }}">
     @if (! empty($sample))<span class="sample-stamp">پیش‌نمایش با داده نمونه</span>@endif
     @if (($v['status'] ?? '') === 'void')<div class="void-stamp" aria-hidden="true">باطل شد</div>@endif
+    @if ($pfClosed)<div class="void-stamp pf-print-stamp" aria-hidden="true">ابطال شده</div>@endif
 
     <header class="inv-head">
         <div class="blocks">
@@ -45,7 +48,8 @@
                 @if ($html)<div class="al-{{ $b['align'] }}">{!! $html !!}</div>@endif
             @endforeach
             <div class="meta-line">
-                <span><strong>فاکتور فروش</strong> شماره <strong class="num ltr">{{ $v['number'] }}</strong></span>
+                <span><strong>{{ $isProforma ? 'پیش‌فاکتور' : 'فاکتور فروش' }}</strong> شماره <strong class="num ltr">{{ $v['number'] }}</strong></span>
+                @if ($isProforma)<span>مدت اعتبار: <strong>{{ $v['hours_fa'] }}</strong> ({{ $v['until_fa'] }})</span>@endif
                 <span>تاریخ: <span class="num">{{ $v['issued_fa'] }}</span></span>
                 @if (! empty($v['pay_methods_fa']))<span>روش تسویه: <strong>{{ $v['pay_methods_fa'] }}</strong></span>@endif
                 @if (($v['status'] ?? '') === 'void')<span><strong>باطل‌شده</strong> در {{ $v['voided_fa'] }}</span>@endif
@@ -55,7 +59,7 @@
             @if ($isDraft)
                 <div class="qr-draft">پیش‌نویس</div>
             @else
-                <div class="t">بررسی اصالت فاکتور</div>
+                <div class="t">{{ $isProforma ? 'مشاهده و تأیید پیش‌فاکتور' : 'بررسی اصالت فاکتور' }}</div>
                 {!! $qr !!}
                 <div class="num ltr">{{ $v['number'] }}</div>
                 <div class="ltr">{{ $verifyShort }}</div>
@@ -162,6 +166,7 @@
             @if ($L['summary']['public_note']['visible'] ?? false)<p>{{ $L['summary']['public_note']['text'] }}</p>@endif
             <p>مبالغ به تومان است. @if($v['has_gold'])مالیات بر ارزش افزوده فقط روی اجرت و سود محاسبه شده است.@endif @if($v['has_gold_in'] ?? false)<br>ردیف‌های «دریافتی» طلایی است که مشتری به‌جای پول داده و از مبلغ فاکتور کسر شده است؛ وزن ۷۵۰ یعنی وزن معادل طلای ۱۸ عیار.@endif</p>
             @if ($v['issuer'])<p>صادرکننده: {{ $v['issuer'] }}</p>@endif
+            @if ($isProforma)<p><strong>پیش‌فاکتور، فاکتور فروش نیست.</strong> پس از تأیید خریدار تا پایان مدت اعتبار، فاکتور فروش صادر می‌شود؛ پس از آن، این پیش‌فاکتور فاقد اعتبار است.</p>@endif
         </div>
         <div>
             @if ($L['summary']['show_component_breakdown'] ?? true)

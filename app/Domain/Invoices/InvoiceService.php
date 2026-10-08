@@ -268,7 +268,9 @@ final class InvoiceService
         $invoice = DB::transaction(function () use ($draft, $tenant, $user, $input, $key, &$mode, &$autoSkipped) {
             Tenant::query()->whereKey($tenant->id)->lockForUpdate()->first();
             $invoice = Invoice::query()->whereKey($draft->id)->lockForUpdate()->firstOrFail();
-            if (! $invoice->isDraft()) {
+            // A confirmed پیش‌فاکتور issues its own (locked) draft; nothing else may issue a non-draft.
+            $fromProforma = ($input['from_proforma'] ?? false) === true && $invoice->status === 'proforma';
+            if (! $invoice->isDraft() && ! $fromProforma) {
                 throw new DomainError('ALREADY_ISSUED', 'این فاکتور قبلاً صادر شده است.', 409, ['invoice' => $invoice->public_id]);
             }
             if ((int) ($input['version'] ?? -1) !== $invoice->version) {
@@ -317,15 +319,10 @@ final class InvoiceService
                 }
             }
 
-            $rows = $invoice->items()->get();
-            $rule = $this->taxRules->for('GOLD_SERVICES', now());
-            $vat = (string) BigDecimal::of($rule->rate_percent)->strippedOfTrailingZeros();
-            $priced = $this->calculator->priceAll($rows->map->only(self::ROW_FIELDS)->all(), $invoice->accepted_rate_irr, $vat, $invoice->accepted_buy_rate_irr);
-            if ($priced['sale_required']) {
-                throw new DomainError('ROWS_SALE_REQUIRED', 'فاکتور فروش دست‌کم یک ردیف فروش (طلا یا متفرقه) لازم دارد. طلای دریافتی به‌تنهایی فاکتور فروش نیست.', 422);
-            }
-            if (! $priced['valid']) {
-                throw new DomainError('ROWS_INVALID', 'بعضی ردیف‌ها کامل یا درست نیستند. آن‌ها را اصلاح کنید.', 422);
+            [$priced, $rule] = $this->priceForIssue($invoice);
+            // From a confirmed پیش‌فاکتور: the customer agreed to that amount, so it must not have changed.
+            if (isset($input['expect_payable_irr']) && (string) $priced['payable'] !== (string) $input['expect_payable_irr']) {
+                throw new DomainError('PROFORMA_AMOUNT_CHANGED', 'مبلغ محاسبه‌شده با مبلغ پیش‌فاکتور فرق دارد (مثلاً نرخ مالیات عوض شده). فاکتور را از روی پیش‌نویس دوباره صادر کنید.', 409);
             }
 
             // One mobile is one person (unique per shop): a known customer completes what the form left empty.
@@ -395,7 +392,29 @@ final class InvoiceService
         return ['invoice' => $invoice->fresh(), 'replayed' => false, 'sms' => $sms];
     }
 
-    private function snapshot(Invoice $invoice, Tenant $tenant, User $user, array $priced, $rule): array
+    /**
+     * Server pricing of a draft for issuance (also the پیش‌فاکتور): all rows valid and at least one sale row.
+     *
+     * @return array{0: array, 1: mixed} [$priced, $taxRule]
+     */
+    public function priceForIssue(Invoice $invoice): array
+    {
+        $rows = $invoice->items()->get();
+        $rule = $this->taxRules->for('GOLD_SERVICES', now());
+        $vat = (string) BigDecimal::of($rule->rate_percent)->strippedOfTrailingZeros();
+        $priced = $this->calculator->priceAll($rows->map->only(self::ROW_FIELDS)->all(), $invoice->accepted_rate_irr, $vat, $invoice->accepted_buy_rate_irr);
+        if ($priced['sale_required']) {
+            throw new DomainError('ROWS_SALE_REQUIRED', 'فاکتور فروش دست‌کم یک ردیف فروش (طلا یا متفرقه) لازم دارد. طلای دریافتی به‌تنهایی فاکتور فروش نیست.', 422);
+        }
+        if (! $priced['valid']) {
+            throw new DomainError('ROWS_INVALID', 'بعضی ردیف‌ها کامل یا درست نیستند. آن‌ها را اصلاح کنید.', 422);
+        }
+
+        return [$priced, $rule];
+    }
+
+    /** @param  array{number?: string, at?: \DateTimeInterface}  $doc  overrides for a پیش‌فاکتور (its own number and date) */
+    public function snapshot(Invoice $invoice, Tenant $tenant, User $user, array $priced, $rule, array $doc = []): array
     {
         $profile = $tenant->profile()->first();
         $canCustomize = $this->entitlements->can($tenant, 'invoice.customize');
@@ -405,8 +424,8 @@ final class InvoiceService
 
         return [
             'schema' => 1,
-            'number' => $invoice->number,
-            'issued_at' => $invoice->issued_at->toIso8601String(),
+            'number' => $doc['number'] ?? $invoice->number,
+            'issued_at' => CarbonImmutable::instance($doc['at'] ?? $invoice->issued_at)->toIso8601String(),
             'timezone' => $tenant->timezone,
             'issuer' => ['name' => $user->name ?: Mobile::mask($user->mobile)],
             'shop' => [

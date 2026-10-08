@@ -48,7 +48,7 @@ class SendSms implements ShouldQueue
         try {
             if ($message->purpose === 'OTP') {
                 $code = (string) ($message->payload['code'] ?? '');
-                $kind = ($message->payload['kind'] ?? 'login') === 'mobile_change' ? 'mobile_change' : 'login';
+                $kind = in_array($message->payload['kind'] ?? 'login', ['mobile_change', 'proforma'], true) ? $message->payload['kind'] : 'login';
                 $result = $gateway->sendOtp($message->recipient, $code, SmsService::otpBody($code, $kind), $kind);
             } else {
                 $result = $gateway->send($message->recipient, $message->body, $message->public_id);

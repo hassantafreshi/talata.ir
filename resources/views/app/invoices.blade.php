@@ -3,6 +3,8 @@
     @if ($canIssue)
         {{-- On mobile the bottom bar has no «فاکتور جدید»; this is the way to start one from the list. --}}
         <a href="{{ route('invoices.new') }}" class="btn btn-gold block mobile-only">+ فاکتور جدید</a>
+        @php($pfOpen = \App\Models\Proforma::query()->where('status', 'SENT')->where('expires_at', '>', now())->count())
+        <a class="list-item" href="{{ route('proformas.index') }}"><span class="body"><strong>پیش‌فاکتورها</strong><span class="sub">{{ $pfOpen ? fa($pfOpen).' پیش‌فاکتور منتظر تأیید مشتری' : 'پیش‌فاکتورهای فرستاده‌شده و وضعیت تأیید' }}</span></span>@if($pfOpen)<span class="badge warn">{{ fa($pfOpen) }}</span>@endif<span aria-hidden="true">‹</span></a>
     @endif
     @if ($quota['limit'] !== null)
         <div class="band stack-sm">

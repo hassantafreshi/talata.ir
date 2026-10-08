@@ -132,3 +132,4 @@
 .inv table.ledger tfoot tr.bal th, .inv table.ledger tfoot tr.bal td { background: #fff; border-top: 1.5pt solid #000; font-weight: 800; }
 .inv table.ledger td.side { white-space: nowrap; }
 .inv table.ledger td:nth-child(2) { min-width: 42mm; }
+.inv .pf-print-stamp { font-size: 46pt; top: 70mm; }

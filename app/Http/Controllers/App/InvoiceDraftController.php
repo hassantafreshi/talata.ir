@@ -4,10 +4,12 @@ namespace App\Http\Controllers\App;
 
 use App\Domain\DomainError;
 use App\Domain\Invoices\InvoiceService;
+use App\Domain\Invoices\ProformaService;
 use App\Domain\Market\QuoteService;
 use App\Domain\Sms\SmsService;
 use App\Domain\Tax\TaxRules;
 use App\Models\Invoice;
+use App\Models\Proforma;
 use App\Models\SmsSetting;
 use App\Support\Mobile;
 use Brick\Math\BigDecimal;
@@ -115,6 +117,7 @@ class InvoiceDraftController extends BaseController
             'autoSms' => SmsSetting::autoSend(),
             'profileComplete' => (bool) $tenant->profile?->isComplete(),
             'buyerMobile' => $invoice->buyer_mobile ? Mobile::display($invoice->buyer_mobile) : '',
+            'proformaHours' => ProformaService::defaultHours(),
         ]);
     }
 
@@ -144,6 +147,11 @@ class InvoiceDraftController extends BaseController
 
     private function assertDraft(Invoice $invoice): void
     {
+        if ($invoice->status === 'proforma') {
+            // Locked while its پیش‌فاکتور is out: open that instead.
+            $p = Proforma::query()->where('invoice_id', $invoice->id)->latest('id')->first();
+            abort(redirect()->route($p ? 'proformas.show' : 'invoices.index', $p ?? []));
+        }
         if (! $invoice->isDraft()) {
             abort(redirect()->route('invoices.show', $invoice));
         }

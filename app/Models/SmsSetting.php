@@ -11,7 +11,7 @@ class SmsSetting extends Model
 
     protected $table = 'sms_settings';
 
-    protected $fillable = ['invoice_template', 'auto_send_invoice'];
+    protected $fillable = ['invoice_template', 'auto_send_invoice', 'proforma_valid_hours'];
 
     protected function casts(): array
     {

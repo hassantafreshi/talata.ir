@@ -10,6 +10,7 @@ use App\Domain\Sms\SmsCredit;
 use App\Domain\Sms\SmsService;
 use App\Models\Invoice;
 use App\Models\InvoiceShare;
+use App\Models\Proforma;
 use App\Models\SmsMessage;
 use App\Support\Digits;
 use App\Support\Jalali;
@@ -86,6 +87,10 @@ class InvoiceController extends BaseController
     {
         if ($invoice->isDraft()) {
             abort(redirect()->route('invoices.items', $invoice));
+        }
+        if ($invoice->status === 'proforma') {
+            $p = Proforma::query()->where('invoice_id', $invoice->id)->latest('id')->first();
+            abort(redirect()->route($p ? 'proformas.show' : 'invoices.index', $p ?? []));
         }
         // Team access: "invoices.view" sees every invoice; a seller with only "invoice.issue" sees the ones they issued.
         $m = $this->membership();
