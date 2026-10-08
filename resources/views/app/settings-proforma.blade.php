@@ -9,6 +9,8 @@
 
     <section class="band stack-sm" aria-labelledby="issue-h">
         <div class="between"><h2 id="issue-h">صدور فاکتور پس از تأیید مشتری</h2>@unless($canConfigure)<span class="badge off">پلن پایه و حرفه‌ای</span>@endunless</div>
+        <div class="{{ $canConfigure ? '' : 'locked-area' }}">
+        @unless ($canConfigure)<x-lock-cover cap="proforma.configure" label="انتخاب صدور دستی" />@endunless
         <fieldset class="choice-cards" @disabled(! $canConfigure) aria-labelledby="issue-h">
             <label class="choice-card">
                 <input type="radio" name="auto_issue" value="1" @checked($autoIssue)>
@@ -21,6 +23,7 @@
                 <span class="cc-text">مشتری تأیید می‌کند؛ شما پس از بررسی (مثلاً دریافت وجه) در صفحه پیش‌فاکتور «صدور فاکتور فروش» را می‌زنید.</span>
             </label>
         </fieldset>
+        </div>
         @unless ($canConfigure)
             <p class="xs muted">در پلن رایگان، فاکتور پس از تأیید مشتری خودکار صادر می‌شود. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></p>
         @endunless

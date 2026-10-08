@@ -74,7 +74,7 @@ class SettingsBackupTest extends TestCase
         $this->actingAs($free);
         $this->business('فروشگاه رایگان');
         $this->assertCount(0, $this->backups($this->tenantOf($free)->id));
-        $this->get('/settings/backups')->assertOk()->assertSee('در پلن پایه و حرفه‌ای');
+        $this->get('/settings/backups')->assertOk()->assertSee('data-upgrade="settings.backup"', false)->assertSee('پایه و حرفه‌ای')->assertDontSee('data-manual', false);
         $this->api('POST', '/api/settings/backups', [])->assertStatus(403);
     }
 

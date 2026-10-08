@@ -33,11 +33,11 @@ class DatabaseSeeder extends Seeder
             'source_reference' => 'قیمت ردیف متفرقه نهایی است؛ مالیات جدا محاسبه نمی‌شود',
         ]);
 
-        // Owner's own test code (owner request 2026-10-07): 100% off plan purchases, usable only by the owner's
-        // login mobile, any number of times. Created once; deactivate or change it in the admin console.
+        // Owner's test code (owner request 2026-10-07; opened to everyone 2026-10-08): 100% off plan purchases,
+        // any shop, any number of times. Created once; deactivate, cap or set an expiry in the admin console.
         PromoCode::query()->firstOrCreate(['code' => 'HTDC00'], [
             'percent' => '100', 'products' => ['PLAN'], 'max_uses' => null, 'expires_at' => null, 'active' => true,
-            'allowed_mobile' => '09396727215', 'once_per_shop' => false, 'note' => 'کد آزمایشی مالک — فقط شماره ۰۹۳۹۶۷۲۷۲۱۵',
+            'allowed_mobile' => null, 'once_per_shop' => false, 'note' => 'کد آزمایشی ۱۰۰٪ — برای همه (درخواست مالک ۱۴۰۵/۰۷/۱۶)',
         ]);
 
         app(QuoteService::class)->refresh();

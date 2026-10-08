@@ -15,9 +15,12 @@ use Tests\TestCase;
 /** Staff discount codes; a 100% code completes a purchase without the bank (owner test plan 2026-10-07). */
 class PromoCodeTest extends TestCase
 {
+    private static int $staffSeq = 100;
+
     private function admin(string $role = 'admin'): StaffUser
     {
-        $staff = StaffUser::query()->create(['mobile' => '09120003'.random_int(100, 999), 'name' => 'مدیر', 'role' => $role, 'active' => true]);
+        // A sequence, not random_int: two staff in one test must never draw the same (unique) mobile.
+        $staff = StaffUser::query()->create(['mobile' => '09120003'.(self::$staffSeq++ % 900 + 100), 'name' => 'مدیر', 'role' => $role, 'active' => true]);
         $this->asStaff($staff);
 
         return $staff;
@@ -84,7 +87,7 @@ class PromoCodeTest extends TestCase
         $this->postJson('/admin/api/promo-codes', ['code' => 'BAD1', 'percent' => '150', 'product_plan' => true, 'reason' => 'آزمون درصد', 'idempotency_key' => 'adm-x7654321'])->assertStatus(422);
     }
 
-    public function test_the_seeded_owner_code_htdc00_works_only_for_the_owner_and_can_be_reused(): void
+    public function test_the_seeded_code_htdc00_works_for_any_shop_and_can_be_reused(): void
     {
         $this->seed(DatabaseSeeder::class);
         $this->seed(DatabaseSeeder::class); // idempotent: still one code
@@ -96,9 +99,9 @@ class PromoCodeTest extends TestCase
         $this->order($owner, ['product' => 'PLAN', 'plan' => 'professional', 'period' => 'yearly', 'discount_code' => 'HTDC00'])->assertCreated();
         $this->assertSame(2, BillingOrder::withoutGlobalScope('tenant')->where('status', 'FULFILLED')->where('amount_irr', '0')->count());
 
-        // Anyone else is refused, and it never applies to SMS credit.
+        // Owner request 2026-10-08: any shop may use it; it still never applies to SMS credit.
         $other = $this->merchant();
-        $this->order($other, ['product' => 'PLAN', 'plan' => 'basic', 'period' => 'monthly', 'discount_code' => 'htdc00'])->assertStatus(422)->assertJsonPath('errors.discount_code.0', 'این کد تخفیف برای حساب شما نیست.');
+        $this->order($other, ['product' => 'PLAN', 'plan' => 'basic', 'period' => 'monthly', 'discount_code' => 'htdc00'])->assertCreated();
         $this->order($owner, ['product' => 'SMS_CREDIT', 'pack_amount_toman' => '100000', 'discount_code' => 'htdc00'])->assertStatus(422);
         $this->assertSame(1, PromoCode::query()->where('code', 'HTDC00')->count());
     }

@@ -17,9 +17,9 @@
 
     <section class="stack" aria-labelledby="ag-h">
         <div class="between"><h2 id="ag-h">اقساط</h2>
-            @if ($canInstallments && $canManage)<a class="btn btn-gold sm" href="{{ route('agreements.create', $customer) }}">+ قرارداد اقساط</a>@endif</div>
+            @if ($canInstallments && $canManage)<a class="btn btn-gold sm" href="{{ route('agreements.create', $customer) }}">+ قرارداد اقساط</a>@elseif (! $canInstallments)<x-locked cap="installments.manage" label="+ قرارداد اقساط" class="sm" />@endif</div>
         @unless ($canInstallments)
-            <div class="notice info">اقساط و یادآوری پیامکی در پلن حرفه‌ای است. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></div>
+            <x-upgrade-note cap="installments.manage">فروش اقساطی، ثبت قسط‌ها و یادآوری پیامکی با ارتقا فعال می‌شود.</x-upgrade-note>
         @endunless
         @forelse ($agreements as $a)
             @php

@@ -1,7 +1,7 @@
 <x-layouts.app title="کاربران و دسترسی‌ها" page="users" :back="route('settings')">
     <p class="small muted">همکاران با شماره موبایل خود و کد پیامکی (یا اثر انگشت) وارد می‌شوند؛ رمز عبور لازم نیست.@if($limit) حداکثر {{ fa($limit) }} کاربر.@endif</p>
     @unless ($canRestrict)
-        <div class="notice info">همکاران به‌طور پیش‌فرض دسترسی کامل دارند. تعیین سطح دسترسی هر همکار در پلن پایه و حرفه‌ای است. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></div>
+        <x-upgrade-note cap="team.permissions_edit">همکاران به‌طور پیش‌فرض دسترسی کامل دارند. تعیین دسترسی هر همکار با ارتقا.</x-upgrade-note>
     @endunless
     <ul class="list" data-members>
         @foreach ($members as $m)
@@ -26,6 +26,7 @@
                         </form>
                     </details>
                 @else
+                    <x-locked cap="team.permissions_edit" label="ویرایش دسترسی" class="sm" />
                     <p class="xs muted"><span class="badge ok">دسترسی کامل</span> مظنه، ماشین‌حساب، فاکتورها، مشتریان، داشبورد، تنظیمات و پرداخت.</p>
                 @endif
             </li>

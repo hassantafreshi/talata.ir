@@ -1,4 +1,5 @@
 @php
+    $canCap = fn (string $cap) => app(\App\Domain\Plans\Entitlements::class)->can(app(\App\Tenancy\TenantContext::class)->tenant(), $cap);
     $q = $summary['quotas'];
     $isOwner = $membership->isOwner();
     $meter = function ($key, $label) use ($q) {
@@ -39,13 +40,13 @@
         @endif
         @if ($membership->can('settings.manage'))
             <a class="list-item" href="{{ route('settings.business') }}"><span class="body"><strong>اطلاعات کسب‌وکار</strong><span class="sub">{{ $profile?->isComplete() ? $profile->name : 'ناقص؛ پیش از اولین صدور کامل کنید' }}</span></span>@unless($profile?->isComplete())<span class="badge warn">ناقص</span>@endunless<span aria-hidden="true">‹</span></a>
-            <a class="list-item" href="{{ route('settings.appearance') }}"><span class="body"><strong>ظاهر فاکتور</strong><span class="sub">قالب، لوگو، ستون‌ها و پیش‌نمایش چاپ</span></span><span aria-hidden="true">‹</span></a>
+            <a class="list-item" href="{{ route('settings.appearance') }}"><span class="body"><strong>ظاهر فاکتور</strong><span class="sub">قالب، لوگو، ستون‌ها و پیش‌نمایش چاپ</span></span>@unless($canCap('invoice.customize'))<span class="badge lock-badge"><span aria-hidden="true">🔒</span> ارتقا</span>@endunless<span aria-hidden="true">‹</span></a>
             <a class="list-item" href="{{ route('settings.numbering') }}"><span class="body"><strong>شماره‌گذاری فاکتور</strong><span class="sub">شکل شماره، شروع از عدد دلخواه، سالانه/ماهانه/پیوسته</span></span><span aria-hidden="true">‹</span></a>
             <a class="list-item" href="{{ route('settings.proforma') }}"><span class="body"><strong>پیش‌فاکتور</strong><span class="sub">پس از تأیید مشتری: {{ $proformaAuto ? 'صدور خودکار فاکتور' : 'صدور دستی توسط فروشنده' }} · مدت اعتبار</span></span><span aria-hidden="true">‹</span></a>
             <a class="list-item" href="{{ route('settings.sms_template') }}"><span class="body"><strong>پیامک فاکتور</strong><span class="sub">ارسال خودکار: {{ $smsAuto ? 'روشن' : 'خاموش' }} · متن پیامک</span></span><span aria-hidden="true">‹</span></a>
         @endif
         @if ($isOwner)
-            <a class="list-item" href="{{ route('settings.backups') }}"><span class="body"><strong>پشتیبان تنظیمات</strong><span class="sub">۵۰ تغییر آخر تنظیمات؛ بازگرداندن با یک لمس</span></span><span aria-hidden="true">‹</span></a>
+            <a class="list-item" href="{{ route('settings.backups') }}"><span class="body"><strong>پشتیبان تنظیمات</strong><span class="sub">۵۰ تغییر آخر تنظیمات؛ بازگرداندن با یک لمس</span></span>@unless($canCap('settings.backup'))<span class="badge lock-badge"><span aria-hidden="true">🔒</span> ارتقا</span>@endunless<span aria-hidden="true">‹</span></a>
             <a class="list-item" href="{{ route('settings.users') }}"><span class="body"><strong>کاربران و دسترسی‌ها</strong></span><span aria-hidden="true">‹</span></a>
         @endif
     </nav>

@@ -725,3 +725,26 @@ html.is-navigating .main { opacity: .55; transition: opacity .2s ease .18s; poin
   .tabs a.is-loading svg { animation: none; opacity: .5; }
   .btn:active, .list-item:active, .chip:active, .tabs a:active, .action-tile:active { transform: none; }
 }
+
+/* Locked features (x-locked) and the «ارتقا» sheet (lib/upgrade.js) */
+.locked-area { position: relative; border-radius: var(--t-r-card); }
+.locked-content { opacity: .5; filter: grayscale(.4); pointer-events: none; user-select: none; }
+.locked-cover { position: absolute; inset: 0; z-index: 3; display: flex; align-items: flex-start; justify-content: center; padding-top: 14px; border: 0; background: transparent; cursor: pointer; border-radius: inherit; }
+.locked-area.compact .locked-cover { align-items: center; padding-top: 0; }
+.locked-cover:focus-visible { outline: var(--t-focus-ring); }
+.lock-pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; background: var(--t-chrome); color: var(--t-gold-bright); font-size: 14px; box-shadow: 0 6px 16px -8px rgba(0,0,0,.5); position: sticky; top: 72px; }
+.locked-cover:active .lock-pill { transform: scale(.96); }
+.locked-btn { gap: 8px; }
+.lock-ico { font-size: 15px; }
+.lock-tag { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--t-band-emphasis); color: var(--t-ink); margin-inline-start: 4px; }
+.up-head { display: flex; align-items: center; gap: 12px; }
+.up-ico { display: inline-flex; flex: none; width: 48px; height: 48px; align-items: center; justify-content: center; border-radius: 50%; background: var(--t-chrome); font-size: 22px; box-shadow: 0 0 0 4px rgba(224, 180, 76, .3); }
+.up-points { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.up-points li { display: flex; gap: 8px; align-items: flex-start; line-height: 1.7; }
+.up-points li::before { content: "✓"; flex: none; display: inline-flex; width: 22px; height: 22px; align-items: center; justify-content: center; border-radius: 50%; background: #0F5E46; color: #fff; font-size: 12px; margin-top: 3px; }
+.up-price { margin: 0; font-weight: 800; color: var(--t-ink); text-align: center; }
+.locked-area > :not(.locked-cover) { opacity: .5; filter: grayscale(.4); pointer-events: none; user-select: none; }
+.upgrade-note { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--t-band-emphasis); border: 1px solid rgba(224, 180, 76, .45); }
+.upgrade-note .btn { flex: none; }
+.chip-locked { gap: 4px; opacity: .8; }
+.lock-badge { background: var(--t-chrome); color: var(--t-gold-bright); }

@@ -2,7 +2,8 @@
     <p class="small muted">بعد از هر تغییر در تنظیمات (اطلاعات کسب‌وکار، لوگو، ظاهر فاکتور، متن پیامک، شماره‌گذاری) یک نسخه پشتیبان ذخیره می‌شود. {{ fa($keep) }} نسخه آخر نگه داشته می‌شود. فاکتورها، مشتریان، اعتبار پیامک و کاربران با بازگرداندن تغییر نمی‌کنند.</p>
 
     @unless ($enabled)
-        <div class="notice info">پشتیبان‌گیری و بازگرداندن تنظیمات در پلن پایه و حرفه‌ای است. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></div>
+        <x-upgrade-note cap="settings.backup">پشتیبان‌گیری و بازگرداندن تنظیمات با ارتقا فعال می‌شود.</x-upgrade-note>
+        <x-locked cap="settings.backup" label="پشتیبان‌گیری همین حالا" class="block" />
     @else
         <form method="post" class="band stack-sm" data-manual novalidate>
             <div class="field"><label for="b-label">پشتیبان دستی (اختیاری: یک نام بنویسید)</label><div class="input-wrap"><input id="b-label" name="label" maxlength="80" placeholder="مثلاً قبل از تغییر قالب عید"></div><div class="err"></div></div>

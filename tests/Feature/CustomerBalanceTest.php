@@ -84,7 +84,8 @@ class CustomerBalanceTest extends TestCase
 
         // Downgrade: no new agreements, but the existing debt is still visible and payable.
         $this->setPlan($this->tenantOf($user), 'free');
-        $this->get("/customers/{$customer->public_id}")->assertOk()->assertSee('ثبت دریافت')->assertSee('لغو قرارداد')->assertDontSee('+ قرارداد اقساط');
+        $this->get("/customers/{$customer->public_id}")->assertOk()->assertSee('ثبت دریافت')->assertSee('لغو قرارداد')
+            ->assertDontSee('/agreements/new', false)->assertSee('data-upgrade="installments.manage"', false); // new agreements are locked: tap → upgrade sheet
         $this->api('POST', "/api/agreements/{$agreement->public_id}/payments", ['amount_toman' => '100000', 'method' => 'cash', 'paid_on' => Jalali::date(now(), 'Asia/Tehran'), 'idempotency_key' => 'pay-after-downgrade'])->assertOk();
 
         // Voiding needs the agreement settled or cancelled first; cancelling keeps the payment on record.

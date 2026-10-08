@@ -6,7 +6,7 @@
         </div>
     @endif
     @unless ($canInstallments)
-        <div class="notice info">فهرست مشتریان در همه پلن‌ها آزاد است. اقساط و یادآوری پیامکی در پلن حرفه‌ای است. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></div>
+        <x-upgrade-note cap="installments.manage">فهرست مشتریان در همه پلن‌ها آزاد است. اقساط و یادآوری پیامکی با ارتقا.</x-upgrade-note>
     @endunless
 
     <div class="between">

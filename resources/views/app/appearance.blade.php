@@ -9,7 +9,7 @@
 <x-layouts.app title="ظاهر فاکتور" page="appearance" :back="route('settings')">
     <script type="application/json" id="boot">@json($boot)</script>
     @unless ($canCustomize)
-        <div class="notice info">در پلن رایگان قالب ثابت «ساده و خوانا» استفاده می‌شود. ویرایش ظاهر در پلن پایه و حرفه‌ای است. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></div>
+        <x-upgrade-note cap="invoice.customize">در پلن رایگان قالب ثابت «ساده و خوانا» استفاده می‌شود. انتخاب قالب، رنگ و چیدمان با ارتقا.</x-upgrade-note>
     @endunless
 
     {{-- Phones: one panel at a time. Desktop: settings and a large live preview side by side. --}}
@@ -19,7 +19,8 @@
     </div>
 
     <div class="ap-layout" data-ap data-view="settings">
-        <form method="post" id="ap-form" class="ap-settings stack-sm" data-layout novalidate>
+        <form method="post" id="ap-form" class="ap-settings stack-sm {{ $canCustomize ? '' : 'locked-area' }}" data-layout novalidate>
+            @unless ($canCustomize)<x-lock-cover cap="invoice.customize" label="ویرایش ظاهر فاکتور" />@endunless
             <details class="ap-sec" open>
                 <summary><span class="ap-title">قالب</span><span class="ap-val" data-val="template"></span></summary>
                 <fieldset class="ap-body" @disabled(! $canCustomize)>

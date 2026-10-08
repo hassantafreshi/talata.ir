@@ -11,7 +11,7 @@
     <section class="band stack-sm" aria-labelledby="logo-h">
         <h2 id="logo-h">لوگو</h2>
         @unless ($canLogo)
-            <p class="notice info small">در پلن رایگان لوگو در پروفایل ذخیره می‌شود اما روی فاکتور چاپ نمی‌شود؛ با پلن پایه یا حرفه‌ای روی فاکتورهای بعدی می‌آید. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></p>
+            <x-upgrade-note cap="invoice.shop_logo">در پلن رایگان لوگو در پروفایل ذخیره می‌شود اما روی فاکتور چاپ نمی‌شود؛ با ارتقا روی فاکتورهای بعدی می‌آید.</x-upgrade-note>
         @endunless
             <img class="logo-preview {{ $profile->logo_path ? '' : 'hidden' }}" data-logo-img src="{{ $boot['logo_url'] }}" alt="لوگوی فعلی">
             <label class="btn btn-line block" for="logo-file">انتخاب تصویر لوگو</label>

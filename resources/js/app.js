@@ -53,6 +53,16 @@ function flash() {
   document.querySelectorAll('[data-flash]').forEach((el) => toast(el.dataset.flash, { kind: el.dataset.kind || 'info' }));
 }
 
+// Locked features (x-locked): a tap opens the «ارتقا» sheet instead of doing nothing. The sheet code loads
+// only when someone taps one.
+document.addEventListener('click', (e) => {
+  const el = e.target.closest?.('[data-upgrade]');
+  if (!el) return;
+  e.preventDefault();
+  e.stopPropagation();
+  import('./lib/upgrade.js').then((m) => m.showUpgrade(el.dataset.upgrade, { plans: el.dataset.upgradePlans, price: el.dataset.upgradePrice }));
+}, true);
+
 document.addEventListener('DOMContentLoaded', async () => {
   navFeedback(toast);
   offlineBanner();

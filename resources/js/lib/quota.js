@@ -5,6 +5,10 @@ import { quotaPanel } from './quota-panel.js';
 
 export function showQuota(res) {
   const d = res.data || {};
+  if (d.capability && !d.resource) {
+    import('./upgrade.js').then((m) => m.showUpgrade(d.capability, { message: res.message }));
+    return;
+  }
   const upgrade = escapeHtml(d.upgrade_url || '/settings/plan');
   const panel = quotaPanel(res);
 

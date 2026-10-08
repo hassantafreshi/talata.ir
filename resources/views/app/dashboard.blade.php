@@ -7,6 +7,7 @@
         'gold_in' => ['طلای خریداری‌شده از مشتری', 'طلایی که مشتری به‌جای پول داده'],
         'vat' => ['مالیات بر ارزش افزوده', 'دریافتی از مشتری روی اجرت و سود'],
     ];
+    $up = \App\Domain\Plans\UpgradeInfo::for('reports.financial');
     $boot = ['report' => $report, 'api' => route('api.dashboard'), 'labels' => $metricLabels];
     $lock = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 @endphp
@@ -19,7 +20,7 @@
                 @if (in_array($key, $access['ranges'], true))
                     <button type="button" class="chip" data-range="{{ $key }}" aria-pressed="{{ $report['range'] === $key ? 'true' : 'false' }}">{{ $label }}</button>
                 @else
-                    <a class="chip chip-locked" href="{{ route('settings.plan') }}" title="در پلن پایه و حرفه‌ای">{!! $lock !!}{{ $label }}</a>
+                    <button type="button" class="chip chip-locked" data-upgrade="reports.financial" data-upgrade-plans="{{ $up['plans'] }}" data-upgrade-price="{{ $up['price_fa'] }}">{!! $lock !!}{{ $label }}</button>
                 @endif
             @endforeach
         </div>
@@ -55,7 +56,7 @@
                     <p class="xs muted t-hint">{{ $hint }}</p>
                 </article>
             @else
-                <a class="tile dash-tile is-locked" href="{{ route('settings.plan') }}">
+                <a class="tile dash-tile is-locked" href="{{ route('settings.plan') }}" data-upgrade="reports.financial" data-upgrade-plans="{{ $up['plans'] }}" data-upgrade-price="{{ $up['price_fa'] }}">
                     <h2 class="t-label">{{ $label }}</h2>
                     <p class="t-big muted">{!! $lock !!} <span class="small">در پلن پایه و حرفه‌ای</span></p>
                     <p class="xs muted t-hint">{{ $hint }}</p>

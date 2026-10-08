@@ -15,7 +15,7 @@
         </div>
     @endif
     @if ($historyRestricted)
-        <div class="notice info">در پلن رایگان فقط فاکتورهای ماه جاری نمایش داده می‌شود. فاکتورهای قبلی حذف نشده‌اند. <a href="{{ route('settings.plan') }}">مشاهده همه با ارتقا</a></div>
+        <x-upgrade-note cap="history.all">در پلن رایگان فقط فاکتورهای ماه جاری نمایش داده می‌شود. فاکتورهای قبلی حذف نشده‌اند و با ارتقا دیده می‌شوند.</x-upgrade-note>
     @endif
 
     <form class="stack-sm" data-filter role="search" action="{{ route('invoices.index') }}">
@@ -25,16 +25,17 @@
                 <label><input type="radio" name="filter" value="{{ $k }}" @checked($filter === $k)>{{ $label }}</label>
             @endforeach
         </div>
-        @if (! $historyRestricted || $canInstallments)
-            <div class="chips" role="group" aria-label="فیلترهای بیشتر">
-                @unless ($historyRestricted)
-                    <label class="chip"><input type="checkbox" name="month" value="1" @checked($onlyMonth)>این ماه</label>
-                @endunless
-                @if ($canInstallments)
-                    <label class="chip"><input type="checkbox" name="installment" value="1" @checked($onlyInstallment)>اقساطی</label>
-                @endif
-            </div>
-        @endif
+        <div class="chips" role="group" aria-label="فیلترهای بیشتر">
+            @unless ($historyRestricted)
+                <label class="chip"><input type="checkbox" name="month" value="1" @checked($onlyMonth)>این ماه</label>
+            @endunless
+            @if ($canInstallments)
+                <label class="chip"><input type="checkbox" name="installment" value="1" @checked($onlyInstallment)>اقساطی</label>
+            @else
+                {{-- Visible but locked: a tap explains the upgrade instead of the filter silently missing. --}}
+                <x-locked cap="installments.manage" label="اقساطی" class="chip chip-locked" />
+            @endif
+        </div>
         <noscript><button class="btn btn-line">اعمال</button></noscript>
     </form>
     <p class="xs muted" data-count role="status">{{ fa($page->total()) }} مورد</p>
