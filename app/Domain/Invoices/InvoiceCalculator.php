@@ -34,6 +34,9 @@ final class InvoiceCalculator
     /** Row types that are sold to the customer (at least one is required on a sales invoice). */
     public const SALE_TYPES = ['GOLD', 'MISC'];
 
+    /** Money settlements other than cash («نقد») recorded on a sold gold row. */
+    public const PAY_METHODS = ['CHEQUE', 'INSTALLMENT'];
+
     public function __construct(private readonly PolicyRegistry $registry) {}
 
     /** Normalizes one untrusted row from the client into stored columns (strings, IRR). */
@@ -62,9 +65,18 @@ final class InvoiceCalculator
                 $row['discount_irr'] = Money::parseTomanToIrr($discountToman, true) ?? 'invalid';
             }
             // «تسویه وزنی»: the metal is settled with gold (customer owes 750-grams), only wage/profit/VAT in money.
+            // «روش تسویه»: نقد (MONEY, default, not stored), چک, با طلا (WEIGHT), قسطی. Only WEIGHT changes the
+            // calculation; cheque and instalment are money settlements recorded for the invoice and its print.
             $attrs = [];
-            if (($raw['settlement'] ?? 'MONEY') === 'WEIGHT') {
+            $settle = (string) ($raw['settlement'] ?? 'MONEY');
+            if ($settle === 'WEIGHT') {
                 $attrs['settlement'] = 'WEIGHT';
+            } elseif (in_array($settle, self::PAY_METHODS, true)) {
+                $attrs['pay_method'] = $settle;
+            }
+            // Coins and gold plaques sold by the shop («سکه و پلاک»): purity as weighed/stamped (Bahar Azadi 900).
+            if (($raw['kind'] ?? '') === 'COIN') {
+                $attrs['kind'] = 'COIN';
             }
             // Melted/assayed gold sold by the shop («فروش طلای آب‌شده»): exact assay purity and an optional assay slip number.
             if (($raw['kind'] ?? '') === 'MELTED') {

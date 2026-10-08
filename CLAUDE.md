@@ -19,6 +19,7 @@ For future implementation requests, read:
 13. `docs/ADMIN_PRICING.md` for the admin plan/SMS price editor (versioned, audited; doc prices are defaults).
 14. `docs/TEAM_PERMISSIONS.md` for screen-level team access (presets, dependencies, home redirect); owners may restrict مظنه/calculator per member, plans/quotas never block them.
 15. `docs/GOLD_RECEIVED_AND_DASHBOARD.md` for gold received from the customer instead of money (GOLD_IN rows, GOLD_IN_V1, 750-equivalent weights, Tahesab-style print), weight settlement with the third template «حساب طلا و ریال (بد/بس)» and «مانده سند» (§13; sign convention from the customer's account), and the sales dashboard.
+17. `docs/INVOICE_PRODUCT_SUGGESTIONS.md` for invoice-row product-name suggestions (shop's sold products first, then the shared dataset `resources/data/product-names-fa.json`), pre-fill of weight/wage/profit, «روش تسویه» (نقد/چک/با طلا/قسطی), «سکه و پلاک» and the «ثبت فاکتور جدید» button.
 16. `docs/prompts/UI_UX_RAPID_IMPLEMENTATION_PROMPT.md` for UI execution: prepare an overall wireframe/visual draft, get consolidated owner approval of colors/logo/font/toolkit, then implement details rapidly.
 
 ## Durable constraints
@@ -41,7 +42,7 @@ For future implementation requests, read:
 - Plan purchase and SMS credit go through a `PaymentGateway` adapter chosen from the `PaymentGateways` registry (owner chose **ZarinPal**, `TALATA_PAYMENT_DRIVER=zarinpal`; MockGateway only for local/demo): server-side verify with the stored amount, idempotent fulfillment, result page from server state only, reconciliation (also for payers who never return). Adding/switching a PSP = one adapter class + one config line; in-flight payments keep their own gateway. See `docs/PAYMENTS_AND_SMS_CREDIT.md` §7.
 - Provider integrations behind adapters. Demo data must be visibly labelled.
 - Two always-available entries: «مظنه» (18K buy/sell, 24K, USD, global ounce with real freshness) and «ماشین‌حساب طلایی» (standalone calculator, same GOLD_IR_V1 preview); see `docs/MAZNEH_AND_CALCULATOR.md`.
-- Gold feed refreshes centrally every 180 seconds. New-invoice entry shows the current 18K price prominently with شروع immediately below; Start captures the displayed accepted rate, and background updates never silently reprice the transaction.
+- Gold feed refreshes centrally every 180 seconds. New-invoice entry shows the current 18K price prominently with the «ثبت فاکتور جدید» button (showing that rate) immediately below — renamed from «شروع» on 2026-10-08 because «شروع» was misleading; it captures the displayed accepted rate, and background updates never silently reprice the transaction.
 - No full accounting, inventory, silver, coin, melted-gold, product photos, Modian integration, or commerce in Phase 1; but build the v2-ready infrastructure listed in `docs/ROADMAP_V2_BUSINESS_TYPES.md` (business-type registry, pricing-policy registry, per-category tax rules, typed item attributes, sale/purchase direction, item asset table).
 - Existing specification assumptions must be documented and configurable, not presented as discovered business facts.
 - Visual direction APPROVED by the owner on 2026-10-07: colors (palette 1), fonts (Vazirmatn) and the refined Zarlio logo, as in the wireframe/app. The UI keeps its own CSS/JS (no third-party toolkit).

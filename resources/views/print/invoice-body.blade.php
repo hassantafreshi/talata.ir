@@ -47,6 +47,7 @@
             <div class="meta-line">
                 <span><strong>فاکتور فروش</strong> شماره <strong class="num ltr">{{ $v['number'] }}</strong></span>
                 <span>تاریخ: <span class="num">{{ $v['issued_fa'] }}</span></span>
+                @if (! empty($v['pay_methods_fa']))<span>روش تسویه: <strong>{{ $v['pay_methods_fa'] }}</strong></span>@endif
                 @if (($v['status'] ?? '') === 'void')<span><strong>باطل‌شده</strong> در {{ $v['voided_fa'] }}</span>@endif
             </div>
         </div>

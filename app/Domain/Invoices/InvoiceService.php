@@ -8,6 +8,7 @@ use App\Domain\DomainError;
 use App\Domain\Market\QuoteService;
 use App\Domain\Plans\CommercialConfig;
 use App\Domain\Plans\Entitlements;
+use App\Domain\Products\ProductCatalog;
 use App\Domain\Sms\SmsService;
 use App\Domain\Tax\TaxRules;
 use App\Models\Customer;
@@ -371,6 +372,13 @@ final class InvoiceService
 
             return $invoice;
         });
+
+        // The shop's product list for future suggestions; never allowed to affect the issued invoice.
+        try {
+            app(ProductCatalog::class)->remember($invoice);
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
         $sms = $autoSkipped ? new DomainError('SMS_AUTO_SKIPPED', $autoSkipped) : null;
         if ($mode === 'ISSUE_AND_SMS') {

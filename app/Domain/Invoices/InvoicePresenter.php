@@ -21,6 +21,9 @@ final class InvoicePresenter
     /** Gold received from the customer (GOLD_IN), by item_attributes.kind. */
     public const GOLD_IN_KINDS = ['OLD_GOLD' => 'طلای کهنه', 'COIN' => 'سکه', 'MELTED' => 'طلای آب‌شده', 'OTHER' => 'طلای دیگر'];
 
+    /** «روش تسویه» of sold gold rows. */
+    public const PAY_METHODS = ['CASH' => 'نقد', 'CHEQUE' => 'چک', 'WEIGHT' => 'با طلا', 'INSTALLMENT' => 'قسطی'];
+
     public const GOLD_IN_BASES = ['BUY' => 'نرخ خرید بازار', 'SELL' => 'نرخ فروش (معاوضه)', 'MANUAL' => 'نرخ دستی'];
 
     public const RATE_REASONS = ['MARKET_UNAVAILABLE' => 'نرخ بازار در دسترس نیست', 'CUSTOMER_AGREEMENT' => 'توافق با مشتری', 'PEER_RATE' => 'نرخ همکار'];
@@ -100,8 +103,26 @@ final class InvoicePresenter
             'columns' => LayoutSettings::columnsFor($s['layout'], collect($s['rows'])->contains('item_type', 'GOLD'), $hasGoldIn),
             // The debit/credit table is used by the «حساب طلا و ریال» template and whenever gold is settled by weight.
             'use_ledger' => ($s['layout']['template_id'] ?? '') === 'ledger' || self::ledger($s)['by_weight'],
+            'pay_methods' => $pay = self::payMethods($s),
+            // Printed only when something other than cash was chosen (older invoices never recorded «نقد»).
+            'pay_methods_fa' => array_diff($pay, ['CASH']) ? implode('، ', array_map(fn ($m) => self::PAY_METHODS[$m], $pay)) : null,
             'show_talata_mark' => (bool) ($s['branding']['show_talata_mark'] ?? true),
         ];
+    }
+
+    /** @return list<string> distinct settlement methods of the sold gold rows, in display order. */
+    public static function payMethods(array $s): array
+    {
+        $found = [];
+        foreach ($s['rows'] as $r) {
+            if ($r['item_type'] !== 'GOLD') {
+                continue;
+            }
+            $a = $r['item_attributes'] ?? [];
+            $found[($a['settlement'] ?? '') === 'WEIGHT' ? 'WEIGHT' : ($a['pay_method'] ?? 'CASH')] = true;
+        }
+
+        return array_values(array_filter(array_keys(self::PAY_METHODS), fn ($m) => isset($found[$m])));
     }
 
     /** One display row from a snapshot row (GOLD, MISC or GOLD_IN). */

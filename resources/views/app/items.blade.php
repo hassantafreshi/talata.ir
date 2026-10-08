@@ -14,7 +14,7 @@
         'rate_toman' => isset($r->item_attributes['rate_irr_per_g']) && $r->item_attributes['rate_irr_per_g'] !== 'invalid' ? \App\Support\Money::irrToToman($r->item_attributes['rate_irr_per_g']) : '',
         'deduction_percent' => $r->item_attributes['deduction_percent'] ?? '0',
         'assay_ref' => $r->item_attributes['assay_ref'] ?? '',
-        'settlement' => $r->item_attributes['settlement'] ?? 'MONEY',
+        'settlement' => $r->item_attributes['settlement'] ?? ($r->item_attributes['pay_method'] ?? 'MONEY'),
     ])->values();
     $boot = [
         'id' => $invoice->public_id, 'version' => $invoice->version, 'rows' => $rowsJson, 'state' => $state,
@@ -24,6 +24,8 @@
         'buyer' => ['name' => $invoice->buyer_name, 'mobile' => $invoice->buyer_mobile],
         'limits' => config('talata.invoices'),
         'review_url' => route('invoices.review', $invoice),
+        'can_installments' => $canInstallments ?? false,
+        'names_url' => route('api.products.names', ['v' => app(\App\Domain\Products\ProductCatalog::class)->dataset()['version']]),
     ];
 @endphp
 <x-layouts.app title="اقلام فاکتور" page="items" :back="route('invoices.new')" badge="پیش‌نویس">
@@ -89,14 +91,17 @@
             <fieldset class="field" data-sec="GOLD"><legend class="label">چه طلایی می‌فروشید؟</legend>
                 <div class="chips" role="radiogroup">
                     <label class="chip"><input type="radio" class="sr-only" value="JEWELRY" data-f="kind">طلای ساخته (زیورآلات)</label>
+                    <label class="chip"><input type="radio" class="sr-only" value="COIN" data-f="kind">سکه و پلاک</label>
                     <label class="chip"><input type="radio" class="sr-only" value="MELTED" data-f="kind">طلای آب‌شده</label>
                 </div>
             </fieldset>
             <div data-sec="GOLD" class="stack">
-                <fieldset class="field"><legend class="label">فلز طلا چطور تسویه شود؟</legend>
-                    <div class="seg" role="radiogroup">
-                        <label><input type="radio" value="MONEY" data-f="settlement">با پول</label>
-                        <label><input type="radio" value="WEIGHT" data-f="settlement">با طلا (وزنی)</label>
+                <fieldset class="field"><legend class="label">روش تسویه</legend>
+                    <div class="seg seg-sm settle-seg" role="radiogroup" aria-label="روش تسویه">
+                        <label><input type="radio" value="MONEY" data-f="settlement">نقد</label>
+                        <label><input type="radio" value="CHEQUE" data-f="settlement">چک</label>
+                        <label><input type="radio" value="WEIGHT" data-f="settlement">با طلا</label>
+                        <label><input type="radio" value="INSTALLMENT" data-f="settlement">قسطی</label>
                     </div>
                     <p class="hint" data-settle-hint>ارزش طلا به تومان حساب می‌شود.</p></fieldset>
                 <div class="grid-2">

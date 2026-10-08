@@ -49,7 +49,7 @@ class InvoiceFlowTest extends TestCase
     public function test_full_invoice_journey_renders_every_page(): void
     {
         $user = $this->merchant();
-        $this->actingAs($user)->get('/invoices/new')->assertOk()->assertSee('شروع');
+        $this->actingAs($user)->get('/invoices/new')->assertOk()->assertSee('ثبت فاکتور جدید')->assertDontSee('>شروع<', false);
         [$id, $version] = $this->draft($user);
         $this->get("/invoices/{$id}/items")->assertOk()->assertSee('افزودن ردیف');
         // «ارسال خودکار پیامک» is on by default: one main «صدور فاکتور» button, with «صدور بدون پیامک» beside it.

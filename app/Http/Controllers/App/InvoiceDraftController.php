@@ -59,6 +59,7 @@ class InvoiceDraftController extends BaseController
             // Market buy rate («خرید از شما»): the default value of gold received from the customer.
             'latestBuyIrr' => ($buy = $quotes->latest('GOLD_18_BUY')) && $quotes->freshness($buy) !== 'ERROR' ? (string) BigDecimal::of($buy->value)->toScale(0, RoundingMode::HalfUp) : null,
             'vat' => (string) BigDecimal::of($tax->for('GOLD_SERVICES', now())->rate_percent)->strippedOfTrailingZeros(),
+            'canInstallments' => $this->ent()->can($tenant, 'installments.manage'),
         ]);
     }
 

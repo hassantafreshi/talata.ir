@@ -16,6 +16,8 @@ export default function () {
   const renderQuote = (q) => {
     quote = q;
     priceEl.textContent = q.value_toman_fa ?? '—';
+    const startRate = hero.querySelector('[data-start-rate]');
+    if (startRate) startRate.textContent = q.value_toman_fa ?? '—';
     timeEl.textContent = q.fetched_at_fa ?? '—';
     const em = hero.querySelector('[data-emergency]');
     if (em) em.hidden = !q.is_emergency;
@@ -29,7 +31,7 @@ export default function () {
     const hint = hero.querySelector('[data-start-hint]');
     if (hint) {
       hint.hidden = !!q.value_irr && navigator.onLine;
-      hint.textContent = navigator.onLine ? 'نرخ بازار هنوز در دسترس نیست؛ پایین همین صفحه «ثبت نرخ دستی» یا «فاکتور فقط متفرقه» را بزنید.' : 'اینترنت قطع است؛ پس از اتصال، «شروع» دوباره فعال می‌شود.';
+      hint.textContent = navigator.onLine ? 'نرخ بازار هنوز در دسترس نیست؛ پایین همین صفحه «ثبت نرخ دستی» یا «فاکتور فقط متفرقه» را بزنید.' : 'اینترنت قطع است؛ پس از اتصال، «ثبت فاکتور جدید» دوباره فعال می‌شود.';
     }
   };
 

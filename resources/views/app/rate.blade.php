@@ -11,7 +11,12 @@
         </div>
         <div><span class="price" data-price aria-live="polite">{{ $quote['value_toman_fa'] ?? '—' }}</span> <span class="unit">تومان</span></div>
         @if ($canIssue)
-            <button class="btn btn-gold block lg" type="button" data-start data-busy-text="در حال شروع…" @disabled(! $quote['value_irr'])>شروع</button>
+            {{-- One clear action: what it does (new invoice) and the rate it fixes for this sale. --}}
+            <button class="btn btn-gold block lg btn-start" type="button" data-start data-busy-text="در حال ساخت فاکتور…" @disabled(! $quote['value_irr'])>
+                <span class="btn-start-main"><span class="btn-start-plus" aria-hidden="true">+</span>ثبت فاکتور جدید</span>
+                <span class="btn-start-sub">با نرخ <span class="num" data-start-rate>{{ $quote['value_toman_fa'] ?? '—' }}</span> تومان</span>
+            </button>
+            <p class="xs start-note">همین نرخ روی فاکتور ثابت می‌ماند؛ تغییر بعدی بازار فاکتور را عوض نمی‌کند.</p>
         @endif
         <div class="between meta"><span>آخرین دریافت: <span class="num" data-time>{{ $quote['fetched_at_fa'] ?? '—' }}</span></span>@include('partials.freshness', ['f' => $quote['freshness']])</div>
         <div class="meta">به‌روزرسانی هر ۳ دقیقه · منبع: <span data-source>{{ $quote['source_fa'] ?? '—' }}</span></div>
@@ -51,7 +56,7 @@
                 </div>
             </fieldset>
             <p class="hint">روی فاکتور و صفحه بررسی، «نرخ دستی» نوشته می‌شود. آخرین نرخ بازار: <span class="num">{{ $quote['value_toman_fa'] ?? '—' }}</span> تومان.</p>
-            <button class="btn btn-gold block" type="submit">ثبت و شروع با این نرخ</button>
+            <button class="btn btn-gold block" type="submit">ثبت فاکتور جدید با این نرخ</button>
             <button class="btn btn-line block" type="button" data-close>انصراف</button>
         </form>
     </template>

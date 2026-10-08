@@ -140,6 +140,10 @@ class InvoiceController extends BaseController
             'canSms' => $this->ent()->can($tenant, 'invoice.sms_share'),
             'smsPreview' => $invoice->isIssued() ? app(SmsService::class)->previewFor($invoice, $tenant, $shareUrl) : null,
             'copies' => $invoice->smsCopies()->limit(10)->get(),
+            // «روش تسویه: قسطی» on a Professional shop: one tap to the instalment plan for this invoice.
+            'installmentUrl' => $invoice->isIssued() && $invoice->customer_id && $this->ent()->can($tenant, 'installments.manage') && $this->membership()->can('customers.manage')
+                && in_array('INSTALLMENT', InvoicePresenter::payMethods($invoice->snapshot ?? ['rows' => []]), true)
+                ? route('agreements.create', ['customer' => $invoice->customer, 'invoice' => $invoice->public_id]) : null,
         ];
     }
 

@@ -23,7 +23,7 @@
             <span class="nowrap"><span class="num strong" data-asset="GOLD_18_BUY">{{ $r['GOLD_18_BUY']['display_fa'] ?? '—' }}</span> <span class="unit">تومان</span></span>
         </div>
         <div class="meta">@if($hasBuy)<span data-spread-wrap>اختلاف خرید و فروش: <span class="num" data-spread>{{ $board['spread_fa'] ?? '—' }}</span> تومان · </span>@endif واحد: تومان / گرم</div>
-        @if ($tenantContext->membership()?->can('invoice.issue'))<a class="btn btn-gold block" href="{{ route('invoices.new') }}">شروع فاکتور با نرخ فروش</a>@endif
+        @if ($tenantContext->membership()?->can('invoice.issue'))<a class="btn btn-gold block" href="{{ route('invoices.new') }}">+ ثبت فاکتور جدید با نرخ فروش</a>@endif
     </section>
 
     <div class="list">
@@ -36,5 +36,5 @@
         @if ($tenantContext->membership()?->can('calculator.use'))<a class="btn btn-dark block" href="{{ route('calculator') }}">ماشین‌حساب طلایی</a>@endif
         <button type="button" class="btn btn-line block" data-refresh data-busy-text="در حال دریافت…">تلاش دوباره الان</button>
     </div>
-    <p class="xs muted">منبع: {{ $board['source_fa'] ?? '—' }} · نرخ‌ها هر ۱۸۰ ثانیه از سرویس مرکزی دریافت می‌شوند، نه لحظه‌ای. تغییر درصدها نسبت به دریافت قبلی است. در قطع اینترنت، آخرین نرخ با زمان دریافت و برچسب «آفلاین» می‌ماند. نرخ مبنای فاکتور «فروش ۱۸ عیار» است و در لحظه «شروع» ثبت می‌شود.</p>
+    <p class="xs muted">منبع: {{ $board['source_fa'] ?? '—' }} · نرخ‌ها هر ۱۸۰ ثانیه از سرویس مرکزی دریافت می‌شوند، نه لحظه‌ای. تغییر درصدها نسبت به دریافت قبلی است. در قطع اینترنت، آخرین نرخ با زمان دریافت و برچسب «آفلاین» می‌ماند. نرخ مبنای فاکتور «فروش ۱۸ عیار» است و در لحظه «ثبت فاکتور جدید» روی فاکتور ثابت می‌شود.</p>
 </x-layouts.app>

@@ -11,6 +11,7 @@ use App\Http\Controllers\App\InvoiceController;
 use App\Http\Controllers\App\InvoiceDraftController;
 use App\Http\Controllers\App\MaznehController;
 use App\Http\Controllers\App\PasskeyController;
+use App\Http\Controllers\App\ProductController;
 use App\Http\Controllers\App\QuoteController;
 use App\Http\Controllers\App\SecurityController;
 use App\Http\Controllers\App\SettingsController;
@@ -125,6 +126,9 @@ Route::middleware(['auth', 'tenant'])->group(function () {
             Route::post('/invoices/{invoice}/sms', [InvoiceController::class, 'resendSms'])->middleware('throttle:10,1')->name('api.invoices.sms');
             Route::post('/invoices/{invoice}/sms/copies', [InvoiceController::class, 'smsCopies'])->middleware('throttle:10,1')->name('api.invoices.sms.copies');
             Route::get('/invoices/{invoice}/status', [InvoiceController::class, 'status'])->name('api.invoices.status');
+            Route::get('/products', [ProductController::class, 'index'])->name('api.products');
+            Route::get('/products/names', [ProductController::class, 'names'])->name('api.products.names');
+            Route::delete('/products/{product}', [ProductController::class, 'destroy'])->middleware('throttle:60,1')->name('api.products.destroy');
         });
         Route::middleware('perm:invoice.void')->group(function () {
             Route::post('/invoices/{invoice}/void', [InvoiceController::class, 'void'])->middleware('throttle:20,1')->name('api.invoices.void');

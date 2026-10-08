@@ -13,6 +13,9 @@
         <a class="btn btn-dark block" href="{{ route('invoices.new') }}">فاکتور جدید</a>
     </div>
 
+    @if ($installmentUrl ?? null)
+        <a class="list-item em" href="{{ $installmentUrl }}"><span class="body"><strong>ثبت اقساط این فاکتور</strong><span class="sub">روش تسویه «قسطی» انتخاب شده است؛ تعداد و تاریخ قسط‌ها را تعیین کنید.</span></span><span aria-hidden="true">‹</span></a>
+    @endif
     @include('app.partials.invoice-actions')
 
     <a class="list-item" href="{{ route('invoices.show', $invoice) }}"><span class="body"><strong>جزئیات کامل فاکتور</strong><span class="sub">ابطال، صدور جایگزین، تاریخچه پیامک</span></span><span aria-hidden="true">‹</span></a>

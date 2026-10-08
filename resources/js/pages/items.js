@@ -1,6 +1,7 @@
 import { put, del } from '../lib/http.js';
 import { toast, markInvalid, clearInvalid } from '../lib/ui.js';
 import { toLatin, toman, toPersian, parseTomanToIrr } from '../lib/digits.js';
+import productSuggest from '../lib/product-suggest.js';
 import { priceGold, priceGoldIn, priceGoldInWeight, priceManual, weight750, PricingError } from '../lib/pricing.js';
 
 const ERR = {
@@ -11,6 +12,16 @@ const ERR = {
 // Gold received from the customer: per-kind defaults (coins are usually 900).
 const KIND_NAME = { OLD_GOLD: 'طلای کهنه', COIN: 'سکه', MELTED: 'طلای آب‌شده', OTHER: 'طلای دریافتی' };
 const FIELD = { rate_irr_per_g: 'rate_toman', deduction_percent: 'deduction_percent', net_weight_g: 'net_weight_g', purity_ppt: 'purity_ppt', wage_percent: 'wage_percent', profit_percent: 'profit_percent', discount: 'discount_toman', manual_total_irr: 'manual_total_toman', price18_irr_per_g: 'net_weight_g' };
+// «روش تسویه»: only «با طلا» changes the calculation; cheque and instalment are recorded on the invoice.
+const SETTLE_HINT = {
+  MONEY: 'ارزش طلا به تومان حساب و نقد یا با کارت پرداخت می‌شود.',
+  CHEQUE: 'مبلغ به تومان حساب می‌شود و روی فاکتور «روش تسویه: چک» نوشته می‌شود.',
+  WEIGHT: 'مشتری به‌جای پولِ طلا، همین وزن (معادل ۷۵۰) طلا بدهکار می‌شود؛ فقط اجرت، سود و مالیات نقدی است.',
+  INSTALLMENT: 'مبلغ به تومان حساب می‌شود و روی فاکتور «قسطی» نوشته می‌شود.',
+};
+// Fields that start at 0: the 0 is cleared on the FIRST focus only, so typing does not give «۰۱۸».
+const ZERO_FIELDS = new Set(['wage_percent', 'profit_percent', 'deduction_percent']);
+const isZero = (v) => /^\s*[0۰٠]([.,٫][0۰٠]*)?\s*$/.test(v || '');
 const uid = () => (Date.now().toString(36) + Math.random().toString(36).slice(2, 12)).slice(0, 20);
 
 export default function () {
@@ -56,7 +67,8 @@ export default function () {
     const isIn = row.item_type === 'GOLD_IN';
     el.classList.toggle('is-in', isIn);
     el.querySelectorAll('[data-sec]').forEach((sec) => { sec.hidden = !sec.dataset.sec.split(',').includes(row.item_type); });
-    el.querySelectorAll('[data-only]').forEach((c) => { c.hidden = c.dataset.only !== row.item_type; });
+    const coin = isIn || (row.item_type === 'GOLD' && row.kind === 'COIN');
+    el.querySelectorAll('[data-only]').forEach((c) => { c.hidden = !(c.dataset.only === row.item_type || (coin && c.dataset.p === '900')); });
     if (isIn) {
       el.querySelector('[data-row-total-label]').textContent = row.rate_basis === 'WEIGHT' ? 'به حساب طلای مشتری (بس)' : 'از مبلغ فاکتور کم می‌شود';
       el.querySelector('[data-weight-hint]').textContent = 'وزن ترازو؛ برای سکه وزن خود سکه.';
@@ -71,7 +83,10 @@ export default function () {
     el.querySelectorAll('input[type="radio"][data-f="kind"], input[type="radio"][data-f="rate_basis"], input[type="radio"][data-f="settlement"]').forEach((r) => { r.name = `${r.dataset.f}-${row.row_uid}`; r.checked = r.value === (row[r.dataset.f] || (r.dataset.f === 'settlement' ? 'MONEY' : '')); });
     if (row.item_type === 'GOLD' && row.settlement === 'WEIGHT') el.querySelector('[data-row-total-label]').textContent = 'مبلغ نقدی (اجرت، سود، مالیات)';
     if (row.item_type === 'GOLD') el.querySelector('[data-assay-sale]').hidden = row.kind !== 'MELTED' && !row.assay_ref;
-    if (row.item_type === 'GOLD') el.querySelector('[data-settle-hint]').textContent = row.settlement === 'WEIGHT' ? 'مشتری به‌جای پولِ طلا، همین وزن (معادل ۷۵۰) طلا بدهکار می‌شود؛ فقط اجرت، سود و مالیات نقدی است.' : 'ارزش طلا به تومان حساب می‌شود.';
+    if (row.item_type === 'GOLD') {
+      el.querySelector('[data-settle-hint]').textContent = (SETTLE_HINT[row.settlement] || SETTLE_HINT.MONEY)
+        + (row.settlement === 'INSTALLMENT' ? (boot.can_installments ? ' بعد از صدور، «ثبت اقساط این فاکتور» را بزنید.' : ' زمان‌بندی اقساط و یادآوری پیامکی در پلن حرفه‌ای است.') : '');
+    }
     el.querySelectorAll('input[data-f]').forEach((inp) => {
       const f = inp.dataset.f;
       if (f === 'item_type' || inp.type === 'radio') return;
@@ -81,7 +96,9 @@ export default function () {
       const label = inp.closest('.field')?.querySelector('label');
       if (label) label.htmlFor = inp.id;
     });
-    const preset = (isIn ? ['750', '900', '875', '1000'] : ['750', '875', '1000']).includes(String(row.purity_ppt));
+    const nameInput = el.querySelector('[data-sec="GOLD,GOLD_IN"] [data-f="name"]');
+    if (row.item_type === 'GOLD') nameInput.dataset.defaultName = 'طلای ۱۸ عیار';
+    const preset = (coin ? ['750', '900', '875', '1000'] : ['750', '875', '1000']).includes(String(row.purity_ppt));
     el.querySelectorAll('[data-p]').forEach((c) => c.setAttribute('aria-pressed', String(preset ? c.dataset.p === String(row.purity_ppt) : c.dataset.p === 'custom')));
     el.querySelector('[data-purity-custom]').classList.toggle('hidden', preset);
     return el;
@@ -99,6 +116,23 @@ export default function () {
     again?.focus();
   }
 
+  // First focus on a field that still holds the default 0: clear it so the number is typed fresh. Later focuses
+  // keep whatever is there; leaving it empty puts the 0 back.
+  const cleared = new Set();
+  host.addEventListener('focusin', (e) => {
+    const f = e.target.dataset?.f;
+    if (!ZERO_FIELDS.has(f)) return;
+    const key = `${e.target.closest('[data-row]').dataset.uid}:${f}`;
+    if (cleared.has(key)) return;
+    cleared.add(key);
+    if (isZero(e.target.value)) { e.target.value = ''; rowOf(e.target)[f] = ''; }
+  });
+  host.addEventListener('focusout', (e) => {
+    const f = e.target.dataset?.f;
+    if (!ZERO_FIELDS.has(f) || e.target.value.trim() !== '') return;
+    e.target.value = '0'; rowOf(e.target)[f] = '0'; changed();
+  });
+
   host.addEventListener('input', (e) => {
     const f = e.target.dataset.f;
     if (!f || e.target.type === 'radio') return;
@@ -114,6 +148,9 @@ export default function () {
       row[f] = e.target.value;
       if (f === 'kind' && e.target.value === 'COIN' && row.purity_ppt === '750') row.purity_ppt = '900';
       if (f === 'kind' && e.target.value !== 'COIN' && row.purity_ppt === '900') row.purity_ppt = '750';
+      // Coins and plaques sold by the shop: a coin name instead of the jewelry default.
+      if (f === 'kind' && e.target.value === 'COIN' && row.item_type === 'GOLD' && (!row.name || row.name === 'طلای ۱۸ عیار' || row.name === 'طلای آب‌شده')) row.name = 'سکه';
+      if (f === 'kind' && e.target.value !== 'COIN' && row.item_type === 'GOLD' && row.name === 'سکه') row.name = 'طلای ۱۸ عیار';
       // Melted gold sold by the shop: usually no wage/profit and an exact assay purity.
       if (f === 'kind' && e.target.value === 'MELTED' && row.item_type === 'GOLD') {
         if (!row.name || row.name === 'طلای ۱۸ عیار') row.name = 'طلای آب‌شده';
@@ -128,11 +165,11 @@ export default function () {
     const prev = row.item_type;
     row.item_type = e.target.value;
     Object.entries(newRow(row.item_type)).forEach(([k, v]) => { if (row[k] === undefined) row[k] = v; });
-    const kinds = row.item_type === 'GOLD' ? ['JEWELRY', 'MELTED'] : ['OLD_GOLD', 'COIN', 'MELTED', 'OTHER'];
+    const kinds = row.item_type === 'GOLD' ? ['JEWELRY', 'COIN', 'MELTED'] : ['OLD_GOLD', 'COIN', 'MELTED', 'OTHER'];
     if (!kinds.includes(row.kind)) row.kind = kinds[0];
     if (row.item_type !== 'GOLD' && row.name === 'طلای ۱۸ عیار') row.name = '';
     if (row.item_type === 'GOLD' && !row.name && prev !== 'GOLD_IN') row.name = 'طلای ۱۸ عیار';
-    if (row.item_type !== 'GOLD_IN' && row.purity_ppt === '900') row.purity_ppt = '750';
+    if (row.item_type !== 'GOLD_IN' && row.kind !== 'COIN' && row.purity_ppt === '900') row.purity_ppt = '750';
     renderKeepingFocus(e.target); changed();
   });
   host.addEventListener('click', (e) => {
@@ -153,6 +190,56 @@ export default function () {
       render(); changed();
       toast('ردیف حذف شد.', { action: { label: 'برگرداندن', onClick: () => { rows.splice(idx, 0, removed); render(); changed(); } }, timeout: 7000 });
     }
+  });
+
+  // Product names: the shop's sold products (pre-fill weight, purity, wage, profit) then the shared list.
+  productSuggest({
+    host,
+    namesUrl: boot.names_url,
+    typeOf: (input) => {
+      const row = rowOf(input);
+      const sec = input.closest('[data-sec]')?.dataset.sec;
+      if (row.item_type === 'GOLD' && sec === 'GOLD,GOLD_IN') return 'GOLD';
+      if (row.item_type === 'MISC' && sec === 'MISC') return 'MISC';
+      return null;
+    },
+    onPick: (input, choice) => {
+      const row = rowOf(input);
+      const uidOf = row.row_uid;
+      let focus = row.item_type === 'MISC' ? 'manual_total_toman' : 'net_weight_g';
+      let note = '';
+      if (choice.kind === 'base') {
+        row.name = choice.term;
+      } else {
+        const p = choice.item;
+        row.name = p.n;
+        if (row.item_type === 'GOLD') {
+          if (p.w) row.net_weight_g = p.w;
+          if (p.p) row.purity_ppt = p.p;
+          if (p.wg !== '') row.wage_percent = p.wg;
+          if (p.pr !== '') row.profit_percent = p.pr;
+          if (['JEWELRY', 'COIN', 'MELTED'].includes(p.k)) row.kind = p.k;
+          ['wage_percent', 'profit_percent'].forEach((f) => cleared.add(`${uidOf}:${f}`)); // pre-filled: keep on focus
+          note = 'وزن، اجرت و سود از فروش قبلی پر شد. وزن همین قطعه را بررسی کنید.';
+        } else if (p.m) {
+          row.manual_total_toman = p.m;
+          note = 'قیمت از فروش قبلی پر شد؛ در صورت نیاز تغییر دهید.';
+        }
+      }
+      render(); changed();
+      const card = host.querySelector(`[data-uid="${CSS.escape(uidOf)}"]`);
+      const target = card?.querySelector(`[data-sec="${row.item_type === 'MISC' ? 'MISC' : 'GOLD,GOLD_IN'}"] [data-f="${focus}"]`) || card?.querySelector(`[data-f="${focus}"]`);
+      if (!target) return;
+      target.focus();
+      target.select?.();
+      const field = target.closest('.field');
+      field?.classList.add('attn');
+      setTimeout(() => field?.classList.remove('attn'), 2600);
+      if (note) {
+        const hint = field?.querySelector('.hint') || field?.appendChild(Object.assign(document.createElement('p'), { className: 'hint' }));
+        if (hint) { hint.dataset.prev ??= hint.textContent; hint.textContent = note; hint.classList.add('attn-text'); }
+      }
+    },
   });
 
   document.querySelector('[data-add-row]').addEventListener('click', () => {
