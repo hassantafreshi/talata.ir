@@ -41,3 +41,32 @@ self.addEventListener('fetch', (event) => {
   }
   // 'network': let the browser handle it normally (nothing stored).
 });
+
+/* Web Push (docs/PROFORMA.md): e.g. «پیش‌فاکتور تأیید شد». Only same-origin links are opened. */
+function pushNotice(data, origin) {
+  const d = data && typeof data === 'object' ? data : {};
+  let url = '/';
+  try { const u = new URL(typeof d.url === 'string' ? d.url : '/', origin); if (u.origin === origin) url = u.pathname + u.search; } catch (e) { url = '/'; }
+  return {
+    title: typeof d.title === 'string' && d.title ? d.title.slice(0, 80) : 'زرلیو',
+    options: { body: typeof d.body === 'string' ? d.body.slice(0, 240) : '', icon: '/icons/icon-192.png', badge: '/icons/icon-192.png', dir: 'rtl', lang: 'fa', tag: typeof d.tag === 'string' ? d.tag : undefined, renotify: !!d.tag, data: { url } },
+  };
+}
+
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { data = { body: event.data ? event.data.text() : '' }; }
+  const n = pushNotice(data, self.location.origin);
+  event.waitUntil(self.registration.showNotification(n.title, n.options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+    for (const c of list) {
+      if (new URL(c.url).pathname === url && 'focus' in c) return c.focus();
+    }
+    return self.clients.openWindow(url);
+  }));
+});

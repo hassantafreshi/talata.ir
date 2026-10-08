@@ -5,12 +5,16 @@ namespace Tests\Feature;
 use App\Domain\Invoices\ProformaService;
 use App\Domain\Market\QuoteService;
 use App\Domain\Sms\SmsGateway;
+use App\Domain\Sms\SmsService;
 use App\Models\Invoice;
 use App\Models\OtpChallenge;
 use App\Models\Proforma;
+use App\Models\PushSubscription;
 use App\Models\ShopProfile;
 use App\Models\SmsMessage;
 use App\Support\Digits;
+use App\Support\WebPush;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 /** پیش‌فاکتور (docs/PROFORMA.md): send, validity, customer confirmation by mobile + SMS code, automatic issuance. */
@@ -243,5 +247,66 @@ class ProformaTest extends TestCase
         $this->assertFalse(ProformaService::autoIssue($tenant));
         $this->setPlan($tenant, 'free');
         $this->assertTrue(ProformaService::autoIssue($tenant->refresh()));
+    }
+
+    private function deviceKeys(): array
+    {
+        $k = openssl_pkey_new(['curve_name' => 'prime256v1', 'private_key_type' => OPENSSL_KEYTYPE_EC]);
+
+        return ['p256dh' => WebPush::b64(WebPush::rawPublic($k)), 'auth' => WebPush::b64(random_bytes(16))];
+    }
+
+    public function test_owner_gets_an_sms_and_a_phone_notification_with_the_invoice_link(): void
+    {
+        Http::fake(['fcm.googleapis.com/*' => Http::response('', 201), 'updates.push.services.mozilla.com/*' => Http::response('', 410)]);
+        $user = $this->merchant();
+        $this->actingAs($user)->api('POST', '/api/push/subscribe', ['endpoint' => 'https://fcm.googleapis.com/fcm/send/dev1', 'keys' => $this->deviceKeys()])->assertOk();
+        $this->api('POST', '/api/push/subscribe', ['endpoint' => 'https://updates.push.services.mozilla.com/wpush/v2/old', 'keys' => $this->deviceKeys()])->assertOk();
+        $this->send($user)[1]->assertCreated();
+        $p = Proforma::query()->firstOrFail();
+        auth()->logout();
+        $this->confirmAsCustomer($p);
+
+        $invoice = Invoice::withoutGlobalScope('tenant')->findOrFail($p->invoice_id);
+        $notice = SmsMessage::query()->where('purpose', 'SHOP_NOTICE')->firstOrFail();
+        $this->assertSame($user->mobile, $notice->recipient);
+        $this->assertSame('OPERATIONAL', $notice->charge_source);
+        $this->assertStringContainsString('را تأیید کرد', $notice->body);
+        $this->assertStringContainsString(route('invoices.issued', $invoice), $notice->body);
+
+        Http::assertSent(fn ($r) => str_starts_with($r->url(), 'https://fcm.googleapis.com/') && $r->header('Content-Encoding')[0] === 'aes128gcm'
+            && str_starts_with($r->header('Authorization')[0], 'vapid t=') && $r->header('Urgency')[0] === 'high');
+        // The device that answered 410 (unsubscribed) is forgotten; the live one stays.
+        $this->assertSame(['https://fcm.googleapis.com/fcm/send/dev1'], PushSubscription::query()->pluck('endpoint')->all());
+    }
+
+    public function test_the_owner_sms_can_be_switched_off_and_is_capped(): void
+    {
+        Http::fake();
+        $user = $this->merchant();
+        $this->actingAs($user)->api('PUT', '/api/settings/proforma', ['notify_sms' => false])->assertOk();
+        $this->send($user)[1]->assertCreated();
+        $p = Proforma::query()->firstOrFail();
+        auth()->logout();
+        $this->confirmAsCustomer($p);
+        $this->assertSame(0, SmsMessage::query()->where('purpose', 'SHOP_NOTICE')->count());
+
+        config(['talata.sms.shop_notice_daily_cap' => 1]);
+        $sms = app(SmsService::class);
+        $this->assertNotNull($sms->queueShopNotice($p->tenant_id, '09121234567', 'x', 'k1'));
+        $this->assertNull($sms->queueShopNotice($p->tenant_id, '09121234567', 'x', 'k2'));
+        $this->assertNull($sms->queueShopNotice($p->tenant_id, '+447700900123', 'x', 'k3'), 'Iranian numbers only');
+    }
+
+    public function test_push_subscriptions_accept_only_known_push_services(): void
+    {
+        $this->actingAs($this->merchant());
+        $this->api('GET', '/api/push/key')->assertOk()->assertJsonStructure(['key']);
+        $this->api('POST', '/api/push/subscribe', ['endpoint' => 'https://169.254.169.254/x', 'keys' => $this->deviceKeys()])->assertStatus(422)->assertJsonPath('code', 'PUSH_SERVICE');
+        $this->api('POST', '/api/push/subscribe', ['endpoint' => 'https://fcm.googleapis.com/fcm/send/x', 'keys' => ['p256dh' => 'abc', 'auth' => 'def']])->assertStatus(422);
+        $this->api('POST', '/api/push/subscribe', ['endpoint' => 'https://fcm.googleapis.com/fcm/send/x', 'keys' => $this->deviceKeys()])->assertOk();
+        $this->api('POST', '/api/push/unsubscribe', ['endpoint' => 'https://fcm.googleapis.com/fcm/send/x'])->assertOk();
+        $this->assertSame(0, PushSubscription::query()->count());
+        $this->get('/settings/proforma')->assertOk()->assertSee('خبر تأیید مشتری')->assertSee('اعلان روی همین گوشی');
     }
 }

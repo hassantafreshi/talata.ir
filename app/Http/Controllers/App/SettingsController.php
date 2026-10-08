@@ -244,12 +244,13 @@ class SettingsController extends BaseController
             'autoIssue' => ProformaService::autoIssue($tenant),
             'canConfigure' => $this->ent()->can($tenant, 'proforma.configure'),
             'hours' => ProformaService::defaultHours(),
+            'notifySms' => SmsSetting::query()->value('proforma_notify_sms') ?? true,
         ]);
     }
 
     public function saveProforma(Request $request)
     {
-        $data = $request->validate(['auto_issue' => ['sometimes', 'boolean'], 'hours' => ['sometimes', 'integer']]);
+        $data = $request->validate(['auto_issue' => ['sometimes', 'boolean'], 'hours' => ['sometimes', 'integer'], 'notify_sms' => ['sometimes', 'boolean']]);
         $tenant = $this->tenant();
         $set = [];
         if (array_key_exists('auto_issue', $data)) {
@@ -261,6 +262,9 @@ class SettingsController extends BaseController
                 throw new DomainError('PROFORMA_HOURS', 'مدت اعتبار را از گزینه‌ها انتخاب کنید.', 422);
             }
             $set['proforma_valid_hours'] = (int) $data['hours'];
+        }
+        if (array_key_exists('notify_sms', $data)) {
+            $set['proforma_notify_sms'] = (bool) $data['notify_sms'];
         }
         if ($set) {
             SmsSetting::query()->updateOrCreate([], $set);

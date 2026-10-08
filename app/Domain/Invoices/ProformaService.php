@@ -7,6 +7,7 @@ use App\Domain\DomainError;
 use App\Domain\Identity\OtpService;
 use App\Domain\Plans\Entitlements;
 use App\Domain\Sms\SmsService;
+use App\Jobs\NotifyProformaConfirmed;
 use App\Models\Invoice;
 use App\Models\Membership;
 use App\Models\Proforma;
@@ -259,6 +260,12 @@ class ProformaService
         // The choice it was sent with: automatic issuance, or the shop issues it after checking (e.g. payment).
         if ($p->auto_issue) {
             $this->issueFrom($p);
+        }
+        // Tell the shop: SMS to the owner and a phone notification where the web app allows it.
+        try {
+            NotifyProformaConfirmed::dispatch($p->id);
+        } catch (\Throwable $e) {
+            report($e);
         }
 
         return $p->refresh();

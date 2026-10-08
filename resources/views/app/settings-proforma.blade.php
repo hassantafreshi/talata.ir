@@ -36,5 +36,19 @@
         </div>
         <p class="xs muted">هنگام ارسال هر پیش‌فاکتور می‌توانید مدت دیگری انتخاب کنید. اگر مشتری تا این مدت تأیید نکند، پیش‌فاکتور خودکار ابطال می‌شود.</p>
     </section>
+    <section class="band stack-sm" aria-labelledby="notify-h">
+        <h2 id="notify-h">خبر تأیید مشتری</h2>
+        <p class="small muted">وقتی مشتری پیش‌فاکتور را تأیید کند، با لینک فاکتور خبرتان می‌کنیم.</p>
+        <label class="choice between"><span><strong>پیامک به موبایل من</strong><br><span class="xs muted">به شماره ورود مالک فروشگاه؛ هزینه‌ای از اعتبار پیامک شما کم نمی‌شود.</span></span>
+            <span class="switch"><input type="checkbox" role="switch" name="notify_sms" @checked($notifySms)><span aria-hidden="true"></span></span></label>
+        <div class="push-card stack-sm" data-push-card>
+            <strong>اعلان روی همین گوشی</strong>
+            <p class="xs" data-push-status aria-live="polite">در حال بررسی…</p>
+            <button type="button" class="btn btn-gold block" data-push-toggle hidden>روشن کردن اعلان روی این گوشی</button>
+            <button type="button" class="btn btn-link sm" data-push-test hidden>ارسال اعلان آزمایشی</button>
+        </div>
+        <p class="xs muted">اعلان به سرویس اعلان مرورگر (مثلاً گوگل برای کروم اندروید) وابسته است و ممکن است در ایران بدون فیلترشکن نرسد؛ پیامک همیشه فرستاده می‌شود.</p>
+    </section>
+
     <p class="xs muted center" data-saved aria-live="polite">تغییرها با هر انتخاب ذخیره می‌شوند.</p>
 </x-layouts.app>

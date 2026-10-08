@@ -691,3 +691,6 @@ body[data-page="appearance"] .main { max-width: 1400px; }
 .band .pf-lock { background: var(--t-band-emphasis); color: var(--t-ink); }
 .pf-ready { border: 2px solid #0F5E46; }
 .pf-ready h2 { color: #0F5E46; }
+.push-card { border: 1px solid var(--t-hairline); border-radius: var(--t-r-card); padding: 12px 14px; background: var(--t-surface); }
+.push-offer { border: 2px dashed var(--t-gold-bright); background: var(--t-band-emphasis); }
+.push-card[data-state="on"] [data-push-status] { color: #0F5E46; font-weight: 600; }

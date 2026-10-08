@@ -34,5 +34,15 @@ test('writes and other origins pass straight through', () => {
 });
 
 test('the worker registers its lifecycle handlers', () => {
-  assert.deepEqual(Object.keys(listeners).sort(), ['activate', 'fetch', 'install']);
+  assert.deepEqual(Object.keys(listeners).sort(), ['activate', 'fetch', 'install', 'notificationclick', 'push']);
+});
+
+test('push notices open only same-origin links and stay short', () => {
+  const n = sandbox.pushNotice({ title: 'پیش‌فاکتور تأیید شد ✓', body: 'متن', url: 'https://zarlio.ir/invoices/abc/issued', tag: 'proforma-1' }, 'https://zarlio.ir');
+  assert.equal(n.title, 'پیش‌فاکتور تأیید شد ✓');
+  assert.equal(n.options.data.url, '/invoices/abc/issued');
+  assert.equal(n.options.dir, 'rtl');
+  assert.equal(sandbox.pushNotice({ url: 'https://evil.example/x' }, 'https://zarlio.ir').options.data.url, '/');
+  assert.equal(sandbox.pushNotice(null, 'https://zarlio.ir').title, 'زرلیو');
+  assert.ok(sandbox.pushNotice({ body: 'x'.repeat(1000) }, 'https://zarlio.ir').options.body.length <= 240);
 });

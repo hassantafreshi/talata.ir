@@ -37,6 +37,11 @@
                 </button>
             @endif
         </section>
+        <div class="push-card push-offer stack-sm" data-push-card hidden>
+            <strong><span aria-hidden="true">🔔</span> وقتی مشتری تأیید کرد، روی همین گوشی خبرتان کنیم؟</strong>
+            <p class="xs" data-push-status aria-live="polite"></p>
+            <button type="button" class="btn btn-gold block" data-push-toggle hidden>روشن کردن اعلان روی این گوشی</button>
+        </div>
         <div class="field"><label for="pf-link">لینک پیش‌فاکتور</label><div class="input-wrap ltr-input"><input id="pf-link" value="{{ $link }}" readonly data-pf-link></div>
             <p class="hint">مشتری با باز کردن لینک، شماره موبایل خود و کد پیامکی را وارد می‌کند تا خرید تأیید شود. مهلت تأیید در پیامک و لینک نوشته شده است.</p></div>
     @elseif ($state === 'CONFIRMED' && ! $p->issued_at)

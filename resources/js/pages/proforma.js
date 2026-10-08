@@ -5,6 +5,12 @@ import { showQuota } from '../lib/quota.js';
 // Shop page of one پیش‌فاکتور: share the link (with the validity in the text), SMS, edit/cancel, issue.
 export default function () {
   const boot = JSON.parse(document.getElementById('boot').textContent);
+  // Offer phone notifications for «مشتری تأیید کرد» only where they are possible and still off.
+  const pushCard = document.querySelector('[data-push-card]');
+  if (pushCard) import('../lib/push.js').then(async (m) => {
+    const st = await m.pushState();
+    if (st === 'off' || st === 'install-first') { pushCard.hidden = false; m.initPushCard(pushCard, toast); }
+  });
   try {
     const note = sessionStorage.getItem('pf-sms-note');
     if (note) { sessionStorage.removeItem('pf-sms-note'); toast(`پیامک فرستاده نشد: ${note} لینک را با «اشتراک‌گذاری» بفرستید.`, { kind: 'error', timeout: 12000 }); }

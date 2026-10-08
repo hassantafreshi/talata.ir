@@ -266,8 +266,8 @@ final class SmsService
             throw new DomainError('SMS_RECIPIENT_DAILY', 'به این شماره امروز به اندازه کافی پیامک فرستاده شده است. فردا دوباره امتحان کنید.', 429);
         }
         $planCode = $this->entitlements->planCode($tenant);
-        $tenantHour = SmsMessage::query()->forTenant($tenant->id)->where('purpose', '!=', 'OTP')->where('created_at', '>=', now()->subHour())->where($attempted)->count();
-        $tenantDay = SmsMessage::query()->forTenant($tenant->id)->where('purpose', '!=', 'OTP')->where('created_at', '>=', now()->subDay())->where($attempted)->count();
+        $tenantHour = SmsMessage::query()->forTenant($tenant->id)->whereNotIn('purpose', ['OTP', 'SHOP_NOTICE'])->where('created_at', '>=', now()->subHour())->where($attempted)->count();
+        $tenantDay = SmsMessage::query()->forTenant($tenant->id)->whereNotIn('purpose', ['OTP', 'SHOP_NOTICE'])->where('created_at', '>=', now()->subDay())->where($attempted)->count();
         if ($tenantHour >= $cfg['tenant_hourly_cap'] || $tenantDay >= ($cfg['tenant_daily_cap'][$planCode] ?? 0)) {
             throw new DomainError('SMS_TENANT_RATE', 'سقف ارسال پیامک این فروشگاه در این بازه پر شده است. کمی بعد دوباره امتحان کنید.', 429);
         }
@@ -337,6 +337,34 @@ final class SmsService
         });
     }
 
+    /**
+     * Short notice to the shop's own owner (e.g. «مشتری پیش‌فاکتور را تأیید کرد»). Operational cost, never the
+     * shop's credit or free allowance; at most shop_notice_daily_cap per shop per day, once per key, Iranian
+     * numbers only (SendSms enforces that again).
+     */
+    public function queueShopNotice(int $tenantId, ?string $mobile, string $body, string $key): ?SmsMessage
+    {
+        if (! $mobile || ! Mobile::isIranian($mobile)) {
+            return null;
+        }
+        $existing = SmsMessage::query()->where('idempotency_key', $key)->first();
+        if ($existing) {
+            return $existing;
+        }
+        $today = SmsMessage::query()->forTenant($tenantId)->where('purpose', 'SHOP_NOTICE')->where('created_at', '>=', now()->subDay())->count();
+        if ($today >= (int) config('talata.sms.shop_notice_daily_cap', 50)) {
+            return null;
+        }
+        $message = SmsMessage::create([
+            'tenant_id' => $tenantId, 'purpose' => 'SHOP_NOTICE', 'recipient' => $mobile, 'body' => $body,
+            'segments' => Segments::count($body), 'cost_irr' => '0', 'charge_source' => 'OPERATIONAL', 'status' => 'QUEUED',
+            'idempotency_key' => $key,
+        ]);
+        SendSms::dispatch($message->id)->afterCommit();
+
+        return $message;
+    }
+
     public function queueReminder(Tenant $tenant, InstallmentLine $line, string $body, string $recipient, string $kind): ?SmsMessage
     {
         return DB::transaction(function () use ($tenant, $line, $body, $recipient, $kind) {
@@ -348,8 +376,8 @@ final class SmsService
             $cfg = config('talata.sms');
             $planCode = $this->entitlements->planCode($tenant);
             $attempted = fn ($q) => $q->whereNotIn('status', ['CANCELLED', 'AWAITING_CREDIT']);
-            $tenantDay = SmsMessage::query()->forTenant($tenant->id)->where('purpose', '!=', 'OTP')->where('created_at', '>=', now()->subDay())->where($attempted)->count();
-            $tenantHour = SmsMessage::query()->forTenant($tenant->id)->where('purpose', '!=', 'OTP')->where('created_at', '>=', now()->subHour())->where($attempted)->count();
+            $tenantDay = SmsMessage::query()->forTenant($tenant->id)->whereNotIn('purpose', ['OTP', 'SHOP_NOTICE'])->where('created_at', '>=', now()->subDay())->where($attempted)->count();
+            $tenantHour = SmsMessage::query()->forTenant($tenant->id)->whereNotIn('purpose', ['OTP', 'SHOP_NOTICE'])->where('created_at', '>=', now()->subHour())->where($attempted)->count();
             $recipientToday = SmsMessage::query()->forTenant($tenant->id)->where('recipient', $recipient)->where('created_at', '>=', now()->subDay())->where($attempted)->count();
             if ($tenantDay >= ($cfg['tenant_daily_cap'][$planCode] ?? 0) || $tenantHour >= $cfg['tenant_hourly_cap'] || $recipientToday >= $cfg['per_recipient_per_tenant_daily']) {
                 return null; // retried on a later run; the key stays unused

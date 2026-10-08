@@ -13,6 +13,7 @@ use App\Http\Controllers\App\MaznehController;
 use App\Http\Controllers\App\PasskeyController;
 use App\Http\Controllers\App\ProductController;
 use App\Http\Controllers\App\ProformaController;
+use App\Http\Controllers\App\PushController;
 use App\Http\Controllers\App\QuoteController;
 use App\Http\Controllers\App\SecurityController;
 use App\Http\Controllers\App\SettingsController;
@@ -121,6 +122,11 @@ Route::middleware(['auth', 'tenant'])->group(function () {
             Route::post('/security/mobile/confirm', [SecurityController::class, 'confirmMobileChange'])->name('api.security.mobile.confirm');
             Route::post('/security/sign-out-others', [SecurityController::class, 'signOutOtherDevices'])->name('api.security.sign_out_others');
         });
+        // «اعلان روی گوشی» (Web Push), per user and device.
+        Route::get('/push/key', [PushController::class, 'key'])->name('api.push.key');
+        Route::post('/push/subscribe', [PushController::class, 'subscribe'])->middleware('throttle:20,1')->name('api.push.subscribe');
+        Route::post('/push/unsubscribe', [PushController::class, 'unsubscribe'])->middleware('throttle:20,1')->name('api.push.unsubscribe');
+        Route::post('/push/test', [PushController::class, 'test'])->middleware('throttle:5,1')->name('api.push.test');
         Route::post('/memberships/{membership}/switch', [UsersController::class, 'switchTenant'])->whereNumber('membership')->name('api.memberships.switch');
         Route::get('/quotes/latest', [QuoteController::class, 'latest'])->middleware('perm:mazneh.view|invoice.issue|calculator.use')->name('api.quotes.latest');
         Route::get('/quotes/board', [QuoteController::class, 'board'])->middleware('perm:mazneh.view')->name('api.quotes.board');

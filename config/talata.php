@@ -93,8 +93,16 @@ return [
         'min_form_seconds' => 2,
     ],
 
+    // Web Push to the shop's installed web app (docs/PROFORMA.md «اعلان»). VAPID keys are generated once and kept
+    // encrypted in platform settings; subject is the contact the push services see.
+    'webpush' => [
+        'subject' => env('TALATA_WEBPUSH_SUBJECT', 'mailto:support@zarlio.ir'),
+        'max_per_user' => 10,
+    ],
+
     'sms' => [
         'max_sends_per_invoice' => 3,          // to the customer (initial + resends)
+        'shop_notice_daily_cap' => 50,          // «مشتری پیش‌فاکتور را تأیید کرد» SMS to the shop owner (operational, per shop per day)
         'max_copies_per_invoice' => 3,         // copies to other numbers the merchant typed
         'max_copy_recipients_per_send' => 3,
         'awaiting_credit_max_days' => 7,      // invoice SMS waiting for credit are sent when credit arrives within this window
