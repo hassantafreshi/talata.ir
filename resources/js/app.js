@@ -1,3 +1,4 @@
+import navFeedback from './lib/nav-feedback.js';
 import '../css/app.css';
 import { toast } from './lib/ui.js';
 // Tiny helpers almost every page uses (~2.5 KiB gzip together) ride in the entry chunk: on an 800 ms RTT
@@ -53,6 +54,7 @@ function flash() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  navFeedback(toast);
   offlineBanner();
   confirmLinks();
   clearDeviceCopiesOnLogout();

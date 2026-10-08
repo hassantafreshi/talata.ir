@@ -24,6 +24,11 @@
     $needs = ['invoices.new' => 'invoice.issue', 'invoices.index' => 'invoices.view', 'dashboard' => 'reports.view', 'mazneh' => 'mazneh.view', 'calculator' => 'calculator.use', 'customers.index' => 'customers.view'];
     $allowed = fn ($route) => ! isset($needs[$route]) || ($member && $member->can($needs[$route]));
     $nav = array_values(array_filter($nav, fn ($n) => $allowed($n[0])));
+    // «خانه» is this member's landing screen (e.g. فاکتور جدید for a seller): highlight خانه there, not the
+    // tab whose patterns also cover it, so tapping خانه visibly lands «home».
+    $homeRoute = $member?->homeRoute() ?? 'settings';
+    $onHome = request()->routeIs($homeRoute);
+    $nav = array_map(fn ($n) => $n[0] === 'home' ? [$n[0], $n[1], $n[2], [$homeRoute]] : ($onHome ? [$n[0], $n[1], $n[2], []] : $n), $nav);
     $desk = array_values(array_filter($desk, fn ($n) => $allowed($n[0])));
     $shopName = app(\App\Tenancy\TenantContext::class)->has() ? (app(\App\Tenancy\TenantContext::class)->tenant()->profile?->name ?: 'فروشگاه من') : '';
 @endphp
@@ -69,7 +74,7 @@
 </main>
 <nav class="tabs" aria-label="منوی اصلی">
     @foreach ($nav as [$route, $label, $icon, $patterns])
-        <a href="{{ route($route) }}" @if(request()->routeIs(...$patterns)) aria-current="page" @endif>
+        <a href="{{ route($route) }}" @if($patterns && request()->routeIs(...$patterns)) aria-current="page" @endif>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{!! $icon !!}</svg>{{ $label }}
         </a>
     @endforeach

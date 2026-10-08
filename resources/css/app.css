@@ -694,3 +694,34 @@ body[data-page="appearance"] .main { max-width: 1400px; }
 .push-card { border: 1px solid var(--t-hairline); border-radius: var(--t-r-card); padding: 12px 14px; background: var(--t-surface); }
 .push-offer { border: 2px dashed var(--t-gold-bright); background: var(--t-band-emphasis); }
 .push-card[data-state="on"] [data-push-status] { color: #0F5E46; font-weight: 600; }
+
+/* ---- Tap and page-load feedback (lib/nav-feedback.js) ---- */
+a, button, label, summary { -webkit-tap-highlight-color: transparent; }
+.btn, .list-item, .chip, .tabs a, .topnav a, .action-tile, .icon-btn, .choice-card, .seg label { transition: transform .12s ease, background-color .15s ease, opacity .15s ease; }
+.btn:active:not(:disabled), .chip:active, .action-tile:active, .icon-btn:active, .choice-card:active, .seg label:active { transform: scale(.97); }
+.list-item:active { transform: scale(.985); background: var(--t-band); }
+.tabs a:active { transform: scale(.92); }
+.tabs a { position: relative; }
+.tabs a[aria-current="page"]::before { content: ""; position: absolute; top: 0; width: 28px; height: 3px; border-radius: 0 0 3px 3px; background: var(--t-gold-bright); }
+/* The tab being opened pulses until the next page arrives. */
+.tabs a.is-loading svg { animation: tab-pulse .9s ease-in-out infinite; }
+@keyframes tab-pulse { 50% { transform: scale(.82); opacity: .55; } }
+/* A tapped list row or link button shows a small spinner at its end. */
+.list-item.is-loading::after, .btn.is-loading::after, .action-tile.is-loading::after { content: ""; width: 16px; height: 16px; flex: none; margin-inline-start: 8px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; }
+.list-item.is-loading > [aria-hidden="true"]:last-child { display: none; }
+/* Top progress bar: quick start, then creeps; never «finishes» until the new page replaces it. */
+.nav-progress { position: fixed; top: 0; inset-inline: 0; height: 3px; z-index: 100; pointer-events: none; transform-origin: right; transform: scaleX(0); background: linear-gradient(to left, var(--t-gold-bright), #F3D98B); box-shadow: 0 0 8px rgba(224, 180, 76, .7); opacity: 0; }
+.nav-progress.run { opacity: 1; animation: nav-progress 9s cubic-bezier(.1, .7, .2, 1) forwards; }
+@keyframes nav-progress { 0% { transform: scaleX(0); } 10% { transform: scaleX(.35); } 40% { transform: scaleX(.7); } 100% { transform: scaleX(.92); } }
+/* Dim the page being left (after a short delay so fast loads do not flicker). */
+html.is-navigating .main { opacity: .55; transition: opacity .2s ease .18s; pointer-events: none; }
+/* The new page settles in gently. */
+@media (prefers-reduced-motion: no-preference) {
+  .main { animation: page-in .22s ease-out backwards; }
+  @keyframes page-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress.run { animation: none; transform: scaleX(.8); }
+  .tabs a.is-loading svg { animation: none; opacity: .5; }
+  .btn:active, .list-item:active, .chip:active, .tabs a:active, .action-tile:active { transform: none; }
+}
