@@ -97,6 +97,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     Route::get('/settings/appearance', [SettingsController::class, 'appearance'])->middleware('perm:settings.manage')->name('settings.appearance');
     Route::get('/settings/numbering', [SettingsController::class, 'numbering'])->middleware('perm:settings.manage')->name('settings.numbering');
     Route::get('/settings/sms-template', [SettingsController::class, 'smsTemplate'])->middleware('perm:settings.manage')->name('settings.sms_template');
+    Route::get('/settings/proforma', [SettingsController::class, 'proforma'])->middleware('perm:settings.manage')->name('settings.proforma');
     Route::get('/settings/users', [UsersController::class, 'index'])->middleware('perm:__owner')->name('settings.users');
     Route::get('/settings/backups', [BackupsController::class, 'index'])->middleware('perm:__owner')->name('settings.backups');
     Route::get('/settings/plan', [BillingController::class, 'plans'])->name('settings.plan');
@@ -170,6 +171,7 @@ Route::middleware(['auth', 'tenant'])->group(function () {
             Route::post('/settings/appearance/preview', [SettingsController::class, 'previewAppearance'])->middleware('throttle:60,1')->name('api.settings.appearance.preview');
             Route::put('/settings/numbering', [SettingsController::class, 'saveNumbering'])->middleware('throttle:20,1')->name('api.settings.numbering');
             Route::put('/settings/sms-template', [SettingsController::class, 'saveSmsTemplate'])->middleware('throttle:20,1')->name('api.settings.sms_template');
+            Route::put('/settings/proforma', [SettingsController::class, 'saveProforma'])->middleware('throttle:30,1')->name('api.settings.proforma');
             Route::put('/settings/sms-auto', [SettingsController::class, 'saveSmsAuto'])->middleware('throttle:20,1')->name('api.settings.sms_auto');
         });
         Route::middleware('perm:billing.manage')->group(function () {

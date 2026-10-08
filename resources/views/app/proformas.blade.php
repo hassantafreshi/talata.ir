@@ -11,7 +11,7 @@
                 @php $st = $p->state(); @endphp
                 <li><a class="list-item" href="{{ route('proformas.show', $p) }}"><span class="body"><strong>پیش‌فاکتور <span class="num ltr">{{ fa($p->number) }}</span> · {{ $p->buyer_name ?: \App\Support\Digits::toPersian(\App\Support\Mobile::mask($p->buyer_mobile)) }}</strong>
                     <span class="sub">{{ toman($p->payable_irr) }} تومان · {{ $st === 'SENT' ? 'مهلت '.\App\Domain\Invoices\ProformaService::until($p, $tz) : jdate($p->created_at) }}</span></span>
-                    <span class="badge {{ $stateFa[$st][1] }}">{{ $st === 'CONFIRMED' && $p->issued_at ? 'فاکتور صادر شد' : $stateFa[$st][0] }}</span></a></li>
+                    @if ($st === 'CONFIRMED' && ! $p->issued_at)<span class="badge warn">تأیید شد · منتظر صدور</span>@else<span class="badge {{ $stateFa[$st][1] }}">{{ $st === 'CONFIRMED' ? 'فاکتور صادر شد' : $stateFa[$st][0] }}</span>@endif</a></li>
             @endforeach
         </ul>
     @endif

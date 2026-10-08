@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Domain\Invoices\ProformaService;
 use App\Domain\Market\QuoteService;
 use App\Domain\Sms\SmsGateway;
 use App\Models\Invoice;
@@ -174,7 +175,7 @@ class ProformaTest extends TestCase
         $sent = app(SmsGateway::class)->sent;
         preg_match('/(\d{6})/', Digits::toLatin(end($sent)['body']), $m);
         $challenge = OtpChallenge::query()->where('purpose', 'proforma')->latest('created_at')->value('id');
-        $this->post('/p/'.$p->token.'/confirm', ['challenge' => $challenge, 'code' => $m[1]])->assertOk()->assertSee('خرید شما تأیید شد')->assertSee('فروشنده فاکتور فروش را صادر می‌کند');
+        $this->post('/p/'.$p->token.'/confirm', ['challenge' => $challenge, 'code' => $m[1]])->assertOk()->assertSee('خرید شما تأیید شد')->assertSee('فروشنده پس از بررسی');
         $p->refresh();
         $this->assertSame('CONFIRMED', $p->status);
         $this->assertNull($p->issued_at);
@@ -185,5 +186,62 @@ class ProformaTest extends TestCase
         $this->api('POST', "/api/proformas/{$p->public_id}/issue")->assertOk();
         $this->assertNotNull($p->refresh()->issued_at);
         $this->assertSame('issued', Invoice::query()->whereKey($p->invoice_id)->value('status'));
+    }
+
+    private function confirmAsCustomer(Proforma $p)
+    {
+        $this->post('/p/'.$p->token.'/code', ['mobile' => self::BUYER])->assertOk();
+        $sent = app(SmsGateway::class)->sent;
+        preg_match('/(\d{6})/', Digits::toLatin(end($sent)['body']), $m);
+        $challenge = OtpChallenge::query()->where('purpose', 'proforma')->latest('created_at')->value('id');
+
+        return $this->post('/p/'.$p->token.'/confirm', ['challenge' => $challenge, 'code' => $m[1]])->assertOk();
+    }
+
+    public function test_free_plan_issues_automatically_and_cannot_switch_to_manual(): void
+    {
+        $this->actingAs($this->merchant());
+        $this->get('/settings/proforma')->assertOk()->assertSee('صدور فاکتور پس از تأیید مشتری')->assertSee('پلن پایه و حرفه‌ای')->assertSee('قیمت پیش‌فاکتور قفل است');
+        $this->api('PUT', '/api/settings/proforma', ['auto_issue' => false])->assertStatus(403);
+        $this->api('PUT', '/api/settings/proforma', ['hours' => 48])->assertOk();
+        $this->api('PUT', '/api/settings/proforma', ['hours' => 5])->assertStatus(422);
+        $this->assertSame(48, ProformaService::defaultHours());
+    }
+
+    public function test_manual_issuance_on_basic_waits_for_the_shop_and_keeps_the_choice_it_was_sent_with(): void
+    {
+        $user = $this->merchant('basic');
+        $this->actingAs($user)->api('PUT', '/api/settings/proforma', ['auto_issue' => false])->assertOk();
+        $this->get('/settings')->assertSee('صدور دستی توسط فروشنده');
+        $this->send($user)[1]->assertCreated();
+        $p = Proforma::query()->firstOrFail();
+        $this->assertFalse($p->auto_issue);
+        // Switching back later does not change a پیش‌فاکتور already sent.
+        $this->api('PUT', '/api/settings/proforma', ['auto_issue' => true])->assertOk();
+
+        auth()->logout();
+        $this->get('/p/'.$p->token)->assertSee('فروشنده فاکتور فروش را صادر می‌کند')->assertSee('قیمت قفل است');
+        $this->confirmAsCustomer($p)->assertSee('خرید شما تأیید شد')->assertSee('فروشنده پس از بررسی');
+        $p->refresh();
+        $this->assertSame('CONFIRMED', $p->status);
+        $this->assertNull($p->issued_at);
+        $this->assertNull($p->issue_error);
+        $this->assertSame('proforma', Invoice::withoutGlobalScope('tenant')->whereKey($p->invoice_id)->value('status'));
+
+        $this->actingAs($user)->get(route('proformas.show', $p))->assertSee('مشتری پیش‌فاکتور را تأیید کرد')->assertSee('روش «دستی»');
+        $this->get('/proformas')->assertSee('منتظر صدور');
+        $this->get('/invoices')->assertSee('تأییدشده منتظر صدور فاکتور');
+        $this->api('POST', "/api/proformas/{$p->public_id}/issue")->assertOk();
+        $this->assertSame('issued', Invoice::query()->whereKey($p->invoice_id)->value('status'));
+    }
+
+    public function test_a_shop_that_loses_the_capability_falls_back_to_automatic(): void
+    {
+        $user = $this->merchant('basic');
+        $this->actingAs($user)->api('PUT', '/api/settings/proforma', ['auto_issue' => false])->assertOk();
+        $tenant = $this->tenantOf($user);
+        $this->assertFalse(ProformaService::autoIssue($tenant));
+        $this->setPlan($tenant, 'free');
+        $this->assertTrue(ProformaService::autoIssue($tenant->refresh()));
     }
 }

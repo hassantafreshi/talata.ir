@@ -11,6 +11,7 @@
             <span class="badge warn pf-pulse">منتظر تأیید شما</span>
             <h1 class="h2">پیش‌فاکتور خرید از {{ $v['shop']['name'] }}</h1>
             <div><span class="price">{{ $v['payable_fa'] }}</span> <span class="unit">تومان</span></div>
+            <span class="pf-lock"><span aria-hidden="true">🔒</span> قیمت قفل است@if($v['rate_fa']) (هر گرم ۱۸ عیار {{ $v['rate_fa'] }} تومان)@endif و فقط تا پایان مهلت معتبر است</span>
             <p class="pf-deadline"><strong>مهلت تأیید: {{ $v['until_fa'] }}</strong><br><span class="xs">({{ $v['hours_fa'] }} از زمان ارسال؛ پس از آن، این پیش‌فاکتور ابطال می‌شود)</span></p>
             <a class="btn btn-gold block lg" href="#confirm">بررسی و تأیید خرید</a>
         </section>
@@ -23,7 +24,8 @@
                 <p><strong>فاکتور فروش شماره <span class="num ltr">{{ \App\Support\Digits::invoiceNumber($invoiceNumber) }}</span> صادر شد.</strong></p>
                 @if ($verifyUrl)<a class="btn btn-gold block" href="{{ $verifyUrl }}" rel="noopener">دیدن و بررسی فاکتور فروش</a>@endif
             @else
-                <p class="meta">فروشنده فاکتور فروش را صادر می‌کند. برای دریافت آن با فروشگاه تماس بگیرید.</p>
+                <p class="meta">فروشنده پس از بررسی، فاکتور فروش را با همین مبلغ صادر می‌کند. برای هماهنگی با فروشگاه تماس بگیرید.</p>
+                <a class="btn btn-line block" href="tel:{{ \App\Support\Digits::toLatin($v['shop']['contact_primary']) }}">تماس با فروشگاه</a>
             @endif
         </section>
     @else
@@ -70,7 +72,7 @@
                 <li class="{{ in_array($step, ['code'], true) ? 'done' : 'now' }}">شماره موبایل</li>
                 <li class="{{ $step === 'code' ? 'now' : '' }}">کد پیامک</li>
             </ol>
-            <p class="small">برای نهایی کردن خرید، این پیش‌فاکتور را تأیید کنید. با تأیید شما، فاکتور فروش با همین اقلام و همین مبلغ (<strong class="num">{{ $v['payable_fa'] }}</strong> تومان) صادر می‌شود.</p>
+            <p class="small">برای نهایی کردن خرید، این پیش‌فاکتور را تأیید کنید. @if ($p->auto_issue)با تأیید شما، فاکتور فروش با همین اقلام و همین مبلغ (<strong class="num">{{ $v['payable_fa'] }}</strong> تومان) همان لحظه صادر می‌شود.@else با تأیید شما، خرید با همین اقلام و همین مبلغ (<strong class="num">{{ $v['payable_fa'] }}</strong> تومان) ثبت می‌شود و فروشنده فاکتور فروش را صادر می‌کند.@endif</p>
 
             @if ($error)<div class="notice err" role="alert">{{ $error }}</div>@endif
 

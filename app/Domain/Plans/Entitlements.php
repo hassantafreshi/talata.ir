@@ -31,6 +31,7 @@ final class Entitlements
         'invoice.finalize' => 'صدور فاکتور',
         'invoice.sms_share' => 'ارسال پیامکی فاکتور',
         'invoice.customize' => 'شخصی‌سازی فاکتور',
+        'proforma.configure' => 'تنظیم صدور پیش‌فاکتور (خودکار/دستی)',
         'invoice.shop_logo' => 'لوگوی فروشگاه روی فاکتور',
         'invoice.hide_provider_brand' => 'حذف نام زرلیو از پای فاکتور',
         'customers.manage' => 'مدیریت مشتریان',

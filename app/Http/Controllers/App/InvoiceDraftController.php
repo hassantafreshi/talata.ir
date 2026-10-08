@@ -118,6 +118,7 @@ class InvoiceDraftController extends BaseController
             'profileComplete' => (bool) $tenant->profile?->isComplete(),
             'buyerMobile' => $invoice->buyer_mobile ? Mobile::display($invoice->buyer_mobile) : '',
             'proformaHours' => ProformaService::defaultHours(),
+            'proformaAuto' => ProformaService::autoIssue($tenant),
         ]);
     }
 

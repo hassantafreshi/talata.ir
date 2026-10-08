@@ -16,6 +16,10 @@
         <div><span class="price">{{ $v['payable_fa'] }}</span> <span class="unit">تومان</span></div>
         <p class="meta">مشتری: {{ $v['buyer_name'] ?: '—' }} · <span class="num ltr">{{ $v['buyer_mobile'] }}</span></p>
         <p class="meta">مدت اعتبار {{ $v['hours_fa'] }} · مهلت تأیید {{ $v['until_fa'] }}</p>
+        @if ($state === 'SENT')
+            <span class="pf-lock"><span aria-hidden="true">🔒</span> قیمت با نرخ {{ $v['rate_fa'] ?? '—' }} تومان قفل است</span>
+            <p class="xs">پس از تأیید مشتری: <strong>{{ $p->auto_issue ? 'فاکتور فروش خودکار صادر می‌شود' : 'شما «صدور فاکتور فروش» را می‌زنید' }}</strong></p>
+        @endif
         @if ($state === 'CONFIRMED')<p class="meta">تأیید مشتری: {{ $v['confirmed_fa'] }}</p>@endif
     </section>
 
@@ -36,8 +40,15 @@
         <div class="field"><label for="pf-link">لینک پیش‌فاکتور</label><div class="input-wrap ltr-input"><input id="pf-link" value="{{ $link }}" readonly data-pf-link></div>
             <p class="hint">مشتری با باز کردن لینک، شماره موبایل خود و کد پیامکی را وارد می‌کند تا خرید تأیید شود. مهلت تأیید در پیامک و لینک نوشته شده است.</p></div>
     @elseif ($state === 'CONFIRMED' && ! $p->issued_at)
-        <div class="notice warn stack-sm" role="alert"><span>مشتری تأیید کرده اما فاکتور فروش هنوز صادر نشده است. @if($p->issue_error)<br>دلیل: {{ $p->issue_error }}@endif</span>
-            <button type="button" class="btn btn-gold" data-pf-issue data-busy-text="در حال صدور…">صدور فاکتور فروش</button></div>
+        <section class="band pf-ready stack-sm" role="status">
+            <h2>مشتری پیش‌فاکتور را تأیید کرد ✓</h2>
+            @if ($p->issue_error)
+                <p class="notice warn small">صدور خودکار انجام نشد. دلیل: {{ $p->issue_error }}</p>
+            @else
+                <p class="small">صدور فاکتور با شماست (روش «دستی»). پس از بررسی، فاکتور فروش با همین اقلام و مبلغ صادر می‌شود.</p>
+            @endif
+            <button type="button" class="btn btn-gold block lg" data-pf-issue data-busy-text="در حال صدور…">صدور فاکتور فروش</button>
+        </section>
     @elseif ($state === 'CONFIRMED')
         <a class="btn btn-gold block" href="{{ route('invoices.issued', $invoice) }}">فاکتور فروش صادرشده (شماره <span class="num ltr">{{ invno($invoice->number) }}</span>)</a>
     @else

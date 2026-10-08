@@ -1,0 +1,40 @@
+@php($boot = ['api' => route('api.settings.proforma')])
+<x-layouts.app title="پیش‌فاکتور" page="settings-proforma" :back="route('settings')">
+    <script type="application/json" id="boot">@json($boot)</script>
+
+    <section class="band stack-sm pf-lock-card" aria-labelledby="lock-h">
+        <h2 id="lock-h"><span aria-hidden="true">🔒</span> قیمت پیش‌فاکتور قفل است</h2>
+        <p class="small">مبلغ پیش‌فاکتور با نرخ طلای ثبت‌شده در همان پیش‌فاکتور ثابت می‌ماند و تغییر بعدی بازار آن را عوض نمی‌کند. پیش‌فاکتور فقط تا پایان مدت اعتبار معتبر است؛ پس از آن «ابطال شده» و فاقد اعتبار است.</p>
+    </section>
+
+    <section class="band stack-sm" aria-labelledby="issue-h">
+        <div class="between"><h2 id="issue-h">صدور فاکتور پس از تأیید مشتری</h2>@unless($canConfigure)<span class="badge off">پلن پایه و حرفه‌ای</span>@endunless</div>
+        <fieldset class="choice-cards" @disabled(! $canConfigure) aria-labelledby="issue-h">
+            <label class="choice-card">
+                <input type="radio" name="auto_issue" value="1" @checked($autoIssue)>
+                <span class="cc-title">خودکار <span class="badge ok">پیشنهادی</span></span>
+                <span class="cc-text">با تأیید مشتری، فاکتور فروش همان لحظه با همان مبلغ صادر می‌شود و مشتری آن را روی گوشی می‌بیند.</span>
+            </label>
+            <label class="choice-card">
+                <input type="radio" name="auto_issue" value="0" @checked(! $autoIssue)>
+                <span class="cc-title">دستی، توسط فروشنده</span>
+                <span class="cc-text">مشتری تأیید می‌کند؛ شما پس از بررسی (مثلاً دریافت وجه) در صفحه پیش‌فاکتور «صدور فاکتور فروش» را می‌زنید.</span>
+            </label>
+        </fieldset>
+        @unless ($canConfigure)
+            <p class="xs muted">در پلن رایگان، فاکتور پس از تأیید مشتری خودکار صادر می‌شود. <a href="{{ route('settings.plan') }}">مشاهده پلن‌ها</a></p>
+        @endunless
+        <p class="xs muted">هر پیش‌فاکتور با همان روشی که هنگام ارسال انتخاب شده بود ادامه می‌یابد.</p>
+    </section>
+
+    <section class="band stack-sm" aria-labelledby="hours-h">
+        <h2 id="hours-h">مدت اعتبار پیش‌فرض</h2>
+        <div class="chips" role="radiogroup" aria-labelledby="hours-h">
+            @foreach (\App\Domain\Invoices\ProformaService::HOURS as $h)
+                <label class="chip"><input type="radio" name="hours" value="{{ $h }}" @checked($h === $hours)>{{ \App\Domain\Invoices\ProformaService::hoursFa($h) }}</label>
+            @endforeach
+        </div>
+        <p class="xs muted">هنگام ارسال هر پیش‌فاکتور می‌توانید مدت دیگری انتخاب کنید. اگر مشتری تا این مدت تأیید نکند، پیش‌فاکتور خودکار ابطال می‌شود.</p>
+    </section>
+    <p class="xs muted center" data-saved aria-live="polite">تغییرها با هر انتخاب ذخیره می‌شوند.</p>
+</x-layouts.app>

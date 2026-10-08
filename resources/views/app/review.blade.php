@@ -119,6 +119,8 @@
                         </div>
                         <p class="hint">اگر مشتری تا این مدت تأیید نکند، پیش‌فاکتور خودکار ابطال می‌شود. قیمت‌ها تا پایان مهلت ثابت می‌ماند.</p>
                     </fieldset>
+                    <p class="pf-lock"><span aria-hidden="true">🔒</span> قیمت با نرخ همین پیش‌نویس@if($invoice->accepted_rate_irr) ({{ toman($invoice->accepted_rate_irr) }} تومان هر گرم ۱۸ عیار)@endif قفل می‌شود و فقط تا پایان مدت اعتبار معتبر است.</p>
+                    <p class="xs">پس از تأیید مشتری: <strong>{{ $proformaAuto ? 'فاکتور فروش خودکار صادر می‌شود' : 'شما «صدور فاکتور فروش» را می‌زنید' }}</strong> · <a href="{{ route('settings.proforma') }}">تنظیمات پیش‌فاکتور</a></p>
                     @if ($canSms)
                         <label class="check"><input type="checkbox" name="pf_sms" value="1" checked> ارسال پیامک پیش‌فاکتور (با مهلت تأیید و لینک) به موبایل مشتری</label>
                     @else

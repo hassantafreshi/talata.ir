@@ -6,6 +6,7 @@ use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Domain\Invoices\LayoutSettings;
 use App\Domain\Invoices\Numbering;
+use App\Domain\Invoices\ProformaService;
 use App\Domain\Invoices\Qr;
 use App\Domain\Settings\SettingsBackups;
 use App\Domain\Sms\SmsCredit;
@@ -42,6 +43,7 @@ class SettingsController extends BaseController
             'balanceFa' => Money::toman(app(SmsCredit::class)->balance($tenant->id)),
             'perSegmentFa' => Money::toman($ent->smsPerSegmentIrr($tenant)),
             'smsAuto' => SmsSetting::autoSend(),
+            'proformaAuto' => ProformaService::autoIssue($this->tenant()),
             'membership' => $this->membership(),
             'user' => auth()->user(),
             'affiliate' => Affiliate::query()->where('user_id', auth()->id())->first(),
@@ -231,6 +233,41 @@ class SettingsController extends BaseController
             'template' => SmsSetting::query()->value('invoice_template') ?: SmsTemplate::DEFAULT, 'canEdit' => $can, 'default' => SmsTemplate::DEFAULT,
             'autoSend' => SmsSetting::autoSend(), 'canSms' => $this->ent()->can($tenant, 'invoice.sms_share'),
         ]);
+    }
+
+    /** پیش‌فاکتور settings: default validity (every plan) and issuance after confirmation (proforma.configure). */
+    public function proforma()
+    {
+        $tenant = $this->tenant();
+
+        return view('app.settings-proforma', [
+            'autoIssue' => ProformaService::autoIssue($tenant),
+            'canConfigure' => $this->ent()->can($tenant, 'proforma.configure'),
+            'hours' => ProformaService::defaultHours(),
+        ]);
+    }
+
+    public function saveProforma(Request $request)
+    {
+        $data = $request->validate(['auto_issue' => ['sometimes', 'boolean'], 'hours' => ['sometimes', 'integer']]);
+        $tenant = $this->tenant();
+        $set = [];
+        if (array_key_exists('auto_issue', $data)) {
+            $this->ent()->assertCan($tenant, 'proforma.configure', 'انتخاب صدور دستی پس از تأیید مشتری در پلن پایه و حرفه‌ای است. در پلن رایگان فاکتور خودکار صادر می‌شود.');
+            $set['proforma_auto_issue'] = (bool) $data['auto_issue'];
+        }
+        if (array_key_exists('hours', $data)) {
+            if (! in_array((int) $data['hours'], ProformaService::HOURS, true)) {
+                throw new DomainError('PROFORMA_HOURS', 'مدت اعتبار را از گزینه‌ها انتخاب کنید.', 422);
+            }
+            $set['proforma_valid_hours'] = (int) $data['hours'];
+        }
+        if ($set) {
+            SmsSetting::query()->updateOrCreate([], $set);
+            Audit::record('proforma.settings_changed', null, $set);
+        }
+
+        return response()->json(['ok' => true] + $set);
     }
 
     /** «ارسال خودکار پیامک فاکتور» on/off — every plan that can send invoice SMS. */

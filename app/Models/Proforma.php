@@ -13,13 +13,13 @@ class Proforma extends Model
     use BelongsToTenant, HasPublicId;
 
     protected $fillable = ['invoice_id', 'jalali_year', 'seq', 'number', 'token', 'token_hash', 'buyer_name', 'buyer_mobile', 'payable_irr', 'snapshot',
-        'valid_hours', 'expires_at', 'status', 'confirmed_at', 'issued_at', 'issue_error', 'cancelled_at', 'cancel_reason', 'sent_by'];
+        'valid_hours', 'expires_at', 'status', 'confirmed_at', 'issued_at', 'issue_error', 'cancelled_at', 'cancel_reason', 'sent_by', 'auto_issue'];
 
     protected $hidden = ['token', 'token_hash'];
 
     protected function casts(): array
     {
-        return ['snapshot' => 'array', 'expires_at' => 'datetime', 'confirmed_at' => 'datetime', 'issued_at' => 'datetime', 'cancelled_at' => 'datetime', 'payable_irr' => 'decimal:0'];
+        return ['snapshot' => 'array', 'expires_at' => 'datetime', 'confirmed_at' => 'datetime', 'issued_at' => 'datetime', 'cancelled_at' => 'datetime', 'payable_irr' => 'decimal:0', 'auto_issue' => 'boolean'];
     }
 
     public function invoice(): BelongsTo

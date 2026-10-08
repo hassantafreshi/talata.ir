@@ -4,7 +4,8 @@
         {{-- On mobile the bottom bar has no «فاکتور جدید»; this is the way to start one from the list. --}}
         <a href="{{ route('invoices.new') }}" class="btn btn-gold block mobile-only">+ فاکتور جدید</a>
         @php($pfOpen = \App\Models\Proforma::query()->where('status', 'SENT')->where('expires_at', '>', now())->count())
-        <a class="list-item" href="{{ route('proformas.index') }}"><span class="body"><strong>پیش‌فاکتورها</strong><span class="sub">{{ $pfOpen ? fa($pfOpen).' پیش‌فاکتور منتظر تأیید مشتری' : 'پیش‌فاکتورهای فرستاده‌شده و وضعیت تأیید' }}</span></span>@if($pfOpen)<span class="badge warn">{{ fa($pfOpen) }}</span>@endif<span aria-hidden="true">‹</span></a>
+        @php($pfReady = \App\Models\Proforma::query()->where('status', 'CONFIRMED')->whereNull('issued_at')->count())
+        <a class="list-item" href="{{ route('proformas.index') }}"><span class="body"><strong>پیش‌فاکتورها</strong><span class="sub">@if($pfReady){{ fa($pfReady) }} تأییدشده منتظر صدور فاکتور@if($pfOpen) · @endif @endif @if($pfOpen){{ fa($pfOpen) }} منتظر تأیید مشتری@endif @if(! $pfOpen && ! $pfReady)پیش‌فاکتورهای فرستاده‌شده و وضعیت تأیید@endif</span></span>@if($pfReady + $pfOpen)<span class="badge {{ $pfReady ? 'ok' : 'warn' }}">{{ fa($pfReady + $pfOpen) }}</span>@endif<span aria-hidden="true">‹</span></a>
     @endif
     @if ($quota['limit'] !== null)
         <div class="band stack-sm">

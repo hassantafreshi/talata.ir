@@ -5,6 +5,7 @@ namespace App\Domain\Invoices;
 use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Domain\Identity\OtpService;
+use App\Domain\Plans\Entitlements;
 use App\Domain\Sms\SmsService;
 use App\Models\Invoice;
 use App\Models\Membership;
@@ -37,6 +38,20 @@ class ProformaService
     public const DEFAULT_HOURS = 24;
 
     public function __construct(private readonly InvoiceService $invoices, private readonly SmsService $sms, private readonly OtpService $otp) {}
+
+    /**
+     * «صدور فاکتور پس از تأیید مشتری»: automatic unless a shop allowed to configure it (proforma.configure,
+     * Basic/Professional) chose «دستی». A shop that loses the capability falls back to automatic.
+     */
+    public static function autoIssue(Tenant $tenant): bool
+    {
+        if (! app(Entitlements::class)->can($tenant, 'proforma.configure')) {
+            return true;
+        }
+        $v = SmsSetting::query()->value('proforma_auto_issue');
+
+        return $v === null ? true : (bool) $v;
+    }
 
     public static function defaultHours(): int
     {
@@ -127,6 +142,7 @@ class ProformaService
                 'token' => $t = Tokens::shareCode(), 'token_hash' => Tokens::hash($t),
                 'buyer_name' => $name, 'buyer_mobile' => $mobile, 'payable_irr' => $priced['payable'], 'snapshot' => $snapshot,
                 'valid_hours' => $hours, 'expires_at' => $now->addHours($hours), 'status' => 'SENT', 'sent_by' => $user->id,
+                'auto_issue' => self::autoIssue($tenant),
             ]);
             SmsSetting::query()->updateOrCreate([], ['proforma_valid_hours' => $hours]);
             Audit::record('proforma.sent', $p, ['number' => $number, 'hours' => $hours, 'payable_irr' => (string) $priced['payable']]);
@@ -240,7 +256,10 @@ class ProformaService
 
             return $p;
         });
-        $this->issueFrom($p);
+        // The choice it was sent with: automatic issuance, or the shop issues it after checking (e.g. payment).
+        if ($p->auto_issue) {
+            $this->issueFrom($p);
+        }
 
         return $p->refresh();
     }
