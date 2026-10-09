@@ -22,10 +22,11 @@ class QuoteScheduleTest extends TestCase
     public function test_interval_follows_the_tehran_time_windows(): void
     {
         $expect = [
-            '00:00' => 180, '01:59' => 180, '02:00' => 1200, '05:59' => 1200, '06:00' => 300, '07:30' => 300,
-            '08:00' => 180, '09:00' => 120, '10:00' => 60, '11:59' => 60, '12:00' => 60, '15:59' => 60,
-            '16:00' => 60, '19:59' => 60, '20:00' => 120, '23:59' => 120,
+            '00:00' => 120, '01:59' => 120, '02:00' => 180, '05:59' => 180, '06:00' => 120, '07:30' => 120,
+            '08:00' => 120, '09:00' => 60, '10:00' => 60, '15:59' => 60, '19:59' => 60, '20:00' => 120, '23:59' => 120,
         ];
+        $daily = array_sum(array_map(fn ($w) => QuoteSchedule::requestsPerDay(...$w), QuoteSchedule::WINDOWS));
+        $this->assertSame(1010, $daily);
         foreach ($expect as $time => $seconds) {
             $this->assertSame($seconds, QuoteSchedule::intervalSeconds($this->tehran($time)), $time);
         }
@@ -38,9 +39,9 @@ class QuoteScheduleTest extends TestCase
         $provider = $this->provider();
         $service = new QuoteService($provider);
 
-        $this->travelTo($this->tehran('03:00'));                 // every 20 minutes
+        $this->travelTo($this->tehran('03:00'));                 // every 3 minutes
         $this->assertTrue($service->refreshIfDue(true));
-        $this->travel(19)->minutes();
+        $this->travel(2)->minutes();
         $this->assertFalse($service->refreshIfDue(true));
         $this->travel(1)->minutes();
         $this->assertTrue($service->refreshIfDue(true));

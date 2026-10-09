@@ -47,7 +47,7 @@
                     </form>
                 @endif
                 <details class="xs muted"><summary>زمان‌بندی دریافت نرخ (ساعت تهران)</summary>
-                    <ul>@foreach ($schedule as [$from, $to, $sec])<li>{{ fa(sprintf('%02d:00', $from)) }} تا {{ fa(sprintf('%02d:00', $to)) }}: هر {{ fa($sec >= 60 ? intdiv($sec, 60).' دقیقه' : $sec.' ثانیه') }}</li>@endforeach</ul>
+                    <ul>@foreach ($schedule as [$from, $to, $sec])<li>{{ fa(sprintf('%02d:00', $from)) }} تا {{ fa(sprintf('%02d:00', $to)) }}: هر {{ fa($sec >= 60 ? intdiv($sec, 60).' دقیقه' : $sec.' ثانیه') }} · {{ fa(\App\Domain\Market\QuoteSchedule::requestsPerDay($from, $to, $sec)) }} درخواست</li>@endforeach</ul>
                 </details>
             </div>
             <div class="action-card stack-sm {{ $emergency ? 'danger' : '' }}">
