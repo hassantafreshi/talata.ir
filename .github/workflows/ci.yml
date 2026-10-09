@@ -132,6 +132,22 @@ jobs:
           test -f "$REL/vendor/autoload.php" && test -f "$REL/public/build/manifest.json" && test -f "$REL/.cpanel.yml"
           du -sh "$REL" | cut -f1 | sed 's/^/release size: /'
 
+      - name: Zip for manual upload
+        run: |
+          set -euo pipefail
+          # Trim vendor test/doc folders to keep the download small.
+          find "$RUNNER_TEMP/rel/vendor" -mindepth 3 -maxdepth 3 -type d \( -iname tests -o -iname test -o -iname docs -o -name .github -o -name examples \) -prune -exec rm -rf {} +
+          (cd "$RUNNER_TEMP/rel" && zip -qr "$RUNNER_TEMP/zarlio-release.zip" .)
+          ls -lh "$RUNNER_TEMP/zarlio-release.zip"
+
+      - name: Upload the zip as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zarlio-release
+          path: ${{ runner.temp }}/zarlio-release.zip
+          compression-level: 0
+          retention-days: 14
+
       - name: Publish to the cpanel-release branch
         run: |
           set -euo pipefail
