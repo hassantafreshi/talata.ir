@@ -168,7 +168,7 @@ class AdminConsoleTest extends TestCase
         // Four merchant-side requests reach the hourly per-number limit of the «user» purpose…
         for ($i = 0; $i < 4; $i++) {
             $otp->request($staff->mobile, '10.0.0.'.(20 + $i));
-            $this->travel(91)->seconds();
+            $this->travel(181)->seconds();
         }
         $this->expectsDomainError(fn () => $otp->request($staff->mobile, '10.0.0.30'), 'OTP_RATE_LIMITED');
         // …and the staff sign-in still gets its code.

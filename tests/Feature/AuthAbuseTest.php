@@ -73,10 +73,10 @@ class AuthAbuseTest extends TestCase
         $this->requestCode('09123456789')->assertOk();
         $this->requestCode('09123456789')->assertStatus(429)->assertJsonPath('code', 'OTP_COOLDOWN');
         for ($i = 0; $i < 3; $i++) {
-            $this->travel(91)->seconds();
+            $this->travel(181)->seconds();
             $this->requestCode('09123456789')->assertOk();
         }
-        $this->travel(91)->seconds();
+        $this->travel(181)->seconds();
         $this->requestCode('09123456789')->assertStatus(429)->assertJsonPath('code', 'OTP_RATE_LIMITED');
         $this->assertSame(4, count(app(SmsGateway::class)->sent));
     }
@@ -118,14 +118,14 @@ class AuthAbuseTest extends TestCase
         $this->assertSame(TrustedDevice::value('09123456789'), $device);
         $this->post('/logout');
         $this->flushSession();
-        $this->travel(2)->minutes();
+        $this->travel(4)->minutes();
 
         // A stranger (the number is printed on every invoice) uses up the anonymous allowance and locks it.
         for ($i = 0; $i < 4; $i++) {
-            $this->travel(91)->seconds();
+            $this->travel(181)->seconds();
             $this->requestCode('09123456789');
         }
-        $this->travel(91)->seconds();
+        $this->travel(181)->seconds();
         $this->requestCode('09123456789')->assertStatus(429)->assertJsonPath('code', 'OTP_RATE_LIMITED');
         for ($i = 0; $i < 5; $i++) {
             $this->postJson('/api/auth/otp/verify', ['code' => '111111']);

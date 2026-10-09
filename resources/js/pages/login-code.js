@@ -37,7 +37,7 @@ export default function () {
   form.addEventListener('submit', (e) => { e.preventDefault(); submit(); });
 
   // Resend countdown
-  let resendAt = Number(form.dataset.resendAt) * 1000;
+  let resendAt = Date.now() + Number(form.dataset.resendIn || 0) * 1000;
   const tick = () => {
     const left = Math.ceil((resendAt - Date.now()) / 1000);
     if (left > 0) { resend.disabled = true; resend.textContent = `ارسال دوباره کد تا ${toPersian(String(Math.floor(left / 60)).padStart(2, '0'))}:${toPersian(String(left % 60).padStart(2, '0'))}`; }
@@ -52,7 +52,7 @@ export default function () {
     const res = await requestCode(form.dataset.mobile || '');
     busy(resend, false);
     if (res.ok) {
-      resendAt = Date.now() + (res.data.resend_after_seconds || 90) * 1000;
+      resendAt = Date.now() + (res.data.resend_after_seconds || 180) * 1000;
       tick();
       boxes.forEach((b) => { b.value = ''; }); boxes[0].focus();
       err.textContent = ''; form.querySelector('.field').classList.remove('invalid');
