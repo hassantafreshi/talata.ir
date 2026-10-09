@@ -1,0 +1,161 @@
+{
+ "$comment": "Seed for pricing_versions v1. Source of truth: docs/PLANS_AND_QUOTAS.md and docs/design/contracts/plans-pricing.json. Basic monthly 790000 toman and Basic caps 500/500 are owner-pending assumptions. team.permissions_edit: Free members always have full access (owner request 2026-10-06); team_members is the max active+invited members incl. owner (assumption, configurable).",
+ "plans": {
+  "free": {
+   "label_fa": "رایگان",
+   "price_toman": {
+    "monthly": "0",
+    "yearly": "0"
+   },
+   "highlights_fa": [
+    "مظنه و ماشین‌حساب طلایی بدون محدودیت",
+    "۵۰ فاکتور در ماه · ۵۰ مشتری جدید در ماه",
+    "۵ پیامک در سال · ۱۰ لینک فاکتور در ماه",
+    "فقط فاکتورهای ماه جاری؛ بدون گزارش مالی",
+    "QR بررسی اصالت · قالب ثابت «ساده و خوانا» با نشان زرلیو"
+   ],
+   "not_included_fa": [
+    "لوگوی فروشگاه و ویرایش ظاهر فاکتور",
+    "اقساط و یادآوری پیامکی",
+    "فاکتورهای ماه‌های قبل و گزارش مالی"
+   ],
+   "capabilities": {
+    "mazneh.view": true,
+    "calculator.use": true,
+    "invoice.finalize": true,
+    "invoice.print": true,
+    "invoice.sms_share": true,
+    "customers.manage": true, "dashboard.view": true, "settings.backup": false,
+    "team.permissions_edit": false,
+    "proforma.configure": false, "invoice.customize": false,
+    "invoice.shop_logo": false,
+    "invoice.hide_provider_brand": false,
+    "sms.template_edit": false,
+    "reports.financial": false,
+    "history.all": false,
+    "installments.manage": false,
+    "installments.sms_remind": false,
+    "business.multi_type": false,
+    "invoice.photo_attach": false
+   },
+   "quotas": {
+    "invoices_per_month": 50,
+    "new_customers_per_month": 50,
+    "links_per_month": 10,
+    "free_sms_per_year": 5,
+    "team_members": 10, "settings_backups": 50
+   }
+  },
+  "basic": {
+   "label_fa": "پایه",
+   "price_toman": {
+    "monthly": "790000",
+    "yearly": "7900000"
+   },
+   "highlights_fa": [
+    "همه امکانات رایگان · همه ماه‌ها و گزارش مالی",
+    "سقف بالاتر فاکتور و مشتری جدید در ماه · ۱۰۰ لینک فاکتور در ماه",
+    "لوگوی فروشگاه، بدون نشان زرلیو، دو قالب و ویرایش ظاهر فاکتور",
+    "ویرایش متن پیامک · ارسال پیامک فاکتور با شارژ"
+   ],
+   "not_included_fa": [
+    "اقساط و یادآوری پیامکی"
+   ],
+   "capabilities": {
+    "mazneh.view": true,
+    "calculator.use": true,
+    "invoice.finalize": true,
+    "invoice.print": true,
+    "invoice.sms_share": true,
+    "customers.manage": true, "dashboard.view": true, "settings.backup": true,
+    "team.permissions_edit": true,
+    "proforma.configure": true, "invoice.customize": true,
+    "invoice.shop_logo": true,
+    "invoice.hide_provider_brand": true,
+    "sms.template_edit": true,
+    "reports.financial": true,
+    "history.all": true,
+    "installments.manage": false,
+    "installments.sms_remind": false,
+    "business.multi_type": false,
+    "invoice.photo_attach": false
+   },
+   "quotas": {
+    "invoices_per_month": 500,
+    "new_customers_per_month": 500,
+    "links_per_month": 100,
+    "free_sms_per_year": 0,
+    "team_members": 10, "settings_backups": 50
+   }
+  },
+  "professional": {
+   "label_fa": "حرفه‌ای",
+   "price_toman": {
+    "monthly": "1900000",
+    "yearly": "10900000"
+   },
+   "highlights_fa": [
+    "همه امکانات پایه · فاکتور و مشتری نامحدود",
+    "۱٬۰۰۰ لینک فاکتور در ماه",
+    "قرارداد اقساط و ثبت پرداخت",
+    "یادآوری پیامکی اقساط",
+    "نسخه ۲: چند نوع کسب‌وکار و ضمیمه عکس محصول"
+   ],
+   "not_included_fa": [],
+   "capabilities": {
+    "mazneh.view": true,
+    "calculator.use": true,
+    "invoice.finalize": true,
+    "invoice.print": true,
+    "invoice.sms_share": true,
+    "customers.manage": true, "dashboard.view": true, "settings.backup": true,
+    "team.permissions_edit": true,
+    "proforma.configure": true, "invoice.customize": true,
+    "invoice.shop_logo": true,
+    "invoice.hide_provider_brand": true,
+    "sms.template_edit": true,
+    "reports.financial": true,
+    "history.all": true,
+    "installments.manage": true,
+    "installments.sms_remind": true,
+    "business.multi_type": true,
+    "invoice.photo_attach": true
+   },
+   "quotas": {
+    "invoices_per_month": null,
+    "new_customers_per_month": null,
+    "links_per_month": 1000,
+    "free_sms_per_year": 0,
+    "team_members": 10, "settings_backups": 50
+   }
+  }
+ },
+ "tax": {
+  "vat_rate_percent": "10"
+ },
+ "sms_credit": {
+  "per_segment_toman": {
+   "free": "850",
+   "basic": "500",
+   "professional": "350"
+  },
+  "min_purchase_toman": {
+   "free": "400000",
+   "basic": "100000",
+   "professional": "100000"
+  },
+  "pack_amounts_toman": [
+   "100000",
+   "200000",
+   "300000",
+   "500000",
+   "1000000"
+  ],
+  "carry_over": {
+   "free": false,
+   "basic": true,
+   "professional": true
+  }
+ },
+ "proration": "ADD_REMAINING_DAYS"
+}

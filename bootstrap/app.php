@@ -1,0 +1,105 @@
+<?php
+
+use App\Domain\DomainError;
+use App\Domain\Pricing\PricingError;
+use App\Http\Middleware\RequestContext;
+use App\Http\Middleware\RequirePermission;
+use App\Http\Middleware\RequireStaff;
+use App\Http\Middleware\ResolveTenant;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\UseAdminSession;
+use App\Support\Digits;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Context;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        then: function () {
+            Route::middleware('admin')->prefix('admin')->name('admin.')->group(base_path('routes/admin.php'));
+        },
+        commands: __DIR__.'/../routes/console.php',
+        health: '/up',
+    )
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(RequestContext::class);
+        $middleware->append(SecurityHeaders::class);
+        $middleware->group('admin', [
+            UseAdminSession::class,
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            ShareErrorsFromSession::class,
+            ValidateCsrfToken::class,
+            SubstituteBindings::class,
+        ]);
+        $middleware->alias([
+            'staff' => RequireStaff::class,
+            'tenant' => ResolveTenant::class,
+            'perm' => RequirePermission::class,
+        ]);
+        // Tenant context must exist before route-model binding so bindings are tenant-scoped.
+        $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: ResolveTenant::class);
+        $middleware->redirectGuestsTo(fn () => route('login'));
+        $middleware->redirectUsersTo(fn () => route('invoices.new'));
+        // The bank posts back cross-site; the callback is protected by the gateway authority + server verify instead.
+        $middleware->validateCsrfTokens(except: ['pay/callback/*']);
+        $middleware->trustProxies(at: env('TRUSTED_PROXIES', '127.0.0.1'));
+    })
+    ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->shouldRenderJsonWhen(fn (Request $request) => $request->is('api/*') || $request->expectsJson());
+
+        $exceptions->dontReport([DomainError::class, PricingError::class]);
+
+        $exceptions->render(function (DomainError $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['code' => $e->codeName, 'message_fa' => $e->messageFa, 'trace_id' => (string) (Context::get('request_id') ?? Str::ulid())] + $e->context, $e->status);
+            }
+
+            if ($request->isMethod('GET')) {
+                return response()->view('errors.page', ['status' => $e->status, 'message' => $e->messageFa], $e->status);
+            }
+
+            return back()->with('error', $e->messageFa)->withInput();
+        });
+
+        // Validation errors as {code, message_fa, errors} with Persian digits (lang/fa/validation.php).
+        $exceptions->render(function (ValidationException $e, Request $request) {
+            if (! $request->expectsJson() && ! $request->is('api/*')) {
+                return null;
+            }
+            $errors = array_map(fn (array $messages) => array_map(fn ($m) => Digits::toPersian((string) $m), $messages), $e->errors());
+
+            return response()->json(['code' => 'VALIDATION', 'message_fa' => reset($errors)[0] ?? 'اطلاعات واردشده کامل یا درست نیست.', 'errors' => $errors], $e->status);
+        });
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if (! $request->expectsJson() && ! $request->is('api/*')) {
+                return null; // pages: the usual redirect to the login page
+            }
+
+            return response()->json(['code' => 'UNAUTHENTICATED', 'message_fa' => 'نشست شما تمام شد. دوباره وارد شوید.', 'login' => route('login')], 401);
+        });
+
+        $exceptions->render(function (TokenMismatchException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['code' => 'SESSION_EXPIRED', 'message_fa' => 'نشست شما منقضی شد. صفحه را دوباره باز کنید.'], 419);
+            }
+
+            return redirect()->route('login')->with('error', 'نشست شما منقضی شد. دوباره وارد شوید.');
+        });
+    })->create();

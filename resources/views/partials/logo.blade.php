@@ -1,0 +1,2 @@
+{{-- Zarlio mark v2 (Z from two gold ingots + gleam). Single-colour: follows the current text colour. --}}
+<svg width="{{ $size ?? 30 }}" height="{{ $size ?? 30 }}" viewBox="0 0 120 120" aria-hidden="true" focusable="false"><g transform="translate(0 8)" fill="currentColor"><polygon points="34,20 86,20 94,40 26,40"/><polygon points="70,44 94,44 50,76 26,76" opacity=".72"/><polygon points="34,80 86,80 94,100 26,100"/><path d="M103 3 L104.4 8.6 L110 10 L104.4 11.4 L103 17 L101.6 11.4 L96 10 L101.6 8.6 Z"/></g></svg>

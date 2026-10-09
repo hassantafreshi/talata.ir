@@ -1,0 +1,1 @@
+/* empty css                */document.addEventListener(`DOMContentLoaded`,()=>{document.querySelector(`[data-print]`)?.addEventListener(`click`,()=>window.print()),new URLSearchParams(location.search).has(`auto`)&&setTimeout(()=>window.print(),400)});
