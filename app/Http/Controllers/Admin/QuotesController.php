@@ -6,9 +6,12 @@ use App\Domain\Admin\AdminActions;
 use App\Domain\Audit\Audit;
 use App\Domain\DomainError;
 use App\Domain\Market\EmergencyRates;
+use App\Domain\Market\QuoteSchedule;
 use App\Domain\Market\QuoteService;
 use App\Models\EmergencyRate;
+use App\Models\PlatformSetting;
 use App\Models\StaffUser;
+use App\Support\Digits;
 use App\Support\Money;
 use Brick\Math\BigDecimal;
 use Illuminate\Http\JsonResponse;
@@ -44,6 +47,8 @@ class QuotesController extends AdminController
             'driver' => config('talata.drivers.quotes'),
             'validity' => EmergencyRates::VALIDITY_FA,
             'canManage' => $this->staff()->allows('quotes.manage'),
+            'markupToman' => QuoteService::goldMarkupToman(),
+            'schedule' => QuoteSchedule::WINDOWS,
         ]);
     }
 
@@ -72,6 +77,27 @@ class QuotesController extends AdminController
         $rates->cancel($this->staff(), $this->reason($request));
 
         return response()->json(['message_fa' => 'نرخ اعلامی لغو شد؛ نرخ سرویس دوباره نمایش داده می‌شود.']);
+    }
+
+    /** Toman per gram added to every gold quote from the API; applies from the next fetch (stored quotes keep theirs). */
+    public function saveMarkup(Request $request, AdminActions $actions): JsonResponse
+    {
+        $data = $request->validate(['markup_toman' => ['required', 'string', 'max:20'], 'idempotency_key' => ['required', 'string']]);
+        $reason = $this->reason($request);
+        $digits = preg_replace('/[^0-9]/', '', Digits::toLatin($data['markup_toman']));
+        if ($digits === '' || strlen($digits) > 9) {
+            throw new DomainError('VALIDATION', 'مبلغ را به تومان وارد کنید.', 422, ['errors' => ['markup_toman' => ['مبلغ درست نیست (۰ تا ۹۹۹٬۹۹۹٬۹۹۹ تومان).']]]);
+        }
+        $value = (int) $digits;
+        $result = $actions->once($this->staff(), 'quotes.gold_markup', $data['idempotency_key'], null, function () use ($value, $reason) {
+            $old = QuoteService::goldMarkupToman();
+            PlatformSetting::put('quotes.gold_markup_toman', $value, $this->staff()->id);
+            Audit::record('quotes.gold_markup_changed', null, ['from' => $old, 'to' => $value, 'reason' => $reason], null, 'staff');
+
+            return ['markup_toman' => $value];
+        });
+
+        return response()->json($result + ['message_fa' => 'افزایش قیمت طلا ذخیره شد؛ از دریافت بعدی نرخ اعمال می‌شود.']);
     }
 
     /** «دریافت دوباره الان»: one central fetch (single-flight lock; never a per-merchant call). */

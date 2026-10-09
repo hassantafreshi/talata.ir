@@ -8,6 +8,7 @@ use App\Domain\Plans\Entitlements;
 use App\Models\MarketQuote;
 use App\Models\SmsMessage;
 use Brick\Math\BigDecimal;
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -17,6 +18,7 @@ class FreshnessAndWindowsTest extends TestCase
 {
     public function test_quote_is_fresh_then_stale_after_240_seconds_then_error_when_refresh_fails(): void
     {
+        $this->travelTo(CarbonImmutable::parse('2026-10-10 13:00:00', 'Asia/Tehran')); // a 1-minute window
         $quotes = app(QuoteService::class);
         $q = MarketQuote::query()->create(['asset' => 'GOLD_18_SELL', 'value' => '100000000', 'unit' => 'IRR_PER_GRAM', 'source' => 'test', 'is_demo' => true, 'fetched_at' => now()]);
         $this->assertSame('FRESH', $quotes->freshness($q));
@@ -95,11 +97,11 @@ class FreshnessAndWindowsTest extends TestCase
         $this->assertSame('ERROR', $down->freshness($latest));
     }
 
-    public function test_the_feed_is_scheduled_every_three_minutes_without_overlap(): void
+    public function test_the_feed_requester_is_woken_every_minute_without_overlap(): void
     {
         $event = collect(app(Schedule::class)->events())->first(fn ($e) => str_contains((string) $e->command, 'talata:quotes'));
         $this->assertNotNull($event);
-        $this->assertSame('*/3 * * * *', $event->expression);
+        $this->assertSame('* * * * *', $event->expression); // the interval itself is decided by QuoteSchedule
         $this->assertTrue($event->withoutOverlapping);
     }
 

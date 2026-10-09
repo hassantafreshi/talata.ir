@@ -17,8 +17,8 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('talata:quotes', fn (QuoteService $q) => $this->info($q->refresh() ? 'quotes refreshed' : 'quote refresh skipped/failed'))
-    ->purpose('Central 180-second quote fetch (single-flight)');
+Artisan::command('talata:quotes {--force : fetch now, ignoring the time-of-day interval}', fn (QuoteService $q) => $this->info(($this->option('force') ? $q->refresh() : $q->refreshIfDue(true)) ? 'quotes refreshed' : 'quote refresh not due/failed'))
+    ->purpose('Quote fetch by Tehran time-of-day interval (App\\Domain\\Market\\QuoteSchedule; single-flight)');
 
 Artisan::command('talata:payments-reconcile', fn (BillingService $b) => $this->info(json_encode($b->reconcile())))
     ->purpose('Retry ambiguous payment verifications and expire abandoned orders');
@@ -107,7 +107,7 @@ Artisan::command('talata:affiliate-approve', fn (AffiliateService $a) => $this->
 // Each job records its last run for the admin «سلامت سیستم» page (App\Support\ScheduleMonitor).
 ScheduleMonitor::track(Schedule::command('talata:logs-prune')->dailyAt('03:30'), 'logs-prune');
 ScheduleMonitor::track(Schedule::command('talata:affiliate-approve')->hourlyAt(17)->withoutOverlapping(), 'affiliate-approve');
-ScheduleMonitor::track(Schedule::command('talata:quotes')->everyThreeMinutes()->withoutOverlapping(), 'quotes');
+ScheduleMonitor::track(Schedule::command('talata:quotes')->everyMinute()->withoutOverlapping(), 'quotes');
 ScheduleMonitor::track(Schedule::command('talata:payments-reconcile')->everyMinute()->withoutOverlapping(), 'payments-reconcile');
 ScheduleMonitor::track(Schedule::command('talata:sms-reconcile')->everyMinute()->withoutOverlapping(), 'sms-reconcile');
 ScheduleMonitor::track(Schedule::command('talata:sms-credit-expire')->everyFiveMinutes()->withoutOverlapping(), 'sms-credit-expire');

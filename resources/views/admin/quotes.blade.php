@@ -31,11 +31,25 @@
                         <tr><td class="muted">هنوز دریافتی ثبت نشده است.</td></tr>
                     @endforelse
                 </tbody></table>
-                <p class="xs muted">ارائه‌دهنده: <span class="mono">{{ $driver }}</span> · فاصله دریافت {{ fa($config['interval_seconds']) }} ثانیه (ثابت) · «قدیمی» پس از {{ fa($config['stale_after_seconds']) }} ثانیه@if($lastError) · آخرین خطا: {{ jdate(\Carbon\CarbonImmutable::parse($lastError), true) }}@endif</p>
+                <p class="xs muted">ارائه‌دهنده: <span class="mono">{{ $driver }}</span> · فاصله دریافت الان {{ fa(\App\Domain\Market\QuoteSchedule::intervalSeconds(now())) }} ثانیه (بسته به ساعت تهران)@if($lastError) · آخرین خطا: {{ jdate(\Carbon\CarbonImmutable::parse($lastError), true) }}@endif</p>
             </section>
         </section>
 
         <section class="stack-sm">
+            <div class="action-card stack-sm">
+                <h3>افزایش ثابت قیمت طلا</h3>
+                <p class="small">به قیمت هر گرم طلا (۱۸ فروش، ۱۸ خرید و ۲۴ عیار) که از سرویس نرخ می‌رسد اضافه می‌شود: <strong class="num">{{ fa(number_format($markupToman)) }} تومان</strong>. از دریافت بعدی اعمال می‌شود؛ نرخ اضطراری و فاکتورهای صادرشده تغییر نمی‌کنند.</p>
+                @if ($canManage)
+                    <form class="stack-sm" data-action="{{ route('admin.quotes.markup') }}" data-idem data-reload data-confirm="افزایش قیمت طلا «{markup_toman}» تومان شود؟">
+                        <div class="field"><label for="gm">مبلغ (تومان برای هر گرم)</label><input id="gm" name="markup_toman" class="ltr-input num" inputmode="numeric" maxlength="20" value="{{ $markupToman }}" required></div>
+                        <div class="field"><label for="gmr">دلیل</label><textarea id="gmr" name="reason" required minlength="5" maxlength="250"></textarea></div>
+                        <button class="btn btn-dark sm" type="submit">ذخیره</button>
+                    </form>
+                @endif
+                <details class="xs muted"><summary>زمان‌بندی دریافت نرخ (ساعت تهران)</summary>
+                    <ul>@foreach ($schedule as [$from, $to, $sec])<li>{{ fa(sprintf('%02d:00', $from)) }} تا {{ fa(sprintf('%02d:00', $to)) }}: هر {{ fa($sec >= 60 ? intdiv($sec, 60).' دقیقه' : $sec.' ثانیه') }}</li>@endforeach</ul>
+                </details>
+            </div>
             <div class="action-card stack-sm {{ $emergency ? 'danger' : '' }}">
                 <h3>نرخ اضطراری ۱۸ عیار (فروش)</h3>
                 @if ($emergency)

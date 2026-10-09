@@ -4,6 +4,7 @@ namespace App\Domain\Market;
 
 use App\Models\EmergencyRate;
 use App\Models\MarketQuote;
+use App\Models\PlatformSetting;
 use App\Support\Digits;
 use App\Support\Jalali;
 use App\Support\Money;
@@ -77,6 +78,9 @@ final class QuoteService
 
                     continue;
                 }
+                if (str_starts_with($asset, 'GOLD_') && ($markup = self::goldMarkupToman()) > 0) {
+                    $normalized = (string) BigDecimal::of($normalized)->plus($markup * 10); // toman → rial
+                }
                 $previous = MarketQuote::query()->where('asset', $asset)->latest('fetched_at')->first();
                 $value = BigDecimal::of($normalized);
                 $change = null;
@@ -141,30 +145,44 @@ final class QuoteService
         if ($quote->isEmergency) {
             return 'FRESH'; // valid until staff cancel it or its validity ends
         }
-        if (Cache::get('talata.quotes.last_error') && $quote->fetched_at->lt(now()->subMinutes(4))) {
+        if (Cache::get('talata.quotes.last_error') && $quote->fetched_at->lt(now()->subSeconds(max(240, QuoteSchedule::intervalSeconds(now()) + 60)))) {
             return 'ERROR';
         }
 
-        return $quote->fetched_at->lt(now()->subSeconds((int) config('talata.quotes.stale_after_seconds', 240))) ? 'STALE' : 'FRESH';
+        $staleAfter = max((int) config('talata.quotes.stale_after_seconds', 240), QuoteSchedule::intervalSeconds(now()) + 60);
+
+        return $quote->fetched_at->lt(now()->subSeconds($staleAfter)) ? 'STALE' : 'FRESH';
     }
 
     /**
-     * Shared hosting without a scheduler (TALATA_QUOTES_REFRESH_ON_READ=true, test server only): a page or API
-     * call that reads prices refreshes them first when the last fetch is older than the 180 s interval. Still
-     * single-flight (refresh() holds a lock) and paused for one interval after a failed fetch.
+     * The only place that decides whether to ask the quote API now: the gap since the last fetch must reach the
+     * Tehran time-of-day interval (QuoteSchedule). The scheduler calls it every minute (talata:quotes) and, on
+     * hosts without a reliable scheduler (TALATA_QUOTES_REFRESH_ON_READ=true), price reads call it too. Single
+     * flight (refresh() holds a lock); after a failed fetch it waits one interval (at least 60 s).
      */
-    public function refreshIfDue(): void
+    public function refreshIfDue(bool $fromScheduler = false): bool
     {
-        if (! config('talata.quotes.refresh_on_read')) {
-            return;
+        if (! $fromScheduler && ! config('talata.quotes.refresh_on_read')) {
+            return false;
         }
-        $interval = (int) config('talata.quotes.interval_seconds', 180);
+        $interval = QuoteSchedule::intervalSeconds(now());
         $last = MarketQuote::query()->where('asset', 'GOLD_18_SELL')->max('fetched_at');
         $lastError = Cache::get('talata.quotes.last_error');
-        if (($last && now()->subSeconds($interval)->lt($last)) || ($lastError && now()->subSeconds($interval)->lt($lastError))) {
-            return;
+        // 5 s slack so a fetch that ran a moment late in the previous minute does not skip a whole minute.
+        if ($last && now()->subSeconds(max(1, $interval - 5))->lt($last)) {
+            return false;
         }
-        $this->refresh();
+        if ($lastError && now()->subSeconds(max(60, $interval))->lt($lastError)) {
+            return false;
+        }
+
+        return $this->refresh();
+    }
+
+    /** Fixed markup (toman per gram) added to every gold quote from the API; edited in the admin console. */
+    public static function goldMarkupToman(): int
+    {
+        return max(0, (int) PlatformSetting::get('quotes.gold_markup_toman', config('talata.quotes.gold_markup_toman', 100000)));
     }
 
     public function latestDto(string $tz): array

@@ -136,6 +136,8 @@ return [
         // Shared hosting without cron/scheduler: refresh when a price is read and the last fetch is older than
         // the interval (single-flight). Test server only; production uses the scheduler (talata:quotes).
         'refresh_on_read' => (bool) env('TALATA_QUOTES_REFRESH_ON_READ', false),
+        // Toman per gram added to every gold quote from the API (owner decision 2026-10-09); admin console overrides.
+        'gold_markup_toman' => (int) env('TALATA_GOLD_MARKUP_TOMAN', 100000),
     ],
 
     'invoices' => [
