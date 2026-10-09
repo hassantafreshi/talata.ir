@@ -11,10 +11,11 @@ export default function () {
   const badge = hero.querySelector('[data-freshness-badge]');
   const errNote = hero.querySelector('[data-error-note]');
   const startBtn = hero.querySelector('[data-start]');
-  const poll = Number(hero.dataset.poll || 180) * 1000;
+  let pollMs = Number(hero.dataset.poll || 180) * 1000;
 
   const renderQuote = (q) => {
     quote = q;
+    if (q.poll_seconds) pollMs = q.poll_seconds * 1000;
     priceEl.textContent = q.value_toman_fa ?? '—';
     const startRate = hero.querySelector('[data-start-rate]');
     if (startRate) startRate.textContent = q.value_toman_fa ?? '—';
@@ -43,7 +44,8 @@ export default function () {
     if (res.ok) renderQuote(res.data); else if (btn) toast(res.message, { kind: 'error' });
   };
   hero.querySelector('[data-retry-quote]')?.addEventListener('click', (e) => refresh(e.currentTarget));
-  setInterval(refresh, poll);
+  const loop = () => setTimeout(async () => { await refresh(); loop(); }, pollMs);
+  loop();
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
   // Back online: re-enable with the last known rate at once, then fetch (a failed fetch keeps it usable).
   window.addEventListener('online', () => { renderQuote(quote); refresh(); });

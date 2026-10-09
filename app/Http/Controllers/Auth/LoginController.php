@@ -14,6 +14,7 @@ use App\Models\Membership;
 use App\Models\Passkey;
 use App\Models\SmsMessage;
 use App\Support\Mobile;
+use App\Support\TechLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -46,7 +47,19 @@ class LoginController extends Controller
 
     public function pow(Request $request, ProofOfWork $pow): JsonResponse
     {
-        return response()->json($pow->issue($request->ip()))->header('Cache-Control', 'no-store');
+        $response = response()->json($pow->issue($request->ip()))->header('Cache-Control', 'no-store');
+        self::timing('pow');
+
+        return $response;
+    }
+
+    /** Slow login steps (> 0.8 s since PHP started, boot included) are written to the technical log (admin → لاگ فنی, service auth). */
+    private static function timing(string $step): void
+    {
+        $ms = defined('LARAVEL_START') ? (int) round((microtime(true) - LARAVEL_START) * 1000) : 0;
+        if ($ms > 800) {
+            TechLog::warning('auth', 'slow login step', ['step' => $step, 'ms' => $ms]);
+        }
     }
 
     public function requestOtp(Request $request, ProofOfWork $pow, OtpService $otp): JsonResponse
@@ -79,6 +92,8 @@ class LoginController extends Controller
             'otp.mobile_display' => Mobile::display($mobile),
             'otp.resend_at' => time() + $result['resend_after_seconds'],
         ]);
+
+        self::timing('otp_request');
 
         return response()->json(['next' => route('login.code'), 'resend_after_seconds' => $result['resend_after_seconds']]);
     }

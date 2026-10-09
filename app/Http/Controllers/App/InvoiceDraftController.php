@@ -31,7 +31,7 @@ class InvoiceDraftController extends BaseController
             'draft' => $draft,
             'quota' => $this->ent()->quota($tenant, 'invoices_per_month'),
             'canIssue' => $this->membership()->can('invoice.issue'),
-            'pollSeconds' => config('talata.quotes.client_poll_seconds'),
+            'pollSeconds' => QuoteService::pollSeconds(),
         ]);
     }
 

@@ -19,7 +19,7 @@
             <p class="xs start-note">همین نرخ روی فاکتور ثابت می‌ماند؛ تغییر بعدی بازار فاکتور را عوض نمی‌کند.</p>
         @endif
         <div class="between meta"><span>آخرین دریافت: <span class="num" data-time>{{ $quote['fetched_at_fa'] ?? '—' }}</span></span>@include('partials.freshness', ['f' => $quote['freshness']])</div>
-        <div class="meta">به‌روزرسانی هر ۳ دقیقه · منبع: <span data-source>{{ $quote['source_fa'] ?? '—' }}</span></div>
+        <div class="meta">به‌روزرسانی {{ \App\Domain\Market\QuoteService::pollLabelFa() }} · منبع: <span data-source>{{ $quote['source_fa'] ?? '—' }}</span></div>
         <div class="notice err {{ $quote['freshness'] === 'ERROR' ? '' : 'hidden' }}" data-error-note role="status">
             <span>سرویس نرخ پاسخ نمی‌دهد. آخرین نرخ معتبر نمایش داده می‌شود؛ صفحه هر ۳ دقیقه خودش دوباره تلاش می‌کند.</span>
             <button type="button" class="btn sm btn-dark" data-retry-quote data-busy-text="در حال دریافت…">تلاش دوباره الان</button>
