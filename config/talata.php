@@ -73,7 +73,7 @@ return [
 
     'otp' => [
         'length' => 6,
-        'ttl_seconds' => 120,
+        'ttl_seconds' => 180,             // every SMS code (login, admin, number change, پیش‌فاکتور): 3 minutes
         'max_attempts' => 5,
         'resend_cooldown_seconds' => 90,
         'per_mobile_hour' => 4,
@@ -88,7 +88,8 @@ return [
 
     // Proof-of-work before any OTP SMS is sent (anti SMS-pumping without third-party captcha).
     'pow' => [
-        'bits' => (int) env('TALATA_POW_BITS', 18),
+        // 15 bits ≈ 33k hashes: well under a second on a weak phone (18 took several seconds); still costs a pump.
+        'bits' => (int) env('TALATA_POW_BITS', 15),
         'ttl_seconds' => 300,
         'min_form_seconds' => 2,
     ],

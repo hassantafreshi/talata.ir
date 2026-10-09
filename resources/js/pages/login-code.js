@@ -1,7 +1,7 @@
 import { get, post } from '../lib/http.js';
 import { busy, toast } from '../lib/ui.js';
 import { toLatin, toPersian } from '../lib/digits.js';
-import { requestCode } from '../lib/otp.js';
+import { prepare, requestCode } from '../lib/otp.js';
 
 export default function () {
   const form = document.querySelector('[data-code-form]');
@@ -44,6 +44,8 @@ export default function () {
     else { resend.disabled = false; resend.textContent = 'ارسال دوباره کد'; }
   };
   tick(); setInterval(tick, 1000);
+  // Have the security check ready before «ارسال دوباره کد» unlocks.
+  setTimeout(prepare, Math.max(0, resendAt - Date.now() - 20_000));
   // Resend right here, to the same number (same proof-of-work and limits as the first request).
   resend.addEventListener('click', async () => {
     busy(resend);
