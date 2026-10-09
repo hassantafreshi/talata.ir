@@ -48,4 +48,16 @@ class CpanelDeployFilesTest extends TestCase
         $this->assertStringContainsString('--exclude=./.env', $ci);
         $this->assertStringNotContainsStringIgnoringCase('hostinger', $ci);
     }
+
+    public function test_the_pure_php_deployer_is_valid_and_uses_no_shell_function(): void
+    {
+        $file = $this->root('scripts/deploy/deploy.php');
+        exec('php -l '.escapeshellarg($file).' 2>&1', $out, $code);
+        $this->assertSame(0, $code, implode("\n", $out));
+
+        $code = (string) file_get_contents($file);
+        // Hosts that run cron for PHP files only usually disable these; the deployer must not need any of them.
+        $this->assertDoesNotMatchRegularExpression('/\b(exec|shell_exec|system|passthru|proc_open|popen|escapeshellarg|escapeshellcmd)\s*\(/', $code);
+        $this->assertStringContainsString("PHP_SAPI !== 'cli'", $code, 'must not be runnable from the web');
+    }
 }

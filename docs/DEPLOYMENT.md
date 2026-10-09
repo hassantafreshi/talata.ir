@@ -245,3 +245,11 @@ cron کاربر `www-data`:
 
 ### استقرار خودکار پس از هر push (اختیاری)
 بدون آن، پس از هر انتشار باید در cPanel دو دکمه را بزنید. برای خودکار شدن، در cPanel › Security › **Manage API Tokens** یک توکن بسازید و در گیت‌هاب (Settings › Secrets and variables › Actions) این secretها را بگذارید: `CPANEL_HOST` (مثل `3114551444.cloudylink.com`)، `CPANEL_USER`، `CPANEL_TOKEN`، `CPANEL_REPO` (مسیر مخزن روی سرور، مثل `/home/<کاربر>/repositories/talata.ir`) و اختیاری `ZARLIO_SITE_URL` (`https://zarlio.ir`) برای تطبیق نسخه زنده از `release.txt`. CI سپس `VersionControl/update` و `VersionControlDeployment/create` را از API رسمی cPanel صدا می‌زند؛ اگر پاسخ نداد، فقط هشدار می‌دهد و دو دکمه دستی کار می‌کنند. **این مرحله هنوز روی هاست واقعی آزموده نشده است.**
+
+### هاست بدون Shell: استقرار با PHP خالص (آزموده‌شده در sandbox، نه روی هاست واقعی)
+اگر هاست Cron را فقط برای فایل PHP می‌پذیرد و توابع `exec`/`escapeshellarg` بسته است، اسکریپت bash اجرا نمی‌شود و «Git Version Control» هم ممکن است دسترسی Shell نخواهد. فایل `scripts/deploy/deploy.php` همان کار را با توابع فایل PHP و اجرای Artisan درون همان پردازش انجام می‌دهد (بدون هیچ تابع shell).
+1. `zarlio-release.zip` (خروجی CI، artifact) را **بیرون از `public_html`** در `~/zarlio-src` باز کنید.
+2. cPanel › Cron Jobs › هر دقیقه › `/usr/local/bin/php /home/<کاربر>/zarlio-src/scripts/deploy/deploy.php`؛ پس از یک دقیقه Cron را حذف کنید. خروجی: `~/zarlio/deploy.log`.
+3. پوشه استخراج‌شده **منتقل** می‌شود به `~/zarlio/releases/<نسخه>` (بدون کپی)، پس Cron یک‌بارمصرف است و بعد از اجرا مسیرش دیگر وجود ندارد. برای نسخه بعد دوباره zip را در `~/zarlio-src` باز کنید و یک‌بار Cron بسازید.
+4. زمان‌بند دائمی: `/usr/local/bin/php /home/<کاربر>/zarlio/current/artisan schedule:run` (هر دقیقه؛ بدون `cd`، `&&` و تغییر مسیر خروجی).
+5. نیاز: افزونه `pdo_sqlite` در PHP هاست (Select PHP Version › Extensions)؛ اگر نباشد، اجرا با پیام روشن متوقف می‌شود.
