@@ -1,0 +1,6 @@
+---
+# cPanel › Git Version Control › «Deploy HEAD Commit» runs these tasks inside the cloned repository.
+# This file is part of the `cpanel-release` branch that CI builds (vendor/ and public/build included).
+deployment:
+  tasks:
+    - /bin/bash scripts/deploy/cpanel-deploy.sh

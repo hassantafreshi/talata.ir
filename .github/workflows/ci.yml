@@ -84,97 +84,106 @@ jobs:
           path: bundle-report.json
           if-no-files-found: ignore
 
-  # Test server on Hostinger shared hosting (docs/DEPLOYMENT.md). Runs only after green tests, only for the
-  # working branch, and only when the repository secrets below exist; otherwise it is skipped with a notice.
-  # Secrets: HOSTINGER_SSH_HOST, HOSTINGER_SSH_PORT, HOSTINGER_SSH_USER, HOSTINGER_SSH_PASSWORD, BRSAPI_KEY,
-  # KAVENEGAR_API_KEY. Nothing secret is written to the repository or printed.
-  deploy-test-server:
+  # cPanel host (zarlio.ir): CI builds the release (vendor/ and public/build included, because cPanel has no
+  # Composer/Node terminal) and publishes it to the `cpanel-release` branch. cPanel «Git Version Control» pulls
+  # that branch and runs .cpanel.yml → scripts/deploy/cpanel-deploy.sh (docs/DEPLOYMENT.md §13).
+  publish-cpanel-release:
     needs: test
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/claude/friendly-hopper-ntt0vl'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    permissions:
+      contents: write          # push the cpanel-release branch
     concurrency:
-      group: deploy-test-server
+      group: cpanel-release
       cancel-in-progress: false
     env:
-      SITE: violet-leopard-846931.hostingersite.com
-      SSH_HOST: ${{ secrets.HOSTINGER_SSH_HOST }}
-      SSH_PORT: ${{ secrets.HOSTINGER_SSH_PORT }}
-      SSH_USER: ${{ secrets.HOSTINGER_SSH_USER }}
-      SSHPASS: ${{ secrets.HOSTINGER_SSH_PASSWORD }}
-      BRSAPI_KEY: ${{ secrets.BRSAPI_KEY }}
-      KAVENEGAR_API_KEY: ${{ secrets.KAVENEGAR_API_KEY }}
+      # Optional: let CI trigger the cPanel deployment itself (cPanel › Security › Manage API Tokens).
+      CPANEL_HOST: ${{ secrets.CPANEL_HOST }}       # e.g. 3114551444.cloudylink.com
+      CPANEL_USER: ${{ secrets.CPANEL_USER }}       # cPanel account name
+      CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
+      CPANEL_REPO: ${{ secrets.CPANEL_REPO }}       # repository path on the server, e.g. /home/<user>/repositories/talata.ir
+      SITE_URL: ${{ secrets.ZARLIO_SITE_URL }}      # e.g. https://zarlio.ir (for the version check)
     steps:
-      - name: Test server configured?
-        id: cfg
-        run: |
-          # Names and shapes only — values are never printed.
-          chk() { if [ -n "$2" ]; then echo "secret $1: set (${#2} chars)"; else echo "secret $1: MISSING"; fi; }
-          chk HOSTINGER_SSH_HOST "$SSH_HOST"; chk HOSTINGER_SSH_PORT "$SSH_PORT"; chk HOSTINGER_SSH_USER "$SSH_USER"
-          chk HOSTINGER_SSH_PASSWORD "$SSHPASS"; chk BRSAPI_KEY "$BRSAPI_KEY"; chk KAVENEGAR_API_KEY "$KAVENEGAR_API_KEY"
-          [ -n "$SSH_HOST" ] && ! printf '%s' "$SSH_HOST" | grep -Eq '^[A-Za-z0-9.-]+$' && echo "::warning::HOSTINGER_SSH_HOST has spaces or odd characters (expected 185.212.71.141)"
-          [ -n "$SSH_PORT" ] && ! printf '%s' "$SSH_PORT" | grep -Eq '^[0-9]{2,5}$' && echo "::warning::HOSTINGER_SSH_PORT must be digits only (expected 65002)"
-          [ -n "$SSH_USER" ] && ! printf '%s' "$SSH_USER" | grep -Eq '^[a-z0-9_]+$' && echo "::warning::HOSTINGER_SSH_USER has spaces or odd characters (expected u912604790)"
-          [ -n "$SSHPASS" ] && [ "$SSHPASS" != "$(printf '%s' "$SSHPASS" | xargs -0)" ] && echo "::warning::HOSTINGER_SSH_PASSWORD starts or ends with a space/newline — paste it again"
-          if [ -z "$SSH_HOST" ] || [ -z "$SSHPASS" ] || [ -z "$SSH_USER" ]; then
-            echo "::notice::Hostinger secrets are not set; test-server deploy skipped."
-            echo "go=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "go=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - uses: actions/checkout@v4
-        if: steps.cfg.outputs.go == 'true'
 
       - uses: shivammathur/setup-php@v2
-        if: steps.cfg.outputs.go == 'true'
         with:
           php-version: '8.3'
           extensions: pdo_sqlite, gd, intl, bcmath
           coverage: none
 
       - uses: actions/setup-node@v4
-        if: steps.cfg.outputs.go == 'true'
         with:
           node-version-file: .nvmrc
           cache: npm
 
       - name: Build release
-        if: steps.cfg.outputs.go == 'true'
         run: |
           composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress
           npm ci && npm run build
-          tar czf "$RUNNER_TEMP/release.tgz" --exclude=./.git --exclude=./node_modules --exclude=./tests --exclude=./docs \
-            --exclude=./storage --exclude=./.env --exclude=./database/testing.sqlite .
+          REL="$RUNNER_TEMP/rel"; mkdir -p "$REL"
+          # .gitignore is left out on purpose: it would hide vendor/ and public/build from git.
+          tar cf - --exclude=.git --exclude=./.github --exclude=./.gitignore --exclude=./node_modules --exclude=./tests --exclude=./docs \
+            --exclude=./storage --exclude=./.env --exclude='./database/*.sqlite' . | tar xf - -C "$REL"
+          SHORT="${GITHUB_SHA::12}"
+          printf '%s' "$SHORT" > "$REL/REVISION"
+          printf '%s' "$SHORT" > "$REL/public/release.txt"
+          test -f "$REL/vendor/autoload.php" && test -f "$REL/public/build/manifest.json" && test -f "$REL/.cpanel.yml"
+          du -sh "$REL" | cut -f1 | sed 's/^/release size: /'
 
-      - name: Upload and switch release
-        if: steps.cfg.outputs.go == 'true'
+      - name: Publish to the cpanel-release branch
         run: |
-          sudo apt-get install -y -qq sshpass > /dev/null
-          umask 077
-          {
-            [ -n "$BRSAPI_KEY" ] && echo "BRSAPI_KEY=$BRSAPI_KEY"
-            [ -n "$KAVENEGAR_API_KEY" ] && echo "KAVENEGAR_API_KEY=$KAVENEGAR_API_KEY"
-            echo "KAVENEGAR_SENDER=10007770000707"
-            echo "TEST_ADMIN_MOBILE=09396727215"
-            echo "APP_URL=https://$SITE"
-            # Test server only: staff may use the console after an SMS login while passkeys are being tested
-            # on real phones (production keeps TALATA_ADMIN_REQUIRE_PASSKEY=true).
-            echo "TALATA_ADMIN_REQUIRE_PASSKEY=false"
-            echo "TALATA_STARTER_SMS_CREDIT_TOMAN=50000"
-          } > "$RUNNER_TEMP/secrets.env"
-          DIR="domains/$SITE"
-          OPTS="-o StrictHostKeyChecking=accept-new -o ConnectTimeout=30"
-          sshpass -e scp $OPTS -P "${SSH_PORT:-22}" "$RUNNER_TEMP/release.tgz" scripts/deploy/hostinger-test.sh "$RUNNER_TEMP/secrets.env" "$SSH_USER@$SSH_HOST:$DIR/"
-          sshpass -e ssh $OPTS -p "${SSH_PORT:-22}" "$SSH_USER@$SSH_HOST" \
-            "bash \"$DIR/hostinger-test.sh\" \"$DIR\" \"\$HOME/$DIR/release.tgz\" \"${GITHUB_SHA::12}\" \"\$HOME/$DIR/secrets.env\"; rm -f \"$DIR/hostinger-test.sh\""
-          rm -f "$RUNNER_TEMP/secrets.env"
+          set -euo pipefail
+          SHORT="${GITHUB_SHA::12}"; OUT="$RUNNER_TEMP/out"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin cpanel-release > /dev/null 2>&1; then
+            git fetch --depth=1 origin cpanel-release
+            git worktree add -B cpanel-release "$OUT" FETCH_HEAD
+          else
+            echo "creating the cpanel-release branch"
+            git worktree add --detach "$OUT"
+            (cd "$OUT" && git checkout -q --orphan cpanel-release && git rm -rfq .)
+          fi
+          rsync -a --delete --exclude=/.git "$RUNNER_TEMP/rel/" "$OUT/"
+          cd "$OUT"
+          git add -A -f
+          if git diff --cached --quiet; then echo "nothing to publish"; exit 0; fi
+          git commit -q -m "Release $SHORT" -m "Built by CI from $GITHUB_SHA (vendor/ and public/build included). Generated: do not edit by hand."
+          git push origin HEAD:refs/heads/cpanel-release
+          echo "published $SHORT to cpanel-release"
 
-      - name: Smoke test
-        if: steps.cfg.outputs.go == 'true'
+      - name: Ask cPanel to deploy (optional)
+        continue-on-error: true
         run: |
-          for path in / /login /terms /mazneh; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' "https://$SITE$path")
-            echo "$path $code"
+          if [ -z "$CPANEL_HOST" ] || [ -z "$CPANEL_USER" ] || [ -z "$CPANEL_TOKEN" ] || [ -z "$CPANEL_REPO" ]; then
+            echo "::notice::cPanel API secrets are not set: in cPanel › Git Version Control › Manage press «Update from Remote», then «Deploy HEAD Commit»."
+            exit 0
+          fi
+          api() {  # api <module/function> -> JSON; the token is never printed
+            curl -sS --max-time 180 -H "Authorization: cpanel $CPANEL_USER:$CPANEL_TOKEN" --get \
+              --data-urlencode "repository_root=$CPANEL_REPO" --data-urlencode "branch=cpanel-release" \
+              "https://$CPANEL_HOST:2083/execute/$1"
+          }
+          for fn in VersionControl/update VersionControlDeployment/create; do
+            out="$(api "$fn" || true)"
+            if [ "$(printf '%s' "$out" | jq -r '.status // 0' 2>/dev/null)" != "1" ]; then
+              echo "::warning::cPanel $fn failed: $(printf '%s' "$out" | jq -c '.errors // .' 2>/dev/null | cut -c1-300). Press «Update from Remote» and «Deploy HEAD Commit» in cPanel."
+              exit 1
+            fi
+            echo "cPanel $fn: ok"
           done
-          curl -fsS "https://$SITE/" | grep -q 'زرلیو'
+
+      - name: Check the live version (optional)
+        continue-on-error: true
+        run: |
+          [ -n "$SITE_URL" ] && [ -n "$CPANEL_TOKEN" ] || { echo "version check skipped"; exit 0; }
+          SHORT="${GITHUB_SHA::12}"
+          for i in $(seq 1 12); do
+            live="$(curl -fsS --max-time 20 "$SITE_URL/release.txt" 2>/dev/null || true)"
+            [ "$live" = "$SHORT" ] && { echo "live version is $SHORT"; exit 0; }
+            sleep 20
+          done
+          echo "::warning::$SITE_URL/release.txt still shows '${live:-nothing}', expected $SHORT (deployment may still be running, or press «Deploy HEAD Commit» in cPanel)."
+          exit 1
