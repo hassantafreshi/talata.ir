@@ -278,7 +278,9 @@ $htNew = $handler.(string) file_get_contents($REL.'/public/.htaccess');
 rcopy($REL.'/public', $DOCROOT);
 file_put_contents($DOCROOT.'/.htaccess', $htNew);
 
-$base = is_link($APP.'/current') || function_exists('symlink') ? $APP.'/current' : $REL;
+// The release folder itself, not the `current` link: PHP's realpath/opcache caches resolve a link once and can keep
+// serving the previous release's files (config, views) after the link is switched.
+$base = $REL;
 $index = (string) file_get_contents($REL.'/public/index.php');
 $index = str_replace("__DIR__.'/../", "'".$base.'/', $index);
 $index = preg_replace('/^(.*bootstrap\/app\.php.*)$/m', "$1\n\$app->usePublicPath(__DIR__);", $index, 1);
