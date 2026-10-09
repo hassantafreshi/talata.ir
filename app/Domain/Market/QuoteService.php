@@ -185,6 +185,20 @@ final class QuoteService
         return max(0, (int) PlatformSetting::get('quotes.gold_markup_toman', config('talata.quotes.gold_markup_toman', 100000)));
     }
 
+    /** How often a screen should ask for fresh rates: the current API interval (never faster than once a minute). */
+    public static function pollSeconds(): int
+    {
+        return max(60, QuoteSchedule::intervalSeconds(now()));
+    }
+
+    /** «هر ۲ دقیقه» for the current interval. */
+    public static function pollLabelFa(): string
+    {
+        $m = max(1, intdiv(self::pollSeconds(), 60));
+
+        return 'هر '.Digits::toPersian((string) $m).' دقیقه';
+    }
+
     public function latestDto(string $tz): array
     {
         $this->refreshIfDue();
@@ -192,6 +206,7 @@ final class QuoteService
 
         return [
             'asset' => 'GOLD_18_SELL',
+            'poll_seconds' => self::pollSeconds(),
             'value_irr' => $q ? (string) BigDecimal::of($q->value)->toScale(0, RoundingMode::HalfUp) : null,
             'value_toman_fa' => $q ? Money::toman((string) BigDecimal::of($q->value)->toScale(0, RoundingMode::HalfUp)) : null,
             'fetched_at' => $q?->fetched_at?->toIso8601String(),
@@ -231,6 +246,7 @@ final class QuoteService
         $buy = $this->latest('GOLD_18_BUY');
 
         return [
+            'poll_seconds' => self::pollSeconds(),
             'rows' => $rows,
             'spread_fa' => $sell && $buy ? Money::toman((string) BigDecimal::of($sell->value)->minus($buy->value)->toScale(0, RoundingMode::HalfUp)) : null,
             'fetched_at_fa' => $sell ? Jalali::time($sell->fetched_at, $tz) : null,

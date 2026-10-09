@@ -22,14 +22,16 @@ export default function () {
     const [kind, label] = navigator.onLine ? (BADGE[b.freshness] || ['off', '—']) : ['off', 'آفلاین'];
     badge.className = `badge ${kind}`; badge.textContent = label;
   }
+  let pollMs = 180000;
   async function refresh(btn) {
     if (!navigator.onLine) { badge.className = 'badge off'; badge.textContent = 'آفلاین'; return; }
     if (btn) busy(btn);
     const res = await get('/api/quotes/board');
     if (btn) busy(btn, false);
-    if (res.ok) render(res.data); else if (btn) toast(res.message, { kind: 'error' });
+    if (res.ok) { if (res.data.poll_seconds) pollMs = res.data.poll_seconds * 1000; render(res.data); } else if (btn) toast(res.message, { kind: 'error' });
   }
-  setInterval(() => { if (!document.hidden) refresh(); }, 180000);
+  const loop = () => setTimeout(async () => { if (!document.hidden) await refresh(); loop(); }, pollMs);
+  loop();
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
   window.addEventListener('offline', () => { badge.className = 'badge off'; badge.textContent = 'آفلاین'; });
   window.addEventListener('online', () => refresh());
