@@ -3,7 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-claude/friendly-hopper-ntt0vl',
         'version' => 'dev-claude/friendly-hopper-ntt0vl',
-        'reference' => 'ce7c09b356821a4a7ff96d20650a75b1e5a9a4c3',
+        'reference' => 'a38e30cdf198e03065edc48636e759628d0cac70',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -379,7 +379,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-claude/friendly-hopper-ntt0vl',
             'version' => 'dev-claude/friendly-hopper-ntt0vl',
-            'reference' => 'ce7c09b356821a4a7ff96d20650a75b1e5a9a4c3',
+            'reference' => 'a38e30cdf198e03065edc48636e759628d0cac70',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

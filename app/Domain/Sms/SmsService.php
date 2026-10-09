@@ -71,7 +71,13 @@ final class SmsService
             'segments' => 1, 'cost_irr' => '0', 'charge_source' => 'OPERATIONAL', 'status' => 'QUEUED',
             'idempotency_key' => 'otp:'.$challengeId,
         ]);
-        SendSms::dispatch($message->id)->onQueue('otp');
+        // Without a queue worker (QUEUE_CONNECTION=sync, shared hosting) the provider call would run inside the
+        // login request and keep the person waiting on the spinner: send it after the response instead.
+        if (config('queue.default') === 'sync' && ! app()->runningUnitTests()) {
+            SendSms::dispatchAfterResponse($message->id);
+        } else {
+            SendSms::dispatch($message->id)->onQueue('otp');
+        }
 
         return $message;
     }

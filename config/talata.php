@@ -75,7 +75,7 @@ return [
         'length' => 6,
         'ttl_seconds' => 180,             // every SMS code (login, admin, number change, پیش‌فاکتور): 3 minutes
         'max_attempts' => 5,
-        'resend_cooldown_seconds' => 90,
+        'resend_cooldown_seconds' => 180, // same as the code's validity: the visible timer is the 3 minutes to enter it
         'per_mobile_hour' => 4,
         'per_mobile_day' => 8,
         'per_ip_hour' => 12,

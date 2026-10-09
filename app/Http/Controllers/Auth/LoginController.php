@@ -39,7 +39,8 @@ class LoginController extends Controller
 
         return view('auth.code', [
             'masked' => $request->session()->get('otp.mobile_display'),
-            'resendAt' => (int) $request->session()->get('otp.resend_at', 0),
+            // Seconds left, not a server timestamp: a phone clock that is off cannot distort the timer.
+            'resendIn' => max(0, (int) $request->session()->get('otp.resend_at', 0) - time()),
         ]);
     }
 
@@ -66,7 +67,7 @@ class LoginController extends Controller
         if (! empty($data['website'])) {
             // Honeypot filled: answer like success but send nothing.
             Audit::record('auth.honeypot', null, [], null, 'system');
-            $request->session()->put(['otp.challenge_id' => strtolower((string) Str::ulid()), 'otp.mobile_display' => Mobile::display($mobile), 'otp.resend_at' => time() + 90]);
+            $request->session()->put(['otp.challenge_id' => strtolower((string) Str::ulid()), 'otp.mobile_display' => Mobile::display($mobile), 'otp.resend_at' => time() + (int) config('talata.otp.resend_cooldown_seconds')]);
 
             return response()->json(['next' => route('login.code')]);
         }
