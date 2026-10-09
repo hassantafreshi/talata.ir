@@ -1,0 +1,1 @@
+import{n as e}from"./app-DZVB3dwD.js";function t(){let t=JSON.parse(document.getElementById(`boot`).textContent);if(!t.pending)return;let n=3e3,r=0,i=async()=>{r+=1;let a=await e(t.status_url);if(a.ok&&a.data.final){location.reload();return}n=Math.min(n*1.5,3e4),r<40&&setTimeout(i,n)};setTimeout(i,n)}export{t as default};

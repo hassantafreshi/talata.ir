@@ -19,4 +19,5 @@
         <a class="btn btn-line block" href="{{ $verifyUrl }}" rel="noopener">بررسی این فاکتور</a>
     </div>
     @if ($v['show_talata_mark'])<p class="xs muted center">صادرشده با زرلیو</p>@endif
+    @include('site.enamad')
 </x-layouts.public>

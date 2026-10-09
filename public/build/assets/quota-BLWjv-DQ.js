@@ -1,8 +1,0 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/upgrade-BLMBprgF.js","assets/app-7VINg2RG.js","assets/app-B37vlMW0.css"])))=>i.map(i=>d[i]);
-import{c as e,d as t,m as n}from"./app-7VINg2RG.js";var r=`مظنه، ماشین‌حساب طلایی و چاپ فاکتورهای صادرشده همیشه آزاد است.`;function i(e){switch((e&&e.data||{}).resource){case`invoices_per_month`:return{title:`سقف فاکتور این ماه پر شد`,note:`چاپ و اشتراک فاکتورهای قبلی، مظنه و ماشین‌حساب همچنان باز است.`,label:`سقف فاکتور`,calc:!0};case`new_customers_per_month`:return{title:`سقف مشتری جدید این ماه پر شد`,note:`می‌توانید بدون ذخیرهٔ مشتری جدید فاکتور صادر کنید؛ مشتریان قبلی در دسترس‌اند.`,label:`سقف مشتری جدید`,calc:!1};case`links_per_month`:return{title:`سقف لینک و پیامک فاکتور این ماه پر شد`,note:`صدور و چاپ فاکتور باز است؛ فقط ارسال لینک یا پیامک این ماه به سقف رسیده.`,label:`سقف لینک فاکتور`,calc:!1};default:return{title:`این امکان در پلن فعلی نیست`,note:r,label:`محدودیت پلن`,calc:!1}}}function a(r){let a=r.data||{};if(a.capability&&!a.resource){e(()=>import(`./upgrade-BLMBprgF.js`).then(e=>e.showUpgrade(a.capability,{message:r.message})),__vite__mapDeps([0,1,2]));return}let o=t(a.upgrade_url||`/settings/plan`),s=i(r),c=s.calc?`<a class="btn btn-dark block" href="/calculator">محاسبه با ماشین‌حساب (بدون صدور)</a>`:``;n(`
-    <h2 class="h3">${t(s.title)}</h2>
-    <p class="small">${t(r.message)}</p>
-    <div class="notice ok">${t(s.note)}</div>
-    ${c}
-    <a class="btn btn-gold block" href="${o}">مشاهده پلن‌ها و ارتقا</a>
-    <button class="btn btn-line block" type="button" data-close>فعلاً نه</button>`,{label:s.label})}export{a as t};

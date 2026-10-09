@@ -22,7 +22,7 @@ class SecurityHeaders
             "default-src 'self'",
             "script-src 'self' 'nonce-{$nonce}'".$devOrigin,
             "style-src 'self' 'nonce-{$nonce}'".$devOrigin,
-            "img-src 'self' data: blob:",
+            "img-src 'self' data: blob: https://trustseal.enamad.ir",
             "font-src 'self'",
             "connect-src 'self'".$devOrigin,
             "form-action 'self'".$this->pspFormHosts($request),
