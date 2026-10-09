@@ -6,5 +6,6 @@
         <a href="{{ route('login') }}">ورود</a>
     </nav>
     @if ($support ?? null)<p>پشتیبانی: <a class="num ltr" dir="ltr" href="tel:{{ $support }}">{{ fa($support) }}</a></p>@endif
+    @include('site.enamad')
     <p class="xs muted"><span dir="ltr">zarlio.ir</span></p>
 </footer>
