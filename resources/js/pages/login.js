@@ -1,13 +1,15 @@
 import { post } from '../lib/http.js';
 import { busy, fieldErrors, toast } from '../lib/ui.js';
 import { toLatin } from '../lib/digits.js';
-import { requestCode } from '../lib/otp.js';
+import { prepare, requestCode } from '../lib/otp.js';
 
 // Weak-network budget (docs/PERFORMANCE_BUDGET.md: ≤8 requests for login): the proof-of-work solver and the
 // passkey helpers load on demand, in parallel with the request that needs them, not with the page.
 
 export default function () {
   const form = document.querySelector('[data-login-form]');
+  // Start the security check as soon as the user starts on the number, not after the tap.
+  ['focusin', 'input'].forEach((ev) => form.mobile.addEventListener(ev, prepare, { once: true }));
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = form.querySelector('[type=submit]');
