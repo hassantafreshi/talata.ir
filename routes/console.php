@@ -13,6 +13,7 @@ use App\Models\SmsMessage;
 use App\Models\StaffUser;
 use App\Support\Mobile;
 use App\Support\ScheduleMonitor;
+use Illuminate\Console\Scheduling\CallbackEvent;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
@@ -103,6 +104,45 @@ Artisan::command('talata:logs-prune', function () {
 
 Artisan::command('talata:affiliate-approve', fn (AffiliateService $a) => $this->info('approved: '.$a->approveDue()))
     ->purpose('Move affiliate commissions past the hold period to payable');
+
+// Hosts that disable proc_open (shared hosting) cannot run `schedule:run`, which starts every job as a shell process.
+// `talata:tick` does the same due-check but runs each job inside this PHP process. Cron: `php artisan talata:tick`
+// every minute. Elsewhere (a normal server) keep using `schedule:run`; both can never run the same job twice at once
+// because overlapping protection uses the same lock.
+Artisan::command('talata:tick', function () {
+    $schedule = app(Illuminate\Console\Scheduling\Schedule::class);
+    $ran = 0;
+    foreach ($schedule->dueEvents($this->laravel) as $event) {
+        if ($event instanceof CallbackEvent) {
+            $event->run($this->laravel);
+            $ran++;
+
+            continue;
+        }
+        if (! preg_match('/artisan[\'"]?\s+(.+)$/', (string) $event->command, $m)) {
+            continue;
+        }
+        if ($event->shouldSkipDueToOverlapping()) {
+            continue;
+        }
+        $code = 1;
+        try {
+            $event->callBeforeCallbacks($this->laravel);
+            $code = Artisan::call(trim($m[1]));
+        } catch (Throwable $e) {
+            report($e);
+        } finally {
+            $event->exitCode = $code;
+            try {
+                $event->callAfterCallbacks($this->laravel);
+            } finally {
+                $event->mutex->forget($event);
+            }
+        }
+        $ran++;
+    }
+    $this->info("tick: {$ran} job(s)");
+})->purpose('Run due scheduled jobs inside this process (hosts without proc_open)');
 
 // Each job records its last run for the admin «سلامت سیستم» page (App\Support\ScheduleMonitor).
 ScheduleMonitor::track(Schedule::command('talata:logs-prune')->dailyAt('03:30'), 'logs-prune');

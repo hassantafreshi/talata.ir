@@ -13,7 +13,7 @@ final class ScheduleMonitor
 {
     /** key => [label, cadence label]; the order is the table order. */
     public const JOBS = [
-        'quotes' => ['دریافت مرکزی نرخ‌ها', 'هر ۳ دقیقه (۱۸۰ ثانیه)'],
+        'quotes' => ['دریافت مرکزی نرخ‌ها', 'بر اساس ساعت تهران (۱ تا ۳ دقیقه)'],
         'payments-reconcile' => ['استعلام پرداخت‌های نامعلوم و انقضای سفارش‌ها', 'هر دقیقه'],
         'sms-reconcile' => ['وضعیت پیامک‌های نامعلوم', 'هر دقیقه'],
         'sms-credit-expire' => ['انقضای اعتبار ماهانه پیامک', 'هر ۵ دقیقه'],
