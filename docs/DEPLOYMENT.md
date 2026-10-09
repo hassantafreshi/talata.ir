@@ -251,5 +251,5 @@ cron کاربر `www-data`:
 1. `zarlio-release.zip` (خروجی CI، artifact) را **بیرون از `public_html`** در `~/zarlio-src` باز کنید.
 2. cPanel › Cron Jobs › هر دقیقه › `/usr/local/bin/php /home/<کاربر>/zarlio-src/scripts/deploy/deploy.php`؛ پس از یک دقیقه Cron را حذف کنید. خروجی: `~/zarlio/deploy.log`.
 3. پوشه استخراج‌شده **منتقل** می‌شود به `~/zarlio/releases/<نسخه>` (بدون کپی)، پس Cron یک‌بارمصرف است و بعد از اجرا مسیرش دیگر وجود ندارد. برای نسخه بعد دوباره zip را در `~/zarlio-src` باز کنید و یک‌بار Cron بسازید.
-4. زمان‌بند دائمی: `/usr/local/bin/php /home/<کاربر>/zarlio/current/artisan schedule:run` (هر دقیقه؛ بدون `cd`، `&&` و تغییر مسیر خروجی).
+4. زمان‌بند دائمی (هر دقیقه؛ بدون `cd`، `&&` و تغییر مسیر خروجی): `/opt/alt/php83/usr/bin/php /home/<کاربر>/zarlio/current/artisan talata:tick`. **نه `schedule:run`**: آن هر کار را با `proc_open` به‌صورت پردازش شل اجرا می‌کند و روی هاستی که `proc_open` بسته است خطای «The Process class relies on proc_open» می‌دهد؛ `talata:tick` همان کارهای موعددار را داخل همین پردازش PHP اجرا می‌کند.
 5. نیاز: افزونه `pdo_sqlite` در PHP هاست (Select PHP Version › Extensions)؛ اگر نباشد، اجرا با پیام روشن متوقف می‌شود.

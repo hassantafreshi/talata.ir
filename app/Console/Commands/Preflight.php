@@ -160,7 +160,7 @@ class Preflight extends Command
     {
         $last = ScheduleMonitor::last('payments-reconcile')['at'];
         $fresh = $last && now()->diffInSeconds(Carbon::parse($last)) <= 300;
-        $this->check($fresh ? 'ok' : 'fail', 'Scheduler (live)', $last ? "payments-reconcile last ran {$last}" : 'never ran: add the cron entry «* * * * * php artisan schedule:run»');
+        $this->check($fresh ? 'ok' : 'fail', 'Scheduler (live)', $last ? "payments-reconcile last ran {$last}" : 'never ran: add the cron entry «* * * * * php artisan schedule:run» (or talata:tick where proc_open is disabled)');
     }
 
     private function check(string $level, string $name, string $detail): void
