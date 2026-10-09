@@ -541,6 +541,7 @@ class ComposerStaticInitd1437bc4b627f32243d069678c25fa01
         'App\\Domain\\Market\\DemoQuoteProvider' => __DIR__ . '/../..' . '/app/Domain/Market/DemoQuoteProvider.php',
         'App\\Domain\\Market\\EmergencyRates' => __DIR__ . '/../..' . '/app/Domain/Market/EmergencyRates.php',
         'App\\Domain\\Market\\QuoteProvider' => __DIR__ . '/../..' . '/app/Domain/Market/QuoteProvider.php',
+        'App\\Domain\\Market\\QuoteSchedule' => __DIR__ . '/../..' . '/app/Domain/Market/QuoteSchedule.php',
         'App\\Domain\\Market\\QuoteService' => __DIR__ . '/../..' . '/app/Domain/Market/QuoteService.php',
         'App\\Domain\\Notifications\\PushService' => __DIR__ . '/../..' . '/app/Domain/Notifications/PushService.php',
         'App\\Domain\\Plans\\CommercialConfig' => __DIR__ . '/../..' . '/app/Domain/Plans/CommercialConfig.php',

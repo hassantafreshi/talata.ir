@@ -75,6 +75,7 @@ Route::middleware('staff')->group(function () {
     Route::middleware(['staff:quotes.manage,fresh', 'throttle:20,1'])->group(function () {
         Route::post('/api/quotes/emergency', [QuotesController::class, 'announce'])->name('quotes.emergency');
         Route::post('/api/quotes/emergency/cancel', [QuotesController::class, 'cancel'])->name('quotes.emergency.cancel');
+        Route::post('/api/quotes/markup', [QuotesController::class, 'saveMarkup'])->name('quotes.markup');
     });
 
     // Tax rules (A-08).

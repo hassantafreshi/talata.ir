@@ -48,6 +48,7 @@ return array(
     'App\\Domain\\Market\\DemoQuoteProvider' => $baseDir . '/app/Domain/Market/DemoQuoteProvider.php',
     'App\\Domain\\Market\\EmergencyRates' => $baseDir . '/app/Domain/Market/EmergencyRates.php',
     'App\\Domain\\Market\\QuoteProvider' => $baseDir . '/app/Domain/Market/QuoteProvider.php',
+    'App\\Domain\\Market\\QuoteSchedule' => $baseDir . '/app/Domain/Market/QuoteSchedule.php',
     'App\\Domain\\Market\\QuoteService' => $baseDir . '/app/Domain/Market/QuoteService.php',
     'App\\Domain\\Notifications\\PushService' => $baseDir . '/app/Domain/Notifications/PushService.php',
     'App\\Domain\\Plans\\CommercialConfig' => $baseDir . '/app/Domain/Plans/CommercialConfig.php',
