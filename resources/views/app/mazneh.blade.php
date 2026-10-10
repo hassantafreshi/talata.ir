@@ -3,7 +3,7 @@
 @php($chg = fn ($row) => $row['change_fa'] ? $dir($row).$row['change_fa'].' از دریافت قبلی' : 'بدون تغییر')
 <x-layouts.app title="مظنه" page="mazneh">
     <div class="between small" data-board-meta>
-        <span>آخرین دریافت <span class="num" data-time>{{ $board['fetched_at_fa'] ?? '—' }}</span> · به‌روزرسانی {{ \App\Domain\Market\QuoteService::pollLabelFa() }}</span>
+        <span>آخرین دریافت <span class="num" data-time>{{ $board['fetched_at_fa'] ?? '—' }}</span> · <span data-clock='@json($board['clock'])'>{{ $board['clock']['text_fa'] }}</span></span>
         @include('partials.freshness', ['f' => $board['freshness']])
     </div>
 

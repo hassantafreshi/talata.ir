@@ -750,3 +750,11 @@ html.is-navigating .main { opacity: .55; transition: opacity .2s ease .18s; poin
 .upgrade-note .btn { flex: none; }
 .chip-locked { gap: 4px; opacity: .8; }
 .lock-badge { background: var(--t-chrome); color: var(--t-gold-bright); }
+/* Home-screen «فروش امروز» summary (same tiles as the dashboard, compact). */
+.home-sales h2 { font-size: 16px; margin: 0; }
+.home-sales .dash-tile { min-height: 0; padding: 10px 12px; }
+.home-sales .dash-tile .t-label { font-size: 12px; color: var(--t-muted); }
+.home-sales .dash-tile .t-big { font-size: 17px; }
+.home-sales .dash-tile.m-sales .t-label { color: inherit; opacity: .85; }
+.home-sales .dash-tile.m-sales .t-big, .home-sales .dash-tile.m-sales .t-big .num { font-size: 22px; }
+.home-sales button.dash-tile { font: inherit; text-align: start; border: 0; cursor: pointer; }

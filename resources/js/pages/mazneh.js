@@ -1,5 +1,6 @@
 import { get } from '../lib/http.js';
 import { busy, toast } from '../lib/ui.js';
+import { startClock } from '../lib/quote-clock.js';
 
 const BADGE = { FRESH: ['ok', 'به‌روز'], STALE: ['warn', 'قدیمی'], ERROR: ['err', 'خطا'] };
 
@@ -22,15 +23,15 @@ export default function () {
     const [kind, label] = navigator.onLine ? (BADGE[b.freshness] || ['off', '—']) : ['off', 'آفلاین'];
     badge.className = `badge ${kind}`; badge.textContent = label;
   }
-  let pollMs = 180000;
+  const clock = startClock();
   async function refresh(btn) {
     if (!navigator.onLine) { badge.className = 'badge off'; badge.textContent = 'آفلاین'; return; }
     if (btn) busy(btn);
     const res = await get('/api/quotes/board');
     if (btn) busy(btn, false);
-    if (res.ok) { if (res.data.poll_seconds) pollMs = res.data.poll_seconds * 1000; render(res.data); } else if (btn) toast(res.message, { kind: 'error' });
+    if (res.ok) { clock.set(res.data.clock); render(res.data); } else if (btn) toast(res.message, { kind: 'error' });
   }
-  const loop = () => setTimeout(async () => { if (!document.hidden) await refresh(); loop(); }, pollMs);
+  const loop = () => setTimeout(async () => { if (!document.hidden) await refresh(); loop(); }, clock.delayMs());
   loop();
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
   window.addEventListener('offline', () => { badge.className = 'badge off'; badge.textContent = 'آفلاین'; });

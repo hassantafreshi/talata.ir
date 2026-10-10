@@ -191,12 +191,34 @@ final class QuoteService
         return max(60, QuoteSchedule::intervalSeconds(now()));
     }
 
-    /** «هر ۲ دقیقه» for the current interval. */
-    public static function pollLabelFa(): string
+    /**
+     * The «آخرین دریافت … · به‌روزرسانی بعدی …» line. Built from the real schedule so a quiet hour (every 2–3 min)
+     * reads as planned, not as a stalled site. The browser keeps it ticking (resources/js/lib/quote-clock.js).
+     */
+    public static function clock(?MarketQuote $q): array
     {
-        $m = max(1, intdiv(self::pollSeconds(), 60));
+        $interval = QuoteSchedule::intervalSeconds(now());
+        $fetched = $q?->fetched_at;
+        $next = $fetched ? max(0, $interval - (int) $fetched->diffInSeconds(now())) : 0;
 
-        return 'هر '.Digits::toPersian((string) $m).' دقیقه';
+        return [
+            'interval_seconds' => $interval,
+            'fetched_at' => $fetched?->toIso8601String(),
+            'next_in_seconds' => $next,
+            'quiet' => $interval >= 120,
+            'text_fa' => self::clockText($fetched ? (int) $fetched->diffInSeconds(now()) : null, $next),
+        ];
+    }
+
+    public static function clockText(?int $ago, int $next): string
+    {
+        if ($ago === null) {
+            return 'در انتظار اولین دریافت نرخ';
+        }
+        $agoFa = $ago < 60 ? 'همین الان' : Digits::toPersian((string) intdiv($ago, 60)).' دقیقه پیش';
+        $nextFa = $next <= 0 ? 'در حال به‌روزرسانی…' : ($next < 60 ? 'به‌روزرسانی بعدی کمتر از یک دقیقه دیگر' : 'به‌روزرسانی بعدی حدود '.Digits::toPersian((string) (int) ceil($next / 60)).' دقیقه دیگر');
+
+        return $agoFa.' · '.$nextFa;
     }
 
     public function latestDto(string $tz): array
@@ -207,6 +229,7 @@ final class QuoteService
         return [
             'asset' => 'GOLD_18_SELL',
             'poll_seconds' => self::pollSeconds(),
+            'clock' => self::clock($this->feed('GOLD_18_SELL')),
             'value_irr' => $q ? (string) BigDecimal::of($q->value)->toScale(0, RoundingMode::HalfUp) : null,
             'value_toman_fa' => $q ? Money::toman((string) BigDecimal::of($q->value)->toScale(0, RoundingMode::HalfUp)) : null,
             'fetched_at' => $q?->fetched_at?->toIso8601String(),
@@ -247,6 +270,7 @@ final class QuoteService
 
         return [
             'poll_seconds' => self::pollSeconds(),
+            'clock' => self::clock($this->feed('GOLD_18_SELL')),
             'rows' => $rows,
             'spread_fa' => $sell && $buy ? Money::toman((string) BigDecimal::of($sell->value)->minus($buy->value)->toScale(0, RoundingMode::HalfUp)) : null,
             'fetched_at_fa' => $sell ? Jalali::time($sell->fetched_at, $tz) : null,

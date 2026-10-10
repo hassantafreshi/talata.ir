@@ -2,6 +2,7 @@ import { get, post } from '../lib/http.js';
 import { busy, sheet, toast, escapeHtml } from '../lib/ui.js';
 import { parseTomanToIrr, toman } from '../lib/digits.js';
 import { showQuota } from '../lib/quota.js';
+import { startClock } from '../lib/quote-clock.js';
 
 export default function () {
   const hero = document.querySelector('[data-quote]');
@@ -11,11 +12,11 @@ export default function () {
   const badge = hero.querySelector('[data-freshness-badge]');
   const errNote = hero.querySelector('[data-error-note]');
   const startBtn = hero.querySelector('[data-start]');
-  let pollMs = Number(hero.dataset.poll || 180) * 1000;
+  const clock = startClock();
 
   const renderQuote = (q) => {
     quote = q;
-    if (q.poll_seconds) pollMs = q.poll_seconds * 1000;
+    clock.set(q.clock);
     priceEl.textContent = q.value_toman_fa ?? '—';
     const startRate = hero.querySelector('[data-start-rate]');
     if (startRate) startRate.textContent = q.value_toman_fa ?? '—';
@@ -44,7 +45,7 @@ export default function () {
     if (res.ok) renderQuote(res.data); else if (btn) toast(res.message, { kind: 'error' });
   };
   hero.querySelector('[data-retry-quote]')?.addEventListener('click', (e) => refresh(e.currentTarget));
-  const loop = () => setTimeout(async () => { await refresh(); loop(); }, pollMs);
+  const loop = () => setTimeout(async () => { await refresh(); loop(); }, clock.delayMs());
   loop();
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
   // Back online: re-enable with the last known rate at once, then fetch (a failed fetch keeps it usable).
