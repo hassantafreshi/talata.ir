@@ -36,6 +36,15 @@ final class DashboardService
         'vat' => ['مالیات بر ارزش افزوده', 'دریافتی از مشتری روی اجرت و سود'],
     ];
 
+    /** Icon + colour tint per metric (same house stroke style as the rest of the UI: stroke-width 1.8, round). */
+    public const ICONS_FA = [
+        'sales' => ['gold', '<path d="M4 16l4.5-4.5L12 15l7-7"/><path d="M15.5 8H19v3.5"/>'],
+        'wage' => ['info', '<path d="M3 8c0-1.4 4-2.5 9-2.5s9 1.1 9 2.5-4 2.5-9 2.5-9-1.1-9-2.5Z"/><path d="M3 8v4c0 1.4 4 2.5 9 2.5s9-1.1 9-2.5V8"/><path d="M3 12v4c0 1.4 4 2.5 9 2.5s9-1.1 9-2.5v-4"/>'],
+        'profit' => ['success', '<path d="M7 17 17 7"/><path d="M9 7h8v8"/>'],
+        'gold_in' => ['warning', '<path d="M12 3v10"/><path d="M8 9l4 4 4-4"/><path d="M4 17h16v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3Z"/>'],
+        'vat' => ['neutral', '<path d="M6.5 3h8l3 3v15l-2.5-1.6-2.5 1.6-2.5-1.6-2.5 1.6-1-.6V3Z"/><path d="M9 8h6M9 11.5h6M9 15h3"/>'],
+    ];
+
     public const BASIC_METRICS = ['sales', 'wage', 'gold_in'];
 
     /** Metrics that also have a gram value (750-equivalent grams). VAT is toman only. */
