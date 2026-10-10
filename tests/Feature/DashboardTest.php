@@ -77,7 +77,7 @@ class DashboardTest extends TestCase
             $this->api('GET', "/api/dashboard?range={$range}&from=1405/01/01&to=1405/02/01")->assertStatus(403)->assertJsonPath('code', 'FEATURE_LOCKED');
         }
         $page = $this->get('/dashboard')->assertOk();
-        $page->assertSee('در پلن پایه و حرفه‌ای')->assertSee('اجرت دریافتی')->assertSee('طلای خریداری‌شده از مشتری');
+        $page->assertSee('با ارتقا باز می‌شود')->assertSee('اجرت دریافتی')->assertSee('طلای خریداری‌شده از مشتری');
     }
 
     public function test_custom_range_validation_and_tenant_isolation(): void

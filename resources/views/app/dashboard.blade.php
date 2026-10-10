@@ -3,7 +3,6 @@
     $metricLabels = \App\Domain\Reports\DashboardService::LABELS_FA;
     $up = \App\Domain\Plans\UpgradeInfo::for('reports.financial');
     $boot = ['report' => $report, 'api' => route('api.dashboard'), 'labels' => $metricLabels];
-    $lock = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 @endphp
 <x-layouts.app title="داشبورد فروش" page="dashboard" :back="route('settings')">
     <script type="application/json" id="boot">@json($boot)</script>
@@ -14,7 +13,7 @@
                 @if (in_array($key, $access['ranges'], true))
                     <button type="button" class="chip" data-range="{{ $key }}" aria-pressed="{{ $report['range'] === $key ? 'true' : 'false' }}">{{ $label }}</button>
                 @else
-                    <button type="button" class="chip chip-locked" data-upgrade="reports.financial" data-upgrade-plans="{{ $up['plans'] }}" data-upgrade-price="{{ $up['price_fa'] }}">{!! $lock !!}{{ $label }}</button>
+                    <button type="button" class="chip chip-locked" data-upgrade="reports.financial" data-upgrade-plans="{{ $up['plans'] }}" data-upgrade-price="{{ $up['price_fa'] }}">@include('app.partials.premium-icon'){{ $label }}</button>
                 @endif
             @endforeach
         </div>
@@ -52,7 +51,7 @@
             @else
                 <a class="tile dash-tile is-locked" href="{{ route('settings.plan') }}" data-upgrade="reports.financial" data-upgrade-plans="{{ $up['plans'] }}" data-upgrade-price="{{ $up['price_fa'] }}">
                     <div class="t-head">@include('app.partials.metric-icon', ['key' => $key])<h2 class="t-label">{{ $label }}</h2></div>
-                    <p class="t-big muted">{!! $lock !!} <span class="small">در پلن پایه و حرفه‌ای</span></p>
+                    <p class="t-big premium-cta">@include('app.partials.premium-icon', ['size' => 18])<span class="small">با ارتقا باز می‌شود</span></p>
                     <p class="xs muted t-hint">{{ $hint }}</p>
                 </a>
             @endif
