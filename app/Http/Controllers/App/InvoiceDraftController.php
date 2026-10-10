@@ -6,6 +6,7 @@ use App\Domain\DomainError;
 use App\Domain\Invoices\InvoiceService;
 use App\Domain\Invoices\ProformaService;
 use App\Domain\Market\QuoteService;
+use App\Domain\Reports\DashboardService;
 use App\Domain\Sms\SmsService;
 use App\Domain\Tax\TaxRules;
 use App\Models\Invoice;
@@ -20,9 +21,13 @@ class InvoiceDraftController extends BaseController
 {
     public function __construct(private readonly InvoiceService $invoices) {}
 
-    public function start(QuoteService $quotes)
+    public function start(QuoteService $quotes, DashboardService $dashboard)
     {
         $tenant = $this->tenant();
+        // Today's sales on the home screen: same rules as the dashboard (team permission reports.view, plan feature
+        // dashboard.view, and the plan decides which cards are open and which are locked).
+        $sales = $this->membership()->can('reports.view') && $this->ent()->can($tenant, 'dashboard.view')
+            ? $dashboard->report($tenant, 'day') : null;
         $draft = Invoice::query()->where('status', 'draft')->where('created_by', auth()->id())->latest('updated_at')->withCount('items')->first();
 
         return view('app.rate', [
@@ -32,6 +37,7 @@ class InvoiceDraftController extends BaseController
             'quota' => $this->ent()->quota($tenant, 'invoices_per_month'),
             'canIssue' => $this->membership()->can('invoice.issue'),
             'pollSeconds' => QuoteService::pollSeconds(),
+            'sales' => $sales,
         ]);
     }
 

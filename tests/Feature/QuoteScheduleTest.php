@@ -16,7 +16,7 @@ class QuoteScheduleTest extends TestCase
 {
     private function tehran(string $time): CarbonImmutable
     {
-        return CarbonImmutable::parse('2026-10-10 '.$time, 'Asia/Tehran');
+        return CarbonImmutable::parse('2031-03-01 '.$time, 'Asia/Tehran');
     }
 
     public function test_interval_follows_the_tehran_time_windows(): void
@@ -31,7 +31,7 @@ class QuoteScheduleTest extends TestCase
             $this->assertSame($seconds, QuoteSchedule::intervalSeconds($this->tehran($time)), $time);
         }
         // The server clock may be UTC: 09:30 UTC is 13:00 in Tehran (+03:30).
-        $this->assertSame(60, QuoteSchedule::intervalSeconds(CarbonImmutable::parse('2026-10-10 09:30:00', 'UTC')));
+        $this->assertSame(60, QuoteSchedule::intervalSeconds(CarbonImmutable::parse('2031-03-01 09:30:00', 'UTC')));
     }
 
     public function test_the_requester_itself_decides_when_to_ask_the_api(): void

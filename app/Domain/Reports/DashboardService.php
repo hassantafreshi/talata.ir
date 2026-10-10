@@ -27,6 +27,15 @@ final class DashboardService
 
     public const METRICS = ['sales', 'wage', 'profit', 'gold_in', 'vat'];
 
+    /** Card title and one-line hint per metric (dashboard and the home-screen summary). */
+    public const LABELS_FA = [
+        'sales' => ['مجموع فروش', 'جمع فاکتورهای صادرشده (طلا و متفرقه)'],
+        'wage' => ['اجرت دریافتی', 'اجرت ردیف‌های طلا، بعد از تخفیف'],
+        'profit' => ['سود فروش', 'سود ردیف‌های طلا، بعد از تخفیف'],
+        'gold_in' => ['طلای خریداری‌شده از مشتری', 'طلایی که مشتری به‌جای پول داده'],
+        'vat' => ['مالیات بر ارزش افزوده', 'دریافتی از مشتری روی اجرت و سود'],
+    ];
+
     public const BASIC_METRICS = ['sales', 'wage', 'gold_in'];
 
     /** Metrics that also have a gram value (750-equivalent grams). VAT is toman only. */

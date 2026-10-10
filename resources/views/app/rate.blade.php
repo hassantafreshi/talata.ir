@@ -19,9 +19,9 @@
             <p class="xs start-note">همین نرخ روی فاکتور ثابت می‌ماند؛ تغییر بعدی بازار فاکتور را عوض نمی‌کند.</p>
         @endif
         <div class="between meta"><span>آخرین دریافت: <span class="num" data-time>{{ $quote['fetched_at_fa'] ?? '—' }}</span></span>@include('partials.freshness', ['f' => $quote['freshness']])</div>
-        <div class="meta">به‌روزرسانی {{ \App\Domain\Market\QuoteService::pollLabelFa() }} · منبع: <span data-source>{{ $quote['source_fa'] ?? '—' }}</span></div>
+        <div class="meta"><span data-clock='@json($quote['clock'])'>{{ $quote['clock']['text_fa'] }}</span> · منبع: <span data-source>{{ $quote['source_fa'] ?? '—' }}</span></div>
         <div class="notice err {{ $quote['freshness'] === 'ERROR' ? '' : 'hidden' }}" data-error-note role="status">
-            <span>سرویس نرخ پاسخ نمی‌دهد. آخرین نرخ معتبر نمایش داده می‌شود؛ صفحه هر ۳ دقیقه خودش دوباره تلاش می‌کند.</span>
+            <span>سرویس نرخ پاسخ نمی‌دهد. آخرین نرخ معتبر نمایش داده می‌شود؛ صفحه خودش دوباره تلاش می‌کند.</span>
             <button type="button" class="btn sm btn-dark" data-retry-quote data-busy-text="در حال دریافت…">تلاش دوباره الان</button>
         </div>
         <p class="xs" data-start-hint @if($quote['value_irr']) hidden @endif>نرخ بازار هنوز در دسترس نیست؛ پایین همین صفحه «ثبت نرخ دستی» یا «فاکتور فقط متفرقه» را بزنید.</p>
@@ -31,6 +31,10 @@
         <div class="band"><span class="small muted">طلای ۲۴ عیار</span><strong class="num">{{ $board['rows']['GOLD_24']['display_fa'] ?? '—' }} <span class="small muted">تومان</span></strong></div>
         <div class="band"><span class="small muted">دلار</span><strong class="num">{{ $board['rows']['USD_IRR']['display_fa'] ?? '—' }} <span class="small muted">تومان</span></strong></div>
     </div>
+    @if ($sales)
+        @include('app.partials.home-sales', ['sales' => $sales])
+    @endif
+
     <a class="list-item" href="{{ route('mazneh') }}"><span class="body"><strong>مظنه کامل: خرید و فروش ۱۸، ۲۴ عیار، دلار، انس</strong></span><span aria-hidden="true">‹</span></a>
 
     @if ($draft)

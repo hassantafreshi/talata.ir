@@ -126,4 +126,28 @@ class DashboardTest extends TestCase
         $this->actingAs($member)->api('POST', "/api/invites/{$invite->id}/accept")->assertOk();
         $this->api('GET', '/api/dashboard?range=day')->assertStatus(403)->assertJsonPath('code', 'FORBIDDEN');
     }
+
+    public function test_home_screen_shows_todays_sales_with_the_same_plan_and_team_rules(): void
+    {
+        // Free: sales, wage and gold received open; profit and VAT locked behind the upgrade sheet.
+        $free = $this->merchant();
+        $this->issueInvoice($free, [$this->gold('2')]);
+        $home = $this->actingAs($free)->get(route('invoices.new'))->assertOk();
+        $home->assertSee('فروش امروز')->assertSee('گزارش کامل')->assertSee('۱ فاکتور صادرشده', false);
+        $html = $home->getContent();
+        $this->assertSame(2, substr_count($html, 'class="tile dash-tile is-locked"'), 'profit and VAT are locked on Free');
+
+        // Professional: every card open, none locked.
+        $pro = $this->merchant('professional');
+        $this->issueInvoice($pro, [$this->gold('1')]);
+        $html = $this->actingAs($pro)->get(route('invoices.new'))->assertOk()->assertSee('سود فروش')->getContent();
+        $this->assertStringNotContainsString('dash-tile is-locked', $html);
+
+        // A team member without «گزارش فروش» never sees the numbers on the home screen.
+        $this->actingAs($pro)->api('POST', '/api/users/invite', ['mobile' => '09371112288', 'permissions' => ['invoice.issue']])->assertOk();
+        $member = app(LoginService::class)->completeLogin('09371112288')['user'];
+        $invite = Membership::query()->where('invited_mobile', '09371112288')->where('status', 'invited')->firstOrFail();
+        $this->actingAs($member)->api('POST', "/api/invites/{$invite->id}/accept")->assertOk();
+        $this->get(route('invoices.new'))->assertOk()->assertDontSee('فروش امروز');
+    }
 }

@@ -18,7 +18,7 @@ class FreshnessAndWindowsTest extends TestCase
 {
     public function test_quote_is_fresh_then_stale_after_240_seconds_then_error_when_refresh_fails(): void
     {
-        $this->travelTo(CarbonImmutable::parse('2026-10-10 13:00:00', 'Asia/Tehran')); // a 1-minute window
+        $this->travelTo(CarbonImmutable::parse('2031-03-01 13:00:00', 'Asia/Tehran')); // a 1-minute window
         $quotes = app(QuoteService::class);
         $q = MarketQuote::query()->create(['asset' => 'GOLD_18_SELL', 'value' => '100000000', 'unit' => 'IRR_PER_GRAM', 'source' => 'test', 'is_demo' => true, 'fetched_at' => now()]);
         $this->assertSame('FRESH', $quotes->freshness($q));

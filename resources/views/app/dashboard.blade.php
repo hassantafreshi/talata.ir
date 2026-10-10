@@ -1,12 +1,6 @@
 @php
     $rangeLabels = ['day' => 'امروز', 'week' => 'این هفته', 'month' => 'این ماه', 'quarter' => 'سه ماه', 'year' => 'امسال', 'custom' => 'بازه دلخواه'];
-    $metricLabels = [
-        'sales' => ['مجموع فروش', 'جمع فاکتورهای صادرشده (طلا و متفرقه)'],
-        'wage' => ['اجرت دریافتی', 'اجرت ردیف‌های طلا، بعد از تخفیف'],
-        'profit' => ['سود فروش', 'سود ردیف‌های طلا، بعد از تخفیف'],
-        'gold_in' => ['طلای خریداری‌شده از مشتری', 'طلایی که مشتری به‌جای پول داده'],
-        'vat' => ['مالیات بر ارزش افزوده', 'دریافتی از مشتری روی اجرت و سود'],
-    ];
+    $metricLabels = \App\Domain\Reports\DashboardService::LABELS_FA;
     $up = \App\Domain\Plans\UpgradeInfo::for('reports.financial');
     $boot = ['report' => $report, 'api' => route('api.dashboard'), 'labels' => $metricLabels];
     $lock = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
