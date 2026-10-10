@@ -758,3 +758,28 @@ html.is-navigating .main { opacity: .55; transition: opacity .2s ease .18s; poin
 .home-sales .dash-tile.m-sales .t-label { color: inherit; opacity: .85; }
 .home-sales .dash-tile.m-sales .t-big, .home-sales .dash-tile.m-sales .t-big .num { font-size: 22px; }
 .home-sales button.dash-tile { font: inherit; text-align: start; border: 0; cursor: pointer; }
+
+/* Metric icon badges (dashboard + home-sales summary): small round tint circles, same stroke style as other icons. */
+.t-head { display: flex; align-items: center; gap: 6px; margin: 0 0 2px; }
+.t-head .t-label { margin: 0; }
+.m-icon { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 999px; flex: none; }
+.m-icon-gold { background: rgba(224, 180, 76, .18); color: var(--t-gold-bright); }
+.m-icon-info { background: var(--t-info-bg); color: var(--t-info-fg); }
+.m-icon-success { background: var(--t-success-bg); color: var(--t-success-fg); }
+.m-icon-warning { background: var(--t-warning-bg); color: var(--t-warning-fg); }
+.m-icon-neutral { background: var(--t-offline-bg); color: var(--t-offline-fg); }
+.dash-tile.m-sales .m-icon-gold { background: rgba(224, 180, 76, .22); }
+.dash-tile.is-locked .m-icon { opacity: .55; filter: grayscale(.4); }
+
+/* Home-screen «فروش امروز» card: header icon, link chevron, polish on the tiles themselves. */
+.between-start { display: flex; align-items: center; gap: 6px; }
+.home-sales { box-shadow: 0 1px 0 var(--t-hairline) inset; }
+.home-sales h2 { font-size: 15px; margin: 0; }
+.home-sales-icon { display: inline-flex; color: var(--t-gold-deep); }
+.home-sales-link { display: inline-flex; align-items: center; gap: 3px; color: var(--t-muted); text-decoration: none; }
+.home-sales-link:hover { color: var(--t-ink); }
+.home-sales-link svg { flex: none; }
+.home-sales-empty { display: flex; align-items: center; gap: 6px; padding: 4px 0; }
+.home-sales .dash-tile { box-shadow: 0 1px 2px rgba(0, 0, 0, .04); }
+.home-sales .dash-tile.m-sales { box-shadow: none; }
+.t-locked-note { display: inline-flex; align-items: center; gap: 4px; }

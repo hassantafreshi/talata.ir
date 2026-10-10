@@ -43,7 +43,7 @@
             @if (isset($report['metrics'][$key]))
                 @php $m = $report['metrics'][$key]; @endphp
                 <article class="tile dash-tile m-{{ $key }}" data-metric="{{ $key }}">
-                    <h2 class="t-label">{{ $label }}</h2>
+                    <div class="t-head">@include('app.partials.metric-icon', ['key' => $key])<h2 class="t-label">{{ $label }}</h2></div>
                     <p class="t-big"><span class="num" data-big>{{ $m['toman_fa'] }}</span> <span class="unit" data-unit>تومان</span></p>
                     <p class="t-small num" data-small>{{ $m['g_fa'] ?? '' }}</p>
                     <p class="t-delta xs" data-delta></p>
@@ -51,7 +51,7 @@
                 </article>
             @else
                 <a class="tile dash-tile is-locked" href="{{ route('settings.plan') }}" data-upgrade="reports.financial" data-upgrade-plans="{{ $up['plans'] }}" data-upgrade-price="{{ $up['price_fa'] }}">
-                    <h2 class="t-label">{{ $label }}</h2>
+                    <div class="t-head">@include('app.partials.metric-icon', ['key' => $key])<h2 class="t-label">{{ $label }}</h2></div>
                     <p class="t-big muted">{!! $lock !!} <span class="small">در پلن پایه و حرفه‌ای</span></p>
                     <p class="xs muted t-hint">{{ $hint }}</p>
                 </a>
