@@ -1,0 +1,1 @@
+import{t as e}from"./admin-forms-CqVo2j8R.js";function t(){e()}export{t as default};

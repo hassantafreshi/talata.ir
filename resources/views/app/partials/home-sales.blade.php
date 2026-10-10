@@ -3,7 +3,6 @@
 @php
     $labels = \App\Domain\Reports\DashboardService::LABELS_FA;
     $up = \App\Domain\Plans\UpgradeInfo::for('reports.financial');
-    $lock = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 @endphp
 <section class="band stack-sm home-sales" aria-labelledby="home-sales-title">
     <div class="between">
@@ -29,7 +28,7 @@
                 @else
                     <button type="button" class="tile dash-tile is-locked" data-upgrade="reports.financial" data-upgrade-plans="{{ $up['plans'] }}" data-upgrade-price="{{ $up['price_fa'] }}">
                         <div class="t-head">@include('app.partials.metric-icon', ['key' => $key])<span class="t-label">{{ $label }}</span></div>
-                        <span class="xs muted t-locked-note">{!! $lock !!}در پلن پایه و حرفه‌ای</span>
+                        <span class="xs t-locked-note">@include('app.partials.premium-icon', ['size' => 13])با ارتقا باز می‌شود</span>
                     </button>
                 @endif
             @endforeach

@@ -426,7 +426,9 @@ table.t tr.lvl-warning td { background: #FFFBF1; }
 .dash-ranges { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; width: 100%; max-width: 100%; min-width: 0; }
 [data-page="dashboard"] .main > * { min-width: 0; max-width: 100%; }
 .dash-ranges .chip { flex: none; min-height: 44px; }
-.chip-locked { color: var(--t-muted); gap: 4px; }
+/* Premium (locked) chip: a gem badge + gold tint, not a padlock — same invitation styling as the tiles. */
+.chip-locked { color: var(--t-gold-deep); gap: 4px; background: rgba(224, 180, 76, .14); }
+.chip-locked svg { color: var(--t-gold-action); flex: none; }
 .dash-bar { flex-wrap: wrap; gap: 8px; }
 .seg-sm label { min-height: 36px; font-size: 14px; padding: 0 12px; white-space: nowrap; }
 .seg-scroll { overflow-x: auto; scrollbar-width: none; max-width: 100%; min-width: 0; }
@@ -445,8 +447,11 @@ table.t tr.lvl-warning td { background: #FFFBF1; }
 .dash-tile .t-small { font-size: 14px; color: var(--t-muted); }
 .dash-tile .t-delta.up { color: var(--t-ok-fg, #1E6B3A); } .dash-tile .t-delta.down { color: var(--t-error-fg); }
 .dash-tile.m-sales .t-delta.up { color: #8FD9A8; } .dash-tile.m-sales .t-delta.down { color: #F2A7A0; }
-.dash-tile.is-locked { background: var(--t-surface); box-shadow: inset 0 0 0 1px var(--t-hairline); }
-.dash-tile.is-locked .t-big { font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+/* Locked card = an invitation, not a block: soft gold wash + a gem badge instead of a padlock. */
+.dash-tile.is-locked { background: linear-gradient(155deg, rgba(224, 180, 76, .14), rgba(224, 180, 76, .04)); box-shadow: inset 0 0 0 1px rgba(212, 165, 60, .35); cursor: pointer; transition: box-shadow .15s, transform .15s; }
+.dash-tile.is-locked:hover, .dash-tile.is-locked:focus-visible { box-shadow: inset 0 0 0 1.5px var(--t-gold-action); transform: translateY(-1px); }
+.premium-cta { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--t-gold-deep); }
+.premium-cta svg { color: var(--t-gold-action); flex: none; }
 .dash-chart { margin: 0; }
 .dash-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
 .dash-chart .grid { stroke: var(--t-hairline); stroke-width: 1; }
@@ -748,7 +753,7 @@ html.is-navigating .main { opacity: .55; transition: opacity .2s ease .18s; poin
 .locked-area > :not(.locked-cover) { opacity: .5; filter: grayscale(.4); pointer-events: none; user-select: none; }
 .upgrade-note { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--t-band-emphasis); border: 1px solid rgba(224, 180, 76, .45); }
 .upgrade-note .btn { flex: none; }
-.chip-locked { gap: 4px; opacity: .8; }
+
 .lock-badge { background: var(--t-chrome); color: var(--t-gold-bright); }
 /* Home-screen «فروش امروز» summary (same tiles as the dashboard, compact). */
 .home-sales h2 { font-size: 16px; margin: 0; }
@@ -769,7 +774,7 @@ html.is-navigating .main { opacity: .55; transition: opacity .2s ease .18s; poin
 .m-icon-warning { background: var(--t-warning-bg); color: var(--t-warning-fg); }
 .m-icon-neutral { background: var(--t-offline-bg); color: var(--t-offline-fg); }
 .dash-tile.m-sales .m-icon-gold { background: rgba(224, 180, 76, .22); }
-.dash-tile.is-locked .m-icon { opacity: .55; filter: grayscale(.4); }
+.dash-tile.is-locked .m-icon { opacity: .7; }
 
 /* Home-screen «فروش امروز» card: header icon, link chevron, polish on the tiles themselves. */
 .between-start { display: flex; align-items: center; gap: 6px; }
@@ -782,4 +787,5 @@ html.is-navigating .main { opacity: .55; transition: opacity .2s ease .18s; poin
 .home-sales-empty { display: flex; align-items: center; gap: 6px; padding: 4px 0; }
 .home-sales .dash-tile { box-shadow: 0 1px 2px rgba(0, 0, 0, .04); }
 .home-sales .dash-tile.m-sales { box-shadow: none; }
-.t-locked-note { display: inline-flex; align-items: center; gap: 4px; }
+.t-locked-note { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: var(--t-gold-deep); }
+.t-locked-note svg { color: var(--t-gold-action); flex: none; }
